@@ -9,6 +9,7 @@ final mockPets = [
     userId: 'user-1',
     name: 'Bella',
     breed: 'Golden Retriever',
+    animalType: 'Dog',
     age: 3,
     bio: 'Loves tennis balls and chasing tails!',
     profileImageUrl: 'https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=200&auto=format&fit=crop',
@@ -18,18 +19,30 @@ final mockPets = [
     userId: 'user-2',
     name: 'Max',
     breed: 'Siberian Husky',
+    animalType: 'Dog',
     age: 2,
     bio: 'Snow dog at heart. Awooo!',
     profileImageUrl: 'https://images.unsplash.com/photo-1605568420105-0eebd126dd18?q=80&w=200&auto=format&fit=crop',
   ),
   PetModel(
     id: 'pet-3',
-    userId: 'user-3',
+    userId: 'user-1', // User 1 owns both Bella and Luna
     name: 'Luna',
     breed: 'Maine Coon',
+    animalType: 'Cat',
     age: 4,
     bio: 'Majestic floof. Will ignore you.',
     profileImageUrl: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=200&auto=format&fit=crop',
+  ),
+  PetModel(
+    id: 'pet-4',
+    userId: 'user-4',
+    name: 'Sunny',
+    breed: 'Macaw',
+    animalType: 'Bird',
+    age: 1,
+    bio: 'Talkative bright feather ball. Sqwawk!',
+    profileImageUrl: 'https://images.unsplash.com/photo-1552728089-5731b5c468ad?q=80&w=200&auto=format&fit=crop',
   ),
 ];
 
@@ -83,6 +96,18 @@ class FeedNotifier extends Notifier<List<PostModel>> {
       }
       return post;
     }).toList();
+  }
+
+  void addPost(PetModel pet, String mediaUrl, String caption) {
+    final newPost = PostModel(
+      id: 'post-${DateTime.now().millisecondsSinceEpoch}',
+      pet: pet,
+      mediaUrl: mediaUrl,
+      caption: caption,
+      likedByPetIds: [],
+      createdAt: DateTime.now(),
+    );
+    state = [newPost, ...state];
   }
 
   void addComment(String postId, String petId, String petName, String text) {

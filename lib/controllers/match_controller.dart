@@ -6,22 +6,26 @@ import 'feed_controller.dart'; // To access mockPets
 class MatchState {
   final List<PetModel> discoveryPets;
   final List<MatchRequestModel> myRequests; // Requests received by me
+  final String? filterAnimal;
   final String? filterBreed;
   
   MatchState({
     this.discoveryPets = const [],
     this.myRequests = const [],
+    this.filterAnimal,
     this.filterBreed,
   });
 
   MatchState copyWith({
     List<PetModel>? discoveryPets,
     List<MatchRequestModel>? myRequests,
+    String? filterAnimal,
     String? filterBreed,
   }) {
     return MatchState(
       discoveryPets: discoveryPets ?? this.discoveryPets,
       myRequests: myRequests ?? this.myRequests,
+      filterAnimal: filterAnimal ?? this.filterAnimal,
       filterBreed: filterBreed ?? this.filterBreed,
     );
   }
@@ -48,11 +52,28 @@ class MatchController extends Notifier<MatchState> {
   }
 
   void setFilterBreed(String? breed) {
+    _applyFilters(state.filterAnimal, breed);
+  }
+
+  void setFilterAnimal(String? animal) {
+    // When changing animal, maybe reset breed since breeds are animal-specific
+    _applyFilters(animal, null);
+  }
+
+  void _applyFilters(String? animal, String? breed) {
     var available = mockPets.where((pet) => pet.id != 'pet-1').toList();
+    if (animal != null && animal.isNotEmpty) {
+      available = available.where((p) => p.animalType == animal).toList();
+    }
     if (breed != null && breed.isNotEmpty) {
       available = available.where((p) => p.breed == breed).toList();
     }
-    state = state.copyWith(discoveryPets: available, filterBreed: breed);
+    state = MatchState(
+       discoveryPets: available,
+       myRequests: List.from(state.myRequests),
+       filterAnimal: animal,
+       filterBreed: breed,
+    );
   }
 
   void sendLikeRequest(String receiverPetId) {

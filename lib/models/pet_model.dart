@@ -3,6 +3,7 @@ class PetModel {
   final String userId;
   final String name;
   final String breed;
+  final String animalType;
   final int age;
   final String bio;
   final String profileImageUrl;
@@ -14,6 +15,7 @@ class PetModel {
     required this.userId,
     required this.name,
     required this.breed,
+    required this.animalType,
     required this.age,
     required this.bio,
     required this.profileImageUrl,
@@ -26,6 +28,7 @@ class PetModel {
     String? userId,
     String? name,
     String? breed,
+    String? animalType,
     int? age,
     String? bio,
     String? profileImageUrl,
@@ -37,6 +40,7 @@ class PetModel {
       userId: userId ?? this.userId,
       name: name ?? this.name,
       breed: breed ?? this.breed,
+      animalType: animalType ?? this.animalType,
       age: age ?? this.age,
       bio: bio ?? this.bio,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
