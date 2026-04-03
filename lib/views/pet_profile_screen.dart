@@ -213,7 +213,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                        Image.network(
                          post.mediaUrl,
                          fit: BoxFit.cover,
-                         errorBuilder: (ctx, _, __) => Container(color: Colors.grey.shade200),
+                         errorBuilder: (ctx, _, _) => Container(color: Colors.grey.shade200),
                        ),
                        // If Owner view, optionally overlay entirely small author icon so human knows whose picture it is
                        if (isOwnerView)

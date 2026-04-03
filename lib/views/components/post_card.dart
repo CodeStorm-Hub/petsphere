@@ -50,9 +50,13 @@ class _PostCardState extends State<PostCard> {
                 title: Text(_isSaved ? 'Unsave Post' : 'Save Post'),
                 onTap: () {
                   Navigator.pop(context);
-                  setState(() { _isSaved = !_isSaved; });
+                  setState(() {
+                    _isSaved = !_isSaved;
+                  });
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(_isSaved ? 'Post Saved!' : 'Post Unsaved.'))
+                    SnackBar(
+                      content: Text(_isSaved ? 'Post Saved!' : 'Post Unsaved.'),
+                    ),
                   );
                 },
               ),
@@ -60,12 +64,22 @@ class _PostCardState extends State<PostCard> {
               ListTile(
                 leading: const Icon(Icons.visibility_off_outlined),
                 title: const Text('Hide'),
-                onTap: () { Navigator.pop(context); },
+                onTap: () {
+                  Navigator.pop(context);
+                },
               ),
               ListTile(
-                leading: const Icon(Icons.report_problem_outlined, color: Colors.red),
-                title: const Text('Report', style: TextStyle(color: Colors.red)),
-                onTap: () { Navigator.pop(context); },
+                leading: const Icon(
+                  Icons.report_problem_outlined,
+                  color: Colors.red,
+                ),
+                title: const Text(
+                  'Report',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                },
               ),
             ],
           ),
@@ -77,7 +91,7 @@ class _PostCardState extends State<PostCard> {
   @override
   Widget build(BuildContext context) {
     final isLiked = widget.post.likedByPetIds.contains(widget.currentPetId);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -86,7 +100,10 @@ class _PostCardState extends State<PostCard> {
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
           child: Row(
             children: [
-              PetAvatar(imageUrl: widget.post.pet.profileImageUrl, hasStory: true),
+              PetAvatar(
+                imageUrl: widget.post.pet.profileImageUrl,
+                hasStory: true,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -101,7 +118,7 @@ class _PostCardState extends State<PostCard> {
             ],
           ),
         ),
-        
+
         // Image
         AspectRatio(
           aspectRatio: 1, // Square image
@@ -115,13 +132,13 @@ class _PostCardState extends State<PostCard> {
                 child: const Center(child: CircularProgressIndicator()),
               );
             },
-            errorBuilder: (_, __, ___) => Container(
+            errorBuilder: (_, _, _) => Container(
               color: Colors.grey.shade200,
               child: const Icon(Icons.error, color: Colors.grey),
             ),
           ),
         ),
-        
+
         // Actions
         Row(
           children: [
@@ -149,13 +166,15 @@ class _PostCardState extends State<PostCard> {
                   _isSaved = !_isSaved;
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(_isSaved ? 'Post Saved!' : 'Post Unsaved.')),
+                  SnackBar(
+                    content: Text(_isSaved ? 'Post Saved!' : 'Post Unsaved.'),
+                  ),
                 );
               },
             ),
           ],
         ),
-        
+
         // Likes
         if (widget.post.likedByPetIds.isNotEmpty)
           Padding(
@@ -165,7 +184,7 @@ class _PostCardState extends State<PostCard> {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          
+
         // Caption
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
@@ -182,7 +201,7 @@ class _PostCardState extends State<PostCard> {
             ),
           ),
         ),
-        
+
         // Comments Preview
         if (widget.post.comments.isNotEmpty)
           Padding(
@@ -195,7 +214,7 @@ class _PostCardState extends State<PostCard> {
               ),
             ),
           ),
-          
+
         const SizedBox(height: 16),
       ],
     );
