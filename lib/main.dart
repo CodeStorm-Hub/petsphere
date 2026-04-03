@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../utils/routes.dart';
-import '../theme/app_theme.dart';
+import 'utils/routes.dart';
+import 'theme/app_theme.dart';
 
 void main() {
   runApp(
