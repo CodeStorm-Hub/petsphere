@@ -48,4 +48,34 @@ class PetModel {
       isPublicOwner: isPublicOwner ?? this.isPublicOwner,
     );
   }
+
+  factory PetModel.fromJson(Map<String, dynamic> json) {
+    return PetModel(
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      name: json['name'] as String,
+      breed: json['breed'] as String,
+      animalType: json['animal_type'] as String,
+      age: (json['age'] as num).toInt(),
+      bio: json['bio'] as String? ?? '',
+      profileImageUrl: json['profile_image_url'] as String? ?? '',
+      images: (json['images'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      isPublicOwner: json['is_public_owner'] as bool? ?? true,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'user_id': userId,
+        'name': name,
+        'breed': breed,
+        'animal_type': animalType,
+        'age': age,
+        'bio': bio,
+        'profile_image_url': profileImageUrl,
+        'images': images,
+        'is_public_owner': isPublicOwner,
+      };
 }

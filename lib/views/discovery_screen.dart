@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/match_controller.dart';
-import '../controllers/feed_controller.dart';
+import '../controllers/pet_controller.dart';
 import '../models/pet_model.dart';
 import 'components/match_pet_card.dart';
 
@@ -157,9 +157,8 @@ class _BreedChip extends ConsumerWidget {
 }
 
 void _showListPetSheet(BuildContext context, WidgetRef ref) {
-  // Pull authenticated user's pets
-  final myUserId = 'user-1'; 
-  final myOwnedPets = ref.read(feedProvider).map((p) => p.pet).where((p) => p.userId == myUserId).toSet().toList(); // Pull distinct user pets
+  // Pull authenticated user's pets from petProvider
+  final myOwnedPets = ref.read(petProvider).myPets;
 
   showModalBottomSheet(
     context: context,

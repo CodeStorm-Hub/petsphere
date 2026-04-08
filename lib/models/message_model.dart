@@ -32,4 +32,22 @@ class MessageModel {
       isRead: isRead ?? this.isRead,
     );
   }
+
+  factory MessageModel.fromJson(Map<String, dynamic> json) {
+    return MessageModel(
+      id: json['id'] as String,
+      threadId: json['thread_id'] as String,
+      senderPetId: json['sender_pet_id'] as String,
+      text: json['text'] as String,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      isRead: json['is_read'] as bool? ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'thread_id': threadId,
+        'sender_pet_id': senderPetId,
+        'text': text,
+        'is_read': isRead,
+      };
 }

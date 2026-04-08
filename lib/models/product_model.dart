@@ -40,4 +40,30 @@ class ProductModel {
       category: category ?? this.category,
     );
   }
+
+  factory ProductModel.fromJson(Map<String, dynamic> json) {
+    return ProductModel(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      price: (json['price'] as num).toDouble(),
+      vendorId: json['vendor_id'] as String,
+      description: json['description'] as String? ?? '',
+      images: (json['images'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      stock: (json['stock'] as num?)?.toInt() ?? 0,
+      category: json['category'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'price': price,
+        'vendor_id': vendorId,
+        'description': description,
+        'images': images,
+        'stock': stock,
+        'category': category,
+      };
 }

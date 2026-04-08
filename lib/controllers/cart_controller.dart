@@ -1,22 +1,43 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/cart_item_model.dart';
 import '../models/product_model.dart';
+import '../repositories/marketplace_repository.dart';
+import 'auth_controller.dart';
 
 class CartState {
   final List<CartItemModel> items;
+  final bool isCheckingOut;
+  final bool orderSuccess;
+  final String? error;
 
-  CartState({this.items = const []});
+  CartState({
+    this.items = const [],
+    this.isCheckingOut = false,
+    this.orderSuccess = false,
+    this.error,
+  });
 
   double get totalPrice {
     return items.fold(0, (sum, item) => sum + item.subtotal);
   }
-  
+
   int get totalItemCount {
     return items.fold(0, (sum, item) => sum + item.quantity);
   }
 
-  CartState copyWith({List<CartItemModel>? items}) {
-    return CartState(items: items ?? this.items);
+  CartState copyWith({
+    List<CartItemModel>? items,
+    bool? isCheckingOut,
+    bool? orderSuccess,
+    String? error,
+    bool clearError = false,
+  }) {
+    return CartState(
+      items: items ?? this.items,
+      isCheckingOut: isCheckingOut ?? this.isCheckingOut,
+      orderSuccess: orderSuccess ?? this.orderSuccess,
+      error: clearError ? null : (error ?? this.error),
+    );
   }
 }
 
@@ -67,7 +88,32 @@ class CartController extends Notifier<CartState> {
   }
 
   void clearCart() {
-    state = CartState(items: []);
+    state = CartState();
+  }
+
+  // -------------------------------------------------------------------------
+  // Place order — submits to Supabase then clears cart
+  // -------------------------------------------------------------------------
+  Future<bool> placeOrder() async {
+    final userId = ref.read(authProvider).user?.id;
+    if (userId == null || state.items.isEmpty) return false;
+
+    state = state.copyWith(isCheckingOut: true, clearError: true, orderSuccess: false);
+    try {
+      await marketplaceRepository.placeOrder(
+        userId: userId,
+        items: state.items,
+      );
+      // Clear cart after successful order
+      state = CartState(orderSuccess: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isCheckingOut: false,
+        error: 'Order failed: ${e.toString()}',
+      );
+      return false;
+    }
   }
 }
 

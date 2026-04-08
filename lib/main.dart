@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'utils/routes.dart';
+import 'utils/supabase_config.dart';
 import 'theme/app_theme.dart';
 
-void main() {
-  runApp(
-    // Wrap the entire app in a ProviderScope
-    const ProviderScope(
-      child: PetSphereApp(),
-    ),
-  );
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
+
+  runApp(const ProviderScope(child: PetSphereApp()));
 }
 
 class PetSphereApp extends ConsumerWidget {

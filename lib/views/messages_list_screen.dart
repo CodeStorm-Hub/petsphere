@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/chat_controller.dart';
-import '../controllers/feed_controller.dart'; // To get mockPets (our pet context)
+import '../controllers/pet_controller.dart';
 import 'components/chat_thread_tile.dart';
 
 class MessagesListScreen extends ConsumerWidget {
@@ -12,7 +12,7 @@ class MessagesListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final chatState = ref.watch(chatProvider);
     final threads = chatState.threads;
-    final myCurrentPetId = mockPets[0].id; // Bella
+    final myCurrentPetId = ref.watch(activePetProvider)?.id ?? '';
 
     return Scaffold(
       appBar: AppBar(
