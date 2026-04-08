@@ -221,16 +221,19 @@ void _showListPetSheet(BuildContext context, WidgetRef ref) {
   );
 }
 
-class _ListPetSheetWidget extends StatefulWidget {
+class _ListPetSheetWidget extends ConsumerStatefulWidget {
   final List<PetModel> myOwnedPets;
   const _ListPetSheetWidget({required this.myOwnedPets});
 
   @override
-  State<_ListPetSheetWidget> createState() => _ListPetSheetWidgetState();
+  ConsumerState<_ListPetSheetWidget> createState() =>
+      _ListPetSheetWidgetState();
 }
 
-class _ListPetSheetWidgetState extends State<_ListPetSheetWidget> {
+class _ListPetSheetWidgetState extends ConsumerState<_ListPetSheetWidget> {
   String? _selectedPetId;
+  bool _isSubmitting = false;
+  String? _submitError;
 
   @override
   Widget build(BuildContext context) {
@@ -278,27 +281,56 @@ class _ListPetSheetWidgetState extends State<_ListPetSheetWidget> {
                 onChanged: (val) {
                   setState(() {
                     _selectedPetId = val;
+                    _submitError = null;
                   });
                 },
               );
             }),
 
+          if (_submitError != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              _submitError!,
+              style: const TextStyle(color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
+          ],
+
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: _selectedPetId == null
+              onPressed: _selectedPetId == null || _isSubmitting
                   ? null
-                  : () {
-                      // Mock API logic
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Successfully listed your pet for breeding!',
+                  : () async {
+                      setState(() {
+                        _isSubmitting = true;
+                        _submitError = null;
+                      });
+
+                      final ok = await ref
+                          .read(matchProvider.notifier)
+                          .listPetForDiscovery(_selectedPetId!);
+
+                      if (!context.mounted) return;
+
+                      if (ok) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Successfully listed your pet for breeding!',
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                        Navigator.of(context).pop();
+                      } else {
+                        setState(() {
+                          _isSubmitting = false;
+                          _submitError =
+                              ref.read(matchProvider).error ??
+                              'Could not list pet. Please try again.';
+                        });
+                      }
                     },
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -306,10 +338,22 @@ class _ListPetSheetWidgetState extends State<_ListPetSheetWidget> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
-                'Confirm Listing',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
+              child: _isSubmitting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Confirm Listing',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
             ),
           ),
         ],

@@ -3,8 +3,21 @@ import '../models/match_request_model.dart';
 import '../utils/supabase_config.dart';
 
 class MatchRepository {
+  Future<List<String>> _fetchActiveListedPetIds() async {
+    final listingRows = await supabase
+        .from('pet_listings')
+        .select('pet_id')
+        .eq('status', 'active');
+
+    return (listingRows as List)
+        .map((row) => row['pet_id'] as String)
+        .toSet()
+        .toList();
+  }
+
   // -------------------------------------------------------------------------
-  // Fetch pets for discovery (excludes the current user's pets + already-requested ones)
+  // Fetch pets for discovery from active listings
+  // (excludes current pet + already requested peers)
   // -------------------------------------------------------------------------
   Future<List<PetModel>> fetchDiscoveryPets({
     required String myPetId,
@@ -28,11 +41,18 @@ class MatchRepository {
       ...(receivedRequests as List).map((r) => r['sender_pet_id'] as String),
     };
 
-    var query = supabase.from('pets').select().not(
-          'id',
-          'in',
-          '(${excludedIds.map((id) => '"$id"').join(',')})',
-        );
+    final listedPetIds = await _fetchActiveListedPetIds();
+    if (listedPetIds.isEmpty) return [];
+
+    final candidateIds = listedPetIds
+        .where((id) => !excludedIds.contains(id))
+        .toList(growable: false);
+    if (candidateIds.isEmpty) return [];
+
+    var query = supabase
+        .from('pets')
+        .select()
+        .filter('id', 'in', '(${candidateIds.map((id) => '"$id"').join(',')})');
 
     if (filterAnimal != null && filterAnimal.isNotEmpty) {
       query = query.eq('animal_type', filterAnimal);
@@ -86,6 +106,47 @@ class MatchRepository {
         .from('match_requests')
         .update({'status': status})
         .eq('id', requestId);
+
+    if (status == 'matched') {
+      final request = await supabase
+          .from('match_requests')
+          .select('sender_pet_id, receiver_pet_id')
+          .eq('id', requestId)
+          .maybeSingle();
+
+      if (request != null) {
+        final senderPetId = request['sender_pet_id'] as String;
+        final receiverPetId = request['receiver_pet_id'] as String;
+        final petA = senderPetId.compareTo(receiverPetId) <= 0
+            ? senderPetId
+            : receiverPetId;
+        final petB = senderPetId.compareTo(receiverPetId) <= 0
+            ? receiverPetId
+            : senderPetId;
+
+        // Use request_id as idempotency key for accepted requests.
+        await supabase.from('matches').upsert({
+          'request_id': requestId,
+          'pet_id_1': petA,
+          'pet_id_2': petB,
+          'status': 'active',
+        }, onConflict: 'request_id');
+      }
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // List one of my pets into the discovery pool
+  // -------------------------------------------------------------------------
+  Future<void> listPetForDiscovery({
+    required String petId,
+    required String listedByUserId,
+  }) async {
+    await supabase.from('pet_listings').upsert({
+      'pet_id': petId,
+      'listed_by_user_id': listedByUserId,
+      'status': 'active',
+    }, onConflict: 'pet_id');
   }
 
   // -------------------------------------------------------------------------
@@ -95,7 +156,9 @@ class MatchRepository {
     final data = await supabase
         .from('match_requests')
         .select()
-        .or('and(sender_pet_id.eq.$petId1,receiver_pet_id.eq.$petId2),and(sender_pet_id.eq.$petId2,receiver_pet_id.eq.$petId1)')
+        .or(
+          'and(sender_pet_id.eq.$petId1,receiver_pet_id.eq.$petId2),and(sender_pet_id.eq.$petId2,receiver_pet_id.eq.$petId1)',
+        )
         .eq('status', 'matched')
         .maybeSingle();
 

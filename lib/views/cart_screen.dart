@@ -18,11 +18,13 @@ class CartScreen extends ConsumerWidget {
         title: const Text('My Cart'),
         actions: [
           TextButton(
-            onPressed: () {
-              ref.read(cartProvider.notifier).clearCart();
-            },
+            onPressed: cartState.isCheckingOut
+                ? null
+                : () {
+                    ref.read(cartProvider.notifier).clearCart();
+                  },
             child: const Text('Clear', style: TextStyle(color: Colors.red)),
-          )
+          ),
         ],
       ),
       body: cartState.items.isEmpty
@@ -30,9 +32,16 @@ class CartScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey),
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    size: 80,
+                    color: Colors.grey,
+                  ),
                   SizedBox(height: 16),
-                  Text('Your cart is empty', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                  Text(
+                    'Your cart is empty',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
                 ],
               ),
             )
@@ -51,15 +60,25 @@ class CartScreen extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
-                      BoxShadow(color: Colors.grey.shade200, blurRadius: 4, offset: const Offset(0, -2))
-                    ]
+                      BoxShadow(
+                        color: Colors.grey.shade200,
+                        blurRadius: 4,
+                        offset: const Offset(0, -2),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Total:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          const Text(
+                            'Total:',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           Text(
                             currencyFormat.format(cartState.totalPrice),
                             style: TextStyle(
@@ -75,19 +94,50 @@ class CartScreen extends ConsumerWidget {
                         width: double.infinity,
                         height: 56,
                         child: ElevatedButton(
-                          onPressed: () {
-                             ref.read(cartProvider.notifier).clearCart();
-                             ScaffoldMessenger.of(context).showSnackBar(
-                               const SnackBar(content: Text('Checkout successful!')),
-                             );
-                             context.pop();
-                          },
-                          child: const Text('Checkout', style: TextStyle(fontSize: 18)),
+                          onPressed: cartState.isCheckingOut
+                              ? null
+                              : () async {
+                                  final ok = await ref
+                                      .read(cartProvider.notifier)
+                                      .placeOrder();
+                                  if (!context.mounted) return;
+
+                                  if (ok) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Order placed successfully!',
+                                        ),
+                                      ),
+                                    );
+                                    context.pop();
+                                  } else {
+                                    final error =
+                                        ref.read(cartProvider).error ??
+                                        'Checkout failed. Please try again.';
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(error)),
+                                    );
+                                  }
+                                },
+                          child: cartState.isCheckingOut
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.4,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Checkout',
+                                  style: TextStyle(fontSize: 18),
+                                ),
                         ),
-                      )
+                      ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
     );

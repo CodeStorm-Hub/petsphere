@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/match_request_model.dart';
 import '../models/pet_model.dart';
 import '../repositories/match_repository.dart';
+import 'auth_controller.dart';
 import 'pet_controller.dart';
 
 // ---------------------------------------------------------------------------
@@ -181,6 +182,30 @@ class MatchController extends Notifier<MatchState> {
       );
     } catch (e) {
       state = state.copyWith(error: 'Could not decline request: $e');
+    }
+  }
+
+  Future<bool> listPetForDiscovery(String petId) async {
+    final userId = ref.read(authProvider).user?.id;
+    final activePet = ref.read(activePetProvider);
+    if (userId == null) {
+      state = state.copyWith(error: 'Please sign in again.');
+      return false;
+    }
+
+    try {
+      await matchRepository.listPetForDiscovery(
+        petId: petId,
+        listedByUserId: userId,
+      );
+
+      if (activePet != null) {
+        await _load(activePet.id);
+      }
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: 'Could not list pet: $e');
+      return false;
     }
   }
 }

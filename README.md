@@ -1,30 +1,119 @@
-# pet_dating_app
+# PetSphere
 
-A new Flutter project.
+PetSphere is a Flutter social + matchmaking + chat + marketplace app for pet owners.
 
-## Getting Started
+## Verified local environment (Windows)
 
-This project is a starting point for a Flutter application.
+This repository was validated on the current machine with:
 
-A few resources to get you started if this is your first Flutter project:
+- Flutter `3.41.6` (stable)
+- Dart `3.11.4`
+- Android SDK `36.1.0`
+- Chrome + Edge web targets
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Validation commands executed successfully:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Flutter/Dart version checks
+- `flutter doctor -v`
+- `flutter devices`
+- `flutter pub get`
+- `flutter run -d web-server --web-port=8081` (launch confirmed)
 
+## Prerequisites
 
+- Flutter SDK (stable)
+- Dart SDK (bundled with Flutter)
+- Android Studio + Android SDK (for Android builds)
+- Chrome or Edge (for web)
+- Supabase project credentials
 
-# Commands
+## Environment configuration
 
+The app now supports compile-time environment values using `--dart-define-from-file`.
+
+1. Copy `.env.example` to `.env`.
+2. Fill values:
+
+```env
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
 ```
+
+## Install dependencies
+
+```bash
 flutter pub get
-flutter --version; dart --version; flutter doctor -v; flutter devices
-flutter analyze
-flutter run -d chrome
-flutter run -d web-server --web-port=8080
-
 ```
+
+## Run the app
+
+### Web (Chrome)
+
+```bash
+flutter run -d chrome --dart-define-from-file=.env
+```
+
+### Web (web-server)
+
+```bash
+flutter run -d web-server --web-port=8080 --dart-define-from-file=.env
+```
+
+### Windows desktop
+
+```bash
+flutter run -d windows --dart-define-from-file=.env
+```
+
+## Analyze and quality checks
+
+```bash
+flutter analyze
+```
+
+Current analyzer output includes a few known deprecation infos (non-blocking), tracked in `CODEBASE_ANALYSIS.md`.
+
+## Android on Windows
+
+Android toolchain is installed and healthy on this machine, but no emulator is currently configured (`flutter emulators` returned no entries).
+
+To run Android locally:
+
+1. Open Android Studio → Device Manager.
+2. Create an Android Virtual Device (AVD).
+3. Start the emulator.
+4. Run:
+
+```bash
+flutter devices
+flutter run -d <emulator_id> --dart-define-from-file=.env
+```
+
+## iOS note (important)
+
+You **cannot build or run iOS apps on Windows**.
+
+For iOS, use:
+
+- macOS + Xcode + CocoaPods
+- same project repo and `.env` values
+- run from Mac:
+
+```bash
+flutter run -d ios --dart-define-from-file=.env
+```
+
+## Supabase schema/migrations
+
+A production-facing schema migration was applied:
+
+- `expand_core_domain_schema_v2`
+
+It adds/extends matchmaking listings, canonical matches, notifications, and normalized order items. See `CODEBASE_ANALYSIS.md` for full schema + ERD + rollout notes.
+
+## Helpful references
+
+- Flutter docs: https://docs.flutter.dev/
+- Riverpod docs: https://riverpod.dev/
+- Supabase docs: https://supabase.com/docs
+- go_router docs: https://pub.dev/packages/go_router

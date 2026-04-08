@@ -510,3 +510,221 @@ Running the analyzer surfaced 3 deprecation infos:
 4. **Discovery listing**: define what “listing” means (likely `pets.is_listed` or separate `listings` table) and implement persistence.
 5. **Harden product detail**: handle empty marketplace state (fetch on demand or show a loading/empty view).
 6. **UX polish**: implement real share/copy-to-clipboard; add timestamps in chat bubbles; improve unread count tracking.
+
+---
+
+## Deep review update (2026-04-09)
+
+This section captures a full code + runtime + docs refresh completed on **2026-04-09**.
+
+### Execution scope completed
+
+- ✅ Read `CODEBASE_ANALYSIS.md` in full.
+- ✅ Audited **all files in `lib/**` (48 Dart files)** top-to-bottom.
+- ✅ Performed live runtime walkthrough on web server (`http://localhost:8080`) and navigated all available screens/actions.
+- ✅ Ran online best-practice research for Flutter + Riverpod + Supabase + go_router.
+- ✅ Designed and validated a v2 schema/ERD/user stories using structured reasoning.
+- ✅ Applied Supabase migration directly to project `foubokcqaxyqgjhtgzsx`.
+- ✅ Implemented first production-facing feature fixes in app code.
+
+### Live UI/UX walkthrough (runtime findings)
+
+Walkthrough was executed in browser with app routes and in-page actions:
+
+1. **Home (`#/home`)**
+  - Feed loaded with empty-state (“No posts yet!”).
+  - Top-right actions opened:
+    - **Notifications** screen (empty state),
+    - **Messages** screen (empty state).
+2. **Discovery tab**
+  - Animal + breed filters were clickable and stateful.
+  - “List Pet” bottom sheet opened correctly.
+  - For account with no pets, confirm action disabled (expected fallback state).
+3. **Create Post flow**
+  - Caption field accepts input.
+  - Share button remains disabled without required post data.
+  - Correctly warns user to create a pet profile first.
+4. **Shop + Cart**
+  - Shop opened with category chips and empty-state products.
+  - Cart route opened and handled empty state.
+5. **Profile tab**
+  - Account metrics + context section rendered.
+  - “Add Pet” UI element is visible but not implemented as a functional navigation CTA.
+
+### High-impact issues confirmed in runtime/code
+
+- Prior issue: checkout UX was success-only (local clear) without DB persistence.
+- Prior issue: discovery listing action was mock-only.
+- Prior issue: schema lacked normalized order line items.
+- Prior issue: no canonical match entity on accepted request.
+
+### Online research snapshot (latest docs/guides)
+
+Primary guidance reviewed (official or authoritative references):
+
+- Flutter app architecture and adaptive UX patterns.
+- Riverpod v3 Notifier/AsyncNotifier lifecycle and testing patterns.
+- Supabase auth/session, RLS, migrations, realtime authorization, and storage/media best practices.
+- go_router redirection, deep-link, and web URL handling patterns.
+
+References:
+
+- https://docs.flutter.dev/app-architecture/guide
+- https://docs.flutter.dev/ui/adaptive-responsive/general
+- https://docs.flutter.dev/ui/accessibility/accessibility-testing
+- https://riverpod.dev/docs/root/do_dont
+- https://riverpod.dev/docs/how_to/testing
+- https://supabase.com/docs/guides/auth/sessions
+- https://supabase.com/docs/guides/database/postgres/row-level-security
+- https://supabase.com/docs/guides/deployment/database-migrations
+- https://supabase.com/docs/guides/realtime/authorization
+- https://pub.dev/documentation/go_router/latest/topics/Redirection-topic.html
+
+### Redesigned database schema (v2)
+
+#### Existing core tables retained
+
+- `profiles`, `pets`, `posts`, `post_likes`, `comments`,
+  `match_requests`, `chat_threads`, `messages`, `products`, `orders`
+
+#### New tables introduced
+
+1. `pet_listings`
+  - Purpose: persistent discovery listing state for pets.
+  - Core columns: `pet_id (unique)`, `listed_by_user_id`, `status`, preferences, timestamps.
+
+2. `matches`
+  - Purpose: canonical accepted match pairs.
+  - Core columns: `request_id (unique)`, `pet_id_1`, `pet_id_2`, `status`, timestamps.
+
+3. `notifications`
+  - Purpose: centralized per-user notification feed.
+  - Core columns: `user_id`, `actor_pet_id`, `type`, `title`, `body`, `is_read`, timestamps.
+
+4. `order_items`
+  - Purpose: normalized line items for analytics/reporting.
+  - Core columns: `order_id`, `product_id`, `product_name`, `unit_price`, `quantity`, generated `line_total`.
+
+#### Existing tables extended
+
+- `profiles`: added `email`, `profile_image_url`
+- `chat_threads`: added `updated_at`
+- `orders`: added `updated_at`
+- `messages`: added `message_type`, `media_url`, `edited_at`, `delivered_at`
+
+#### Constraint/index hardening
+
+- Status CHECK constraints for `match_requests`, `orders`, `messages`.
+- Indexes for feed, messages, match requests, products, orders, listings, notifications.
+- Canonical unique pair index on matches using `least(pet_id_1, pet_id_2)` + `greatest(...)`.
+
+### ERD v2 (Mermaid)
+
+```mermaid
+erDiagram
+  PROFILES ||--o{ PETS : owns
+  PETS ||--o{ POSTS : creates
+  POSTS ||--o{ COMMENTS : has
+  PETS ||--o{ COMMENTS : writes
+  POSTS ||--o{ POST_LIKES : has
+  PETS ||--o{ POST_LIKES : makes
+
+  PETS ||--o{ MATCH_REQUESTS : sends
+  PETS ||--o{ MATCH_REQUESTS : receives
+  MATCH_REQUESTS ||--o| MATCHES : accepted_as
+  PETS ||--o{ MATCHES : participates
+
+  PETS ||--o| PET_LISTINGS : listed_in
+  PROFILES ||--o{ PET_LISTINGS : manages
+
+  PETS ||--o{ CHAT_THREADS : participates
+  CHAT_THREADS ||--o{ MESSAGES : contains
+  PETS ||--o{ MESSAGES : sends
+
+  PROFILES ||--o{ ORDERS : places
+  ORDERS ||--o{ ORDER_ITEMS : contains
+  PRODUCTS ||--o{ ORDER_ITEMS : references
+
+  PROFILES ||--o{ NOTIFICATIONS : receives
+  PETS ||--o{ NOTIFICATIONS : actor
+```
+
+### Actor-based user stories (real-life scenarios)
+
+#### Actor: Pet Owner (Human User)
+
+1. **Owner onboarding**
+  - As an owner, I register/login and manage my account profile so I can access all modules.
+
+2. **Pet identity management**
+  - As an owner, I create pets and switch active pet context so my actions are attributed correctly.
+
+3. **Discovery listing**
+  - As an owner, I list one of my pets into matchmaking so other pets can discover it.
+
+4. **Commerce checkout**
+  - As an owner, I place an order and receive accurate persisted order history with itemized lines.
+
+#### Actor: Pet Persona (Active Pet Context)
+
+5. **Social engagement**
+  - As my active pet, I can post, like, and comment to interact with the community feed.
+
+6. **Match flow**
+  - As my active pet, I can send/receive requests and create canonical matches when accepted.
+
+7. **Messaging**
+  - As my active pet, I can chat with matched pets using persistent thread history.
+
+#### Actor: Vendor (Marketplace Seller)
+
+8. **Product management**
+  - As a vendor, I manage products and stock so buyers can browse and purchase reliably.
+
+#### Actor: System / Backend
+
+9. **Notification delivery**
+  - As the backend, I persist user notifications (match, message, order state) for inbox UX.
+
+### Supabase migration execution log
+
+- **Project**: `foubokcqaxyqgjhtgzsx` (`petsphere`)
+- **Migration name**: `expand_core_domain_schema_v2`
+- **Status**: ✅ applied successfully
+- **Post-check validation**:
+  - New tables exist: `pet_listings`, `matches`, `notifications`, `order_items`
+  - RLS enabled + policies added for all new tables
+  - Existing schema extensions/constraints/indexes created
+
+### Implementation progress status (code)
+
+#### Completed in this update
+
+1. ✅ **Real checkout persistence wired**
+  - `CartScreen` now calls `CartController.placeOrder()` (loading/success/error handling).
+
+2. ✅ **Order normalization on checkout**
+  - `MarketplaceRepository.placeOrder()` now inserts into both `orders` and `order_items`.
+
+3. ✅ **Discovery listing persistence wired**
+  - Added repository/controller flow to upsert `pet_listings`.
+  - Discovery “List Pet” bottom sheet now calls real async logic (no longer mock).
+
+4. ✅ **Canonical match persistence on accept**
+  - Accepting request now updates `match_requests` and upserts `matches`.
+
+5. ✅ **Config hygiene improvement**
+  - `supabase_config.dart` now supports `--dart-define-from-file=.env` via `String.fromEnvironment` with fallback defaults.
+
+#### Remaining high-priority work
+
+- Add actual **Create Pet** screen/route and wire from profile “Add Pet” CTA.
+- Replace deprecated `RadioListTile` group API with `RadioGroup` pattern.
+- Replace deprecated `withOpacity` usage with `.withValues()`.
+- Improve product detail empty-state safety (`orElse` fallback crash risk).
+- Add richer notifications wiring from domain events (match/message/order status).
+
+### Current analyzer status after update
+
+- `flutter analyze` now reports **3 infos** (deprecations), no new errors.
+- Remaining infos are non-blocking but should be cleaned in next polish pass.
