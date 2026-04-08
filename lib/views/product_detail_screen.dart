@@ -64,7 +64,30 @@ class ProductDetailScreen extends ConsumerWidget {
     if (product == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Product')),
-        body: const Center(child: Text('Product not found.')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Product not found.'),
+                const SizedBox(height: 8),
+                const Text(
+                  'It may have been removed or the catalog is not loaded yet.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    ref.read(marketplaceProvider.notifier).refresh();
+                  },
+                  child: const Text('Reload Catalog'),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
@@ -80,14 +103,23 @@ class ProductDetailScreen extends ConsumerWidget {
           children: [
             AspectRatio(
               aspectRatio: 1,
-              child: Image.network(
-                resolvedProduct.images.isNotEmpty
-                    ? resolvedProduct.images[0]
-                    : '',
-                fit: BoxFit.cover,
-                errorBuilder: (ctx, _, _) =>
-                    Container(color: Colors.grey.shade200),
-              ),
+              child: resolvedProduct.images.isEmpty
+                  ? Container(
+                      color: Colors.grey.shade200,
+                      child: const Center(
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          size: 48,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    )
+                  : Image.network(
+                      resolvedProduct.images[0],
+                      fit: BoxFit.cover,
+                      errorBuilder: (ctx, _, _) =>
+                          Container(color: Colors.grey.shade200),
+                    ),
             ),
             Padding(
               padding: const EdgeInsets.all(24.0),

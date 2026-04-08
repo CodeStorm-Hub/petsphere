@@ -71,7 +71,7 @@ flutter run -d windows --dart-define-from-file=.env
 flutter analyze
 ```
 
-Current analyzer output includes a few known deprecation infos (non-blocking), tracked in `CODEBASE_ANALYSIS.md`.
+Current status: `flutter analyze` reports **No issues found**.
 
 ## Android on Windows
 

@@ -113,9 +113,9 @@ flowchart LR
 - CRUD-style access exists in `lib/repositories/pet_repository.dart`.
 - Controller support exists in `lib/controllers/pet_controller.dart` (`createPet`, `reload`, `setActivePet`).
 
-**UI gap**
+**UI status**
 
-- No screen in `lib/views/**` calls `PetNotifier.createPet(...)` (search shows only the controller/repo implement it). The profile screen has an “Add pet” avatar (`_AddPetAvatar`) but it doesn’t currently navigate to a pet-creation flow.
+- Pet creation UI is now implemented via `CreatePetScreen` and wired from profile “Add Pet” action (`/create_pet`).
 
 ### Social feed
 
@@ -142,9 +142,9 @@ flowchart LR
 - Notifications screen shows received requests with accept/decline:
   - `lib/views/notifications_screen.dart`
 
-**Stub / mock**
+**Recently implemented**
 
-- “List Pet” (FAB) in `DiscoveryScreen` is explicitly **mock**: it shows a modal, lets you pick one of your pets, and displays a success snackbar without writing anything to Supabase.
+- “List Pet” (FAB) now persists to Supabase `pet_listings` through controller/repository wiring.
 
 ### Chat
 
@@ -174,9 +174,9 @@ flowchart LR
   - `lib/repositories/marketplace_repository.dart` inserts into `orders` with `items` as JSON and `total`.
   - `CartController.placeOrder()` calls that repository method.
 
-**Important gap**
+**Recently implemented**
 
-- `CartScreen` checkout button currently **does not call** `CartController.placeOrder()`. It just clears the cart and shows “Checkout successful!”. So orders will not be persisted unless UI is wired up.
+- `CartScreen` checkout now calls `CartController.placeOrder()` with loading/success/error handling and persists order data.
 
 ## Inferred database schema (Supabase/Postgres)
 
@@ -407,7 +407,7 @@ This section lists **every Dart file** (48 total) and what it does.
 
 ### Utils
 
-- `lib/utils/routes.dart` — GoRouter route table + redirect logic based on auth state (`/splash`, `/login`, `/register`, `/home`, `/create_post`, `/notifications`, `/pet/:id`, `/messages`, `/chat/:threadId`, `/cart`, `/product/:id`).
+- `lib/utils/routes.dart` — GoRouter route table + redirect logic based on auth state (`/splash`, `/login`, `/register`, `/home`, `/create_post`, `/create_pet`, `/notifications`, `/pet/:id`, `/messages`, `/chat/:threadId`, `/cart`, `/product/:id`).
 - `lib/utils/supabase_config.dart` — Supabase URL/anon key constants + `supabase` client getter + bucket name constants.
 - `lib/utils/image_upload_helper.dart` — image picking (camera/gallery) + Supabase Storage upload helpers.
 
@@ -450,6 +450,7 @@ This section lists **every Dart file** (48 total) and what it does.
 - `lib/views/splash_screen.dart` — splash/loading UI.
 - `lib/views/login_screen.dart` — login form.
 - `lib/views/registration_screen.dart` — sign-up form.
+- `lib/views/create_pet_screen.dart` — pet creation form (name/breed/type/age/bio/image URL).
 - `lib/views/main_layout.dart` — bottom navigation scaffold (Home/Discover/Create/Shop/Profile).
 - `lib/views/home_screen.dart` — feed list + comment/share sheets.
 - `lib/views/create_post_screen.dart` — pick image + upload + caption + create post.
@@ -482,9 +483,8 @@ This section lists **every Dart file** (48 total) and what it does.
 
 ### UI-to-data wiring gaps
 
-- **Checkout doesn’t place an order**: `CartController.placeOrder()` exists, but `CartScreen` checkout button doesn’t call it.
-- **“List Pet” is mock**: Discovery listing doesn’t write to Supabase.
-- **No pet creation screen**: pet creation exists in controller/repo only.
+- Share actions are still partially UI-only in feed/profile contexts.
+- Account settings/edit flows are still placeholders in profile screen.
 
 ### Crash/edge-case risks
 
@@ -493,10 +493,7 @@ This section lists **every Dart file** (48 total) and what it does.
 
 ### Analyzer notes (from `flutter analyze`)
 
-Running the analyzer surfaced 3 deprecation infos:
-
-- `lib/views/discovery_screen.dart`: `RadioListTile.groupValue` and `RadioListTile.onChanged` are flagged as deprecated in newer Flutter versions (recommendation: a `RadioGroup` ancestor).
-- `lib/views/home_screen.dart`: `Color.withOpacity` is flagged as deprecated (recommendation: `.withValues()` to avoid precision loss).
+- Current status: **No issues found**.
 
 ### Data modeling notes
 
@@ -504,12 +501,11 @@ Running the analyzer surfaced 3 deprecation infos:
 
 ## Suggested next steps / backlog
 
-1. **Configuration hygiene**: move Supabase config out of source using `--dart-define` or a dotenv approach (since `.env.example` already exists).
-2. **Wire up real checkout**: in `CartScreen`, call `await ref.read(cartProvider.notifier).placeOrder()` and handle loading/error states.
-3. **Pet onboarding**: add a “Create Pet” screen and connect it to `PetNotifier.createPet(...)`.
-4. **Discovery listing**: define what “listing” means (likely `pets.is_listed` or separate `listings` table) and implement persistence.
-5. **Harden product detail**: handle empty marketplace state (fetch on demand or show a loading/empty view).
-6. **UX polish**: implement real share/copy-to-clipboard; add timestamps in chat bubbles; improve unread count tracking.
+1. **Notifications wiring**: connect domain events (new message, match accepted, order status updates) into `notifications` table and UI badge counts.
+2. **Share implementation**: replace placeholder share/copy actions with real clipboard/share integrations.
+3. **Profile settings**: implement edit account/profile flows currently shown as placeholders.
+4. **Chat UX polish**: add message timestamps/typing states and richer attachment support.
+5. **Marketplace evolution**: add order history and status timeline screens from persisted `orders`/`order_items`.
 
 ---
 
@@ -718,13 +714,17 @@ erDiagram
 
 #### Remaining high-priority work
 
-- Add actual **Create Pet** screen/route and wire from profile “Add Pet” CTA.
-- Replace deprecated `RadioListTile` group API with `RadioGroup` pattern.
-- Replace deprecated `withOpacity` usage with `.withValues()`.
-- Improve product detail empty-state safety (`orElse` fallback crash risk).
 - Add richer notifications wiring from domain events (match/message/order status).
+
+#### Follow-up progress (2026-04-09, iteration 2)
+
+Newly completed:
+
+- ✅ Added `CreatePetScreen` (`/create_pet`) and connected profile “Add Pet” action to this flow.
+- ✅ Replaced deprecated discovery selection UI (`RadioListTile`) with non-deprecated selectable list tiles.
+- ✅ Replaced deprecated `withOpacity` usage in comments UI with `.withValues(alpha: ...)`.
+- ✅ Further hardened `ProductDetailScreen` for missing catalog/product/image cases with retry UX.
 
 ### Current analyzer status after update
 
-- `flutter analyze` now reports **3 infos** (deprecations), no new errors.
-- Remaining infos are non-blocking but should be cleaned in next polish pass.
+- `flutter analyze` now reports **No issues found**.

@@ -261,29 +261,33 @@ class _ListPetSheetWidgetState extends ConsumerState<_ListPetSheetWidget> {
             )
           else
             ...widget.myOwnedPets.map((pet) {
-              return RadioListTile<String>(
-                title: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(pet.profileImageUrl),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      pet.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
+              final isSelected = _selectedPetId == pet.id;
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 4),
+                child: ListTile(
+                  onTap: () {
+                    setState(() {
+                      _selectedPetId = pet.id;
+                      _submitError = null;
+                    });
+                  },
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(pet.profileImageUrl),
+                  ),
+                  title: Text(
+                    pet.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(pet.breed),
+                  trailing: Icon(
+                    isSelected
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.grey,
+                  ),
                 ),
-                subtitle: Text(pet.breed),
-                value: pet.id,
-                groupValue: _selectedPetId,
-                activeColor: Theme.of(context).colorScheme.primary,
-                onChanged: (val) {
-                  setState(() {
-                    _selectedPetId = val;
-                    _submitError = null;
-                  });
-                },
               );
             }),
 
