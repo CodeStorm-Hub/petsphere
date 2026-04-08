@@ -9,7 +9,7 @@ class FeedRepository {
   Future<List<PostModel>> fetchPosts() async {
     final data = await supabase
         .from('posts')
-        .select('*, pets(*), post_likes(pet_id), comments(*, pets(name, id))')
+        .select('*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
         .order('created_at', ascending: false)
         .limit(50);
 
@@ -33,7 +33,7 @@ class FeedRepository {
           'media_url': mediaUrl,
           'caption': caption,
         })
-        .select('*, pets(*), post_likes(pet_id), comments(*, pets(name, id))')
+        .select('*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
         .single();
 
     return PostModel.fromJson(data);
@@ -103,7 +103,7 @@ class FeedRepository {
           'pet_id': petId,
           'text': text,
         })
-        .select('*, pets(name, id)')
+        .select('*, pets!comments_pet_id_fkey(name, id)')
         .single();
 
     return CommentModel.fromJson(data);

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/match_request_model.dart';
 import '../models/pet_model.dart';
@@ -50,27 +51,36 @@ class MatchState {
 // Notifier
 // ---------------------------------------------------------------------------
 class MatchController extends Notifier<MatchState> {
+  int _loadGeneration = 0; // cancel stale async loads
+
   @override
   MatchState build() {
-    // Watch active pet — reload discovery & requests when it changes
     final activePet = ref.watch(activePetProvider);
     if (activePet != null) {
+      // Initial load — state already has filterAnimal/filterBreed as null
       _load(activePet.id);
     }
     return MatchState(isLoading: true);
   }
 
-  Future<void> _load(String myPetId, {String? animal, String? breed}) async {
+  /// Always reads filters from the current state, never from parameters.
+  /// Uses a generation counter so stale fetches don't overwrite newer state.
+  Future<void> _load(String myPetId) async {
+    final gen = ++_loadGeneration;
     state = state.copyWith(isLoading: true, clearError: true);
+
     try {
       final futures = await Future.wait([
         matchRepository.fetchDiscoveryPets(
           myPetId: myPetId,
-          filterAnimal: animal,
-          filterBreed: breed,
+          filterAnimal: state.filterAnimal,
+          filterBreed: state.filterBreed,
         ),
         matchRepository.fetchMyRequests(myPetId),
       ]);
+
+      // Only apply results if this is still the latest load
+      if (gen != _loadGeneration) return;
 
       state = state.copyWith(
         discoveryPets: futures[0] as List<PetModel>,
@@ -78,21 +88,41 @@ class MatchController extends Notifier<MatchState> {
         isLoading: false,
       );
     } catch (e) {
+      if (gen != _loadGeneration) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
   void setFilterBreed(String? breed) {
     final activePet = ref.read(activePetProvider);
-    if (activePet == null) return;
-    _load(activePet.id,
-        animal: state.filterAnimal, breed: breed == '' ? null : breed);
+    debugPrint('[MatchController] setFilterBreed($breed) — activePet=${activePet?.name}');
+    if (activePet == null) {
+      debugPrint('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
+      return;
+    }
+    if (breed == null || breed.isEmpty) {
+      state = state.copyWith(clearBreed: true);
+    } else {
+      state = state.copyWith(filterBreed: breed);
+    }
+    debugPrint('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
+    _load(activePet.id);
   }
 
   void setFilterAnimal(String? animal) {
     final activePet = ref.read(activePetProvider);
-    if (activePet == null) return;
-    _load(activePet.id, animal: animal == '' ? null : animal);
+    debugPrint('[MatchController] setFilterAnimal($animal) — activePet=${activePet?.name}');
+    if (activePet == null) {
+      debugPrint('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
+      return;
+    }
+    if (animal == null || animal.isEmpty) {
+      state = state.copyWith(clearAnimal: true, clearBreed: true);
+    } else {
+      state = state.copyWith(filterAnimal: animal, clearBreed: true);
+    }
+    debugPrint('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
+    _load(activePet.id);
   }
 
   Future<void> sendLikeRequest(String receiverPetId) async {
