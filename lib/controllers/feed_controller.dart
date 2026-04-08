@@ -11,11 +11,7 @@ class FeedState {
   final bool isLoading;
   final String? error;
 
-  FeedState({
-    this.posts = const [],
-    this.isLoading = false,
-    this.error,
-  });
+  FeedState({this.posts = const [], this.isLoading = false, this.error});
 
   FeedState copyWith({
     List<PostModel>? posts,
@@ -37,7 +33,8 @@ class FeedState {
 class FeedNotifier extends Notifier<FeedState> {
   @override
   FeedState build() {
-    _fetchPosts();
+    // Defer async state mutations until after initial state is returned.
+    Future.microtask(_fetchPosts);
     return FeedState(isLoading: true);
   }
 
@@ -71,8 +68,10 @@ class FeedNotifier extends Notifier<FeedState> {
     );
 
     try {
-      final updatedLikes =
-          await feedRepository.toggleLike(postId, currentPetId);
+      final updatedLikes = await feedRepository.toggleLike(
+        postId,
+        currentPetId,
+      );
       state = state.copyWith(
         posts: state.posts.map((post) {
           if (post.id != postId) return post;
@@ -105,7 +104,11 @@ class FeedNotifier extends Notifier<FeedState> {
   // Add Comment
   // -------------------------------------------------------------------------
   Future<void> addComment(
-      String postId, String petId, String petName, String text) async {
+    String postId,
+    String petId,
+    String petName,
+    String text,
+  ) async {
     try {
       final newComment = await feedRepository.addComment(
         postId: postId,
@@ -115,8 +118,7 @@ class FeedNotifier extends Notifier<FeedState> {
       state = state.copyWith(
         posts: state.posts.map((post) {
           if (post.id != postId) return post;
-          return post.copyWith(
-              comments: [...post.comments, newComment]);
+          return post.copyWith(comments: [...post.comments, newComment]);
         }).toList(),
       );
     } catch (e) {

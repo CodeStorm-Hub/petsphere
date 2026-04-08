@@ -45,8 +45,11 @@ class PetNotifier extends Notifier<PetState> {
   PetState build() {
     // Watch auth state — reload pets when user changes
     final authState = ref.watch(authProvider);
-    if (authState.status == AuthStatus.authenticated && authState.user != null) {
-      _loadMyPets(authState.user!.id);
+    final userId = authState.user?.id;
+    if (authState.status == AuthStatus.authenticated && userId != null) {
+      // Defer async state mutations until after initial state is returned.
+      Future.microtask(() => _loadMyPets(userId));
+      return PetState(isLoading: true);
     }
     return PetState();
   }

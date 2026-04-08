@@ -15,3 +15,16 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+
+
+# Commands
+
+```
+flutter pub get
+flutter --version; dart --version; flutter doctor -v; flutter devices
+flutter analyze
+flutter run -d chrome
+flutter run -d web-server --web-port=8080
+
+```
