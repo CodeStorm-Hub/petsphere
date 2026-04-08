@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/match_controller.dart';
+import '../controllers/notification_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/pet_model.dart';
 import 'components/match_pet_card.dart';
@@ -12,13 +13,18 @@ class DiscoveryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final matchState = ref.watch(matchProvider);
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Discover Matches'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none),
+            icon: Badge(
+              isLabelVisible: unreadCount > 0,
+              label: Text(unreadCount > 99 ? '99+' : '$unreadCount'),
+              child: const Icon(Icons.notifications_none),
+            ),
             onPressed: () {
               context.push('/notifications');
             },

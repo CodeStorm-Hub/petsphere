@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/feed_controller.dart';
+import '../controllers/notification_controller.dart';
 import '../controllers/pet_controller.dart';
 import 'components/post_card.dart';
 
@@ -12,6 +14,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final feedState = ref.watch(feedProvider);
     final activePet = ref.watch(activePetProvider);
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
     final currentPetId = activePet?.id ?? '';
 
     return Scaffold(
@@ -22,7 +25,11 @@ class HomeScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.favorite_border),
+            icon: Badge(
+              isLabelVisible: unreadCount > 0,
+              label: Text(unreadCount > 99 ? '99+' : '$unreadCount'),
+              child: const Icon(Icons.favorite_border),
+            ),
             onPressed: () => context.push('/notifications'),
           ),
           IconButton(
@@ -100,14 +107,16 @@ class HomeScreen extends ConsumerWidget {
                 ref.read(activePetProvider)?.name ?? 'Unknown',
               );
             },
-            onShareIconTap: () => _showShareSheet(context),
+            onShareIconTap: () => _showShareSheet(context, post.id),
           );
         },
       ),
     );
   }
 
-  void _showShareSheet(BuildContext context) {
+  void _showShareSheet(BuildContext context, String postId) {
+    final shareUrl = 'https://petsphere.app/post/$postId';
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -169,7 +178,9 @@ class HomeScreen extends ConsumerWidget {
                   child: const Icon(Icons.link),
                 ),
                 title: const Text('Copy Link'),
-                onTap: () {
+                onTap: () async {
+                  await Clipboard.setData(ClipboardData(text: shareUrl));
+                  if (!context.mounted) return;
                   Navigator.pop(context);
                   ScaffoldMessenger.of(
                     context,
@@ -186,7 +197,16 @@ class HomeScreen extends ConsumerWidget {
                   child: const Icon(Icons.share),
                 ),
                 title: const Text('Share via...'),
-                onTap: () => Navigator.pop(context),
+                onTap: () async {
+                  await Clipboard.setData(ClipboardData(text: shareUrl));
+                  if (!context.mounted) return;
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Share link copied. Paste it in any app.'),
+                    ),
+                  );
+                },
               ),
             ],
           ),

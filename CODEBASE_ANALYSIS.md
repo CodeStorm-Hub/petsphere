@@ -128,7 +128,7 @@ flowchart LR
 
 **Partially implemented / placeholder UX**
 
-- Share sheet exists but actions are mostly UI-only (e.g., “Copy link” shows a snackbar; doesn’t actually copy to clipboard).
+- Share sheet now copies post links to clipboard; native OS share integration is still pending.
 
 ### Matchmaking
 
@@ -141,6 +141,20 @@ flowchart LR
 - Send like request (upsert into `match_requests`).
 - Notifications screen shows received requests with accept/decline:
   - `lib/views/notifications_screen.dart`
+
+### Notifications
+
+**Implemented**
+
+- Backend notification events now generated from DB triggers (`match accepted`, `new message`, `order status change`).
+- App-side notification stack added:
+  - `lib/models/notification_model.dart`
+  - `lib/repositories/notification_repository.dart`
+  - `lib/controllers/notification_controller.dart`
+- `NotificationsScreen` now shows both:
+  - match requests (actionable accept/decline), and
+  - activity feed from `notifications` table with mark-read support.
+- Unread notification badge now appears on Home and Discovery notification icons.
 
 **Recently implemented**
 
@@ -353,9 +367,9 @@ These are written to reflect what the current codebase supports (✅) and what i
 
 ### Pet onboarding & identity (“act as a pet”)
 
-- ⚠️ **As an authenticated user**, I can create a pet profile (name, breed, animal type, age, bio, images) so that I can participate socially.
+- ✅ **As an authenticated user**, I can create a pet profile (name, breed, animal type, age, bio, images) so that I can participate socially.
   - Data/controller exist: `PetRepository.createPet`, `PetNotifier.createPet`.
-  - UI screen is missing (no view calls `createPet(...)`).
+  - Implemented via `CreatePetScreen` + `PetNotifier.createPet(...)`.
 - ✅ **As a user with multiple pets**, I can switch the active pet identity so that my actions (posting, liking, matching, chatting) come from the correct pet.
   - Implemented via `PetState.activePet` and `activePetProvider`.
 
@@ -378,8 +392,8 @@ These are written to reflect what the current codebase supports (✅) and what i
   - Implemented in: `MatchRepository.sendLikeRequest`.
 - ✅ **As a pet**, I can see incoming match requests and accept/decline them.
   - Implemented in: `NotificationsScreen` + `MatchRepository.updateRequestStatus`.
-- ⚠️ **As a pet owner**, I can “list” one of my pets into the matchmaking pool.
-  - Current UI is mock only (no Supabase write).
+- ✅ **As a pet owner**, I can “list” one of my pets into the matchmaking pool.
+  - Implemented with persistence to `pet_listings`.
 
 ### Chat
 
@@ -394,12 +408,12 @@ These are written to reflect what the current codebase supports (✅) and what i
   - Implemented in: `MarketplaceScreen`.
 - ✅ **As a user**, I can add products to a cart and adjust quantities.
   - Implemented in: `CartController` + `CartScreen`.
-- ⚠️ **As a user**, I can checkout and have my order saved.
-  - Data-layer is implemented (`MarketplaceRepository.placeOrder`), but the checkout UI currently just clears the cart.
+- ✅ **As a user**, I can checkout and have my order saved.
+  - Implemented in `CartScreen` + `CartController.placeOrder` + `MarketplaceRepository.placeOrder`.
 
 ## File-by-file walkthrough (`lib/**`)
 
-This section lists **every Dart file** (48 total) and what it does.
+This section lists **every Dart file** and what it does.
 
 ### Entry
 
@@ -425,6 +439,7 @@ This section lists **every Dart file** (48 total) and what it does.
 - `lib/models/chat_thread_model.dart` — chat thread model with participant pet ids/pets and optional last message/unread count.
 - `lib/models/product_model.dart` — marketplace product model.
 - `lib/models/cart_item_model.dart` — local cart line item model.
+- `lib/models/notification_model.dart` — app notification model mapped from `notifications` table.
 
 ### Repositories (Supabase data access)
 
@@ -434,6 +449,7 @@ This section lists **every Dart file** (48 total) and what it does.
 - `lib/repositories/match_repository.dart` — discovery query + match request flow in `match_requests`.
 - `lib/repositories/chat_repository.dart` — `chat_threads` + `messages` + realtime subscription for inserts.
 - `lib/repositories/marketplace_repository.dart` — fetch `products` and insert `orders`.
+- `lib/repositories/notification_repository.dart` — fetch/mark/subscribe user notifications.
 
 ### Controllers (Riverpod state + orchestration)
 
@@ -443,7 +459,8 @@ This section lists **every Dart file** (48 total) and what it does.
 - `lib/controllers/match_controller.dart` — loads discovery pets + match requests; applies animal/breed filters.
 - `lib/controllers/chat_controller.dart` — threads + per-thread message notifier and realtime lifecycle.
 - `lib/controllers/marketplace_controller.dart` — loads products and filters by category.
-- `lib/controllers/cart_controller.dart` — local cart state; has `placeOrder()` but UI doesn’t call it yet.
+- `lib/controllers/cart_controller.dart` — local cart state + checkout orchestration (`placeOrder()`).
+- `lib/controllers/notification_controller.dart` — notification list/unread count state + realtime subscription lifecycle.
 
 ### Views (screens)
 
@@ -454,14 +471,14 @@ This section lists **every Dart file** (48 total) and what it does.
 - `lib/views/main_layout.dart` — bottom navigation scaffold (Home/Discover/Create/Shop/Profile).
 - `lib/views/home_screen.dart` — feed list + comment/share sheets.
 - `lib/views/create_post_screen.dart` — pick image + upload + caption + create post.
-- `lib/views/discovery_screen.dart` — discovery grid + animal/breed filters; “List Pet” bottom sheet (mock).
+- `lib/views/discovery_screen.dart` — discovery grid + animal/breed filters; “List Pet” bottom sheet persists listing state.
 - `lib/views/notifications_screen.dart` — match requests inbox (accept/decline).
 - `lib/views/match_pet_profile_screen.dart` — details page for a discovered pet.
 - `lib/views/messages_list_screen.dart` — list of chat threads.
 - `lib/views/chat_screen.dart` — thread messages + composer; realtime updates.
 - `lib/views/marketplace_screen.dart` — product grid + filters + cart icon.
 - `lib/views/product_detail_screen.dart` — product detail + add to cart.
-- `lib/views/cart_screen.dart` — cart review + totals + checkout (currently local-only).
+- `lib/views/cart_screen.dart` — cart review + totals + checkout with persisted order placement.
 - `lib/views/pet_profile_screen.dart` — profile for owner vs specific pet; shows post grid.
 
 ### View components
@@ -479,17 +496,17 @@ This section lists **every Dart file** (48 total) and what it does.
 ### Security / configuration
 
 - **Hardcoded Supabase config**: `lib/utils/supabase_config.dart` contains the Supabase URL and anon key. While the anon key is not as sensitive as a service-role key, it is still best practice to load config via environment/build-time defines.
-- `.env` / `.env.example` exist, but code does not read them.
+- App now supports compile-time environment injection via `--dart-define-from-file=.env` with fallback values.
 
 ### UI-to-data wiring gaps
 
-- Share actions are still partially UI-only in feed/profile contexts.
+- Native OS share sheet integration (beyond clipboard copy) is still pending.
 - Account settings/edit flows are still placeholders in profile screen.
 
 ### Crash/edge-case risks
 
-- `lib/views/product_detail_screen.dart`:
-  - Uses `ref.read(marketplaceProvider).products` (non-reactive) and falls back to `products.first` in `orElse`, which will throw if the list is empty.
+- Notification action routing is currently read-only; tapping activity items marks read but does not deep-link to destination entities yet.
+- Chat model/query still has partial support for unread metadata and no message attachment path in UI.
 
 ### Analyzer notes (from `flutter analyze`)
 
@@ -501,11 +518,11 @@ This section lists **every Dart file** (48 total) and what it does.
 
 ## Suggested next steps / backlog
 
-1. **Notifications wiring**: connect domain events (new message, match accepted, order status updates) into `notifications` table and UI badge counts.
-2. **Share implementation**: replace placeholder share/copy actions with real clipboard/share integrations.
-3. **Profile settings**: implement edit account/profile flows currently shown as placeholders.
-4. **Chat UX polish**: add message timestamps/typing states and richer attachment support.
-5. **Marketplace evolution**: add order history and status timeline screens from persisted `orders`/`order_items`.
+1. **Share implementation**: add native OS share sheet integration (clipboard copy is now implemented).
+2. **Profile settings**: implement edit account/profile flows currently shown as placeholders.
+3. **Chat UX polish**: add message timestamps/typing states and richer attachment support.
+4. **Marketplace evolution**: add order history and status timeline screens from persisted `orders`/`order_items`.
+5. **Auth hardening**: add password reset, email verification UX, and optional social login.
 
 ---
 
@@ -714,7 +731,11 @@ erDiagram
 
 #### Remaining high-priority work
 
-- Add richer notifications wiring from domain events (match/message/order status).
+- Add richer deep-link actions from notifications to target screens/entities.
+- Implement share integrations in feed/profile actions.
+- Implement account settings/profile edit flows.
+- Add chat media + typing + improved unread counters.
+- Add order history/status screens from persisted order tables.
 
 #### Follow-up progress (2026-04-09, iteration 2)
 
@@ -724,6 +745,22 @@ Newly completed:
 - ✅ Replaced deprecated discovery selection UI (`RadioListTile`) with non-deprecated selectable list tiles.
 - ✅ Replaced deprecated `withOpacity` usage in comments UI with `.withValues(alpha: ...)`.
 - ✅ Further hardened `ProductDetailScreen` for missing catalog/product/image cases with retry UX.
+
+#### Follow-up progress (2026-04-09, iteration 3)
+
+Newly completed:
+
+- ✅ Applied Supabase migration `notification_event_triggers_v1` for DB-side event notifications.
+- ✅ Added app notification model/repository/controller with realtime sync + unread count.
+- ✅ Upgraded `NotificationsScreen` from match-only list to unified requests + activity feed.
+- ✅ Added unread badge indicators on Home and Discovery notification icons.
+
+#### Follow-up progress (2026-04-09, iteration 4)
+
+Newly completed:
+
+- ✅ Implemented real clipboard copy for post links in Home share sheet.
+- ✅ Implemented clipboard copy for account/profile share actions in profile screen.
 
 ### Current analyzer status after update
 

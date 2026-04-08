@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/feed_controller.dart';
@@ -212,7 +213,18 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () {},
+                              onPressed: () async {
+                                final link = isOwnerView
+                                    ? 'https://petsphere.app/u/$myUserId'
+                                    : 'https://petsphere.app/pet/${selectedPet!.id}';
+                                await Clipboard.setData(ClipboardData(text: link));
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Share link copied!'),
+                                  ),
+                                );
+                              },
                               child: Text(
                                 isOwnerView ? 'Share Account' : 'Share Profile',
                               ),

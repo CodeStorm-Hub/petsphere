@@ -185,6 +185,12 @@ class MatchController extends Notifier<MatchState> {
     }
   }
 
+  Future<void> refresh() async {
+    final activePet = ref.read(activePetProvider);
+    if (activePet == null) return;
+    await _load(activePet.id);
+  }
+
   Future<bool> listPetForDiscovery(String petId) async {
     final userId = ref.read(authProvider).user?.id;
     final activePet = ref.read(activePetProvider);
