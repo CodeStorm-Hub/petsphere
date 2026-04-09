@@ -14,6 +14,25 @@ class CommentModel {
     required this.text,
     required this.createdAt,
   });
+
+  factory CommentModel.fromJson(Map<String, dynamic> json) {
+    // Comments are joined with the pets table via a Supabase select
+    final petJson = json['pets'] as Map<String, dynamic>?;
+    return CommentModel(
+      id: json['id'] as String,
+      petId: json['pet_id'] as String,
+      petName: petJson?['name'] as String? ?? 'Unknown',
+      text: json['text'] as String,
+      createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'pet_id': petId,
+        'text': text,
+        'created_at': createdAt.toIso8601String(),
+      };
 }
 
 class PostModel {
@@ -52,6 +71,28 @@ class PostModel {
       likedByPetIds: likedByPetIds ?? this.likedByPetIds,
       comments: comments ?? this.comments,
       createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  /// Parses from a Supabase joined query:
+  /// posts.*, pets(*), post_likes(pet_id), comments(*, pets(name))
+  factory PostModel.fromJson(Map<String, dynamic> json) {
+    final petJson = json['pets'] as Map<String, dynamic>;
+    final likesJson = json['post_likes'] as List<dynamic>? ?? [];
+    final commentsJson = json['comments'] as List<dynamic>? ?? [];
+
+    return PostModel(
+      id: json['id'] as String,
+      pet: PetModel.fromJson(petJson),
+      mediaUrl: json['media_url'] as String? ?? '',
+      caption: json['caption'] as String? ?? '',
+      likedByPetIds: likesJson
+          .map((l) => (l as Map<String, dynamic>)['pet_id'] as String)
+          .toList(),
+      comments: commentsJson
+          .map((c) => CommentModel.fromJson(c as Map<String, dynamic>))
+          .toList(),
+      createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
 }

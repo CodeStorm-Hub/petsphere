@@ -6,8 +6,6 @@ class MatchRequestModel {
   final String receiverPetId;
   final String status; // 'pending', 'matched', 'rejected'
   final DateTime createdAt;
-  
-  // Helpful for the mock UI to easily render the sender profile
   final PetModel? senderPet;
 
   MatchRequestModel({
@@ -36,4 +34,22 @@ class MatchRequestModel {
       senderPet: senderPet ?? this.senderPet,
     );
   }
+
+  factory MatchRequestModel.fromJson(Map<String, dynamic> json) {
+    final petJson = json['sender_pets'] as Map<String, dynamic>?;
+    return MatchRequestModel(
+      id: json['id'] as String,
+      senderPetId: json['sender_pet_id'] as String,
+      receiverPetId: json['receiver_pet_id'] as String,
+      status: json['status'] as String? ?? 'pending',
+      createdAt: DateTime.parse(json['created_at'] as String),
+      senderPet: petJson != null ? PetModel.fromJson(petJson) : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'sender_pet_id': senderPetId,
+        'receiver_pet_id': receiverPetId,
+        'status': status,
+      };
 }

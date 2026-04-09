@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
-import 'dart:async';
+import '../repositories/auth_repository.dart';
 
-// State defining authentication status
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
 enum AuthStatus { initial, unauthenticated, authenticated }
 
 class AuthState {
@@ -23,74 +26,124 @@ class AuthState {
     UserModel? user,
     bool? isLoading,
     String? error,
+    bool clearError = false,
   }) {
     return AuthState(
       status: status ?? this.status,
       user: user ?? this.user,
       isLoading: isLoading ?? this.isLoading,
-      error: error, // Clear error if not provided
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
 
+// ---------------------------------------------------------------------------
+// Notifier
+// ---------------------------------------------------------------------------
 class AuthNotifier extends Notifier<AuthState> {
   @override
   AuthState build() {
-    _checkInitialAuth();
+    _init();
     return AuthState();
   }
 
-  Future<void> _checkInitialAuth() async {
-    // Simulate initial load
-    await Future.delayed(const Duration(seconds: 2));
-    state = state.copyWith(status: AuthStatus.unauthenticated);
+  void _init() {
+    // Listen to Supabase auth state changes continuously
+    authRepository.authStateChanges.listen((event) async {
+      final supabaseUser = event.session?.user;
+      if (supabaseUser == null) {
+        state = AuthState(status: AuthStatus.unauthenticated);
+      } else {
+        try {
+          final user = await authRepository.getCurrentUser();
+          state = AuthState(
+            status: AuthStatus.authenticated,
+            user: user,
+          );
+        } catch (_) {
+          state = AuthState(
+            status: AuthStatus.authenticated,
+            user: UserModel(
+              id: supabaseUser.id,
+              email: supabaseUser.email ?? '',
+            ),
+          );
+        }
+      }
+    });
+
+    // Check current session immediately
+    _checkCurrentSession();
   }
 
+  Future<void> _checkCurrentSession() async {
+    try {
+      final user = await authRepository.getCurrentUser();
+      if (user != null) {
+        state = state.copyWith(
+          status: AuthStatus.authenticated,
+          user: user,
+        );
+      } else {
+        state = state.copyWith(status: AuthStatus.unauthenticated);
+      }
+    } catch (_) {
+      state = state.copyWith(status: AuthStatus.unauthenticated);
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Login
+  // -------------------------------------------------------------------------
   Future<void> login(String email, String password) async {
-    state = state.copyWith(isLoading: true, error: null);
-    
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (email.isNotEmpty && password.length >= 6) {
-      final mockUser = UserModel(id: 'mock-123', email: email, name: 'Pet Lover');
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final user = await authRepository.signIn(email, password);
       state = state.copyWith(
         status: AuthStatus.authenticated,
-        user: mockUser,
+        user: user,
         isLoading: false,
       );
-    } else {
+    } on AuthException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
+    } catch (e) {
       state = state.copyWith(
-        isLoading: false,
-        error: "Invalid email or weak password.",
-      );
+          isLoading: false, error: 'Login failed. Please try again.');
     }
   }
 
+  // -------------------------------------------------------------------------
+  // Register
+  // -------------------------------------------------------------------------
   Future<void> register(String email, String password, String name) async {
-     state = state.copyWith(isLoading: true, error: null);
-     
-     await Future.delayed(const Duration(seconds: 1));
-     
-     if (email.isNotEmpty && password.length >= 6) {
-      final mockUser = UserModel(id: 'mock-123', email: email, name: name);
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final user = await authRepository.signUp(email, password, name);
       state = state.copyWith(
         status: AuthStatus.authenticated,
-        user: mockUser,
+        user: user,
         isLoading: false,
       );
-    } else {
-      state = state.copyWith(
-        isLoading: false,
-        error: "Registration failed. Please check inputs.",
-      );
+    } on AuthException catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
+    } catch (e) {
+      state =
+          state.copyWith(isLoading: false, error: 'Registration failed. $e');
     }
   }
 
-  void logout() {
+  // -------------------------------------------------------------------------
+  // Logout
+  // -------------------------------------------------------------------------
+  Future<void> logout() async {
+    await authRepository.signOut();
     state = AuthState(status: AuthStatus.unauthenticated);
   }
 }
 
+// ---------------------------------------------------------------------------
+// Provider
+// ---------------------------------------------------------------------------
 final authProvider = NotifierProvider<AuthNotifier, AuthState>(() {
   return AuthNotifier();
 });

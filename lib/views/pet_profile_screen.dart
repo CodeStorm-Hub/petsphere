@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/feed_controller.dart';
+import '../controllers/pet_controller.dart';
 import '../models/pet_model.dart';
 import '../controllers/auth_controller.dart'; 
 
@@ -17,33 +18,34 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Authenticated User Context
     final authState = ref.watch(authProvider);
     final userName = authState.user?.name ?? 'Pet Lover';
-    
-    // In our mock logic, the logged in user is always 'user-1' (owning Bella and Luna)
-    final myUserId = 'user-1'; 
-    final myOwnedPets = mockPets.where((p) => p.userId == myUserId).toList();
-    
+
+    // Real pets from petProvider
+    final petState = ref.watch(petProvider);
+    final myOwnedPets = petState.myPets;
+
     // Default to 'owner' view
     selectedId ??= 'owner';
-    
+
     final isOwnerView = selectedId == 'owner';
-    
-    // Determine active specific pet (if any)
+
     PetModel? selectedPet;
-    if (!isOwnerView) {
+    if (!isOwnerView && myOwnedPets.isNotEmpty) {
       selectedPet = myOwnedPets.firstWhere(
-        (p) => p.id == selectedId, 
+        (p) => p.id == selectedId,
         orElse: () => myOwnedPets.first,
       );
     }
-    
-    // Post Grids based on View Context
-    final allPosts = ref.watch(feedProvider);
-    final displayedPosts = isOwnerView 
-      ? allPosts.where((post) => post.pet.userId == myUserId).toList()
-      : allPosts.where((post) => post.pet.id == selectedPet?.id).toList();
+
+    // Post grid from real FeedState
+    final feedState = ref.watch(feedProvider);
+    final myUserId = authState.user?.id ?? '';
+    final displayedPosts = isOwnerView
+        ? feedState.posts.where((post) => post.pet.userId == myUserId).toList()
+        : feedState.posts
+            .where((post) => post.pet.id == selectedPet?.id)
+            .toList();
 
     return Scaffold(
       appBar: AppBar(

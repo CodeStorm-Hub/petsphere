@@ -1,24 +1,116 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/chat_thread_model.dart';
 import '../models/message_model.dart';
-import 'feed_controller.dart'; // Source of mockPets
+import '../repositories/chat_repository.dart';
+import 'pet_controller.dart';
 
+// ---------------------------------------------------------------------------
+// Per-Thread Messages State (with Realtime)
+// We expose a regular StateNotifier-style notifier.
+// The screen calls init(threadId) in initState to start loading + Realtime.
+// ---------------------------------------------------------------------------
+class ThreadMessagesNotifier extends Notifier<List<MessageModel>> {
+  RealtimeChannel? _channel;
+  String? _threadId;
+
+  @override
+  List<MessageModel> build() {
+    ref.onDispose(() {
+      _channel?.unsubscribe();
+    });
+    return [];
+  }
+
+  Future<void> init(String threadId) async {
+    _threadId = threadId;
+
+    // Load initial messages
+    try {
+      final messages = await chatRepository.fetchMessages(threadId);
+      state = messages;
+    } catch (_) {
+      state = [];
+    }
+
+    // Subscribe to real-time updates
+    _channel?.unsubscribe();
+    _channel = chatRepository.subscribeToMessages(
+      threadId: threadId,
+      onMessage: (message) {
+        if (!state.any((m) => m.id == message.id)) {
+          state = [...state, message];
+        }
+      },
+    );
+  }
+
+  Future<void> sendMessage(String senderPetId, String text) async {
+    final threadId = _threadId;
+    if (text.trim().isEmpty || threadId == null) return;
+
+    // Optimistic update
+    final tempId = 'temp-${DateTime.now().millisecondsSinceEpoch}';
+    final optimistic = MessageModel(
+      id: tempId,
+      threadId: threadId,
+      senderPetId: senderPetId,
+      text: text.trim(),
+      createdAt: DateTime.now(),
+      isRead: true,
+    );
+    state = [...state, optimistic];
+
+    try {
+      final sent = await chatRepository.sendMessage(
+        threadId: threadId,
+        senderPetId: senderPetId,
+        text: text.trim(),
+      );
+      // Replace temp message with real one (Realtime will also fire but we
+      // deduplicate by ID in the subscription callback above)
+      state = state.map((m) => m.id == tempId ? sent : m).toList();
+    } catch (_) {
+      // Rollback optimistic message
+      state = state.where((m) => m.id != tempId).toList();
+    }
+  }
+
+  List<MessageModel> getMessages() => state;
+}
+
+/// Provider is intentionally NOT auto-disposed so the Realtime subscription
+/// survives soft navigations. The RealtimeChannel is cancelled in onDispose
+/// which fires when the ProviderScope is removed.
+final threadMessagesProvider =
+    NotifierProvider<ThreadMessagesNotifier, List<MessageModel>>(
+  ThreadMessagesNotifier.new,
+);
+
+// ---------------------------------------------------------------------------
+// Chat Threads List State
+// ---------------------------------------------------------------------------
 class ChatState {
   final List<ChatThreadModel> threads;
-  final Map<String, List<MessageModel>> messages; // Keyed by threadId
+  final bool isLoading;
+  final String? error;
 
   ChatState({
     this.threads = const [],
-    this.messages = const {},
+    this.isLoading = false,
+    this.error,
   });
 
   ChatState copyWith({
     List<ChatThreadModel>? threads,
-    Map<String, List<MessageModel>>? messages,
+    bool? isLoading,
+    String? error,
+    bool clearError = false,
   }) {
     return ChatState(
       threads: threads ?? this.threads,
-      messages: messages ?? this.messages,
+      isLoading: isLoading ?? this.isLoading,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
@@ -26,77 +118,52 @@ class ChatState {
 class ChatController extends Notifier<ChatState> {
   @override
   ChatState build() {
-    // Current Pet is mockPets[0] (Bella)
-    final thread1Id = 'thread-1';
-    
-    // Seed an initial mock thread (Bella and Max are matched)
-    final mockThread = ChatThreadModel(
-      id: thread1Id,
-      participantPetIds: ['pet-1', 'pet-2'],
-      participantPets: [mockPets[0], mockPets[1]], // Bella and Max
-      updatedAt: DateTime.now().subtract(const Duration(minutes: 5)),
-      unreadCount: 1,
-      lastMessage: MessageModel(
-        id: 'msg-1',
-        threadId: thread1Id,
-        senderPetId: 'pet-2',
-        text: 'Hi Bella! Max would love to meet up.',
-        createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
-        isRead: false,
-      ),
-    );
-
-    final mockMessages = {
-      thread1Id: [
-        mockThread.lastMessage!,
-      ]
-    };
-
-    return ChatState(threads: [mockThread], messages: mockMessages);
-  }
-
-  void sendMessage(String threadId, String senderPetId, String text) {
-    if (text.trim().isEmpty) return;
-
-    final newMessage = MessageModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      threadId: threadId,
-      senderPetId: senderPetId,
-      text: text.trim(),
-      createdAt: DateTime.now(),
-      isRead: true, // Auto-read for the sender obviously
-    );
-
-    final updatedMessages = Map<String, List<MessageModel>>.from(state.messages);
-    if (!updatedMessages.containsKey(threadId)) {
-      updatedMessages[threadId] = [];
+    final activePet = ref.watch(activePetProvider);
+    if (activePet != null) {
+      _loadThreads(activePet.id);
     }
-    updatedMessages[threadId] = [...updatedMessages[threadId]!, newMessage];
-
-    final updatedThreads = state.threads.map((thread) {
-      if (thread.id == threadId) {
-        return thread.copyWith(
-          lastMessage: newMessage,
-          updatedAt: newMessage.createdAt,
-          // If we are sending it, unread count logic for us doesn't increment.
-        );
-      }
-      return thread;
-    }).toList();
-
-    // Sort threads by most recent
-    updatedThreads.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-
-    state = state.copyWith(messages: updatedMessages, threads: updatedThreads);
+    return ChatState(isLoading: true);
   }
 
-  void markThreadAsRead(String threadId) {
+  Future<void> _loadThreads(String myPetId) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final threads = await chatRepository.fetchThreads(myPetId);
+      state = state.copyWith(threads: threads, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<void> refresh() async {
+    final activePet = ref.read(activePetProvider);
+    if (activePet != null) await _loadThreads(activePet.id);
+  }
+
+  Future<String?> createOrGetThread(String otherPetId) async {
+    final activePet = ref.read(activePetProvider);
+    if (activePet == null) return null;
+    try {
+      final threadId = await chatRepository.createOrGetThread(
+        activePet.id,
+        otherPetId,
+      );
+      await _loadThreads(activePet.id);
+      return threadId;
+    } catch (e) {
+      state = state.copyWith(error: 'Could not start chat: $e');
+      return null;
+    }
+  }
+
+  Future<void> markThreadAsRead(String threadId) async {
+    final activePet = ref.read(activePetProvider);
+    if (activePet == null) return;
+    await chatRepository.markThreadAsRead(threadId, activePet.id);
     state = state.copyWith(
-      threads: state.threads.map((thread) {
-        if (thread.id == threadId) {
-          return thread.copyWith(unreadCount: 0);
-        }
-        return thread;
+      threads: state.threads.map((t) {
+        if (t.id == threadId) return t.copyWith(unreadCount: 0);
+        return t;
       }).toList(),
     );
   }
