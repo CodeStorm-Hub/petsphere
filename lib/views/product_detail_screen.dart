@@ -28,7 +28,7 @@ class ProductDetailScreen extends ConsumerWidget {
               child: Image.network(
                 product.images.isNotEmpty ? product.images[0] : '',
                 fit: BoxFit.cover,
-                errorBuilder: (ctx, _, __) => Container(color: Colors.grey.shade200),
+                errorBuilder: (ctx, _, _) => Container(color: Colors.grey.shade200),
               ),
             ),
             Padding(
