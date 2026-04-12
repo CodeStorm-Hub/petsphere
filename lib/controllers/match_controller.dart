@@ -58,7 +58,7 @@ class MatchController extends Notifier<MatchState> {
     final activePet = ref.watch(activePetProvider);
     if (activePet != null) {
       // Initial load — state already has filterAnimal/filterBreed as null
-      _load(activePet.id);
+      Future.microtask(() => _load(activePet.id));
     }
     return MatchState(isLoading: true);
   }
@@ -95,9 +95,13 @@ class MatchController extends Notifier<MatchState> {
 
   void setFilterBreed(String? breed) {
     final activePet = ref.read(activePetProvider);
-    debugPrint('[MatchController] setFilterBreed($breed) — activePet=${activePet?.name}');
+    debugPrint(
+      '[MatchController] setFilterBreed($breed) — activePet=${activePet?.name}',
+    );
     if (activePet == null) {
-      debugPrint('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
+      debugPrint(
+        '[MatchController] ⚠️ activePet is NULL — filter change ignored!',
+      );
       return;
     }
     if (breed == null || breed.isEmpty) {
@@ -105,15 +109,21 @@ class MatchController extends Notifier<MatchState> {
     } else {
       state = state.copyWith(filterBreed: breed);
     }
-    debugPrint('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
+    debugPrint(
+      '[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}',
+    );
     _load(activePet.id);
   }
 
   void setFilterAnimal(String? animal) {
     final activePet = ref.read(activePetProvider);
-    debugPrint('[MatchController] setFilterAnimal($animal) — activePet=${activePet?.name}');
+    debugPrint(
+      '[MatchController] setFilterAnimal($animal) — activePet=${activePet?.name}',
+    );
     if (activePet == null) {
-      debugPrint('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
+      debugPrint(
+        '[MatchController] ⚠️ activePet is NULL — filter change ignored!',
+      );
       return;
     }
     if (animal == null || animal.isEmpty) {
@@ -121,7 +131,9 @@ class MatchController extends Notifier<MatchState> {
     } else {
       state = state.copyWith(filterAnimal: animal, clearBreed: true);
     }
-    debugPrint('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
+    debugPrint(
+      '[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}',
+    );
     _load(activePet.id);
   }
 
@@ -135,8 +147,9 @@ class MatchController extends Notifier<MatchState> {
       );
       // Remove from discovery list optimistically
       state = state.copyWith(
-        discoveryPets:
-            state.discoveryPets.where((p) => p.id != receiverPetId).toList(),
+        discoveryPets: state.discoveryPets
+            .where((p) => p.id != receiverPetId)
+            .toList(),
       );
     } catch (e) {
       state = state.copyWith(error: 'Could not send request: $e');

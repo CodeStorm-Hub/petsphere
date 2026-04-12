@@ -15,6 +15,8 @@ class AuthRepository {
     final user = response.user;
     if (user == null) throw Exception('Sign in failed. Please try again.');
 
+    await _createProfileIfMissing(user);
+
     return _fetchProfile(user.id, email);
   }
 
@@ -29,14 +31,13 @@ class AuthRepository {
 
     final user = response.user;
     if (user == null) {
-      throw Exception('Registration failed. Check your email for a confirmation link.');
+      throw Exception(
+        'Registration failed. Check your email for a confirmation link.',
+      );
     }
 
     // Upsert the profile row
-    await supabase.from('profiles').upsert({
-      'id': user.id,
-      'name': name,
-    });
+    await supabase.from('profiles').upsert({'id': user.id, 'name': name});
 
     return UserModel(id: user.id, email: email, name: name);
   }
@@ -54,6 +55,7 @@ class AuthRepository {
   Future<UserModel?> getCurrentUser() async {
     final user = supabase.auth.currentUser;
     if (user == null) return null;
+    await _createProfileIfMissing(user);
     try {
       return await _fetchProfile(user.id, user.email ?? '');
     } catch (_) {
@@ -69,6 +71,25 @@ class AuthRepository {
   // -------------------------------------------------------------------------
   // Private helpers
   // -------------------------------------------------------------------------
+  Future<void> _createProfileIfMissing(User user) async {
+    final metadataName = user.userMetadata?['name'] as String?;
+    final resolvedName =
+        (metadataName != null && metadataName.trim().isNotEmpty)
+        ? metadataName.trim()
+        : (user.email?.split('@').first ?? 'Pet Lover');
+
+    try {
+      await supabase.from('profiles').insert({
+        'id': user.id,
+        'name': resolvedName,
+      });
+    } on PostgrestException catch (e) {
+      // Duplicate key means profile already exists — safe to ignore.
+      if (e.code == '23505') return;
+      rethrow;
+    }
+  }
+
   Future<UserModel> _fetchProfile(String userId, String email) async {
     final data = await supabase
         .from('profiles')

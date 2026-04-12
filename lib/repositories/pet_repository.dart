@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/pet_model.dart';
 import '../utils/supabase_config.dart';
 
@@ -50,6 +51,8 @@ class PetRepository {
   // Create a new pet
   // -------------------------------------------------------------------------
   Future<PetModel> createPet(PetModel pet) async {
+    await _ensureProfileExists(pet.userId);
+
     final data = await supabase
         .from('pets')
         .insert(pet.toJson())
@@ -80,11 +83,29 @@ class PetRepository {
     final ext = imageFile.path.split('.').last;
     final path = '$petId/${DateTime.now().millisecondsSinceEpoch}.$ext';
 
-    await supabase.storage
-        .from(kBucketPetImages)
-        .upload(path, imageFile);
+    await supabase.storage.from(kBucketPetImages).upload(path, imageFile);
 
     return supabase.storage.from(kBucketPetImages).getPublicUrl(path);
+  }
+
+  Future<void> _ensureProfileExists(String userId) async {
+    final authUser = supabase.auth.currentUser;
+    final metadataName = authUser?.userMetadata?['name'] as String?;
+    final resolvedName =
+        (metadataName != null && metadataName.trim().isNotEmpty)
+        ? metadataName.trim()
+        : (authUser?.email?.split('@').first ?? 'Pet Lover');
+
+    try {
+      await supabase.from('profiles').insert({
+        'id': userId,
+        'name': resolvedName,
+      });
+    } on PostgrestException catch (e) {
+      // Duplicate key means profile already exists — safe to ignore.
+      if (e.code == '23505') return;
+      rethrow;
+    }
   }
 }
 
