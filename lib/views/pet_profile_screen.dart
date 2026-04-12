@@ -499,11 +499,15 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
         } catch (e) {
           debugPrint('Avatar upload failed: $e');
           if (mounted) {
+            final reason = e.toString();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Avatar upload failed — saving other changes.'),
+                content: Text(
+                  'Avatar upload failed: ${reason.length > 100 ? '${reason.substring(0, 100)}…' : reason}',
+                ),
                 backgroundColor: Colors.orange.shade700,
                 behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 5),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             );

@@ -86,12 +86,21 @@ class AuthRepository {
   // Upload a profile avatar to Supabase Storage — returns the public URL
   // -------------------------------------------------------------------------
   Future<String> uploadAvatar(String userId, File imageFile) async {
-    final ext = imageFile.path.split('.').last;
-    final path = '$userId/avatar_${DateTime.now().millisecondsSinceEpoch}.$ext';
+    final ext = imageFile.path.split('.').last.toLowerCase();
+    final contentType = switch (ext) {
+      'jpg' || 'jpeg' => 'image/jpeg',
+      'png' => 'image/png',
+      'gif' => 'image/gif',
+      'webp' => 'image/webp',
+      _ => 'image/jpeg',
+    };
+    final path = 'avatars/${userId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
-    await supabase.storage
-        .from(kBucketPetImages) // Reuse pet-images bucket for owner avatars
-        .upload(path, imageFile, fileOptions: const FileOptions(upsert: true));
+    await supabase.storage.from(kBucketPetImages).upload(
+      path,
+      imageFile,
+      fileOptions: FileOptions(contentType: contentType),
+    );
 
     return supabase.storage.from(kBucketPetImages).getPublicUrl(path);
   }
