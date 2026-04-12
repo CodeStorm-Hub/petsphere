@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../controllers/auth_controller.dart';
 import '../views/main_layout.dart';
 import '../views/create_post_screen.dart';
+import '../views/add_pet_screen.dart';
 import '../views/messages_list_screen.dart';
 import '../views/chat_screen.dart';
 import '../views/match_pet_profile_screen.dart';
@@ -59,6 +60,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/create_post',
         builder: (context, state) => const CreatePostScreen(),
+      ),
+      GoRoute(
+        path: '/add_pet',
+        builder: (context, state) => const AddPetScreen(),
       ),
       GoRoute(
         path: '/notifications',
