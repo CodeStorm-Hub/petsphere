@@ -114,6 +114,26 @@ class PetNotifier extends Notifier<PetState> {
     }
   }
 
+  Future<bool> updatePet(String petId, Map<String, dynamic> fields) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final updatedPet = await petRepository.updatePet(petId, fields);
+      final updatedList = state.myPets.map((p) {
+        return p.id == petId ? updatedPet : p;
+      }).toList();
+
+      state = state.copyWith(
+        myPets: updatedList,
+        activePet: state.activePet?.id == petId ? updatedPet : state.activePet,
+        isLoading: false,
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
   void setActivePet(PetModel pet) {
     state = state.copyWith(activePet: pet);
   }

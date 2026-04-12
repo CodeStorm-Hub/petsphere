@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/auth_controller.dart';
@@ -15,12 +16,17 @@ import '../views/registration_screen.dart';
 import '../views/splash_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-  
+  final authNotifier = ValueNotifier<AuthState>(ref.read(authProvider));
+  ref.listen<AuthState>(authProvider, (_, next) {
+    authNotifier.value = next;
+  });
+  ref.onDispose(() => authNotifier.dispose());
+
   return GoRouter(
     initialLocation: '/splash',
+    refreshListenable: authNotifier,
     redirect: (context, state) {
-      final status = authState.status;
+      final status = authNotifier.value.status;
       final isGoingToAuth = state.matchedLocation == '/login' || state.matchedLocation == '/register';
       final isAtSplash = state.matchedLocation == '/splash';
       
