@@ -104,6 +104,9 @@ class HomeScreen extends ConsumerWidget {
               );
             },
             onShareIconTap: () => _showShareSheet(context),
+            onPetTap: () {
+              ref.read(profilePetNavigationProvider.notifier).navigateTo(post.pet.id);
+            },
           );
         },
       ),

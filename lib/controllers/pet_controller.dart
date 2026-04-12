@@ -150,3 +150,17 @@ final petProvider = NotifierProvider<PetNotifier, PetState>(() {
 final activePetProvider = Provider<PetModel?>((ref) {
   return ref.watch(petProvider).activePet;
 });
+
+/// Triggers navigation to a specific pet's profile tab.
+/// Set the pet ID via `ref.read(...notifier).navigateTo(petId)`,
+/// then reset after handling.
+class ProfilePetNavigation extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void navigateTo(String petId) => state = petId;
+  void clear() => state = null;
+}
+
+final profilePetNavigationProvider =
+    NotifierProvider<ProfilePetNavigation, String?>(() => ProfilePetNavigation());

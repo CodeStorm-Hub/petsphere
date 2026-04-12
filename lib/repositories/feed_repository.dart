@@ -89,6 +89,13 @@ class FeedRepository {
   }
 
   // -------------------------------------------------------------------------
+  // Delete a post and its related data
+  // -------------------------------------------------------------------------
+  Future<void> deletePost(String postId) async {
+    await supabase.from('posts').delete().eq('id', postId);
+  }
+
+  // -------------------------------------------------------------------------
   // Add a comment
   // -------------------------------------------------------------------------
   Future<CommentModel> addComment({

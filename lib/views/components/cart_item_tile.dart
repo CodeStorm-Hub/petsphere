@@ -24,11 +24,18 @@ class CartItemTile extends ConsumerWidget {
               height: 80,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                image: DecorationImage(
-                  image: NetworkImage(item.product.images.isNotEmpty ? item.product.images[0] : ''),
-                  fit: BoxFit.cover,
-                ),
+                color: Colors.grey.shade100,
+                image: item.product.images.isNotEmpty
+                    ? DecorationImage(
+                        image: NetworkImage(item.product.images[0]),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
+              child: item.product.images.isEmpty
+                  ? Icon(Icons.inventory_2_outlined,
+                      size: 28, color: Colors.grey.shade400)
+                  : null,
             ),
             const SizedBox(width: 16),
             Expanded(

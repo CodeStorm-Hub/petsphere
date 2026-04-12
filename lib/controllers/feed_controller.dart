@@ -102,6 +102,22 @@ class FeedNotifier extends Notifier<FeedState> {
   }
 
   // -------------------------------------------------------------------------
+  // Delete Post
+  // -------------------------------------------------------------------------
+  Future<bool> deletePost(String postId) async {
+    try {
+      await feedRepository.deletePost(postId);
+      state = state.copyWith(
+        posts: state.posts.where((p) => p.id != postId).toList(),
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: 'Failed to delete post: $e');
+      return false;
+    }
+  }
+
+  // -------------------------------------------------------------------------
   // Add Comment
   // -------------------------------------------------------------------------
   Future<void> addComment(

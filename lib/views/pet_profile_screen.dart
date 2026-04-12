@@ -9,6 +9,7 @@ import '../models/pet_model.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
 import '../utils/image_upload_helper.dart';
+import '../utils/supabase_config.dart';
 
 class PetProfileScreen extends ConsumerStatefulWidget {
   const PetProfileScreen({super.key});
@@ -23,6 +24,13 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(profilePetNavigationProvider, (prev, next) {
+      if (next != null) {
+        setState(() => selectedId = next);
+        ref.read(profilePetNavigationProvider.notifier).clear();
+      }
+    });
+
     final authState = ref.watch(authProvider);
     final user = authState.user;
     final userName = user?.name ?? 'Pet Lover';
@@ -302,6 +310,20 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         isOwnerView ? 'Create a post to see it here.' : 'Create a post as ${selectedPet?.name ?? 'this pet'}.',
                         style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
                       ),
+                      if (!isOwnerView && selectedPet != null) ...[
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          onPressed: () => context.push('/create_post?petId=${selectedPet!.id}'),
+                          icon: const Icon(Icons.add_a_photo_outlined, size: 18),
+                          label: const Text('Create Post'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF8A65),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -317,24 +339,34 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   final post = displayedPosts[index];
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.network(
-                        post.mediaUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (ctx, _, _) => Container(color: Colors.grey.shade200),
-                      ),
-                      if (isOwnerView)
-                        Positioned(
-                          bottom: 4,
-                          right: 4,
-                          child: CircleAvatar(
-                            radius: 12,
-                            backgroundImage: NetworkImage(post.pet.profileImageUrl),
+                  return GestureDetector(
+                    onTap: () => context.push('/post/${post.id}'),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.network(
+                          post.mediaUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (ctx, _, __) => Container(color: Colors.grey.shade200),
+                        ),
+                        if (isOwnerView)
+                          Positioned(
+                            bottom: 4,
+                            right: 4,
+                            child: CircleAvatar(
+                              radius: 12,
+                              backgroundColor: Colors.grey.shade300,
+                              backgroundImage: post.pet.profileImageUrl.isNotEmpty
+                                  ? NetworkImage(post.pet.profileImageUrl)
+                                  : null,
+                              child: post.pet.profileImageUrl.isEmpty
+                                  ? Text(post.pet.name.isNotEmpty ? post.pet.name[0] : '?',
+                                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold))
+                                  : null,
+                            ),
                           ),
-                        )
-                    ],
+                      ],
+                    ),
                   );
                 },
                 childCount: displayedPosts.length,
@@ -342,6 +374,13 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
             )
         ],
       ),
+      floatingActionButton: !isOwnerView && selectedPet != null
+          ? FloatingActionButton(
+              onPressed: () => context.push('/create_post?petId=${selectedPet!.id}'),
+              backgroundColor: const Color(0xFFFF8A65),
+              child: const Icon(Icons.add_a_photo_outlined, color: Colors.white),
+            )
+          : null,
     );
   }
 
@@ -760,6 +799,7 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
   late TextEditingController _nameController;
   late TextEditingController _bioController;
   late TextEditingController _breedController;
+  File? _newAvatar;
   bool _isSaving = false;
 
   @override
@@ -778,6 +818,96 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
     super.dispose();
   }
 
+  Future<void> _pickAvatar() async {
+    final file = await ImageUploadHelper.pickFromGallery();
+    if (file != null) {
+      setState(() => _newAvatar = file);
+    }
+  }
+
+  Future<void> _takePhoto() async {
+    final file = await ImageUploadHelper.pickFromCamera();
+    if (file != null) {
+      setState(() => _newAvatar = file);
+    }
+  }
+
+  void _showImageSourceSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Change Photo',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Choose a new photo for your pet',
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF8A65).withAlpha(26),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.photo_library_rounded,
+                    color: Color(0xFFFF8A65)),
+              ),
+              title: const Text('Choose from Gallery',
+                  style: TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: const Text('Select an existing photo'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickAvatar();
+              },
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4FC3F7).withAlpha(26),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.camera_alt_rounded,
+                    color: Color(0xFF4FC3F7)),
+              ),
+              title: const Text('Take a Photo',
+                  style: TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: const Text('Use your camera'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _takePhoto();
+              },
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _save() async {
     setState(() => _isSaving = true);
     try {
@@ -790,6 +920,35 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
       }
       if (_breedController.text.trim() != widget.pet.breed) {
         fields['breed'] = _breedController.text.trim();
+      }
+
+      if (_newAvatar != null) {
+        try {
+          final ext = _newAvatar!.path.split('.').last;
+          final path = '${widget.pet.id}/${DateTime.now().millisecondsSinceEpoch}.$ext';
+          final avatarUrl = await ImageUploadHelper.upload(
+            file: _newAvatar!,
+            bucket: kBucketPetImages,
+            path: path,
+          );
+          fields['profile_image_url'] = avatarUrl;
+        } catch (e) {
+          debugPrint('Pet avatar upload failed: $e');
+          if (mounted) {
+            final reason = e.toString();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Photo upload failed: ${reason.length > 100 ? '${reason.substring(0, 100)}…' : reason}',
+                ),
+                backgroundColor: Colors.orange.shade700,
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 5),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            );
+          }
+        }
       }
 
       if (fields.isEmpty) {
@@ -873,7 +1032,50 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               'Edit Pet Profile',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
+
+            Center(
+              child: GestureDetector(
+                onTap: _showImageSourceSheet,
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.grey.shade200,
+                      backgroundImage: _newAvatar != null
+                          ? FileImage(_newAvatar!)
+                          : (widget.pet.profileImageUrl.isNotEmpty
+                              ? NetworkImage(widget.pet.profileImageUrl)
+                              : null),
+                      child: (_newAvatar == null && widget.pet.profileImageUrl.isEmpty)
+                          ? Icon(Icons.pets, size: 32, color: Colors.grey.shade400)
+                          : null,
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF8A65),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                'Tap to change photo',
+                style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+              ),
+            ),
+            const SizedBox(height: 24),
 
             const Text('Name', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
             const SizedBox(height: 6),

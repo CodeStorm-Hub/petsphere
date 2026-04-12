@@ -28,11 +28,20 @@ class ProductCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: Image.network(
-                product.images.isNotEmpty ? product.images[0] : '',
-                fit: BoxFit.cover,
-                errorBuilder: (ctx, err, stack) => Container(color: Colors.grey.shade200, child: const Icon(Icons.broken_image, color: Colors.grey)),
-              ),
+              child: product.images.isNotEmpty
+                  ? Image.network(
+                      product.images[0],
+                      fit: BoxFit.cover,
+                      errorBuilder: (ctx, err, stack) => Container(
+                        color: Colors.grey.shade200,
+                        child: const Icon(Icons.broken_image, color: Colors.grey),
+                      ),
+                    )
+                  : Container(
+                      color: Colors.grey.shade100,
+                      child: Icon(Icons.inventory_2_outlined,
+                          size: 40, color: Colors.grey.shade400),
+                    ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),

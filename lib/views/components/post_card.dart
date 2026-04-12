@@ -8,6 +8,7 @@ class PostCard extends StatefulWidget {
   final VoidCallback onLikeToggle;
   final VoidCallback onCommentIconTap;
   final VoidCallback onShareIconTap;
+  final VoidCallback? onPetTap;
 
   const PostCard({
     super.key,
@@ -16,6 +17,7 @@ class PostCard extends StatefulWidget {
     required this.onLikeToggle,
     required this.onCommentIconTap,
     required this.onShareIconTap,
+    this.onPetTap,
   });
 
   @override
@@ -100,17 +102,24 @@ class _PostCardState extends State<PostCard> {
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
           child: Row(
             children: [
-              PetAvatar(
-                imageUrl: widget.post.pet.profileImageUrl,
-                hasStory: true,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  widget.post.pet.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+              GestureDetector(
+                onTap: widget.onPetTap,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    PetAvatar(
+                      imageUrl: widget.post.pet.profileImageUrl,
+                      hasStory: true,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      widget.post.pet.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
               ),
+              const Spacer(),
               IconButton(
                 icon: const Icon(Icons.more_vert),
                 onPressed: _showSettingsSheet,

@@ -9,7 +9,9 @@ import '../views/messages_list_screen.dart';
 import '../views/chat_screen.dart';
 import '../views/match_pet_profile_screen.dart';
 import '../views/product_detail_screen.dart';
+import '../views/post_detail_screen.dart';
 import '../views/cart_screen.dart';
+import '../views/order_history_screen.dart';
 import '../views/notifications_screen.dart';
 import '../views/login_screen.dart';
 import '../views/registration_screen.dart';
@@ -65,7 +67,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/create_post',
-        builder: (context, state) => const CreatePostScreen(),
+        builder: (context, state) {
+          final petId = state.uri.queryParameters['petId'];
+          return CreatePostScreen(initialPetId: petId);
+        },
       ),
       GoRoute(
         path: '/add_pet',
@@ -94,8 +99,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: '/post/:id',
+        builder: (context, state) {
+          final postId = state.pathParameters['id']!;
+          return PostDetailScreen(postId: postId);
+        },
+      ),
+      GoRoute(
         path: '/cart',
         builder: (context, state) => const CartScreen(),
+      ),
+      GoRoute(
+        path: '/orders',
+        builder: (context, state) => const OrderHistoryScreen(),
       ),
       GoRoute(
         path: '/product/:id',

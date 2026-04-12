@@ -1,0 +1,269 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../controllers/feed_controller.dart';
+import '../controllers/pet_controller.dart';
+import '../controllers/auth_controller.dart';
+import '../models/post_model.dart';
+import 'components/post_card.dart';
+
+class PostDetailScreen extends ConsumerWidget {
+  final String postId;
+
+  const PostDetailScreen({super.key, required this.postId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final feedState = ref.watch(feedProvider);
+    final activePet = ref.watch(activePetProvider);
+    final currentPetId = activePet?.id ?? '';
+    final userId = ref.watch(authProvider).user?.id ?? '';
+
+    final idx = feedState.posts.indexWhere((p) => p.id == postId);
+    if (idx < 0) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: Text('Post not found')),
+      );
+    }
+
+    final post = feedState.posts[idx];
+    final isOwnPost = post.pet.userId == userId;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(post.pet.name),
+        actions: [
+          if (isOwnPost)
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              tooltip: 'Delete Post',
+              onPressed: () => _confirmDelete(context, ref, post),
+            ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            PostCard(
+              post: post,
+              currentPetId: currentPetId,
+              onLikeToggle: () {
+                ref.read(feedProvider.notifier).toggleLike(post.id, currentPetId);
+              },
+              onCommentIconTap: () =>
+                  _showCommentSheet(context, post.id, currentPetId, activePet?.name ?? ''),
+              onShareIconTap: () {},
+              onPetTap: () {
+                ref.read(profilePetNavigationProvider.notifier).navigateTo(post.pet.id);
+                Navigator.pop(context);
+              },
+            ),
+            if (post.comments.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Divider(),
+                    const Text('Comments',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(height: 8),
+                    ...post.comments.map((comment) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CircleAvatar(
+                                radius: 16,
+                                backgroundColor: Colors.grey.shade200,
+                                child: Text(
+                                  comment.petName.isNotEmpty
+                                      ? comment.petName[0].toUpperCase()
+                                      : '?',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(comment.petName,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13)),
+                                    const SizedBox(height: 2),
+                                    Text(comment.text,
+                                        style: const TextStyle(fontSize: 14)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        )),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, WidgetRef ref, PostModel post) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete Post'),
+        content: const Text(
+            'Are you sure you want to delete this post? This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final success =
+                  await ref.read(feedProvider.notifier).deletePost(post.id);
+              if (context.mounted) {
+                if (success) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Post deleted'),
+                      backgroundColor: const Color(0xFF81C784),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Failed to delete post'),
+                      backgroundColor: Colors.redAccent,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                  );
+                }
+              }
+            },
+            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCommentSheet(
+      BuildContext context, String postId, String currentPetId, String petName) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return _CommentSheet(
+          postId: postId,
+          currentPetId: currentPetId,
+          petName: petName,
+        );
+      },
+    );
+  }
+}
+
+class _CommentSheet extends ConsumerStatefulWidget {
+  final String postId;
+  final String currentPetId;
+  final String petName;
+
+  const _CommentSheet({
+    required this.postId,
+    required this.currentPetId,
+    required this.petName,
+  });
+
+  @override
+  ConsumerState<_CommentSheet> createState() => _CommentSheetState();
+}
+
+class _CommentSheetState extends ConsumerState<_CommentSheet> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final text = _controller.text.trim();
+    if (text.isNotEmpty) {
+      ref.read(feedProvider.notifier).addComment(
+            widget.postId,
+            widget.currentPetId,
+            widget.petName,
+            text,
+          );
+      _controller.clear();
+      FocusScope.of(context).unfocus();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        top: 24,
+        left: 16,
+        right: 16,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('Add Comment',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: 'Write a comment...',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30)),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.send_rounded,
+                          color: Color(0xFFFF8A65)),
+                      onPressed: _submit,
+                    ),
+                  ),
+                  onSubmitted: (_) => _submit(),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+}
