@@ -178,8 +178,14 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
         _showError('Please enter the breed');
         return;
       }
-      if (_ageController.text.trim().isEmpty) {
+      final ageText = _ageController.text.trim();
+      if (ageText.isEmpty) {
         _showError('Please enter age');
+        return;
+      }
+      final age = _parsePositiveAge(ageText);
+      if (age == null || age <= 0) {
+        _showError('Please enter a valid positive integer age');
         return;
       }
       setState(() => _currentStep = 2);
@@ -232,11 +238,16 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
         );
       }
 
+      final age = _parsePositiveAge(_ageController.text.trim());
+      if (age == null || age <= 0) {
+        throw Exception('Please enter a valid positive integer age.');
+      }
+
       final success = await ref.read(petProvider.notifier).createPet(
             name: _nameController.text.trim(),
             breed: _breedController.text.trim(),
             animalType: _selectedAnimalType,
-            age: int.tryParse(_ageController.text.trim()) ?? 1,
+            age: age,
             bio: _bioController.text.trim(),
             profileImageUrl: profileImageUrl,
           );
@@ -281,6 +292,12 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
       if (ext.isNotEmpty) return ext;
     }
     return 'jpg';
+  }
+
+  int? _parsePositiveAge(String input) {
+    final age = int.tryParse(input.trim());
+    if (age == null || age <= 0) return null;
+    return age;
   }
 
   @override

@@ -98,12 +98,16 @@ class PetRepository {
 
   Future<void> _ensureProfileExists(String userId) async {
     final authUser = supabase.auth.currentUser;
-    final metadataName = authUser?.userMetadata?['name'];
+    if (authUser == null || authUser.id != userId) {
+      throw StateError('Cannot ensure profile for unauthenticated or mismatched user.');
+    }
+
+    final metadataName = authUser.userMetadata?['name'];
     final trimmedMetadataName = metadataName?.toString().trim();
     final resolvedName =
         (trimmedMetadataName != null && trimmedMetadataName.isNotEmpty)
         ? trimmedMetadataName
-        : (authUser?.email?.split('@').first ?? 'Pet Lover');
+        : (authUser.email?.split('@').first ?? 'Pet Lover');
 
     try {
       await supabase.from('profiles').insert({

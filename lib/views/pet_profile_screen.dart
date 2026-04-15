@@ -38,19 +38,21 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
         orElse: () => myOwnedPets.first,
       );
     }
+    final showOwnerView = isOwnerView || selectedPet == null;
+    final activePet = showOwnerView ? null : selectedPet;
 
     // Post grid from real FeedState
     final feedState = ref.watch(feedProvider);
     final myUserId = authState.user?.id ?? '';
-    final displayedPosts = isOwnerView
+    final displayedPosts = showOwnerView
         ? feedState.posts.where((post) => post.pet.userId == myUserId).toList()
         : feedState.posts
-            .where((post) => post.pet.id == selectedPet?.id)
+            .where((post) => post.pet.id == activePet?.id)
             .toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isOwnerView ? 'My Account' : selectedPet!.name),
+        title: Text(showOwnerView ? 'My Account' : activePet!.name),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -89,10 +91,10 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                selectedId = 'owner';
                              });
                            },
-                           child: _OwnerCarouselAvatar(
-                             name: 'All', 
-                             isSelected: isOwnerView,
-                           ),
+                            child: _OwnerCarouselAvatar(
+                              name: 'All',
+                              isSelected: showOwnerView,
+                            ),
                          );
                        }
                        
@@ -139,15 +141,15 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                               child: CircleAvatar(
                                 radius: 40,
                                 backgroundColor: Colors.white,
-                                backgroundImage: isOwnerView
+                                backgroundImage: showOwnerView
                                   ? const NetworkImage('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200&auto=format&fit=crop') // Human avatar mock
-                                  : (selectedPet!.profileImageUrl.trim().isNotEmpty
-                                      ? NetworkImage(selectedPet!.profileImageUrl)
+                                  : (activePet!.profileImageUrl.trim().isNotEmpty
+                                      ? NetworkImage(activePet.profileImageUrl)
                                       : null),
-                                child: !isOwnerView && selectedPet!.profileImageUrl.trim().isEmpty
+                                child: !showOwnerView && activePet!.profileImageUrl.trim().isEmpty
                                     ? Text(
-                                        selectedPet!.name.isNotEmpty
-                                            ? selectedPet!.name[0].toUpperCase()
+                                        activePet.name.isNotEmpty
+                                            ? activePet.name[0].toUpperCase()
                                             : '?',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -162,8 +164,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                children: [
                                  _StatColumn(label: 'Posts', value: '${displayedPosts.length}'), 
-                                 _StatColumn(label: 'Followers', value: isOwnerView ? '503' : '128'),
-                                 _StatColumn(label: 'Following', value: isOwnerView ? '312' : '150'),
+                                 _StatColumn(label: 'Followers', value: showOwnerView ? '503' : '128'),
+                                 _StatColumn(label: 'Following', value: showOwnerView ? '312' : '150'),
                                ],
                              ),
                            ),
@@ -173,17 +175,17 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                        
                        // Render dynamic context detail cleanly
                        Text(
-                         isOwnerView ? userName : selectedPet!.name, 
-                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
-                       ),
-                       if (!isOwnerView)
-                         Text(selectedPet!.breed, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
+                          showOwnerView ? userName : activePet!.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
+                        ),
+                        if (!showOwnerView)
+                          Text(activePet!.breed, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
                        
                        const SizedBox(height: 6),
-                       Text(isOwnerView ? 'Human Owner of ${myOwnedPets.length} beautiful pets across the network!' : selectedPet!.bio),
+                        Text(showOwnerView ? 'Human Owner of ${myOwnedPets.length} beautiful pets across the network!' : activePet!.bio),
 
                        // Pet detail chips for non-owner view
-                       if (!isOwnerView) ...[
+                        if (!showOwnerView) ...[
                          const SizedBox(height: 12),
                          Wrap(
                            spacing: 8,
@@ -191,16 +193,16 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                            children: [
                              _InfoChip(
                                icon: Icons.pets,
-                               label: selectedPet!.animalType,
+                                label: activePet!.animalType,
                                color: const Color(0xFFFF8A65),
                              ),
                              _InfoChip(
                                icon: Icons.cake_outlined,
-                               label: '${selectedPet!.age} ${selectedPet!.age == 1 ? 'year' : 'years'} old',
-                               color: const Color(0xFF4FC3F7),
-                             ),
-                             if (selectedPet!.isPublicOwner)
-                               _InfoChip(
+                                label: '${activePet.age} ${activePet.age == 1 ? 'year' : 'years'} old',
+                                color: const Color(0xFF4FC3F7),
+                              ),
+                              if (activePet.isPublicOwner)
+                                _InfoChip(
                                  icon: Icons.visibility,
                                  label: 'Public Owner',
                                  color: const Color(0xFF81C784),
@@ -213,23 +215,21 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                        
                        Row(
                          children: [
-                           Expanded(
-                             child: OutlinedButton(
-                               onPressed: () {
-                                 if (!isOwnerView) {
-                                   _showEditPetSheet(context, selectedPet!);
-                                 }
-                               },
-                               child: Text(isOwnerView ? 'Edit Account' : 'Edit Profile'),
-                             ),
-                           ),
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: showOwnerView
+                                    ? null
+                                    : () => _showEditPetSheet(context, activePet!),
+                                child: Text(showOwnerView ? 'Edit Account' : 'Edit Profile'),
+                              ),
+                            ),
                            const SizedBox(width: 8),
                            Expanded(
-                             child: OutlinedButton(
-                               onPressed: () {},
-                               child: Text(isOwnerView ? 'Share Account' : 'Share Profile'),
-                             ),
-                           ),
+                              child: OutlinedButton(
+                                onPressed: () {},
+                                child: Text(showOwnerView ? 'Share Account' : 'Share Profile'),
+                              ),
+                            ),
                          ],
                        )
                      ],
@@ -240,7 +240,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
           ),
           
           // Empty state with add pet CTA 
-          if (myOwnedPets.isEmpty && isOwnerView)
+           if (myOwnedPets.isEmpty && showOwnerView)
             SliverToBoxAdapter(
               child: _EmptyPetsCta(
                 onAddPet: () => context.push('/add_pet'),
@@ -258,7 +258,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                       Text('No posts yet!', style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 4),
                       Text(
-                        isOwnerView ? 'Create a post to see it here.' : 'Create a post as ${selectedPet?.name ?? 'this pet'}.',
+                        showOwnerView ? 'Create a post to see it here.' : 'Create a post as ${activePet?.name ?? 'this pet'}.',
                         style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
                       ),
                     ],
@@ -285,7 +285,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         errorBuilder: (ctx, _, __) => Container(color: Colors.grey.shade200),
                       ),
                       // If Owner view, optionally overlay entirely small author icon so human knows whose picture it is
-                      if (isOwnerView)
+                      if (showOwnerView)
                           Positioned(
                            bottom: 4,
                            right: 4,

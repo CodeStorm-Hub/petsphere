@@ -48,6 +48,7 @@ class PetNotifier extends Notifier<PetState> {
     if (authState.status == AuthStatus.authenticated &&
         authState.user != null) {
       Future.microtask(() => _loadMyPets(authState.user!.id));
+      return PetState(isLoading: true);
     }
     return PetState();
   }
