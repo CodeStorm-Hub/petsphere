@@ -97,7 +97,14 @@ class ImageUploadHelper {
   }
 
   static String _contentTypeForPath(String path) {
-    final extension = path.split('.').last.toLowerCase();
+    final normalized = path.trim();
+    final lastDot = normalized.lastIndexOf('.');
+    if (normalized.isEmpty || lastDot < 0 || lastDot == normalized.length - 1) {
+      return 'image/jpeg';
+    }
+
+    final extension = normalized.substring(lastDot + 1).trim().toLowerCase();
+    if (extension.isEmpty) return 'image/jpeg';
     switch (extension) {
       case 'png':
         return 'image/png';

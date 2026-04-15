@@ -223,7 +223,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
           throw Exception('You must be signed in to upload a pet photo.');
         }
 
-        final ext = _selectedImage!.path.split('.').last;
+        final ext = _selectedImageExtension();
         final path = '$userId/pet_${DateTime.now().millisecondsSinceEpoch}.$ext';
         profileImageUrl = await ImageUploadHelper.uploadXFile(
           file: _selectedImage!,
@@ -271,6 +271,16 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  String _selectedImageExtension() {
+    final fileName = _selectedImage?.name.trim() ?? '';
+    final lastDot = fileName.lastIndexOf('.');
+    if (lastDot > -1 && lastDot < fileName.length - 1) {
+      final ext = fileName.substring(lastDot + 1).trim().toLowerCase();
+      if (ext.isNotEmpty) return ext;
+    }
+    return 'jpg';
   }
 
   @override
