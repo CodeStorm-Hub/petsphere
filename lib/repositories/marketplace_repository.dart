@@ -31,21 +31,46 @@ class MarketplaceRepository {
     final total = items.fold<double>(0, (sum, i) => sum + i.subtotal);
 
     final orderItems = items
-        .map((i) => {
-              'product_id': i.product.id,
-              'name': i.product.name,
-              'quantity': i.quantity,
-              'price': i.product.price,
-              'subtotal': i.subtotal,
-            })
+        .map(
+          (i) => {
+            'product_id': i.product.id,
+            'name': i.product.name,
+            'quantity': i.quantity,
+            'price': i.product.price,
+            'subtotal': i.subtotal,
+          },
+        )
         .toList();
 
-    await supabase.from('orders').insert({
-      'user_id': userId,
-      'items': orderItems,
-      'total': total,
-      'status': 'pending',
-    });
+    final insertedOrder = await supabase
+        .from('orders')
+        .insert({
+          'user_id': userId,
+          'items': orderItems,
+          'total': total,
+          'status': 'pending',
+        })
+        .select('id')
+        .single();
+
+    final orderId = insertedOrder['id'] as String;
+
+    // Keep order_items normalized for easier reporting/analytics.
+    await supabase
+        .from('order_items')
+        .insert(
+          items
+              .map(
+                (i) => {
+                  'order_id': orderId,
+                  'product_id': i.product.id,
+                  'product_name': i.product.name,
+                  'unit_price': i.product.price,
+                  'quantity': i.quantity,
+                },
+              )
+              .toList(),
+        );
   }
 }
 

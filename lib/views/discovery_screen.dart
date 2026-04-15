@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/match_controller.dart';
+import '../controllers/notification_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/pet_model.dart';
 import 'components/match_pet_card.dart';
@@ -12,13 +13,18 @@ class DiscoveryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final matchState = ref.watch(matchProvider);
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Discover Matches'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none),
+            icon: Badge(
+              isLabelVisible: unreadCount > 0,
+              label: Text(unreadCount > 99 ? '99+' : '$unreadCount'),
+              child: const Icon(Icons.notifications_none),
+            ),
             onPressed: () {
               context.push('/notifications');
             },
@@ -221,16 +227,19 @@ void _showListPetSheet(BuildContext context, WidgetRef ref) {
   );
 }
 
-class _ListPetSheetWidget extends StatefulWidget {
+class _ListPetSheetWidget extends ConsumerStatefulWidget {
   final List<PetModel> myOwnedPets;
   const _ListPetSheetWidget({required this.myOwnedPets});
 
   @override
-  State<_ListPetSheetWidget> createState() => _ListPetSheetWidgetState();
+  ConsumerState<_ListPetSheetWidget> createState() =>
+      _ListPetSheetWidgetState();
 }
 
-class _ListPetSheetWidgetState extends State<_ListPetSheetWidget> {
+class _ListPetSheetWidgetState extends ConsumerState<_ListPetSheetWidget> {
   String? _selectedPetId;
+  bool _isSubmitting = false;
+  String? _submitError;
 
   @override
   Widget build(BuildContext context) {
@@ -258,47 +267,80 @@ class _ListPetSheetWidgetState extends State<_ListPetSheetWidget> {
             )
           else
             ...widget.myOwnedPets.map((pet) {
-              return RadioListTile<String>(
-                title: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(pet.profileImageUrl),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      pet.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
+              final isSelected = _selectedPetId == pet.id;
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 4),
+                child: ListTile(
+                  onTap: () {
+                    setState(() {
+                      _selectedPetId = pet.id;
+                      _submitError = null;
+                    });
+                  },
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(pet.profileImageUrl),
+                  ),
+                  title: Text(
+                    pet.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(pet.breed),
+                  trailing: Icon(
+                    isSelected
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.grey,
+                  ),
                 ),
-                subtitle: Text(pet.breed),
-                value: pet.id,
-                groupValue: _selectedPetId,
-                activeColor: Theme.of(context).colorScheme.primary,
-                onChanged: (val) {
-                  setState(() {
-                    _selectedPetId = val;
-                  });
-                },
               );
             }),
+
+          if (_submitError != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              _submitError!,
+              style: const TextStyle(color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
+          ],
 
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: _selectedPetId == null
+              onPressed: _selectedPetId == null || _isSubmitting
                   ? null
-                  : () {
-                      // Mock API logic
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Successfully listed your pet for breeding!',
+                  : () async {
+                      setState(() {
+                        _isSubmitting = true;
+                        _submitError = null;
+                      });
+
+                      final ok = await ref
+                          .read(matchProvider.notifier)
+                          .listPetForDiscovery(_selectedPetId!);
+
+                      if (!context.mounted) return;
+
+                      if (ok) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Successfully listed your pet for breeding!',
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                        Navigator.of(context).pop();
+                      } else {
+                        setState(() {
+                          _isSubmitting = false;
+                          _submitError =
+                              ref.read(matchProvider).error ??
+                              'Could not list pet. Please try again.';
+                        });
+                      }
                     },
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -306,10 +348,22 @@ class _ListPetSheetWidgetState extends State<_ListPetSheetWidget> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
-                'Confirm Listing',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
+              child: _isSubmitting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Confirm Listing',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
             ),
           ),
         ],

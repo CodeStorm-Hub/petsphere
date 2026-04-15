@@ -2,6 +2,10 @@ import 'dart:io';
 import '../models/pet_model.dart';
 import '../utils/supabase_config.dart';
 
+final RegExp _uuidPattern = RegExp(
+  r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+);
+
 class PetRepository {
   // -------------------------------------------------------------------------
   // Fetch all pets (for discovery / feed)
@@ -36,6 +40,9 @@ class PetRepository {
   // Fetch a single pet by id
   // -------------------------------------------------------------------------
   Future<PetModel?> fetchPetById(String petId) async {
+    // Prevent invalid UUID requests (which produce avoidable 400 responses).
+    if (!_uuidPattern.hasMatch(petId)) return null;
+
     final data = await supabase
         .from('pets')
         .select()
@@ -80,9 +87,7 @@ class PetRepository {
     final ext = imageFile.path.split('.').last;
     final path = '$petId/${DateTime.now().millisecondsSinceEpoch}.$ext';
 
-    await supabase.storage
-        .from(kBucketPetImages)
-        .upload(path, imageFile);
+    await supabase.storage.from(kBucketPetImages).upload(path, imageFile);
 
     return supabase.storage.from(kBucketPetImages).getPublicUrl(path);
   }

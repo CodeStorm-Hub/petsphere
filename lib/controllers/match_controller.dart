@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/match_request_model.dart';
 import '../models/pet_model.dart';
 import '../repositories/match_repository.dart';
+import 'auth_controller.dart';
 import 'pet_controller.dart';
 
 // ---------------------------------------------------------------------------
@@ -57,10 +58,11 @@ class MatchController extends Notifier<MatchState> {
   MatchState build() {
     final activePet = ref.watch(activePetProvider);
     if (activePet != null) {
-      // Initial load — state already has filterAnimal/filterBreed as null
-      _load(activePet.id);
+      // Defer async state mutations until after initial state is returned.
+      Future.microtask(() => _load(activePet.id));
+      return MatchState(isLoading: true);
     }
-    return MatchState(isLoading: true);
+    return MatchState();
   }
 
   /// Always reads filters from the current state, never from parameters.
@@ -95,9 +97,13 @@ class MatchController extends Notifier<MatchState> {
 
   void setFilterBreed(String? breed) {
     final activePet = ref.read(activePetProvider);
-    debugPrint('[MatchController] setFilterBreed($breed) — activePet=${activePet?.name}');
+    debugPrint(
+      '[MatchController] setFilterBreed($breed) — activePet=${activePet?.name}',
+    );
     if (activePet == null) {
-      debugPrint('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
+      debugPrint(
+        '[MatchController] ⚠️ activePet is NULL — filter change ignored!',
+      );
       return;
     }
     if (breed == null || breed.isEmpty) {
@@ -105,15 +111,21 @@ class MatchController extends Notifier<MatchState> {
     } else {
       state = state.copyWith(filterBreed: breed);
     }
-    debugPrint('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
+    debugPrint(
+      '[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}',
+    );
     _load(activePet.id);
   }
 
   void setFilterAnimal(String? animal) {
     final activePet = ref.read(activePetProvider);
-    debugPrint('[MatchController] setFilterAnimal($animal) — activePet=${activePet?.name}');
+    debugPrint(
+      '[MatchController] setFilterAnimal($animal) — activePet=${activePet?.name}',
+    );
     if (activePet == null) {
-      debugPrint('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
+      debugPrint(
+        '[MatchController] ⚠️ activePet is NULL — filter change ignored!',
+      );
       return;
     }
     if (animal == null || animal.isEmpty) {
@@ -121,7 +133,9 @@ class MatchController extends Notifier<MatchState> {
     } else {
       state = state.copyWith(filterAnimal: animal, clearBreed: true);
     }
-    debugPrint('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
+    debugPrint(
+      '[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}',
+    );
     _load(activePet.id);
   }
 
@@ -135,8 +149,9 @@ class MatchController extends Notifier<MatchState> {
       );
       // Remove from discovery list optimistically
       state = state.copyWith(
-        discoveryPets:
-            state.discoveryPets.where((p) => p.id != receiverPetId).toList(),
+        discoveryPets: state.discoveryPets
+            .where((p) => p.id != receiverPetId)
+            .toList(),
       );
     } catch (e) {
       state = state.copyWith(error: 'Could not send request: $e');
@@ -167,6 +182,36 @@ class MatchController extends Notifier<MatchState> {
       );
     } catch (e) {
       state = state.copyWith(error: 'Could not decline request: $e');
+    }
+  }
+
+  Future<void> refresh() async {
+    final activePet = ref.read(activePetProvider);
+    if (activePet == null) return;
+    await _load(activePet.id);
+  }
+
+  Future<bool> listPetForDiscovery(String petId) async {
+    final userId = ref.read(authProvider).user?.id;
+    final activePet = ref.read(activePetProvider);
+    if (userId == null) {
+      state = state.copyWith(error: 'Please sign in again.');
+      return false;
+    }
+
+    try {
+      await matchRepository.listPetForDiscovery(
+        petId: petId,
+        listedByUserId: userId,
+      );
+
+      if (activePet != null) {
+        await _load(activePet.id);
+      }
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: 'Could not list pet: $e');
+      return false;
     }
   }
 }

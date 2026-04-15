@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/feed_controller.dart';
+import '../controllers/notification_controller.dart';
 import '../controllers/pet_controller.dart';
 import 'components/post_card.dart';
 
@@ -12,20 +14,22 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final feedState = ref.watch(feedProvider);
     final activePet = ref.watch(activePetProvider);
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
     final currentPetId = activePet?.id ?? '';
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'PetSphere',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.favorite_border),
+            icon: Badge(
+              isLabelVisible: unreadCount > 0,
+              label: Text(unreadCount > 99 ? '99+' : '$unreadCount'),
+              child: const Icon(Icons.favorite_border),
+            ),
             onPressed: () => context.push('/notifications'),
           ),
           IconButton(
@@ -103,14 +107,16 @@ class HomeScreen extends ConsumerWidget {
                 ref.read(activePetProvider)?.name ?? 'Unknown',
               );
             },
-            onShareIconTap: () => _showShareSheet(context),
+            onShareIconTap: () => _showShareSheet(context, post.id),
           );
         },
       ),
     );
   }
 
-  void _showShareSheet(BuildContext context) {
+  void _showShareSheet(BuildContext context, String postId) {
+    final shareUrl = 'https://petsphere.app/post/$postId';
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -154,7 +160,9 @@ class HomeScreen extends ConsumerWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                      shape: BoxShape.circle, color: Colors.grey.shade100),
+                    shape: BoxShape.circle,
+                    color: Colors.grey.shade100,
+                  ),
                   child: const Icon(Icons.add_to_photos_rounded),
                 ),
                 title: const Text('Add to your story'),
@@ -164,25 +172,41 @@ class HomeScreen extends ConsumerWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                      shape: BoxShape.circle, color: Colors.grey.shade100),
+                    shape: BoxShape.circle,
+                    color: Colors.grey.shade100,
+                  ),
                   child: const Icon(Icons.link),
                 ),
                 title: const Text('Copy Link'),
-                onTap: () {
+                onTap: () async {
+                  await Clipboard.setData(ClipboardData(text: shareUrl));
+                  if (!context.mounted) return;
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Link copied!')));
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('Link copied!')));
                 },
               ),
               ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                      shape: BoxShape.circle, color: Colors.grey.shade100),
+                    shape: BoxShape.circle,
+                    color: Colors.grey.shade100,
+                  ),
                   child: const Icon(Icons.share),
                 ),
                 title: const Text('Share via...'),
-                onTap: () => Navigator.pop(context),
+                onTap: () async {
+                  await Clipboard.setData(ClipboardData(text: shareUrl));
+                  if (!context.mounted) return;
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Share link copied. Paste it in any app.'),
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -192,7 +216,11 @@ class HomeScreen extends ConsumerWidget {
   }
 
   void _showCommentSheet(
-      BuildContext context, String postId, String currentPetId, String petName) {
+    BuildContext context,
+    String postId,
+    String currentPetId,
+    String petName,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -240,12 +268,9 @@ class _CommentBottomSheetWidgetState
   void _submitComment() {
     final text = _commentController.text.trim();
     if (text.isNotEmpty) {
-      ref.read(feedProvider.notifier).addComment(
-            widget.postId,
-            widget.currentPetId,
-            widget.petName,
-            text,
-          );
+      ref
+          .read(feedProvider.notifier)
+          .addComment(widget.postId, widget.currentPetId, widget.petName, text);
       _commentController.clear();
       FocusScope.of(context).unfocus();
     }
@@ -272,8 +297,10 @@ class _CommentBottomSheetWidgetState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Comments',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          const Text(
+            'Comments',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
           const Divider(),
           SizedBox(
             height: 300,
@@ -293,37 +320,50 @@ class _CommentBottomSheetWidgetState
                         Colors.blue,
                         Colors.green,
                         Colors.orange,
-                        Colors.purple
+                        Colors.purple,
                       ];
                       final bg = colors[comment.petName.length % colors.length];
 
                       return ListTile(
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 4),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 4),
                         leading: CircleAvatar(
-                          backgroundColor: bg.withOpacity(0.2),
+                          backgroundColor: bg.withValues(alpha: 0.2),
                           child: Text(
                             comment.petName[0].toUpperCase(),
                             style: TextStyle(
-                                color: bg, fontWeight: FontWeight.bold),
+                              color: bg,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         title: Row(
                           children: [
-                            Text(comment.petName,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 13)),
+                            Text(
+                              comment.petName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
                             const Spacer(),
-                            Text('Just now',
-                                style: TextStyle(
-                                    color: Colors.grey.shade500, fontSize: 11)),
+                            Text(
+                              'Just now',
+                              style: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: 11,
+                              ),
+                            ),
                           ],
                         ),
                         subtitle: Padding(
                           padding: const EdgeInsets.only(top: 4.0),
-                          child: Text(comment.text,
-                              style: const TextStyle(
-                                  color: Colors.black87, fontSize: 14)),
+                          child: Text(
+                            comment.text,
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 14,
+                            ),
+                          ),
                         ),
                       );
                     },
@@ -339,11 +379,17 @@ class _CommentBottomSheetWidgetState
                     decoration: InputDecoration(
                       hintText: 'Add a comment...',
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30)),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       suffixIcon: IconButton(
-                        icon: const Icon(Icons.send_rounded, color: Colors.blue),
+                        icon: const Icon(
+                          Icons.send_rounded,
+                          color: Colors.blue,
+                        ),
                         onPressed: _submitComment,
                       ),
                     ),

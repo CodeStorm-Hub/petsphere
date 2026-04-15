@@ -5,9 +5,25 @@ import '../models/pet_model.dart';
 import '../controllers/match_controller.dart';
 import 'package:go_router/go_router.dart';
 
+bool _looksLikeUuid(String value) {
+  final uuidPattern = RegExp(
+    '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}',
+  );
+  return uuidPattern.hasMatch(value);
+}
+
 // Load pet by ID from Supabase
-final _petByIdProvider = FutureProvider.family<PetModel?, String>((ref, petId) {
-  return petRepository.fetchPetById(petId);
+final _petByIdProvider = FutureProvider.family<PetModel?, String>((
+  ref,
+  petId,
+) async {
+  if (!_looksLikeUuid(petId)) return null;
+
+  try {
+    return await petRepository.fetchPetById(petId);
+  } catch (_) {
+    return null;
+  }
 });
 
 class MatchPetProfileScreen extends ConsumerWidget {
@@ -26,14 +42,11 @@ class MatchPetProfileScreen extends ConsumerWidget {
           Scaffold(body: Center(child: Text('Error loading pet: $e'))),
       data: (pet) {
         if (pet == null) {
-          return const Scaffold(
-              body: Center(child: Text('Pet not found')));
+          return const Scaffold(body: Center(child: Text('Pet not found')));
         }
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text(pet.name),
-          ),
+          appBar: AppBar(title: Text(pet.name)),
           body: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -44,8 +57,11 @@ class MatchPetProfileScreen extends ConsumerWidget {
                       ? Image.network(pet.profileImageUrl, fit: BoxFit.cover)
                       : Container(
                           color: Colors.grey.shade200,
-                          child: const Icon(Icons.pets,
-                              size: 80, color: Colors.grey),
+                          child: const Icon(
+                            Icons.pets,
+                            size: 80,
+                            color: Colors.grey,
+                          ),
                         ),
                 ),
                 Padding(
@@ -58,14 +74,14 @@ class MatchPetProfileScreen extends ConsumerWidget {
                         children: [
                           Text(
                             pet.name,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
+                            style: Theme.of(context).textTheme.headlineMedium
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.primary,
                               borderRadius: BorderRadius.circular(20),
@@ -73,8 +89,9 @@ class MatchPetProfileScreen extends ConsumerWidget {
                             child: Text(
                               '${pet.age} yrs',
                               style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
@@ -82,21 +99,32 @@ class MatchPetProfileScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       Text(
                         'Breed: ${pet.breed}',
-                        style:
-                            const TextStyle(fontSize: 16, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                       ),
                       const SizedBox(height: 24),
-                      const Text('About',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      const Text(
+                        'About',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 8),
-                      Text(pet.bio,
-                          style:
-                              const TextStyle(fontSize: 16, height: 1.5)),
+                      Text(
+                        pet.bio,
+                        style: const TextStyle(fontSize: 16, height: 1.5),
+                      ),
                       const SizedBox(height: 32),
-                      const Text('Medical Details',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      const Text(
+                        'Medical Details',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
@@ -121,8 +149,10 @@ class MatchPetProfileScreen extends ConsumerWidget {
                                 .sendLikeRequest(pet.id);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content: Text(
-                                      'Breeding request sent for ${pet.name}!')),
+                                content: Text(
+                                  'Breeding request sent for ${pet.name}!',
+                                ),
+                              ),
                             );
                             context.pop();
                           },

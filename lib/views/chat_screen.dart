@@ -4,6 +4,13 @@ import '../controllers/chat_controller.dart';
 import '../controllers/pet_controller.dart';
 import 'components/message_bubble.dart';
 
+bool _looksLikeUuid(String value) {
+  final uuidPattern = RegExp(
+    '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}',
+  );
+  return uuidPattern.hasMatch(value);
+}
+
 class ChatScreen extends ConsumerStatefulWidget {
   final String threadId;
 
@@ -22,6 +29,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     super.initState();
     // Initialize the per-thread messages notifier with real Supabase data + Realtime
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_looksLikeUuid(widget.threadId)) return;
+
       ref.read(threadMessagesProvider.notifier).init(widget.threadId);
       // Mark thread as read on open
       ref.read(chatProvider.notifier).markThreadAsRead(widget.threadId);
@@ -40,6 +49,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (text.isEmpty) return;
 
     final myPetId = ref.read(activePetProvider)?.id ?? '';
+    if (myPetId.isEmpty) return;
+
     ref.read(threadMessagesProvider.notifier).sendMessage(myPetId, text);
     _textController.clear();
 
@@ -61,11 +72,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final messages = ref.watch(threadMessagesProvider);
     final myPetId = ref.watch(activePetProvider)?.id ?? '';
 
+    if (!_looksLikeUuid(widget.threadId)) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Chat')),
+        body: const Center(child: Text('Invalid chat thread.')),
+      );
+    }
+
+    if (chatState.isLoading && chatState.threads.isEmpty) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     // Find the thread from the list
     final threadList = chatState.threads.where((t) => t.id == widget.threadId);
     if (threadList.isEmpty) {
-      return const Scaffold(
-          body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        appBar: AppBar(title: const Text('Chat')),
+        body: const Center(child: Text('Chat thread not found.')),
+      );
     }
     final thread = threadList.first;
     final otherPet = thread.participantPets.firstWhere(
@@ -96,8 +120,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           Expanded(
             child: messages.isEmpty
                 ? const Center(
-                    child: Text('Say hello! 👋',
-                        style: TextStyle(color: Colors.grey)))
+                    child: Text(
+                      'Say hello! 👋',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  )
                 : ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -111,8 +138,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
           SafeArea(
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
@@ -120,7 +146,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     color: Colors.grey.shade200,
                     blurRadius: 4,
                     offset: const Offset(0, -2),
-                  )
+                  ),
                 ],
               ),
               child: Row(
@@ -137,7 +163,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         filled: true,
                         fillColor: Colors.grey.shade100,
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
                       ),
                       onSubmitted: (_) => _sendMessage(),
                       textInputAction: TextInputAction.send,
@@ -145,8 +173,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: Icon(Icons.send,
-                        color: Theme.of(context).colorScheme.primary),
+                    icon: Icon(
+                      Icons.send,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     onPressed: _sendMessage,
                   ),
                 ],

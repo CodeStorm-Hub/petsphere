@@ -9,20 +9,23 @@ import '../views/match_pet_profile_screen.dart';
 import '../views/product_detail_screen.dart';
 import '../views/cart_screen.dart';
 import '../views/notifications_screen.dart';
+import '../views/create_pet_screen.dart';
 import '../views/login_screen.dart';
 import '../views/registration_screen.dart';
 import '../views/splash_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
-  
+
   return GoRouter(
     initialLocation: '/splash',
     redirect: (context, state) {
       final status = authState.status;
-      final isGoingToAuth = state.matchedLocation == '/login' || state.matchedLocation == '/register';
+      final isGoingToAuth =
+          state.matchedLocation == '/login' ||
+          state.matchedLocation == '/register';
       final isAtSplash = state.matchedLocation == '/splash';
-      
+
       if (status == AuthStatus.initial) {
         return isAtSplash ? null : '/splash';
       }
@@ -36,7 +39,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           return '/home';
         }
       }
-      
+
       return null;
     },
     routes: [
@@ -44,21 +47,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/splash',
         builder: (context, state) => const SplashScreen(),
       ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegistrationScreen(),
       ),
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => const MainLayout(),
-      ),
+      GoRoute(path: '/home', builder: (context, state) => const MainLayout()),
       GoRoute(
         path: '/create_post',
         builder: (context, state) => const CreatePostScreen(),
+      ),
+      GoRoute(
+        path: '/create_pet',
+        builder: (context, state) => const CreatePetScreen(),
       ),
       GoRoute(
         path: '/notifications',
@@ -67,8 +68,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/pet/:id',
         builder: (context, state) {
-           final petId = state.pathParameters['id']!;
-           return MatchPetProfileScreen(petId: petId);
+          final petId = state.pathParameters['id']!;
+          return MatchPetProfileScreen(petId: petId);
         },
       ),
       GoRoute(
@@ -78,19 +79,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/chat/:threadId',
         builder: (context, state) {
-           final threadId = state.pathParameters['threadId']!;
-           return ChatScreen(threadId: threadId);
+          final threadId = state.pathParameters['threadId']!;
+          return ChatScreen(threadId: threadId);
         },
       ),
-      GoRoute(
-        path: '/cart',
-        builder: (context, state) => const CartScreen(),
-      ),
+      GoRoute(path: '/cart', builder: (context, state) => const CartScreen()),
       GoRoute(
         path: '/product/:id',
         builder: (context, state) {
-           final productId = state.pathParameters['id']!;
-           return ProductDetailScreen(productId: productId);
+          final productId = state.pathParameters['id']!;
+          return ProductDetailScreen(productId: productId);
         },
       ),
     ],
