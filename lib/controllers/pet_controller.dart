@@ -118,6 +118,26 @@ class PetNotifier extends Notifier<PetState> {
   void setActivePet(PetModel pet) {
     state = state.copyWith(activePet: pet);
   }
+
+  Future<bool> updatePet(String petId, Map<String, dynamic> fields) async {
+    if (fields.isEmpty) return true;
+
+    try {
+      final updatedPet = await petRepository.updatePet(petId, fields);
+      final updatedPets = state.myPets
+          .map((pet) => pet.id == petId ? updatedPet : pet)
+          .toList();
+
+      state = state.copyWith(
+        myPets: updatedPets,
+        activePet: state.activePet?.id == petId ? updatedPet : state.activePet,
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return false;
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------

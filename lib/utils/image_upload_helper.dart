@@ -29,6 +29,24 @@ class ImageUploadHelper {
     return File(xFile.path);
   }
 
+  /// Pick an image as XFile from the gallery. Returns null if cancelled.
+  static Future<XFile?> pickXFileFromGallery() async {
+    return _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+      maxWidth: 1200,
+    );
+  }
+
+  /// Pick a photo as XFile from camera. Returns null if cancelled.
+  static Future<XFile?> pickXFileFromCamera() async {
+    return _picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 80,
+      maxWidth: 1200,
+    );
+  }
+
   /// Upload [file] to the given Supabase [bucket] under [path].
   /// Returns the public URL of the uploaded file.
   static Future<String> upload({
@@ -40,6 +58,25 @@ class ImageUploadHelper {
           path,
           file,
           fileOptions: const FileOptions(upsert: true),
+        );
+
+    return supabase.storage.from(bucket).getPublicUrl(path);
+  }
+
+  /// Upload an XFile as bytes to support all Flutter platforms (including web).
+  static Future<String> uploadXFile({
+    required XFile file,
+    required String bucket,
+    required String path,
+  }) async {
+    final bytes = await file.readAsBytes();
+    await supabase.storage.from(bucket).uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(
+            upsert: true,
+            contentType: _contentTypeForPath(path),
+          ),
         );
 
     return supabase.storage.from(bucket).getPublicUrl(path);
@@ -57,5 +94,19 @@ class ImageUploadHelper {
     final ext = file.path.split('.').last;
     final path = '$folder/${DateTime.now().millisecondsSinceEpoch}.$ext';
     return upload(file: file, bucket: bucket, path: path);
+  }
+
+  static String _contentTypeForPath(String path) {
+    final extension = path.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      case 'gif':
+        return 'image/gif';
+      default:
+        return 'image/jpeg';
+    }
   }
 }

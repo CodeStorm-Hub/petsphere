@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/pet_model.dart';
 import '../utils/supabase_config.dart';
@@ -79,21 +79,30 @@ class PetRepository {
   // -------------------------------------------------------------------------
   // Upload a pet image to Supabase Storage — returns the public URL
   // -------------------------------------------------------------------------
-  Future<String> uploadPetImage(String petId, File imageFile) async {
-    final ext = imageFile.path.split('.').last;
+  Future<String> uploadPetImage(
+    String petId,
+    Uint8List imageBytes, {
+    String extension = 'jpg',
+  }) async {
+    final ext = extension;
     final path = '$petId/${DateTime.now().millisecondsSinceEpoch}.$ext';
 
-    await supabase.storage.from(kBucketPetImages).upload(path, imageFile);
+    await supabase.storage.from(kBucketPetImages).uploadBinary(
+          path,
+          imageBytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
 
     return supabase.storage.from(kBucketPetImages).getPublicUrl(path);
   }
 
   Future<void> _ensureProfileExists(String userId) async {
     final authUser = supabase.auth.currentUser;
-    final metadataName = authUser?.userMetadata?['name'] as String?;
+    final metadataName = authUser?.userMetadata?['name'];
+    final trimmedMetadataName = metadataName?.toString().trim();
     final resolvedName =
-        (metadataName != null && metadataName.trim().isNotEmpty)
-        ? metadataName.trim()
+        (trimmedMetadataName != null && trimmedMetadataName.isNotEmpty)
+        ? trimmedMetadataName
         : (authUser?.email?.split('@').first ?? 'Pet Lover');
 
     try {

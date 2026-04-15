@@ -72,10 +72,11 @@ class AuthRepository {
   // Private helpers
   // -------------------------------------------------------------------------
   Future<void> _createProfileIfMissing(User user) async {
-    final metadataName = user.userMetadata?['name'] as String?;
+    final metadataName = user.userMetadata?['name'];
+    final trimmedMetadataName = metadataName?.toString().trim();
     final resolvedName =
-        (metadataName != null && metadataName.trim().isNotEmpty)
-        ? metadataName.trim()
+        (trimmedMetadataName != null && trimmedMetadataName.isNotEmpty)
+        ? trimmedMetadataName
         : (user.email?.split('@').first ?? 'Pet Lover');
 
     try {

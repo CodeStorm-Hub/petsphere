@@ -1,7 +1,9 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import '../controllers/auth_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../utils/image_upload_helper.dart';
 import '../utils/supabase_config.dart';
@@ -22,7 +24,8 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
   final _bioController = TextEditingController();
 
   String _selectedAnimalType = 'Dog';
-  File? _selectedImage;
+  XFile? _selectedImage;
+  Uint8List? _selectedImageBytes;
   bool _isSaving = false;
   int _currentStep = 0;
 
@@ -60,16 +63,26 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
   }
 
   Future<void> _pickImage() async {
-    final file = await ImageUploadHelper.pickFromGallery();
+    final file = await ImageUploadHelper.pickXFileFromGallery();
     if (file != null) {
-      setState(() => _selectedImage = file);
+      final bytes = await file.readAsBytes();
+      if (!mounted) return;
+      setState(() {
+        _selectedImage = file;
+        _selectedImageBytes = bytes;
+      });
     }
   }
 
   Future<void> _takePhoto() async {
-    final file = await ImageUploadHelper.pickFromCamera();
+    final file = await ImageUploadHelper.pickXFileFromCamera();
     if (file != null) {
-      setState(() => _selectedImage = file);
+      final bytes = await file.readAsBytes();
+      if (!mounted) return;
+      setState(() {
+        _selectedImage = file;
+        _selectedImageBytes = bytes;
+      });
     }
   }
 
@@ -202,37 +215,21 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
 
     try {
       String profileImageUrl = '';
+      final userId = ref.read(authProvider).user?.id;
 
-      // Upload image if selected — gracefully skip if bucket doesn't exist
+      // Upload image if selected
       if (_selectedImage != null) {
-        try {
-          final ext = _selectedImage!.path.split('.').last;
-          final path = 'new_pet/${DateTime.now().millisecondsSinceEpoch}.$ext';
-          profileImageUrl = await ImageUploadHelper.upload(
-            file: _selectedImage!,
-            bucket: kBucketPetImages,
-            path: path,
-          );
-        } catch (uploadError) {
-          // Storage bucket may not exist — continue without image
-          debugPrint('Image upload failed (bucket may not exist): $uploadError');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Row(
-                  children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.white, size: 18),
-                    SizedBox(width: 8),
-                    Expanded(child: Text('Photo upload failed — saving pet without photo.')),
-                  ],
-                ),
-                backgroundColor: Colors.orange.shade700,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            );
-          }
+        if (userId == null) {
+          throw Exception('You must be signed in to upload a pet photo.');
         }
+
+        final ext = _selectedImage!.path.split('.').last;
+        final path = '$userId/pet_${DateTime.now().millisecondsSinceEpoch}.$ext';
+        profileImageUrl = await ImageUploadHelper.uploadXFile(
+          file: _selectedImage!,
+          bucket: kBucketPetImages,
+          path: path,
+        );
       }
 
       final success = await ref.read(petProvider.notifier).createPet(
@@ -594,12 +591,12 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                           )
                         ]
                       : [],
-                  image: _selectedImage != null
-                      ? DecorationImage(
-                          image: FileImage(_selectedImage!),
+                   image: _selectedImage != null
+                       ? DecorationImage(
+                          image: MemoryImage(_selectedImageBytes!),
                           fit: BoxFit.cover,
                         )
-                      : null,
+                       : null,
                 ),
                 child: _selectedImage == null
                     ? Column(

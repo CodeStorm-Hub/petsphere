@@ -131,19 +131,32 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                      children: [
                        Row(
                          children: [
-                           Container(
-                             decoration: BoxDecoration(
-                               shape: BoxShape.circle,
-                               border: Border.all(color: Colors.grey.shade300, width: 1),
-                             ),
-                             child: CircleAvatar(
-                               radius: 40,
-                               backgroundColor: Colors.white,
-                               backgroundImage: isOwnerView 
-                                 ? const NetworkImage('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200&auto=format&fit=crop') // Human avatar mock
-                                 : NetworkImage(selectedPet!.profileImageUrl),
-                             ),
-                           ),
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey.shade300, width: 1),
+                              ),
+                              child: CircleAvatar(
+                                radius: 40,
+                                backgroundColor: Colors.white,
+                                backgroundImage: isOwnerView
+                                  ? const NetworkImage('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200&auto=format&fit=crop') // Human avatar mock
+                                  : (selectedPet!.profileImageUrl.trim().isNotEmpty
+                                      ? NetworkImage(selectedPet!.profileImageUrl)
+                                      : null),
+                                child: !isOwnerView && selectedPet!.profileImageUrl.trim().isEmpty
+                                    ? Text(
+                                        selectedPet!.name.isNotEmpty
+                                            ? selectedPet!.name[0].toUpperCase()
+                                            : '?',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 24,
+                                        ),
+                                      )
+                                    : null,
+                              ),
+                            ),
                            Expanded(
                              child: Row(
                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -273,14 +286,24 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                       ),
                       // If Owner view, optionally overlay entirely small author icon so human knows whose picture it is
                       if (isOwnerView)
-                        Positioned(
-                          bottom: 4,
-                          right: 4,
-                          child: CircleAvatar(
-                            radius: 12,
-                            backgroundImage: NetworkImage(post.pet.profileImageUrl),
-                          ),
-                        )
+                          Positioned(
+                           bottom: 4,
+                           right: 4,
+                           child: CircleAvatar(
+                             radius: 12,
+                             backgroundImage: post.pet.profileImageUrl.trim().isNotEmpty
+                                 ? NetworkImage(post.pet.profileImageUrl)
+                                 : null,
+                             child: post.pet.profileImageUrl.trim().isEmpty
+                                 ? Text(
+                                     post.pet.name.isNotEmpty
+                                         ? post.pet.name[0].toUpperCase()
+                                         : '?',
+                                     style: const TextStyle(fontSize: 10),
+                                   )
+                                 : null,
+                           ),
+                         )
                     ],
                   );
                 },
@@ -422,9 +445,19 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
         fields['breed'] = _breedController.text.trim();
       }
 
-      if (fields.isNotEmpty) {
-        await ref.read(petProvider.notifier).reload();
+      if (fields.isEmpty) {
+        if (mounted) {
+          Navigator.pop(context);
+        }
+        return;
       }
+
+      final updated =
+          await ref.read(petProvider.notifier).updatePet(widget.pet.id, fields);
+      if (!updated) {
+        throw Exception('Failed to update pet profile.');
+      }
+      await ref.read(petProvider.notifier).reload();
 
       if (mounted) {
         Navigator.pop(context);
