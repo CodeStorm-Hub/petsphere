@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/marketplace_controller.dart';
 import '../controllers/cart_controller.dart';
@@ -51,6 +52,13 @@ class ProductDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(product.category),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share_outlined),
+            tooltip: 'Share Product',
+            onPressed: () => _showShareSheet(context, product.id, product.name),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -65,7 +73,7 @@ class ProductDetailScreen extends ConsumerWidget {
                         ? Image.network(
                             product.images[0],
                             fit: BoxFit.cover,
-                            errorBuilder: (ctx, _, __) =>
+                            errorBuilder: (ctx, _, _) =>
                                 _ImagePlaceholder(icon: Icons.broken_image),
                           )
                         : _ImagePlaceholder(icon: Icons.inventory_2_outlined),
@@ -88,7 +96,7 @@ class ProductDetailScreen extends ConsumerWidget {
                                 width: 64,
                                 height: 64,
                                 fit: BoxFit.cover,
-                                errorBuilder: (ctx, _, __) => Container(
+                                errorBuilder: (ctx, _, _) => Container(
                                   width: 64,
                                   height: 64,
                                   color: Colors.grey.shade200,
@@ -256,6 +264,96 @@ class ProductDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  static void _showShareSheet(BuildContext context, String productId, String productName) {
+    final shareLink = 'https://petsphere.app/product/$productId';
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 16, bottom: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Share $productName',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 8),
+              const Divider(),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFFF8A65).withAlpha(26),
+                  ),
+                  child: const Icon(Icons.link, color: Color(0xFFFF8A65)),
+                ),
+                title: const Text('Copy Product Link'),
+                subtitle: Text(
+                  shareLink,
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: shareLink));
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.white, size: 16),
+                          SizedBox(width: 8),
+                          Text('Link copied to clipboard!'),
+                        ],
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      backgroundColor: const Color(0xFF81C784),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF4FC3F7).withAlpha(26),
+                  ),
+                  child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF4FC3F7)),
+                ),
+                title: const Text('Send in Message'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Coming soon!')),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

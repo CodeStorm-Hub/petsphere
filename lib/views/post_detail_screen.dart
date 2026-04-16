@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
@@ -52,66 +53,116 @@ class PostDetailScreen extends ConsumerWidget {
               },
               onCommentIconTap: () =>
                   _showCommentSheet(context, post.id, currentPetId, activePet?.name ?? ''),
-              onShareIconTap: () {},
+              onShareIconTap: () => _showShareSheet(context, post.id),
               onPetTap: () {
                 ref.read(profilePetNavigationProvider.notifier).navigateTo(post.pet.id);
                 Navigator.pop(context);
               },
             ),
-            if (post.comments.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Divider(),
-                    const Text('Comments',
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Divider(),
+                  Row(
+                    children: [
+                      const Text('Comments',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${post.comments.length}',
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(height: 8),
-                    ...post.comments.map((comment) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundColor: Colors.grey.shade200,
-                                child: Text(
-                                  comment.petName.isNotEmpty
-                                      ? comment.petName[0].toUpperCase()
-                                      : '?',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12),
-                                ),
+                          color: Colors.grey.shade500,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if (post.comments.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Center(
+                        child: Text(
+                          'No comments yet. Start the conversation!',
+                          style: TextStyle(color: Colors.grey.shade400),
+                        ),
+                      ),
+                    )
+                  else
+                    ...post.comments.map((comment) {
+                      final ago = _timeAgo(comment.createdAt);
+                      final colors = [
+                        Colors.red, Colors.blue, Colors.green,
+                        Colors.orange, Colors.purple,
+                      ];
+                      final bg = colors[comment.petName.length % colors.length];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundColor: bg.withAlpha(38),
+                              child: Text(
+                                comment.petName.isNotEmpty
+                                    ? comment.petName[0].toUpperCase()
+                                    : '?',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                    color: bg),
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(comment.petName,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13)),
-                                    const SizedBox(height: 2),
-                                    Text(comment.text,
-                                        style: const TextStyle(fontSize: 14)),
-                                  ],
-                                ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(comment.petName,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13)),
+                                      const SizedBox(width: 8),
+                                      Text(ago,
+                                          style: TextStyle(
+                                              color: Colors.grey.shade500,
+                                              fontSize: 11)),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(comment.text,
+                                      style: const TextStyle(fontSize: 14)),
+                                ],
                               ),
-                            ],
-                          ),
-                        )),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  const SizedBox(height: 24),
+                ],
               ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  static String _timeAgo(DateTime dateTime) {
+    final diff = DateTime.now().difference(dateTime);
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
+    if (diff.inHours < 24) return '${diff.inHours}h';
+    if (diff.inDays < 7) return '${diff.inDays}d';
+    return '${(diff.inDays / 7).floor()}w';
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref, PostModel post) {
@@ -162,6 +213,90 @@ class PostDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showShareSheet(BuildContext context, String postId) {
+    final shareLink = 'https://petsphere.app/post/$postId';
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 16, bottom: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Share Post',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 8),
+              const Divider(),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFFF8A65).withAlpha(26),
+                  ),
+                  child: const Icon(Icons.link, color: Color(0xFFFF8A65)),
+                ),
+                title: const Text('Copy Link'),
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: shareLink));
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.white, size: 16),
+                          SizedBox(width: 8),
+                          Text('Link copied to clipboard!'),
+                        ],
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      backgroundColor: const Color(0xFF81C784),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF4FC3F7).withAlpha(26),
+                  ),
+                  child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF4FC3F7)),
+                ),
+                title: const Text('Send in Message'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Coming soon!')),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

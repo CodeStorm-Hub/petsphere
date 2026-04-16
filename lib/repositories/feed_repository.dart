@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/post_model.dart';
 import '../utils/supabase_config.dart';
 
@@ -114,6 +115,89 @@ class FeedRepository {
         .single();
 
     return CommentModel.fromJson(data);
+  }
+
+  // -------------------------------------------------------------------------
+  // Fetch a single comment with pet join (used by realtime handler)
+  // -------------------------------------------------------------------------
+  Future<CommentModel> fetchComment(String commentId) async {
+    final data = await supabase
+        .from('comments')
+        .select('*, pets!comments_pet_id_fkey(name, id)')
+        .eq('id', commentId)
+        .single();
+    return CommentModel.fromJson(data);
+  }
+
+  // -------------------------------------------------------------------------
+  // Fetch fresh likes for a specific post
+  // -------------------------------------------------------------------------
+  Future<List<String>> fetchLikesForPost(String postId) async {
+    final likes = await supabase
+        .from('post_likes')
+        .select('pet_id')
+        .eq('post_id', postId);
+    return (likes as List<dynamic>)
+        .map((l) => (l as Map<String, dynamic>)['pet_id'] as String)
+        .toList();
+  }
+
+  // -------------------------------------------------------------------------
+  // Real-time: subscribe to like changes (insert/delete)
+  // -------------------------------------------------------------------------
+  RealtimeChannel subscribeToLikes({
+    required void Function(String postId, String petId, bool isInsert) onLikeChange,
+  }) {
+    return supabase
+        .channel('feed-likes-realtime')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'post_likes',
+          callback: (payload) {
+            final postId = payload.newRecord['post_id'] as String? ?? '';
+            final petId = payload.newRecord['pet_id'] as String? ?? '';
+            if (postId.isNotEmpty && petId.isNotEmpty) {
+              onLikeChange(postId, petId, true);
+            }
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.delete,
+          schema: 'public',
+          table: 'post_likes',
+          callback: (payload) {
+            final postId = payload.oldRecord['post_id'] as String? ?? '';
+            final petId = payload.oldRecord['pet_id'] as String? ?? '';
+            if (postId.isNotEmpty && petId.isNotEmpty) {
+              onLikeChange(postId, petId, false);
+            }
+          },
+        )
+        .subscribe();
+  }
+
+  // -------------------------------------------------------------------------
+  // Real-time: subscribe to new comments
+  // -------------------------------------------------------------------------
+  RealtimeChannel subscribeToComments({
+    required void Function(String postId, String commentId) onNewComment,
+  }) {
+    return supabase
+        .channel('feed-comments-realtime')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'comments',
+          callback: (payload) {
+            final postId = payload.newRecord['post_id'] as String? ?? '';
+            final commentId = payload.newRecord['id'] as String? ?? '';
+            if (postId.isNotEmpty && commentId.isNotEmpty) {
+              onNewComment(postId, commentId);
+            }
+          },
+        )
+        .subscribe();
   }
 }
 

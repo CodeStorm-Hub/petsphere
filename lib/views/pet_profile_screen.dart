@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/feed_controller.dart';
@@ -275,7 +276,21 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                            const SizedBox(width: 8),
                            Expanded(
                              child: OutlinedButton(
-                               onPressed: () {},
+                               onPressed: () {
+                                 if (isOwnerView) {
+                                   _showProfileShareSheet(
+                                     context,
+                                     'https://petsphere.app/user/${user?.id ?? ''}',
+                                     userName,
+                                   );
+                                 } else if (selectedPet != null) {
+                                   _showProfileShareSheet(
+                                     context,
+                                     'https://petsphere.app/pet/${selectedPet.id}',
+                                     selectedPet.name,
+                                   );
+                                 }
+                               },
                                child: Text(isOwnerView ? 'Share Account' : 'Share Profile'),
                              ),
                            ),
@@ -347,7 +362,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         Image.network(
                           post.mediaUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (ctx, _, __) => Container(color: Colors.grey.shade200),
+                          errorBuilder: (ctx, _, _) => Container(color: Colors.grey.shade200),
                         ),
                         if (isOwnerView)
                           Positioned(
@@ -381,6 +396,110 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               child: const Icon(Icons.add_a_photo_outlined, color: Colors.white),
             )
           : null,
+    );
+  }
+
+  void _showProfileShareSheet(BuildContext context, String shareLink, String name) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 16, bottom: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Share $name',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 8),
+              const Divider(),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFFF8A65).withAlpha(26),
+                  ),
+                  child: const Icon(Icons.link, color: Color(0xFFFF8A65)),
+                ),
+                title: const Text('Copy Profile Link'),
+                subtitle: Text(
+                  shareLink,
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: shareLink));
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.white, size: 16),
+                          SizedBox(width: 8),
+                          Text('Link copied to clipboard!'),
+                        ],
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      backgroundColor: const Color(0xFF81C784),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF4FC3F7).withAlpha(26),
+                  ),
+                  child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF4FC3F7)),
+                ),
+                title: const Text('Send in Message'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.push('/messages');
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF81C784).withAlpha(26),
+                  ),
+                  child: const Icon(Icons.qr_code, color: Color(0xFF81C784)),
+                ),
+                title: const Text('QR Code'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('QR Code coming soon!')),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
