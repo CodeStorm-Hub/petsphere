@@ -46,6 +46,7 @@ class DiscoveryScreen extends ConsumerWidget {
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(
+          heroTag: 'discovery_new_listing_fab',
           onPressed: () {
             _showListPetSheet(context, ref);
           },
@@ -96,8 +97,10 @@ class DiscoveryScreen extends ConsumerWidget {
                 // Filter Breeds Row
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: [
                       _BreedChip(
@@ -148,7 +151,8 @@ class DiscoveryScreen extends ConsumerWidget {
                             children: const [
                               SizedBox(height: 120),
                               Center(
-                                  child: Text('No pets found for these filters.')),
+                                child: Text('No pets found for these filters.'),
+                              ),
                             ],
                           )
                         : GridView.builder(
@@ -156,11 +160,11 @@ class DiscoveryScreen extends ConsumerWidget {
                             padding: const EdgeInsets.all(16),
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 0.75,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                            ),
+                                  crossAxisCount: 2,
+                                  childAspectRatio: 0.75,
+                                  crossAxisSpacing: 16,
+                                  mainAxisSpacing: 16,
+                                ),
                             itemCount: matchState.discoveryPets.length,
                             itemBuilder: (context, index) {
                               final pet = matchState.discoveryPets[index];
@@ -185,18 +189,28 @@ class DiscoveryScreen extends ConsumerWidget {
                       physics: const AlwaysScrollableScrollPhysics(),
                       children: [
                         const SizedBox(height: 100),
-                        const Icon(Icons.favorite_border,
-                            size: 64, color: Colors.grey),
+                        const Icon(
+                          Icons.favorite_border,
+                          size: 64,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(height: 16),
                         const Center(
-                            child: Text('You haven\'t listed any pets yet.',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold))),
+                          child: Text(
+                            'You haven\'t listed any pets yet.',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 8),
                         const Center(
-                            child: Text(
-                                'Tap "New Listing" to add your pet to discovery.',
-                                style: TextStyle(color: Colors.grey))),
+                          child: Text(
+                            'Tap "New Listing" to add your pet to discovery.',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
                         const SizedBox(height: 24),
                         Center(
                           child: OutlinedButton(
@@ -212,34 +226,40 @@ class DiscoveryScreen extends ConsumerWidget {
                       itemCount: listedPets.length,
                       itemBuilder: (context, index) {
                         final pet = listedPets[index];
-                        final hasProfileImage =
-                            pet.profileImageUrl.trim().isNotEmpty;
+                        final hasProfileImage = pet.profileImageUrl
+                            .trim()
+                            .isNotEmpty;
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           child: ListTile(
                             contentPadding: const EdgeInsets.all(12),
                             leading: CircleAvatar(
                               radius: 28,
-                              backgroundColor:
-                                  hasProfileImage ? null : Colors.grey.shade200,
-                              backgroundImage:
-                                  hasProfileImage ? NetworkImage(pet.profileImageUrl) : null,
+                              backgroundColor: hasProfileImage
+                                  ? null
+                                  : Colors.grey.shade200,
+                              backgroundImage: hasProfileImage
+                                  ? NetworkImage(pet.profileImageUrl)
+                                  : null,
                               child: hasProfileImage
                                   ? null
-                                  : const Icon(
-                                      Icons.pets,
-                                      color: Colors.grey,
-                                    ),
+                                  : const Icon(Icons.pets, color: Colors.grey),
                             ),
-                            title: Text(pet.name,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
+                            title: Text(
+                              pet.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             subtitle: Text('${pet.breed} • ${pet.animalType}'),
                             trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline,
-                                  color: Colors.red),
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                              ),
                               onPressed: () async {
                                 final success = await ref
                                     .read(petProvider.notifier)
@@ -247,8 +267,10 @@ class DiscoveryScreen extends ConsumerWidget {
                                 if (context.mounted && success) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                        content: Text(
-                                            '${pet.name} removed from breeding listings.')),
+                                      content: Text(
+                                        '${pet.name} removed from breeding listings.',
+                                      ),
+                                    ),
                                   );
                                 }
                               },
@@ -355,14 +377,19 @@ class _ListPetSheetWidgetState extends State<_ListPetSheetWidget> {
   @override
   Widget build(BuildContext context) {
     // Only show pets that are NOT yet listed for breeding
-    final availablePets =
-        widget.myOwnedPets.where((p) => !p.isBreedingListed).toList();
+    final availablePets = widget.myOwnedPets
+        .where((p) => !p.isBreedingListed)
+        .toList();
 
     return Consumer(
       builder: (context, ref, child) {
         return Padding(
-          padding:
-              const EdgeInsets.only(top: 24, left: 16, right: 16, bottom: 32),
+          padding: const EdgeInsets.only(
+            top: 24,
+            left: 16,
+            right: 16,
+            bottom: 32,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -399,28 +426,29 @@ class _ListPetSheetWidgetState extends State<_ListPetSheetWidget> {
                     itemCount: availablePets.length,
                     itemBuilder: (context, index) {
                       final pet = availablePets[index];
-                      final hasProfileImage =
-                          pet.profileImageUrl.trim().isNotEmpty;
+                      final hasProfileImage = pet.profileImageUrl
+                          .trim()
+                          .isNotEmpty;
                       return RadioListTile<String>(
                         title: Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor:
-                                  hasProfileImage ? null : Colors.grey.shade200,
-                              backgroundImage:
-                                  hasProfileImage ? NetworkImage(pet.profileImageUrl) : null,
+                              backgroundColor: hasProfileImage
+                                  ? null
+                                  : Colors.grey.shade200,
+                              backgroundImage: hasProfileImage
+                                  ? NetworkImage(pet.profileImageUrl)
+                                  : null,
                               child: hasProfileImage
                                   ? null
-                                  : const Icon(
-                                      Icons.pets,
-                                      color: Colors.grey,
-                                    ),
+                                  : const Icon(Icons.pets, color: Colors.grey),
                             ),
                             const SizedBox(width: 12),
                             Text(
                               pet.name,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
@@ -483,12 +511,16 @@ class _ListPetSheetWidgetState extends State<_ListPetSheetWidget> {
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
                       : const Text(
                           'Confirm Listing',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                 ),
               ),

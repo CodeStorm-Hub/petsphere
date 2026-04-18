@@ -195,7 +195,7 @@ class _FollowButtonsRow extends ConsumerWidget {
         Expanded(
           child: isFollowingPet.when(
             loading: () => const _FollowButtonSkeleton(label: 'Follow Pet'),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
             data: (following) => _FollowButton(
               label: following ? 'Following' : 'Follow Pet',
               icon: following ? Icons.pets : Icons.pets_outlined,
@@ -217,7 +217,7 @@ class _FollowButtonsRow extends ConsumerWidget {
           child: isFollowingOwner.when(
             loading: () =>
                 const _FollowButtonSkeleton(label: 'Follow Owner'),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
             data: (following) => _FollowButton(
               label: following ? 'Following Owner' : 'Follow Owner',
               icon: following
@@ -359,7 +359,7 @@ class _PetFollowerCount extends ConsumerWidget {
         'Loading followers...',
         style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
       data: (count) => Row(
         children: [
           Icon(Icons.people_outline, size: 16, color: Colors.grey.shade600),

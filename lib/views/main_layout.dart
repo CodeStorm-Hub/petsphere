@@ -16,28 +16,43 @@ class MainLayout extends ConsumerStatefulWidget {
 
 class _MainLayoutState extends ConsumerState<MainLayout> {
   int _currentIndex = 0;
+  final List<bool> _loadedTabs = [true, false, false, false, false];
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const DiscoveryScreen(),
-    const SizedBox.shrink(),
-    const MarketplaceScreen(),
-    const PetProfileScreen(),
-  ];
+  Widget _buildScreenForIndex(int index) {
+    switch (index) {
+      case 0:
+        return const HomeScreen();
+      case 1:
+        return const DiscoveryScreen();
+      case 2:
+        return const SizedBox.shrink();
+      case 3:
+        return const MarketplaceScreen();
+      case 4:
+        return const PetProfileScreen();
+      default:
+        return const SizedBox.shrink();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     ref.listen<String?>(profilePetNavigationProvider, (prev, next) {
       if (next != null) {
-        setState(() => _currentIndex = 4);
+        setState(() {
+          _currentIndex = 4;
+          _loadedTabs[4] = true;
+        });
       }
     });
 
+    final tabChildren = List<Widget>.generate(5, (index) {
+      if (!_loadedTabs[index]) return const SizedBox.shrink();
+      return _buildScreenForIndex(index);
+    });
+
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: tabChildren),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -47,6 +62,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
           }
           setState(() {
             _currentIndex = index;
+            _loadedTabs[index] = true;
           });
         },
         type: BottomNavigationBarType.fixed,
@@ -57,9 +73,18 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Explore'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_box_outlined), label: 'Add'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_bag_outlined), label: 'Shop'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_box_outlined),
+            label: 'Add',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_bag_outlined),
+            label: 'Shop',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
+          ),
         ],
       ),
     );

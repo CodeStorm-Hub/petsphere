@@ -105,6 +105,9 @@ class _PostCardState extends State<PostCard> {
   @override
   Widget build(BuildContext context) {
     final isLiked = widget.post.likedByPetIds.contains(widget.currentPetId);
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+    final mediaCacheWidth = (screenWidth * pixelRatio).round();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,6 +154,8 @@ class _PostCardState extends State<PostCard> {
                 child: Image.network(
                   widget.post.mediaUrl,
                   fit: BoxFit.cover,
+                  cacheWidth: mediaCacheWidth,
+                  filterQuality: FilterQuality.low,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return Container(

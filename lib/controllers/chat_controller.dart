@@ -84,8 +84,8 @@ class ThreadMessagesNotifier extends Notifier<List<MessageModel>> {
 /// which fires when the ProviderScope is removed.
 final threadMessagesProvider =
     NotifierProvider<ThreadMessagesNotifier, List<MessageModel>>(
-  ThreadMessagesNotifier.new,
-);
+      ThreadMessagesNotifier.new,
+    );
 
 // ---------------------------------------------------------------------------
 // Chat Threads List State
@@ -95,11 +95,7 @@ class ChatState {
   final bool isLoading;
   final String? error;
 
-  ChatState({
-    this.threads = const [],
-    this.isLoading = false,
-    this.error,
-  });
+  ChatState({this.threads = const [], this.isLoading = false, this.error});
 
   ChatState copyWith({
     List<ChatThreadModel>? threads,
@@ -120,9 +116,10 @@ class ChatController extends Notifier<ChatState> {
   ChatState build() {
     final activePet = ref.watch(activePetProvider);
     if (activePet != null) {
-      _loadThreads(activePet.id);
+      final petId = activePet.id;
+      Future.microtask(() => _loadThreads(petId));
     }
-    return ChatState(isLoading: true);
+    return ChatState(isLoading: activePet != null);
   }
 
   Future<void> _loadThreads(String myPetId) async {

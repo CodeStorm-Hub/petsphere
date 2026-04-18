@@ -48,22 +48,28 @@ class PetNotifier extends Notifier<PetState> {
   PetState build() {
     ref.listen<AuthState>(authProvider, (prev, next) {
       if (next.status == AuthStatus.authenticated && next.user != null) {
-        if (_lastLoadedUserId != next.user!.id) {
-          _loadMyPets(next.user!.id);
+        final userId = next.user!.id;
+        if (_lastLoadedUserId != userId) {
+          Future.microtask(() => _loadMyPets(userId));
         }
       } else if (next.status == AuthStatus.unauthenticated) {
-        _lastLoadedUserId = null;
-        _loadGeneration++;
-        state = PetState();
+        Future.microtask(() {
+          _lastLoadedUserId = null;
+          _loadGeneration++;
+          state = PetState();
+        });
       }
     });
 
     final authState = ref.read(authProvider);
-    if (authState.status == AuthStatus.authenticated && authState.user != null) {
-      _loadMyPets(authState.user!.id);
+    final shouldLoadInitialPets =
+        authState.status == AuthStatus.authenticated && authState.user != null;
+    if (shouldLoadInitialPets) {
+      final userId = authState.user!.id;
+      Future.microtask(() => _loadMyPets(userId));
     }
 
-    return PetState();
+    return PetState(isLoading: shouldLoadInitialPets);
   }
 
   Future<void> _loadMyPets(String userId) async {
@@ -205,4 +211,6 @@ class ProfilePetNavigation extends Notifier<String?> {
 }
 
 final profilePetNavigationProvider =
-    NotifierProvider<ProfilePetNavigation, String?>(() => ProfilePetNavigation());
+    NotifierProvider<ProfilePetNavigation, String?>(
+      () => ProfilePetNavigation(),
+    );
