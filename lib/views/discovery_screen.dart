@@ -212,6 +212,8 @@ class DiscoveryScreen extends ConsumerWidget {
                       itemCount: listedPets.length,
                       itemBuilder: (context, index) {
                         final pet = listedPets[index];
+                        final hasProfileImage =
+                            pet.profileImageUrl.trim().isNotEmpty;
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           shape: RoundedRectangleBorder(
@@ -220,13 +222,11 @@ class DiscoveryScreen extends ConsumerWidget {
                             contentPadding: const EdgeInsets.all(12),
                             leading: CircleAvatar(
                               radius: 28,
-                              backgroundColor: pet.profileImageUrl.trim().isNotEmpty
-                                  ? null
-                                  : Colors.grey.shade200,
-                              backgroundImage: pet.profileImageUrl.trim().isNotEmpty
-                                  ? NetworkImage(pet.profileImageUrl)
-                                  : null,
-                              child: pet.profileImageUrl.trim().isNotEmpty
+                              backgroundColor:
+                                  hasProfileImage ? null : Colors.grey.shade200,
+                              backgroundImage:
+                                  hasProfileImage ? NetworkImage(pet.profileImageUrl) : null,
+                              child: hasProfileImage
                                   ? null
                                   : const Icon(
                                       Icons.pets,
@@ -399,17 +399,17 @@ class _ListPetSheetWidgetState extends State<_ListPetSheetWidget> {
                     itemCount: availablePets.length,
                     itemBuilder: (context, index) {
                       final pet = availablePets[index];
+                      final hasProfileImage =
+                          pet.profileImageUrl.trim().isNotEmpty;
                       return RadioListTile<String>(
                         title: Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor: pet.profileImageUrl.trim().isNotEmpty
-                                  ? null
-                                  : Colors.grey.shade200,
-                              backgroundImage: pet.profileImageUrl.trim().isNotEmpty
-                                  ? NetworkImage(pet.profileImageUrl)
-                                  : null,
-                              child: pet.profileImageUrl.trim().isNotEmpty
+                              backgroundColor:
+                                  hasProfileImage ? null : Colors.grey.shade200,
+                              backgroundImage:
+                                  hasProfileImage ? NetworkImage(pet.profileImageUrl) : null,
+                              child: hasProfileImage
                                   ? null
                                   : const Icon(
                                       Icons.pets,
