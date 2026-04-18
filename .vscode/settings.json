@@ -1,6 +1,0 @@
-{
-    "java.configuration.updateBuildConfiguration": "interactive",
-    "workbench.browser.openLocalhostLinks": true,
-    "workbench.browser.enableChatTools": true,
-    "playwright.reuseBrowser": true
-}
