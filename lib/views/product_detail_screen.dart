@@ -63,9 +63,12 @@ class ProductDetailScreen extends ConsumerWidget {
       body: Column(
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+            child: RefreshIndicator(
+              onRefresh: () => ref.read(marketplaceProvider.notifier).refresh(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   AspectRatio(
                     aspectRatio: 1,
@@ -202,6 +205,7 @@ class ProductDetailScreen extends ConsumerWidget {
                     ),
                   ),
                 ],
+                ),
               ),
             ),
           ),

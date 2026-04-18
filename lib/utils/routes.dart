@@ -13,6 +13,7 @@ import '../views/post_detail_screen.dart';
 import '../views/cart_screen.dart';
 import '../views/order_history_screen.dart';
 import '../views/notifications_screen.dart';
+import '../views/liked_pets_screen.dart';
 import '../views/login_screen.dart';
 import '../views/registration_screen.dart';
 import '../views/splash_screen.dart';
@@ -79,6 +80,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/notifications',
         builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/liked_pets',
+        builder: (context, state) => const LikedPetsScreen(),
       ),
       GoRoute(
         path: '/pet/:id',

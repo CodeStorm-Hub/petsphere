@@ -9,6 +9,7 @@ import '../controllers/auth_controller.dart';
 import '../models/pet_model.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
+import '../controllers/follow_controller.dart';
 import '../utils/image_upload_helper.dart';
 import '../utils/supabase_config.dart';
 
@@ -84,8 +85,16 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
           ),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await Future.wait([
+            ref.read(petProvider.notifier).reload(),
+            ref.read(feedProvider.notifier).refresh(),
+          ]);
+        },
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
           SliverToBoxAdapter(
              child: Column(
                crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,9 +161,26 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                children: [
                                  _StatColumn(label: 'Posts', value: '${displayedPosts.length}'),
-                                 _StatColumn(label: 'Pets', value: '${myOwnedPets.length}'),
-                                 if (!isOwnerView)
-                                   const _StatColumn(label: 'Followers', value: '—'),
+                                  if (isOwnerView) ...[
+                                    ref.watch(ownerFollowerCountProvider(myUserId)).when(
+                                          data: (count) => _StatColumn(label: "Followers", value: "$count"),
+                                          loading: () => const _StatColumn(label: "Followers", value: "..."),
+                                          error: (_, __) => const _StatColumn(label: "Followers", value: "0"),
+                                        ),
+                                    ref.watch(followingCountProvider(myUserId)).when(
+                                          data: (count) => _StatColumn(label: "Following", value: "$count"),
+                                          loading: () => const _StatColumn(label: "Following", value: "..."),
+                                          error: (_, __) => const _StatColumn(label: "Following", value: "0"),
+                                        ),
+                                  ] else ...[
+                                    _StatColumn(label: "Pets", value: "${myOwnedPets.length}"),
+                                    if (selectedPet != null)
+                                      ref.watch(petFollowerCountProvider(selectedPet.id)).when(
+                                            data: (count) => _StatColumn(label: "Followers", value: "$count"),
+                                            loading: () => const _StatColumn(label: "Followers", value: "..."),
+                                            error: (_, __) => const _StatColumn(label: "Followers", value: "0"),
+                                          ),
+                                  ],
                                ],
                              ),
                            ),
@@ -388,6 +414,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               ),
             )
         ],
+        ),
       ),
       floatingActionButton: !isOwnerView && selectedPet != null
           ? FloatingActionButton(

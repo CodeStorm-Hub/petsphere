@@ -15,12 +15,21 @@ class NotificationsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Notifications'),
       ),
-      body: myRequests.isEmpty
-          ? const Center(child: Text('No new requests.'))
-          : ListView.separated(
-              itemCount: myRequests.length,
-              separatorBuilder: (context, index) => const Divider(height: 1),
-              itemBuilder: (context, index) {
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(matchProvider.notifier).refresh(),
+        child: myRequests.isEmpty
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(height: 120),
+                  Center(child: Text('No new requests.')),
+                ],
+              )
+            : ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: myRequests.length,
+                separatorBuilder: (context, index) => const Divider(height: 1),
+                itemBuilder: (context, index) {
                 final req = myRequests[index];
                 
                 // Usually would load sender pet dynamically from a stream/future
@@ -85,6 +94,7 @@ class NotificationsScreen extends ConsumerWidget {
                 );
               },
             ),
+      ),
     );
   }
 }

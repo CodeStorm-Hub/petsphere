@@ -1,38 +1,26 @@
+import 'package:flutter/foundation.dart';
 import '../models/pet_model.dart';
 import '../models/match_request_model.dart';
 import '../utils/supabase_config.dart';
 
 class MatchRepository {
   // -------------------------------------------------------------------------
-  // Fetch pets for discovery (excludes the current user's pets + already-requested ones)
+  // Fetch pets for discovery (excludes ALL owner's pets + already-requested ones)
   // -------------------------------------------------------------------------
   Future<List<PetModel>> fetchDiscoveryPets({
     required String myPetId,
+    required String userId,
     String? filterAnimal,
     String? filterBreed,
   }) async {
-    // Get IDs already sent or received
-    final sentRequests = await supabase
-        .from('match_requests')
-        .select('receiver_pet_id')
-        .eq('sender_pet_id', myPetId);
+    debugPrint('[MatchRepository] fetchDiscoveryPets simplified: userId=$userId');
 
-    final receivedRequests = await supabase
-        .from('match_requests')
-        .select('sender_pet_id')
-        .eq('receiver_pet_id', myPetId);
-
-    final excludedIds = <String>{
-      myPetId,
-      ...(sentRequests as List).map((r) => r['receiver_pet_id'] as String),
-      ...(receivedRequests as List).map((r) => r['sender_pet_id'] as String),
-    };
-
-    var query = supabase.from('pets').select().not(
-          'id',
-          'in',
-          '(${excludedIds.map((id) => '"$id"').join(',')})',
-        );
+    // Simplify to just listed pets NOT owned by me
+    var query = supabase
+        .from('pets')
+        .select()
+        .eq('is_breeding_listed', true)
+        .neq('user_id', userId);
 
     if (filterAnimal != null && filterAnimal.isNotEmpty) {
       query = query.eq('animal_type', filterAnimal);
@@ -42,6 +30,7 @@ class MatchRepository {
     }
 
     final data = await query.order('created_at', ascending: false);
+    debugPrint('[MatchRepository] Fetched ${(data as List).length} pets from others');
 
     return (data as List<dynamic>)
         .map((e) => PetModel.fromJson(e as Map<String, dynamic>))
@@ -71,6 +60,21 @@ class MatchRepository {
         .select('*, sender_pets:pets!sender_pet_id(*)')
         .eq('receiver_pet_id', myPetId)
         .eq('status', 'pending')
+        .order('created_at', ascending: false);
+
+    return (data as List<dynamic>)
+        .map((e) => MatchRequestModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  // -------------------------------------------------------------------------
+  // Fetch like requests sent by myPetId (with receiver pet details)
+  // -------------------------------------------------------------------------
+  Future<List<MatchRequestModel>> fetchSentRequests(String myPetId) async {
+    final data = await supabase
+        .from('match_requests')
+        .select('*, receiver_pets:pets!receiver_pet_id(*)')
+        .eq('sender_pet_id', myPetId)
         .order('created_at', ascending: false);
 
     return (data as List<dynamic>)

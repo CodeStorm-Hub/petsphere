@@ -42,10 +42,13 @@ class PostDetailScreen extends ConsumerWidget {
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            PostCard(
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(feedProvider.notifier).refresh(),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              PostCard(
               post: post,
               currentPetId: currentPetId,
               onLikeToggle: () {
@@ -151,6 +154,7 @@ class PostDetailScreen extends ConsumerWidget {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

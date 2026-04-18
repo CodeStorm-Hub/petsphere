@@ -51,42 +51,45 @@ class OrderHistoryScreen extends ConsumerWidget {
           ),
         ),
         data: (orders) {
-          if (orders.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.receipt_long_outlined,
-                      size: 80, color: Colors.grey.shade300),
-                  const SizedBox(height: 16),
-                  const Text('No orders yet',
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey)),
-                  const SizedBox(height: 8),
-                  Text('Your order history will appear here',
-                      style: TextStyle(color: Colors.grey.shade400)),
-                ],
-              ),
-            );
-          }
-
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(_ordersProvider),
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              itemCount: orders.length,
-              itemBuilder: (context, index) {
-                final order = orders[index];
-                return _OrderCard(
-                  order: order,
-                  currencyFormat: currencyFormat,
-                  dateFormat: dateFormat,
-                );
-              },
-            ),
+            child: orders.isEmpty
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      const SizedBox(height: 120),
+                      Center(
+                        child: Column(
+                          children: [
+                            Icon(Icons.receipt_long_outlined,
+                                size: 80, color: Colors.grey.shade300),
+                            const SizedBox(height: 16),
+                            const Text('No orders yet',
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey)),
+                            const SizedBox(height: 8),
+                            Text('Your order history will appear here',
+                                style: TextStyle(color: Colors.grey.shade400)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
+                    itemCount: orders.length,
+                    itemBuilder: (context, index) {
+                      final order = orders[index];
+                      return _OrderCard(
+                        order: order,
+                        currencyFormat: currencyFormat,
+                        dateFormat: dateFormat,
+                      );
+                    },
+                  ),
           );
         },
       ),
