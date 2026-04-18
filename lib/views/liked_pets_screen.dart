@@ -97,15 +97,19 @@ class LikedPetsScreen extends ConsumerWidget {
       case 'matched':
         color = Colors.green;
         label = 'Matched';
+        break;
       case 'rejected':
         color = Colors.red;
         label = 'Declined';
+        break;
       case 'pending':
         color = Colors.orange;
         label = 'Pending';
+        break;
       default:
         color = Colors.grey;
         label = status;
+        break;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

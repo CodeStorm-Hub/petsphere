@@ -52,6 +52,20 @@ class FollowRepository {
   }
 
   // -------------------------------------------------------------------------
+  // Check if user directly follows a pet (pet-follow row only)
+  // -------------------------------------------------------------------------
+  Future<bool> isFollowingPetDirect(String followerUserId, String petId) async {
+    final data = await supabase
+        .from('follows')
+        .select('id')
+        .eq('follower_user_id', followerUserId)
+        .not('followed_pet_id', 'is', null)
+        .eq('followed_pet_id', petId)
+        .maybeSingle();
+    return data != null;
+  }
+
+  // -------------------------------------------------------------------------
   // Check if user follows an owner
   // -------------------------------------------------------------------------
   Future<bool> isFollowingOwner(String followerUserId, String ownerId) async {
@@ -70,15 +84,9 @@ class FollowRepository {
   // -------------------------------------------------------------------------
   Future<bool> isFollowingPet(String followerUserId, String petId) async {
     // 1. Direct pet follow
-    final directFollow = await supabase
-        .from('follows')
-        .select('id')
-        .eq('follower_user_id', followerUserId)
-        .not('followed_pet_id', 'is', null)
-        .eq('followed_pet_id', petId)
-        .maybeSingle();
+    final directFollow = await isFollowingPetDirect(followerUserId, petId);
 
-    if (directFollow != null) return true;
+    if (directFollow) return true;
 
     // 2. Check if following the pet's owner
     final pet = await supabase

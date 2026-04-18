@@ -220,8 +220,18 @@ class DiscoveryScreen extends ConsumerWidget {
                             contentPadding: const EdgeInsets.all(12),
                             leading: CircleAvatar(
                               radius: 28,
-                              backgroundImage:
-                                  NetworkImage(pet.profileImageUrl),
+                              backgroundColor: pet.profileImageUrl.trim().isNotEmpty
+                                  ? null
+                                  : Colors.grey.shade200,
+                              backgroundImage: pet.profileImageUrl.trim().isNotEmpty
+                                  ? NetworkImage(pet.profileImageUrl)
+                                  : null,
+                              child: pet.profileImageUrl.trim().isNotEmpty
+                                  ? null
+                                  : const Icon(
+                                      Icons.pets,
+                                      color: Colors.grey,
+                                    ),
                             ),
                             title: Text(pet.name,
                                 style: const TextStyle(
@@ -393,7 +403,18 @@ class _ListPetSheetWidgetState extends State<_ListPetSheetWidget> {
                         title: Row(
                           children: [
                             CircleAvatar(
-                              backgroundImage: NetworkImage(pet.profileImageUrl),
+                              backgroundColor: pet.profileImageUrl.trim().isNotEmpty
+                                  ? null
+                                  : Colors.grey.shade200,
+                              backgroundImage: pet.profileImageUrl.trim().isNotEmpty
+                                  ? NetworkImage(pet.profileImageUrl)
+                                  : null,
+                              child: pet.profileImageUrl.trim().isNotEmpty
+                                  ? null
+                                  : const Icon(
+                                      Icons.pets,
+                                      color: Colors.grey,
+                                    ),
                             ),
                             const SizedBox(width: 12),
                             Text(
