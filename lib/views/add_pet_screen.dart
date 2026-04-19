@@ -1,10 +1,11 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../controllers/pet_controller.dart';
-import '../utils/image_upload_helper.dart';
-import '../utils/supabase_config.dart';
+import 'package:pet_dating_app/controllers/pet_controller.dart';
+import 'package:pet_dating_app/utils/image_upload_helper.dart';
+import 'package:pet_dating_app/utils/supabase_config.dart';
 
 class AddPetScreen extends ConsumerStatefulWidget {
   const AddPetScreen({super.key});
@@ -215,7 +216,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
           );
         } catch (uploadError) {
           // Storage bucket may not exist — continue without image
-          debugPrint('Image upload failed (bucket may not exist): $uploadError');
+          log('Image upload failed (bucket may not exist): $uploadError');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

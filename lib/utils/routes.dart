@@ -1,22 +1,22 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../controllers/auth_controller.dart';
-import '../views/main_layout.dart';
-import '../views/create_post_screen.dart';
-import '../views/add_pet_screen.dart';
-import '../views/messages_list_screen.dart';
-import '../views/chat_screen.dart';
-import '../views/match_pet_profile_screen.dart';
-import '../views/product_detail_screen.dart';
-import '../views/post_detail_screen.dart';
-import '../views/cart_screen.dart';
-import '../views/order_history_screen.dart';
-import '../views/notifications_screen.dart';
-import '../views/liked_pets_screen.dart';
-import '../views/login_screen.dart';
-import '../views/registration_screen.dart';
-import '../views/splash_screen.dart';
+import 'package:pet_dating_app/controllers/auth_controller.dart';
+import 'package:pet_dating_app/views/main_layout.dart';
+import 'package:pet_dating_app/views/create_post_screen.dart';
+import 'package:pet_dating_app/views/add_pet_screen.dart';
+import 'package:pet_dating_app/views/messages_list_screen.dart';
+import 'package:pet_dating_app/views/chat_screen.dart';
+import 'package:pet_dating_app/views/match_pet_profile_screen.dart';
+import 'package:pet_dating_app/views/product_detail_screen.dart';
+import 'package:pet_dating_app/views/post_detail_screen.dart';
+import 'package:pet_dating_app/views/cart_screen.dart';
+import 'package:pet_dating_app/views/order_history_screen.dart';
+import 'package:pet_dating_app/views/notifications_screen.dart';
+import 'package:pet_dating_app/views/liked_pets_screen.dart';
+import 'package:pet_dating_app/views/login_screen.dart';
+import 'package:pet_dating_app/views/registration_screen.dart';
+import 'package:pet_dating_app/views/splash_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authNotifier = ValueNotifier<AuthState>(ref.read(authProvider));

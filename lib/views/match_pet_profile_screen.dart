@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../repositories/pet_repository.dart';
-import '../models/pet_model.dart';
-import '../controllers/match_controller.dart';
-import '../controllers/follow_controller.dart';
-import '../controllers/auth_controller.dart';
+import 'package:pet_dating_app/repositories/pet_repository.dart';
+import 'package:pet_dating_app/models/pet_model.dart';
+import 'package:pet_dating_app/controllers/match_controller.dart';
+import 'package:pet_dating_app/controllers/follow_controller.dart';
+import 'package:pet_dating_app/controllers/auth_controller.dart';
 import 'package:go_router/go_router.dart';
 
 // Load pet by ID from Supabase
@@ -195,7 +195,7 @@ class _FollowButtonsRow extends ConsumerWidget {
         Expanded(
           child: isFollowingPet.when(
             loading: () => const _FollowButtonSkeleton(label: 'Follow Pet'),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
             data: (following) => _FollowButton(
               label: following ? 'Following' : 'Follow Pet',
               icon: following ? Icons.pets : Icons.pets_outlined,
@@ -217,7 +217,7 @@ class _FollowButtonsRow extends ConsumerWidget {
           child: isFollowingOwner.when(
             loading: () =>
                 const _FollowButtonSkeleton(label: 'Follow Owner'),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
             data: (following) => _FollowButton(
               label: following ? 'Following Owner' : 'Follow Owner',
               icon: following
@@ -359,7 +359,7 @@ class _PetFollowerCount extends ConsumerWidget {
         'Loading followers...',
         style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
       data: (count) => Row(
         children: [
           Icon(Icons.people_outline, size: 16, color: Colors.grey.shade600),

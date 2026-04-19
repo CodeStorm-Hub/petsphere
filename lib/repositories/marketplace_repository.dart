@@ -1,7 +1,7 @@
-import '../models/product_model.dart';
-import '../models/cart_item_model.dart';
-import '../models/order_model.dart';
-import '../utils/supabase_config.dart';
+import 'package:pet_dating_app/models/product_model.dart';
+import 'package:pet_dating_app/models/cart_item_model.dart';
+import 'package:pet_dating_app/models/order_model.dart';
+import 'package:pet_dating_app/utils/supabase_config.dart';
 
 class MarketplaceRepository {
   // -------------------------------------------------------------------------

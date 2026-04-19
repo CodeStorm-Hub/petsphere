@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../controllers/auth_controller.dart';
+
+import 'package:pet_dating_app/controllers/auth_controller.dart';
+import 'package:pet_dating_app/utils/supabase_config.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -58,7 +60,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Text(
                     'Log in to connect with other pets!',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey.shade600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                     textAlign: TextAlign.center,
                   ),
@@ -66,7 +68,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   if (authState.error != null) ...[
                     Text(
                       authState.error!,
-                      style: const TextStyle(color: Colors.red),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                     ),
                     const SizedBox(height: 16),
                   ],
@@ -101,6 +105,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: authState.isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : const Text('Login'),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () async {
+                        final email = _emailController.text.trim();
+                        if (email.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Enter your email first.'),
+                            ),
+                          );
+                          return;
+                        }
+                        await supabase.auth.resetPasswordForEmail(email);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Password reset link sent! Check your email.',
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text('Forgot Password?'),
                     ),
                   ),
                   const SizedBox(height: 16),

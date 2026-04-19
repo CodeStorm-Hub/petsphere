@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/pet_model.dart';
+import 'package:pet_dating_app/models/pet_model.dart';
 
 class MatchPetCard extends StatelessWidget {
   final PetModel pet;

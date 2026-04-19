@@ -1,4 +1,4 @@
-import 'pet_model.dart';
+import 'package:pet_dating_app/models/pet_model.dart';
 
 class MatchRequestModel {
   final String id;

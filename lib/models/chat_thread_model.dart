@@ -1,5 +1,5 @@
-import 'pet_model.dart';
-import 'message_model.dart';
+import 'package:pet_dating_app/models/pet_model.dart';
+import 'package:pet_dating_app/models/message_model.dart';
 
 class ChatThreadModel {
   final String id;

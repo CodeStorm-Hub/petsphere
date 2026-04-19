@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../controllers/feed_controller.dart';
-import '../controllers/pet_controller.dart';
-import 'components/post_card.dart';
+import 'package:pet_dating_app/controllers/feed_controller.dart';
+import 'package:pet_dating_app/controllers/pet_controller.dart';
+import 'package:pet_dating_app/views/components/post_card.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/chat_controller.dart';
-import '../controllers/pet_controller.dart';
-import 'components/message_bubble.dart';
+import 'package:pet_dating_app/controllers/chat_controller.dart';
+import 'package:pet_dating_app/controllers/pet_controller.dart';
+import 'package:pet_dating_app/views/components/message_bubble.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String threadId;

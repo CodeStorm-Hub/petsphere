@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../models/cart_item_model.dart';
+import 'package:pet_dating_app/models/cart_item_model.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../controllers/cart_controller.dart';
+import 'package:pet_dating_app/controllers/cart_controller.dart';
 
 class CartItemTile extends ConsumerWidget {
   final CartItemModel item;

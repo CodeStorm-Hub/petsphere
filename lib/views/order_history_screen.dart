@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../controllers/auth_controller.dart';
-import '../models/order_model.dart';
-import '../repositories/marketplace_repository.dart';
+import 'package:pet_dating_app/controllers/auth_controller.dart';
+import 'package:pet_dating_app/models/order_model.dart';
+import 'package:pet_dating_app/repositories/marketplace_repository.dart';
 
 final _ordersProvider = FutureProvider.autoDispose<List<OrderModel>>((ref) async {
   final userId = ref.watch(authProvider).user?.id;

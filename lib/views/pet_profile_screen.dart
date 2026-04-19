@@ -1,17 +1,18 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../controllers/feed_controller.dart';
-import '../controllers/pet_controller.dart';
-import '../controllers/auth_controller.dart';
-import '../models/pet_model.dart';
-import '../models/user_model.dart';
-import '../repositories/auth_repository.dart';
-import '../controllers/follow_controller.dart';
-import '../utils/image_upload_helper.dart';
-import '../utils/supabase_config.dart';
+import 'package:pet_dating_app/controllers/feed_controller.dart';
+import 'package:pet_dating_app/controllers/pet_controller.dart';
+import 'package:pet_dating_app/controllers/auth_controller.dart';
+import 'package:pet_dating_app/models/pet_model.dart';
+import 'package:pet_dating_app/models/user_model.dart';
+import 'package:pet_dating_app/repositories/auth_repository.dart';
+import 'package:pet_dating_app/controllers/follow_controller.dart';
+import 'package:pet_dating_app/utils/image_upload_helper.dart';
+import 'package:pet_dating_app/utils/supabase_config.dart';
 
 class PetProfileScreen extends ConsumerStatefulWidget {
   const PetProfileScreen({super.key});
@@ -163,22 +164,22 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                  _StatColumn(label: 'Posts', value: '${displayedPosts.length}'),
                                   if (isOwnerView) ...[
                                     ref.watch(ownerFollowerCountProvider(myUserId)).when(
-                                          data: (count) => _StatColumn(label: "Followers", value: "$count"),
-                                          loading: () => const _StatColumn(label: "Followers", value: "..."),
-                                          error: (_, __) => const _StatColumn(label: "Followers", value: "0"),
+                                          data: (count) => _StatColumn(label: 'Followers', value: '$count'),
+                                          loading: () => const _StatColumn(label: 'Followers', value: '...'),
+                                          error: (_, _) => const _StatColumn(label: 'Followers', value: '0'),
                                         ),
                                     ref.watch(followingCountProvider(myUserId)).when(
-                                          data: (count) => _StatColumn(label: "Following", value: "$count"),
-                                          loading: () => const _StatColumn(label: "Following", value: "..."),
-                                          error: (_, __) => const _StatColumn(label: "Following", value: "0"),
+                                          data: (count) => _StatColumn(label: 'Following', value: '$count'),
+                                          loading: () => const _StatColumn(label: 'Following', value: '...'),
+                                          error: (_, _) => const _StatColumn(label: 'Following', value: '0'),
                                         ),
                                   ] else ...[
-                                    _StatColumn(label: "Pets", value: "${myOwnedPets.length}"),
+                                    _StatColumn(label: 'Pets', value: '${myOwnedPets.length}'),
                                     if (selectedPet != null)
                                       ref.watch(petFollowerCountProvider(selectedPet.id)).when(
-                                            data: (count) => _StatColumn(label: "Followers", value: "$count"),
-                                            loading: () => const _StatColumn(label: "Followers", value: "..."),
-                                            error: (_, __) => const _StatColumn(label: "Followers", value: "0"),
+                                            data: (count) => _StatColumn(label: 'Followers', value: '$count'),
+                                            loading: () => const _StatColumn(label: 'Followers', value: '...'),
+                                            error: (_, _) => const _StatColumn(label: 'Followers', value: '0'),
                                           ),
                                   ],
                                ],
@@ -682,7 +683,7 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
           );
           fields['profile_image_url'] = avatarUrl;
         } catch (e) {
-          debugPrint('Avatar upload failed: $e');
+          log('Avatar upload failed: $e');
           if (mounted) {
             final reason = e.toString();
             ScaffoldMessenger.of(context).showSnackBar(
@@ -705,7 +706,7 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
         return;
       }
 
-      debugPrint('Updating profile with fields: $fields');
+      log('Updating profile with fields: $fields');
       final success = await ref.read(authProvider.notifier).updateProfile(fields);
 
       if (mounted) {
@@ -1079,7 +1080,7 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
           );
           fields['profile_image_url'] = avatarUrl;
         } catch (e) {
-          debugPrint('Pet avatar upload failed: $e');
+          log('Pet avatar upload failed: $e');
           if (mounted) {
             final reason = e.toString();
             ScaffoldMessenger.of(context).showSnackBar(

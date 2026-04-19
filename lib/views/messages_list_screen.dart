@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../controllers/chat_controller.dart';
-import '../controllers/pet_controller.dart';
-import 'components/chat_thread_tile.dart';
+import 'package:pet_dating_app/controllers/chat_controller.dart';
+import 'package:pet_dating_app/controllers/pet_controller.dart';
+import 'package:pet_dating_app/views/components/chat_thread_tile.dart';
 
 class MessagesListScreen extends ConsumerWidget {
   const MessagesListScreen({super.key});

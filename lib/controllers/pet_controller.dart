@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/pet_model.dart';
-import '../repositories/pet_repository.dart';
-import 'auth_controller.dart';
+import 'package:pet_dating_app/models/pet_model.dart';
+import 'package:pet_dating_app/repositories/pet_repository.dart';
+import 'package:pet_dating_app/controllers/auth_controller.dart';
 
 // ---------------------------------------------------------------------------
 // State

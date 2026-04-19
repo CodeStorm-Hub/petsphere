@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../controllers/match_controller.dart';
-import 'components/pet_avatar.dart';
+import 'package:pet_dating_app/controllers/match_controller.dart';
+import 'package:pet_dating_app/views/components/pet_avatar.dart';
 
 class LikedPetsScreen extends ConsumerWidget {
   const LikedPetsScreen({super.key});
@@ -51,7 +51,7 @@ class LikedPetsScreen extends ConsumerWidget {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemCount: sentRequests.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                 final req = sentRequests[index];
                 final pet = req.receiverPet;

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../controllers/pet_controller.dart';
-import 'home_screen.dart';
-import 'pet_profile_screen.dart';
-import 'discovery_screen.dart';
-import 'marketplace_screen.dart';
+import 'package:pet_dating_app/controllers/pet_controller.dart';
+import 'package:pet_dating_app/views/home_screen.dart';
+import 'package:pet_dating_app/views/pet_profile_screen.dart';
+import 'package:pet_dating_app/views/discovery_screen.dart';
+import 'package:pet_dating_app/views/marketplace_screen.dart';
 
 class MainLayout extends ConsumerStatefulWidget {
   const MainLayout({super.key});
@@ -53,7 +53,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
         showSelectedLabels: false,
         showUnselectedLabels: false,
         selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Colors.black54,
+        unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Explore'),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/match_controller.dart';
-import 'components/pet_avatar.dart';
+import 'package:pet_dating_app/controllers/match_controller.dart';
+import 'package:pet_dating_app/views/components/pet_avatar.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});

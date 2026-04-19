@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'utils/routes.dart';
-import 'utils/supabase_config.dart';
-import 'theme/app_theme.dart';
+import 'package:pet_dating_app/utils/routes.dart';
+import 'package:pet_dating_app/utils/supabase_config.dart';
+import 'package:pet_dating_app/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  ensureSupabaseConfigured();
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
 
   runApp(const ProviderScope(child: PetSphereApp()));
@@ -24,6 +25,8 @@ class PetSphereApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'PetSphere',
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       routerConfig: goRouter,
       debugShowCheckedModeBanner: false,
     );

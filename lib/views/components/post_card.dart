@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../models/post_model.dart';
-import 'pet_avatar.dart';
+import 'package:pet_dating_app/models/post_model.dart';
+import 'package:pet_dating_app/views/components/pet_avatar.dart';
 
 class PostCard extends StatefulWidget {
   final PostModel post;

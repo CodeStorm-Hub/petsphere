@@ -1,8 +1,8 @@
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/user_model.dart';
-import '../repositories/auth_repository.dart';
+import 'package:pet_dating_app/models/user_model.dart';
+import 'package:pet_dating_app/repositories/auth_repository.dart';
 
 // ---------------------------------------------------------------------------
 // State
@@ -68,7 +68,7 @@ class AuthNotifier extends Notifier<AuthState> {
             user: user,
           );
         } catch (e) {
-          debugPrint('Auth listener: profile fetch failed: $e');
+          log('Auth listener: profile fetch failed: $e');
           state = AuthState(
             status: AuthStatus.authenticated,
             user: UserModel(
@@ -96,7 +96,7 @@ class AuthNotifier extends Notifier<AuthState> {
         state = state.copyWith(status: AuthStatus.unauthenticated);
       }
     } catch (e) {
-      debugPrint('Session check failed: $e');
+      log('Session check failed: $e');
       state = state.copyWith(status: AuthStatus.unauthenticated);
     }
   }
@@ -140,7 +140,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } on AuthException catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
     } catch (e) {
-      debugPrint('Registration error: $e');
+      log('Registration error: $e');
       state =
           state.copyWith(isLoading: false, error: 'Registration failed. $e');
     } finally {
@@ -165,7 +165,7 @@ class AuthNotifier extends Notifier<AuthState> {
       );
       return true;
     } catch (e) {
-      debugPrint('Profile update error: $e');
+      log('Profile update error: $e');
       state = state.copyWith(isLoading: false, error: e.toString());
       return false;
     } finally {

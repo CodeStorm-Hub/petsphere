@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/cart_item_model.dart';
-import '../models/product_model.dart';
-import '../repositories/marketplace_repository.dart';
-import 'auth_controller.dart';
+import 'package:pet_dating_app/models/cart_item_model.dart';
+import 'package:pet_dating_app/models/product_model.dart';
+import 'package:pet_dating_app/repositories/marketplace_repository.dart';
+import 'package:pet_dating_app/controllers/auth_controller.dart';
 
 class CartState {
   final List<CartItemModel> items;

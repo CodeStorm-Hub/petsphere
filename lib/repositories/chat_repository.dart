@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/chat_thread_model.dart';
-import '../models/message_model.dart';
-import '../utils/supabase_config.dart';
+import 'package:pet_dating_app/models/chat_thread_model.dart';
+import 'package:pet_dating_app/models/message_model.dart';
+import 'package:pet_dating_app/utils/supabase_config.dart';
 
 class ChatRepository {
   // -------------------------------------------------------------------------
@@ -21,14 +21,27 @@ class ChatRepository {
         .map((e) => ChatThreadModel.fromJson(e as Map<String, dynamic>))
         .toList();
 
-    // Attach last message to each thread
-    final enriched = <ChatThreadModel>[];
-    for (final thread in threads) {
-      final lastMsg = await _fetchLastMessage(thread.id);
-      enriched.add(thread.copyWith(lastMessage: lastMsg));
+    if (threads.isEmpty) return threads;
+
+    // Batch-fetch the latest message for ALL threads in a single query
+    final threadIds = threads.map((t) => t.id).toList();
+    final allMessages = await supabase
+        .from('messages')
+        .select()
+        .inFilter('thread_id', threadIds)
+        .order('created_at', ascending: false);
+
+    // Group by thread_id and pick the first (latest) per thread
+    final lastMsgMap = <String, MessageModel>{};
+    for (final row in (allMessages as List<dynamic>)) {
+      final msg = MessageModel.fromJson(row as Map<String, dynamic>);
+      lastMsgMap.putIfAbsent(msg.threadId, () => msg);
     }
 
-    return enriched;
+    // Enrich threads with their last message
+    return threads
+        .map((t) => t.copyWith(lastMessage: lastMsgMap[t.id]))
+        .toList();
   }
 
   // -------------------------------------------------------------------------

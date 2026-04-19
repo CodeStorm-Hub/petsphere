@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/post_model.dart';
-import '../utils/supabase_config.dart';
+import 'package:pet_dating_app/models/post_model.dart';
+import 'package:pet_dating_app/utils/supabase_config.dart';
 
 class FeedRepository {
   // -------------------------------------------------------------------------

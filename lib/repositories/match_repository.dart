@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
-import '../models/pet_model.dart';
-import '../models/match_request_model.dart';
-import '../utils/supabase_config.dart';
+import 'dart:developer';
+import 'package:pet_dating_app/models/pet_model.dart';
+import 'package:pet_dating_app/models/match_request_model.dart';
+import 'package:pet_dating_app/utils/supabase_config.dart';
 
 class MatchRepository {
   // -------------------------------------------------------------------------
@@ -13,7 +13,7 @@ class MatchRepository {
     String? filterAnimal,
     String? filterBreed,
   }) async {
-    debugPrint('[MatchRepository] fetchDiscoveryPets simplified: userId=$userId');
+    log('[MatchRepository] fetchDiscoveryPets simplified: userId=$userId');
 
     // Simplify to just listed pets NOT owned by me
     var query = supabase
@@ -30,7 +30,7 @@ class MatchRepository {
     }
 
     final data = await query.order('created_at', ascending: false);
-    debugPrint('[MatchRepository] Fetched ${(data as List).length} pets from others');
+    log('[MatchRepository] Fetched ${(data as List).length} pets from others');
 
     return (data as List<dynamic>)
         .map((e) => PetModel.fromJson(e as Map<String, dynamic>))
@@ -44,11 +44,14 @@ class MatchRepository {
     required String senderPetId,
     required String receiverPetId,
   }) async {
-    await supabase.from('match_requests').upsert({
-      'sender_pet_id': senderPetId,
-      'receiver_pet_id': receiverPetId,
-      'status': 'pending',
-    });
+    await supabase.from('match_requests').upsert(
+      {
+        'sender_pet_id': senderPetId,
+        'receiver_pet_id': receiverPetId,
+        'status': 'pending',
+      },
+      onConflict: 'sender_pet_id,receiver_pet_id',
+    );
   }
 
   // -------------------------------------------------------------------------

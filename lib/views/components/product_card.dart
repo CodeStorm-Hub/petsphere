@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/product_model.dart';
+import 'package:pet_dating_app/models/product_model.dart';
 import 'package:intl/intl.dart';
 
 class ProductCard extends StatelessWidget {

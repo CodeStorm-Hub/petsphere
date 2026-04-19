@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../controllers/marketplace_controller.dart';
-import '../controllers/cart_controller.dart';
-import 'components/product_card.dart';
+import 'package:pet_dating_app/controllers/marketplace_controller.dart';
+import 'package:pet_dating_app/controllers/cart_controller.dart';
+import 'package:pet_dating_app/views/components/product_card.dart';
 
 class MarketplaceScreen extends ConsumerWidget {
   const MarketplaceScreen({super.key});

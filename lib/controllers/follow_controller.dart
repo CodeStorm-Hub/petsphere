@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../repositories/follow_repository.dart';
-import 'auth_controller.dart';
+import 'package:pet_dating_app/repositories/follow_repository.dart';
+import 'package:pet_dating_app/controllers/auth_controller.dart';
 
 // ---------------------------------------------------------------------------
 // Reactive query providers (auto-refresh on invalidation)
@@ -69,7 +69,7 @@ class FollowController extends Notifier<void> {
       ref.invalidate(ownerFollowerCountProvider(ownerId));
       ref.invalidate(followingCountProvider(userId));
     } catch (e) {
-      debugPrint('toggleFollowOwner error: $e');
+      log('toggleFollowOwner error: $e');
     }
   }
 
@@ -93,7 +93,7 @@ class FollowController extends Notifier<void> {
       ref.invalidate(petFollowerCountProvider(petId));
       ref.invalidate(followingCountProvider(userId));
     } catch (e) {
-      debugPrint('toggleFollowPet error: $e');
+      log('toggleFollowPet error: $e');
     }
   }
 }

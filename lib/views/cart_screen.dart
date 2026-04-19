@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/cart_controller.dart';
-import 'components/cart_item_tile.dart';
+import 'package:pet_dating_app/controllers/cart_controller.dart';
+import 'package:pet_dating_app/views/components/cart_item_tile.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../models/chat_thread_model.dart';
-import 'pet_avatar.dart';
+import 'package:pet_dating_app/models/chat_thread_model.dart';
+import 'package:pet_dating_app/views/components/pet_avatar.dart';
 
 class ChatThreadTile extends StatelessWidget {
   final ChatThreadModel thread;

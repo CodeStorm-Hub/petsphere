@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../models/pet_model.dart';
-import '../controllers/feed_controller.dart';
-import '../controllers/pet_controller.dart';
-import '../utils/image_upload_helper.dart';
-import '../utils/supabase_config.dart';
+import 'package:pet_dating_app/models/pet_model.dart';
+import 'package:pet_dating_app/controllers/feed_controller.dart';
+import 'package:pet_dating_app/controllers/pet_controller.dart';
+import 'package:pet_dating_app/utils/image_upload_helper.dart';
+import 'package:pet_dating_app/utils/supabase_config.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
   final String? initialPetId;

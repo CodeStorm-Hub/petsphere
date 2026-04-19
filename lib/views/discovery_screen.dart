@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../controllers/match_controller.dart';
-import '../controllers/pet_controller.dart';
-import '../models/pet_model.dart';
-import 'components/match_pet_card.dart';
+import 'package:pet_dating_app/controllers/match_controller.dart';
+import 'package:pet_dating_app/controllers/pet_controller.dart';
+import 'package:pet_dating_app/models/pet_model.dart';
+import 'package:pet_dating_app/views/components/match_pet_card.dart';
 
 class DiscoveryScreen extends ConsumerWidget {
   const DiscoveryScreen({super.key});

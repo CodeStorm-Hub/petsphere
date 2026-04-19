@@ -1,8 +1,10 @@
+import 'dart:developer';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/user_model.dart';
-import '../utils/supabase_config.dart';
+
+import 'package:pet_dating_app/models/user_model.dart';
+import 'package:pet_dating_app/utils/supabase_config.dart';
 
 class AuthRepository {
   // -------------------------------------------------------------------------
@@ -27,6 +29,7 @@ class AuthRepository {
     final response = await supabase.auth.signUp(
       email: email,
       password: password,
+      data: {'name': name},
     );
 
     final user = response.user;
@@ -34,14 +37,10 @@ class AuthRepository {
       throw Exception('Registration failed. Check your email for a confirmation link.');
     }
 
-    // Upsert the profile row — non-fatal if it fails (RLS may block)
-    try {
-      await supabase.from('profiles').upsert({
-        'id': user.id,
-        'name': name,
-      });
-    } catch (e) {
-      debugPrint('Profile upsert during signup failed (non-fatal): $e');
+    // Profile row is auto-created by the handle_new_user DB trigger.
+    // If email confirmation is required, session will be null.
+    if (response.session == null) {
+      log('Signup pending email confirmation for $email');
     }
 
     return UserModel(id: user.id, email: email, name: name);
@@ -94,15 +93,16 @@ class AuthRepository {
       'webp' => 'image/webp',
       _ => 'image/jpeg',
     };
-    final path = 'avatars/${userId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+    // Store in dedicated avatars bucket, one folder per user
+    final path = '$userId/${DateTime.now().millisecondsSinceEpoch}.$ext';
 
-    await supabase.storage.from(kBucketPetImages).upload(
+    await supabase.storage.from('avatars').upload(
       path,
       imageFile,
       fileOptions: FileOptions(contentType: contentType),
     );
 
-    return supabase.storage.from(kBucketPetImages).getPublicUrl(path);
+    return supabase.storage.from('avatars').getPublicUrl(path);
   }
 
   // -------------------------------------------------------------------------

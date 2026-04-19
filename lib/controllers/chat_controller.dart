@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/chat_thread_model.dart';
-import '../models/message_model.dart';
-import '../repositories/chat_repository.dart';
-import 'pet_controller.dart';
+import 'package:pet_dating_app/models/chat_thread_model.dart';
+import 'package:pet_dating_app/models/message_model.dart';
+import 'package:pet_dating_app/repositories/chat_repository.dart';
+import 'package:pet_dating_app/controllers/pet_controller.dart';
 
 // ---------------------------------------------------------------------------
 // Per-Thread Messages State (with Realtime)

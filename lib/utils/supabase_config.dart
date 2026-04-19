@@ -1,13 +1,27 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ---------------------------------------------------------------------------
-// Supabase project credentials
+// Supabase project credentials — injected via --dart-define-from-file
+// Run with: flutter run --dart-define-from-file=.env.local
 // ---------------------------------------------------------------------------
-const String supabaseUrl = 'https://foubokcqaxyqgjhtgzsx.supabase.co';
-const String supabaseAnonKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
-    '.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvdWJva2NxYXh5cWdqaHRnenN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjQ0NjQsImV4cCI6MjA5MDMwMDQ2NH0'
-    '.AO7AYHhkoEoNrMUrz-aLOrfWYhTmsmrzkMIwQLBPT2U';
+const String supabaseUrl = String.fromEnvironment(
+  'SUPABASE_URL',
+  defaultValue: '',
+);
+const String supabaseAnonKey = String.fromEnvironment(
+  'SUPABASE_ANON_KEY',
+  defaultValue: '',
+);
+
+/// Throws an informative error if credentials were not injected at build time.
+void ensureSupabaseConfigured() {
+  if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
+    throw StateError(
+      'Supabase credentials are missing.\n'
+      'Run with: flutter run --dart-define-from-file=.env.local',
+    );
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Convenience getter — use `supabase.from(...)`, `supabase.auth`, etc.

@@ -1,10 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/match_request_model.dart';
-import '../models/pet_model.dart';
-import '../repositories/match_repository.dart';
-import 'auth_controller.dart';
-import 'pet_controller.dart';
+import 'package:pet_dating_app/models/match_request_model.dart';
+import 'package:pet_dating_app/models/pet_model.dart';
+import 'package:pet_dating_app/repositories/match_repository.dart';
+import 'package:pet_dating_app/controllers/auth_controller.dart';
+import 'package:pet_dating_app/controllers/pet_controller.dart';
 
 // ---------------------------------------------------------------------------
 // State
@@ -61,7 +61,7 @@ class MatchController extends Notifier<MatchState> {
   @override
   MatchState build() {
     final activePet = ref.watch(activePetProvider);
-    debugPrint('[MatchController] build: activePet=${activePet?.name}');
+    log('[MatchController] build: activePet=${activePet?.name}');
     if (activePet != null) {
       // Initial load — state already has filterAnimal/filterBreed as null
       _load(activePet.id);
@@ -111,9 +111,9 @@ class MatchController extends Notifier<MatchState> {
 
   void setFilterBreed(String? breed) {
     final activePet = ref.read(activePetProvider);
-    debugPrint('[MatchController] setFilterBreed($breed) — activePet=${activePet?.name}');
+    log('[MatchController] setFilterBreed($breed) — activePet=${activePet?.name}');
     if (activePet == null) {
-      debugPrint('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
+      log('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
       return;
     }
     if (breed == null || breed.isEmpty) {
@@ -121,15 +121,15 @@ class MatchController extends Notifier<MatchState> {
     } else {
       state = state.copyWith(filterBreed: breed);
     }
-    debugPrint('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
+    log('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
     _load(activePet.id);
   }
 
   void setFilterAnimal(String? animal) {
     final activePet = ref.read(activePetProvider);
-    debugPrint('[MatchController] setFilterAnimal($animal) — activePet=${activePet?.name}');
+    log('[MatchController] setFilterAnimal($animal) — activePet=${activePet?.name}');
     if (activePet == null) {
-      debugPrint('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
+      log('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
       return;
     }
     if (animal == null || animal.isEmpty) {
@@ -137,7 +137,7 @@ class MatchController extends Notifier<MatchState> {
     } else {
       state = state.copyWith(filterAnimal: animal, clearBreed: true);
     }
-    debugPrint('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
+    log('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
     _load(activePet.id);
   }
 

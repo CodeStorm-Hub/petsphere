@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/product_model.dart';
-import '../repositories/marketplace_repository.dart';
+import 'package:pet_dating_app/models/product_model.dart';
+import 'package:pet_dating_app/repositories/marketplace_repository.dart';
 
 // ---------------------------------------------------------------------------
 // State

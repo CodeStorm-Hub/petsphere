@@ -1,6 +1,6 @@
 import 'dart:io';
-import '../models/pet_model.dart';
-import '../utils/supabase_config.dart';
+import 'package:pet_dating_app/models/pet_model.dart';
+import 'package:pet_dating_app/utils/supabase_config.dart';
 
 class PetRepository {
   // -------------------------------------------------------------------------

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/marketplace_controller.dart';
-import '../controllers/cart_controller.dart';
+import 'package:pet_dating_app/controllers/marketplace_controller.dart';
+import 'package:pet_dating_app/controllers/cart_controller.dart';
 import 'package:intl/intl.dart';
 
 class ProductDetailScreen extends ConsumerWidget {

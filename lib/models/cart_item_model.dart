@@ -1,4 +1,4 @@
-import 'product_model.dart';
+import 'package:pet_dating_app/models/product_model.dart';
 
 class CartItemModel {
   final String id;

@@ -1,4 +1,4 @@
-import '../utils/supabase_config.dart';
+import 'package:pet_dating_app/utils/supabase_config.dart';
 
 class FollowRepository {
   // -------------------------------------------------------------------------

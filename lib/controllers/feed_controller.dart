@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/post_model.dart';
-import '../models/pet_model.dart';
-import '../repositories/feed_repository.dart';
+import 'package:pet_dating_app/models/post_model.dart';
+import 'package:pet_dating_app/models/pet_model.dart';
+import 'package:pet_dating_app/repositories/feed_repository.dart';
 
 // ---------------------------------------------------------------------------
 // State wrapper
