@@ -46,6 +46,7 @@ class DiscoveryScreen extends ConsumerWidget {
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(
+          heroTag: 'discovery_fab',
           onPressed: () {
             _showListPetSheet(context, ref);
           },

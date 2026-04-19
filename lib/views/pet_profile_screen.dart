@@ -418,6 +418,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
       ),
       floatingActionButton: !isOwnerView && selectedPet != null
           ? FloatingActionButton(
+              heroTag: 'profile_fab',
               onPressed: () => context.push('/create_post?petId=${selectedPet!.id}'),
               backgroundColor: const Color(0xFFFF8A65),
               child: const Icon(Icons.add_a_photo_outlined, color: Colors.white),
