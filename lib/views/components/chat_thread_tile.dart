@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/chat_thread_model.dart';
-import 'pet_avatar.dart';
+
 
 class ChatThreadTile extends StatelessWidget {
   final ChatThreadModel thread;
@@ -23,16 +23,23 @@ class ChatThreadTile extends StatelessWidget {
     );
 
     final hasUnread = thread.unreadCount > 0;
+    final theme = Theme.of(context);
 
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: PetAvatar(imageUrl: otherPet.profileImageUrl, radius: 28),
+      leading: CircleAvatar(
+        radius: 28,
+        backgroundImage: otherPet.profileImageUrl.isNotEmpty ? NetworkImage(otherPet.profileImageUrl) : null,
+        backgroundColor: theme.colorScheme.surfaceContainerHighest,
+        child: otherPet.profileImageUrl.isEmpty ? Icon(Icons.pets, color: theme.colorScheme.onSurfaceVariant) : null,
+      ),
       title: Text(
         otherPet.name,
         style: TextStyle(
           fontWeight: hasUnread ? FontWeight.bold : FontWeight.w600,
           fontSize: 16,
+          color: theme.colorScheme.onSurface,
         ),
       ),
       subtitle: thread.lastMessage == null
@@ -42,7 +49,7 @@ class ChatThreadTile extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: hasUnread ? Colors.black87 : Colors.grey,
+                color: hasUnread ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
                 fontWeight: hasUnread ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
@@ -50,13 +57,13 @@ class ChatThreadTile extends StatelessWidget {
           ? Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary,
+                color: theme.colorScheme.primary,
                 shape: BoxShape.circle,
               ),
               child: Text(
                 '${thread.unreadCount}',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: theme.colorScheme.onPrimary,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),

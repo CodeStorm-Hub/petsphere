@@ -301,7 +301,7 @@ class _CommentBottomSheetWidgetState
                         contentPadding:
                             const EdgeInsets.symmetric(vertical: 4),
                         leading: CircleAvatar(
-                          backgroundColor: bg.withOpacity(0.2),
+                          backgroundColor: bg.withValues(alpha: 0.2),
                           child: Text(
                             comment.petName[0].toUpperCase(),
                             style: TextStyle(
