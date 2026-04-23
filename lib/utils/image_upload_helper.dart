@@ -36,10 +36,20 @@ class ImageUploadHelper {
     required String bucket,
     required String path,
   }) async {
+    final ext = file.path.split('.').last.toLowerCase();
+    final contentType = switch (ext) {
+      'jpg' || 'jpeg' => 'image/jpeg',
+      'png' => 'image/png',
+      'gif' => 'image/gif',
+      'webp' => 'image/webp',
+      'heic' => 'image/heic',
+      _ => 'image/jpeg',
+    };
+
     await supabase.storage.from(bucket).upload(
           path,
           file,
-          fileOptions: const FileOptions(upsert: true),
+          fileOptions: FileOptions(upsert: true, contentType: contentType),
         );
 
     return supabase.storage.from(bucket).getPublicUrl(path);

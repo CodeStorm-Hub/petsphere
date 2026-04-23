@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
@@ -41,6 +42,9 @@ class AuthState {
 // Notifier
 // ---------------------------------------------------------------------------
 class AuthNotifier extends Notifier<AuthState> {
+  // Guard: prevent auth listener from overwriting state during active operations
+  bool _isPerformingAuthAction = false;
+
   @override
   AuthState build() {
     _init();
@@ -50,6 +54,9 @@ class AuthNotifier extends Notifier<AuthState> {
   void _init() {
     // Listen to Supabase auth state changes continuously
     authRepository.authStateChanges.listen((event) async {
+      // Skip if we're in the middle of login/register — those set state directly
+      if (_isPerformingAuthAction) return;
+
       final supabaseUser = event.session?.user;
       if (supabaseUser == null) {
         state = AuthState(status: AuthStatus.unauthenticated);
@@ -60,7 +67,8 @@ class AuthNotifier extends Notifier<AuthState> {
             status: AuthStatus.authenticated,
             user: user,
           );
-        } catch (_) {
+        } catch (e) {
+          debugPrint('Auth listener: profile fetch failed: $e');
           state = AuthState(
             status: AuthStatus.authenticated,
             user: UserModel(
@@ -87,7 +95,8 @@ class AuthNotifier extends Notifier<AuthState> {
       } else {
         state = state.copyWith(status: AuthStatus.unauthenticated);
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Session check failed: $e');
       state = state.copyWith(status: AuthStatus.unauthenticated);
     }
   }
@@ -96,6 +105,7 @@ class AuthNotifier extends Notifier<AuthState> {
   // Login
   // -------------------------------------------------------------------------
   Future<void> login(String email, String password) async {
+    _isPerformingAuthAction = true;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final user = await authRepository.signIn(email, password);
@@ -109,6 +119,8 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
           isLoading: false, error: 'Login failed. Please try again.');
+    } finally {
+      _isPerformingAuthAction = false;
     }
   }
 
@@ -116,6 +128,7 @@ class AuthNotifier extends Notifier<AuthState> {
   // Register
   // -------------------------------------------------------------------------
   Future<void> register(String email, String password, String name) async {
+    _isPerformingAuthAction = true;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final user = await authRepository.signUp(email, password, name);
@@ -127,8 +140,36 @@ class AuthNotifier extends Notifier<AuthState> {
     } on AuthException catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
     } catch (e) {
+      debugPrint('Registration error: $e');
       state =
           state.copyWith(isLoading: false, error: 'Registration failed. $e');
+    } finally {
+      _isPerformingAuthAction = false;
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Update Profile
+  // -------------------------------------------------------------------------
+  Future<bool> updateProfile(Map<String, dynamic> fields) async {
+    final userId = state.user?.id;
+    if (userId == null) return false;
+
+    _isPerformingAuthAction = true;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final updatedUser = await authRepository.updateProfile(userId, fields);
+      state = state.copyWith(
+        user: updatedUser,
+        isLoading: false,
+      );
+      return true;
+    } catch (e) {
+      debugPrint('Profile update error: $e');
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    } finally {
+      _isPerformingAuthAction = false;
     }
   }
 

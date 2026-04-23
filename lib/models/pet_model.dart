@@ -9,6 +9,7 @@ class PetModel {
   final String profileImageUrl;
   final List<String> images;
   final bool isPublicOwner;
+  final bool isBreedingListed;
 
   PetModel({
     required this.id,
@@ -21,6 +22,7 @@ class PetModel {
     required this.profileImageUrl,
     this.images = const [],
     this.isPublicOwner = true,
+    this.isBreedingListed = false,
   });
 
   PetModel copyWith({
@@ -34,6 +36,7 @@ class PetModel {
     String? profileImageUrl,
     List<String>? images,
     bool? isPublicOwner,
+    bool? isBreedingListed,
   }) {
     return PetModel(
       id: id ?? this.id,
@@ -46,6 +49,7 @@ class PetModel {
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       images: images ?? this.images,
       isPublicOwner: isPublicOwner ?? this.isPublicOwner,
+      isBreedingListed: isBreedingListed ?? this.isBreedingListed,
     );
   }
 
@@ -64,6 +68,7 @@ class PetModel {
               .toList() ??
           [],
       isPublicOwner: json['is_public_owner'] as bool? ?? true,
+      isBreedingListed: json['is_breeding_listed'] as bool? ?? false,
     );
   }
 
@@ -77,5 +82,6 @@ class PetModel {
         'profile_image_url': profileImageUrl,
         'images': images,
         'is_public_owner': isPublicOwner,
+        'is_breeding_listed': isBreedingListed,
       };
 }

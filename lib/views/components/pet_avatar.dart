@@ -27,8 +27,11 @@ class PetAvatar extends StatelessWidget {
       padding: hasStory ? const EdgeInsets.all(2) : EdgeInsets.zero,
       child: CircleAvatar(
         radius: radius,
-        backgroundImage: NetworkImage(imageUrl),
+        backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
         backgroundColor: Colors.grey.shade300,
+        child: imageUrl.isEmpty
+            ? Icon(Icons.pets, size: radius, color: Colors.grey.shade500)
+            : null,
       ),
     );
   }
