@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#d7eed8",
+                    "on-error": "#fff7f6",
+                    "primary-container": "#ffad93",
+                    "on-secondary-fixed": "#4e3d00",
+                    "tertiary": "#506453",
+                    "on-primary": "#fff7f5",
+                    "error-dim": "#70030f",
+                    "tertiary-dim": "#445847",
+                    "on-secondary-fixed-variant": "#705900",
+                    "surface-container-low": "#f9f3ed",
+                    "secondary-dim": "#665100",
+                    "error": "#ac3434",
+                    "primary-fixed": "#ffad93",
+                    "secondary-fixed": "#ffe087",
+                    "on-surface-variant": "#625e59",
+                    "outline": "#7f7a74",
+                    "on-tertiary-container": "#4e6251",
+                    "on-secondary-container": "#644f00",
+                    "background": "#fef8f3",
+                    "on-primary-fixed-variant": "#782e15",
+                    "tertiary-container": "#e5fde6",
+                    "on-background": "#35322d",
+                    "on-primary-fixed": "#4f1200",
+                    "on-secondary": "#fff8ee",
+                    "surface": "#fef8f3",
+                    "surface-container-lowest": "#ffffff",
+                    "error-container": "#f56965",
+                    "surface-container-high": "#eee7e0",
+                    "surface-variant": "#e8e1da",
+                    "surface-dim": "#e0d9d1",
+                    "on-tertiary-fixed-variant": "#586d5b",
+                    "surface-container-highest": "#e8e1da",
+                    "primary": "#99472c",
+                    "secondary-fixed-dim": "#fad04b",
+                    "on-tertiary-fixed": "#3c503f",
+                    "inverse-on-surface": "#a09c98",
+                    "inverse-surface": "#0f0e0b",
+                    "primary-fixed-dim": "#ff9878",
+                    "on-primary-container": "#6c250d",
+                    "outline-variant": "#b7b1aa",
+                    "surface-bright": "#fef8f3",
+                    "on-tertiary": "#e8ffe8",
+                    "tertiary-fixed": "#e5fde6",
+                    "secondary": "#745c00",
+                    "inverse-primary": "#fd9574",
+                    "surface-container": "#f3ede6",
+                    "surface-tint": "#99472c",
+                    "on-error-container": "#65000b",
+                    "primary-dim": "#8a3b21",
+                    "on-surface": "#35322d",
+                    "secondary-container": "#ffe087"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "display": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col items-center justify-between selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top AppBar (Simplified for Onboarding as per Suppression Rules) -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-center px-6 h-20 bg-stone-50/80 dark:bg-stone-900/80 backdrop-blur-lg">
+<div class="text-orange-900 dark:text-orange-100 font-extrabold tracking-tighter text-2xl">
+            The Nurtured Atelier
+        </div>
+</header>
+<main class="flex-1 w-full max-w-[480px] px-6 pt-32 pb-24 flex flex-col">
+<!-- Visual Anchor -->
+<div class="mb-10 relative">
+<div class="absolute -top-12 -left-6 w-32 h-32 bg-secondary-fixed-dim/20 rounded-full blur-3xl"></div>
+<div class="absolute -bottom-8 -right-4 w-24 h-24 bg-primary-container/20 rounded-full blur-2xl"></div>
+<div class="relative">
+<h1 class="text-on-background font-display font-bold text-4xl tracking-tight leading-tight mb-3">
+                    Create Account
+                </h1>
+<p class="text-on-surface-variant font-body text-lg leading-relaxed">
+                    Join our community of mindful pet companions and nurturing homes.
+                </p>
+</div>
+</div>
+<!-- Registration Form -->
+<form class="space-y-6">
+<!-- Full Name -->
+<div class="space-y-2">
+<label class="block text-on-surface font-semibold text-sm ml-2" for="full-name">Full Name</label>
+<div class="relative">
+<input class="w-full h-16 px-6 bg-surface-container-highest border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all duration-300 placeholder:text-on-surface-variant/40" id="full-name" placeholder="E.g. Julianna Veldt" type="text"/>
+</div>
+</div>
+<!-- Email -->
+<div class="space-y-2">
+<label class="block text-on-surface font-semibold text-sm ml-2" for="email">Email Address</label>
+<div class="relative">
+<input class="w-full h-16 px-6 bg-surface-container-highest border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all duration-300 placeholder:text-on-surface-variant/40" id="email" placeholder="hello@nurtured.com" type="email"/>
+</div>
+</div>
+<!-- Password -->
+<div class="space-y-2">
+<label class="block text-on-surface font-semibold text-sm ml-2" for="password">Password</label>
+<div class="relative">
+<input class="w-full h-16 px-6 bg-surface-container-highest border-none rounded-lg focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all duration-300 placeholder:text-on-surface-variant/40" id="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-5 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+<!-- Terms & Conditions -->
+<div class="flex items-start space-x-3 px-2 pt-2">
+<div class="flex items-center h-5">
+<input class="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary/20 transition-all cursor-pointer" id="terms" type="checkbox"/>
+</div>
+<label class="text-sm text-on-surface-variant leading-tight" for="terms">
+                    I agree to the <span class="text-primary font-bold hover:underline cursor-pointer">Terms of Service</span> and <span class="text-primary font-bold hover:underline cursor-pointer">Privacy Policy</span>.
+                </label>
+</div>
+<!-- CTA -->
+<div class="pt-6">
+<button class="w-full h-16 bg-gradient-to-br from-primary to-primary-dim text-on-primary font-bold text-lg rounded-full shadow-[0_8px_24px_rgba(153,71,44,0.15)] hover:shadow-[0_12px_32px_rgba(153,71,44,0.25)] active:scale-95 transition-all duration-300 flex items-center justify-center gap-2" type="submit">
+                    Create Account
+                    <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</form>
+<!-- Social Proof/Asymmetry Element -->
+<div class="mt-12 p-6 bg-surface-container-low rounded-lg flex items-center gap-4 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-24 h-24 bg-tertiary-fixed-dim/10 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-125 duration-700"></div>
+<div class="flex -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" data-alt="close-up portrait of a woman with a gentle expression in warm natural sunlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBexMt10mu00AqCJSXLadLeRtf8aCqNGzdEeS_2VitiRNOOe2g7o4SVMise_NNHeWV2iWQm2bGnLE6UjBG0AS2autVJjU-0EefMORj1YI9DgKsCZcfZg3kJKcvacdJMkjPFKAvxa90ZiFrpEbyuP8QOw_SnKkH7m8IEzm2EKEuHKUIU0OKUUSlYfCn0WSZ7T0LBLcX4IaLlimSd2MXRCccVoJF_NUrgMwYLOTRWLFnWKdPVVGl3qENGdW2hNURfb7iaIlTy7jvc3D2j"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" data-alt="portrait of a man smiling warmly with soft ambient indoor lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADYKl9dXR4IhLZ9L9SbHu-r3exTQWUkwZAhDcXErpEZwHwfcF8lCoW_MNYcp1EtlGpg7lx38kk_W29A0aCjGNwKmTzBaFwWqhkf8gaAMO-hI6LCDdArvRfllfl3g3y4n3KnnmEYpBo508Yt6fZ46Tuf02M0ElPd4u1OtkRYQwSlKhCk3vEszxfyySI23vqNMxTDOL2QLedio3wSh7NK6L_0oNwfEsCnbpznDB5VwW-r_v-PFLVx4hpiVupq6fzUhgGf1RnNR10RtKP"/>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-lowest bg-secondary-fixed text-[10px] font-black flex items-center justify-center">+2k</div>
+</div>
+<p class="text-xs text-on-surface-variant font-medium leading-relaxed">
+                Join <span class="text-on-surface font-bold">2,400+</span> pet lovers already nurturing their best lives.
+            </p>
+</div>
+</main>
+<!-- Footer Action -->
+<footer class="w-full max-w-[480px] pb-12 flex justify-center">
+<button class="flex items-center gap-1 group text-on-surface-variant hover:text-on-background transition-colors duration-200">
+<span class="text-sm">Already have an account?</span>
+<span class="text-sm font-extrabold text-primary group-hover:underline">Login</span>
+</button>
+</footer>
+<!-- Background Texture -->
+<div class="fixed inset-0 pointer-events-none opacity-[0.03] z-[-1] bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')]"></div>
+</body></html>

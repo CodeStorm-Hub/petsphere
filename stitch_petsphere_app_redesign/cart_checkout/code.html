@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cart - The Nurtured Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#f56965",
+                        "surface-tint": "#99472c",
+                        "secondary": "#745c00",
+                        "on-primary-fixed": "#4f1200",
+                        "inverse-primary": "#fd9574",
+                        "on-background": "#35322d",
+                        "primary-fixed-dim": "#ff9878",
+                        "on-secondary-fixed-variant": "#705900",
+                        "tertiary-fixed": "#e5fde6",
+                        "tertiary-dim": "#445847",
+                        "surface-variant": "#e8e1da",
+                        "background": "#fef8f3",
+                        "surface-container-highest": "#e8e1da",
+                        "secondary-container": "#ffe087",
+                        "error-dim": "#70030f",
+                        "secondary-fixed": "#ffe087",
+                        "on-tertiary-fixed-variant": "#586d5b",
+                        "on-secondary-fixed": "#4e3d00",
+                        "tertiary": "#506453",
+                        "on-secondary-container": "#644f00",
+                        "on-primary-fixed-variant": "#782e15",
+                        "secondary-dim": "#665100",
+                        "outline": "#7f7a74",
+                        "surface": "#fef8f3",
+                        "surface-bright": "#fef8f3",
+                        "primary": "#99472c",
+                        "surface-container-low": "#f9f3ed",
+                        "tertiary-container": "#e5fde6",
+                        "on-tertiary-container": "#4e6251",
+                        "on-tertiary": "#e8ffe8",
+                        "outline-variant": "#b7b1aa",
+                        "error": "#ac3434",
+                        "on-error": "#fff7f6",
+                        "secondary-fixed-dim": "#fad04b",
+                        "on-primary-container": "#6c250d",
+                        "on-surface": "#35322d",
+                        "primary-dim": "#8a3b21",
+                        "on-primary": "#fff7f5",
+                        "tertiary-fixed-dim": "#d7eed8",
+                        "inverse-on-surface": "#a09c98",
+                        "on-tertiary-fixed": "#3c503f",
+                        "surface-container": "#f3ede6",
+                        "primary-container": "#ffad93",
+                        "on-error-container": "#65000b",
+                        "primary-fixed": "#ffad93",
+                        "on-secondary": "#fff8ee",
+                        "surface-dim": "#e0d9d1",
+                        "inverse-surface": "#0f0e0b",
+                        "on-surface-variant": "#625e59",
+                        "surface-container-high": "#eee7e0",
+                        "surface-container-lowest": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "display": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-40">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f3]/80 backdrop-blur-md dark:bg-stone-900/80 shadow-[0_8px_24px_rgba(153,71,44,0.04)]">
+<div class="flex items-center justify-between px-6 h-16 w-full max-w-screen-xl mx-auto">
+<button class="text-[#99472c] dark:text-[#ffad93] active:scale-95 duration-200 p-2 hover:bg-[#f3ede6] dark:hover:bg-stone-800 rounded-full">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-['Plus_Jakarta_Sans'] font-bold -tracking-[0.02em] text-[#35322d] dark:text-[#fef8f3] text-lg">Cart</h1>
+<button class="text-[#99472c] dark:text-[#ffad93] active:scale-95 duration-200 p-2 hover:bg-[#f3ede6] dark:hover:bg-stone-800 rounded-full">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-screen-md mx-auto">
+<!-- Cart List -->
+<section class="space-y-6">
+<!-- Item 1 -->
+<div class="relative flex items-center gap-4 bg-surface-container-lowest p-4 rounded-lg shadow-[0_8px_24px_rgba(153,71,44,0.04)] group">
+<div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container">
+<img alt="Organic Puppy Kibble" class="w-full h-full object-cover" data-alt="high-quality organic puppy kibble in a minimalist textured bag on a clean neutral background with soft shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAf32e--68tIGJmGTmBBi83uJIH_puD1mlivsRO7WaV_rdSEnDNazWFBXzf-zhb4BsGrPVM6hEyTPBpogkX4ikZZBaZvzzj8wo1r8fIZa_fJNPUkAO7BPXoF3ILgaMJqZ0Ka9t90LYCaKRpFc1UK7Hzriv_36O6hpWC4O2Bo8lvYvZKgGyTArqBmbyUABhDhfGRDzm3lqlCw_d4qpyCDVWmAjwysQOmKQrFXCYaj0CZckh94aXdJAU6ZCUhNQIpy4kQT9cuwuo8VSsx"/>
+</div>
+<div class="flex-grow flex flex-col justify-between h-24">
+<div>
+<h3 class="text-on-surface font-bold text-lg leading-tight">Organic Puppy Kibble</h3>
+<p class="text-on-surface-variant text-sm font-medium">Free-range Chicken &amp; Grains</p>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-primary font-bold text-lg">$24.99</span>
+<div class="flex items-center bg-surface-container-low rounded-full px-2 py-1">
+<button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="remove">remove</span>
+</button>
+<span class="w-8 text-center font-bold text-sm">1</span>
+<button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<button class="absolute -top-2 -right-2 bg-error text-on-error w-8 h-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center active:scale-90">
+<span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+</button>
+</div>
+<!-- Item 2 -->
+<div class="relative flex items-center gap-4 bg-surface-container-lowest p-4 rounded-lg shadow-[0_8px_24px_rgba(153,71,44,0.04)] group">
+<div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container">
+<img alt="Hand-knitted Catnip Mouse" class="w-full h-full object-cover" data-alt="close-up of a hand-knitted gray wool mouse cat toy with pink ears on a soft beige linen texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbpZJGChNmu2frgdI_mACiRxrI_bTVjsySq45_hkpU4OHBdh_rweP5Kiq1YspkKRuF0kWaIg4pZ8eyEgFsNdKcTztRaavK8PwEheuTpjxs6zH1HsZyiM1qLjxhmJHa64AL_8L9ln-NgOEpkBvkQ4vy07qsfunejYfbrTPVkEaT5ki5GtQ6YkGfu88GUhCAhwJTPbJHYZIUYOIpRd8wVtQoowOBLUzk7tgMKPRgDvdOCY7s4HsyhPUovJv4VD23OWSMz_iP50q7RAHr"/>
+</div>
+<div class="flex-grow flex flex-col justify-between h-24">
+<div>
+<h3 class="text-on-surface font-bold text-lg leading-tight">Hand-knitted Mouse</h3>
+<p class="text-on-surface-variant text-sm font-medium">Organic Catnip Infused</p>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-primary font-bold text-lg">$12.50</span>
+<div class="flex items-center bg-surface-container-low rounded-full px-2 py-1">
+<button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="remove">remove</span>
+</button>
+<span class="w-8 text-center font-bold text-sm">2</span>
+<button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<button class="absolute -top-2 -right-2 bg-error text-on-error w-8 h-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center active:scale-90">
+<span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+</button>
+</div>
+<!-- Item 3 -->
+<div class="relative flex items-center gap-4 bg-surface-container-lowest p-4 rounded-lg shadow-[0_8px_24px_rgba(153,71,44,0.04)] group">
+<div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container">
+<img alt="Velvet Pet Harness" class="w-full h-full object-cover" data-alt="luxurious terracotta velvet dog harness with gold hardware laying on a sun-drenched wooden floor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzNkOKYIK8bSM42QpkANtHjVLSAMmzvfv0oZJ5FDhLiA_GMmA9ovmVDxSsPXrmJQW3A43_oFg8TdYsnd2F1MNk8ZB8uCi98bFg_z82HPmzG2sXggmX0eBIgyCzzx3PWJjylpVVbp5Q00BFJbzsxPqvpVvfn0etsUNtWADHwi8ZkY91Dn_md5_2xP8_34eTGRCOW62T_4U9NQ0dtkOYZAafmj0loPQVBmoFTxLDMAlKcwJ3E6eLh_Rls4SQBSKu_uZVNxPT6iBN9VfQ"/>
+</div>
+<div class="flex-grow flex flex-col justify-between h-24">
+<div>
+<h3 class="text-on-surface font-bold text-lg leading-tight">Velvet Harness</h3>
+<p class="text-on-surface-variant text-sm font-medium">Terracotta • Medium</p>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-primary font-bold text-lg">$45.00</span>
+<div class="flex items-center bg-surface-container-low rounded-full px-2 py-1">
+<button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="remove">remove</span>
+</button>
+<span class="w-8 text-center font-bold text-sm">1</span>
+<button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<button class="absolute -top-2 -right-2 bg-error text-on-error w-8 h-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center active:scale-90">
+<span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+</button>
+</div>
+</section>
+<!-- Order Summary & Checkout Section -->
+<section class="mt-12 space-y-8">
+<div class="bg-surface-container p-6 rounded-lg space-y-4">
+<div class="flex justify-between items-center text-on-surface-variant">
+<span class="font-medium">Subtotal</span>
+<span class="font-bold text-on-surface">$94.99</span>
+</div>
+<div class="flex justify-between items-center text-on-surface-variant">
+<span class="font-medium">Shipping</span>
+<span class="font-bold text-tertiary">FREE</span>
+</div>
+<div class="pt-4 border-t border-outline-variant/20 flex justify-between items-center">
+<span class="text-xl font-bold text-on-surface">Total</span>
+<span class="text-2xl font-extrabold text-primary">$94.99</span>
+</div>
+</div>
+<button class="w-full py-5 rounded-full bg-gradient-to-br from-[#99472c] to-[#ffad93] text-white font-bold text-lg shadow-[0_8px_24px_rgba(153,71,44,0.15)] active:scale-[0.98] transition-transform flex items-center justify-center gap-3">
+<span>Proceed to Checkout</span>
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-[#fef8f3] dark:bg-stone-950 shadow-[0_-8px_24px_rgba(153,71,44,0.06)] rounded-t-[3rem]">
+<div class="flex justify-around items-center px-4 pb-6 pt-3">
+<!-- Home -->
+<button class="flex flex-col items-center justify-center text-[#625e59] dark:text-stone-400 p-3 hover:opacity-90 transition-opacity active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-[11px] font-semibold tracking-wide font-['Plus_Jakarta_Sans']">Home</span>
+</button>
+<!-- Shop -->
+<button class="flex flex-col items-center justify-center text-[#625e59] dark:text-stone-400 p-3 hover:opacity-90 transition-opacity active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+<span class="text-[11px] font-semibold tracking-wide font-['Plus_Jakarta_Sans']">Shop</span>
+</button>
+<!-- Favorites -->
+<button class="flex flex-col items-center justify-center text-[#625e59] dark:text-stone-400 p-3 hover:opacity-90 transition-opacity active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="text-[11px] font-semibold tracking-wide font-['Plus_Jakarta_Sans']">Favorites</span>
+</button>
+<!-- Cart (Active) -->
+<button class="flex flex-col items-center justify-center bg-gradient-to-br from-[#99472c] to-[#ffad93] text-white rounded-full p-3 active:scale-90 duration-300 ease-out relative">
+<span class="material-symbols-outlined" data-icon="shopping_basket">shopping_basket</span>
+<span class="text-[11px] font-semibold tracking-wide font-['Plus_Jakarta_Sans']">Cart</span>
+<span class="absolute top-1 right-1 bg-secondary-container text-on-secondary-container text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold border-2 border-[#fef8f3]">4</span>
+</button>
+</div>
+</nav>
+</body></html>

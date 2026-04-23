@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#f9f3ed",
+                    "on-tertiary": "#e8ffe8",
+                    "error": "#ac3434",
+                    "on-error-container": "#65000b",
+                    "surface-dim": "#e0d9d1",
+                    "on-primary-fixed-variant": "#782e15",
+                    "on-error": "#fff7f6",
+                    "tertiary": "#506453",
+                    "on-surface-variant": "#625e59",
+                    "error-dim": "#70030f",
+                    "surface-container-lowest": "#ffffff",
+                    "primary": "#99472c",
+                    "inverse-surface": "#0f0e0b",
+                    "on-secondary-container": "#644f00",
+                    "primary-container": "#ffad93",
+                    "on-tertiary-fixed": "#3c503f",
+                    "on-tertiary-fixed-variant": "#586d5b",
+                    "on-surface": "#35322d",
+                    "on-primary": "#fff7f5",
+                    "on-secondary-fixed": "#4e3d00",
+                    "surface-variant": "#e8e1da",
+                    "on-primary-container": "#6c250d",
+                    "on-primary-fixed": "#4f1200",
+                    "tertiary-dim": "#445847",
+                    "on-background": "#35322d",
+                    "surface-container-high": "#eee7e0",
+                    "on-secondary-fixed-variant": "#705900",
+                    "outline": "#7f7a74",
+                    "surface-bright": "#fef8f3",
+                    "outline-variant": "#b7b1aa",
+                    "surface-tint": "#99472c",
+                    "surface-container": "#f3ede6",
+                    "secondary-fixed-dim": "#fad04b",
+                    "background": "#fef8f3",
+                    "secondary-fixed": "#ffe087",
+                    "surface": "#fef8f3",
+                    "inverse-primary": "#fd9574",
+                    "secondary-container": "#ffe087",
+                    "secondary": "#745c00",
+                    "primary-dim": "#8a3b21",
+                    "on-secondary": "#fff8ee",
+                    "tertiary-fixed-dim": "#d7eed8",
+                    "tertiary-container": "#e5fde6",
+                    "primary-fixed": "#ffad93",
+                    "tertiary-fixed": "#e5fde6",
+                    "inverse-on-surface": "#a09c98",
+                    "on-tertiary-container": "#4e6251",
+                    "surface-container-highest": "#e8e1da",
+                    "secondary-dim": "#665100",
+                    "error-container": "#f56965",
+                    "primary-fixed-dim": "#ff9878"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "display": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-nav { backdrop-filter: blur(16px); }
+        .organic-mask {
+            clip-path: ellipse(50% 45% at 50% 50%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fef8f3]/80 dark:bg-[#1a1a1a]/80 backdrop-blur-md">
+<div class="flex justify-between items-center px-6 py-4 w-full">
+<button class="text-[#99472c] dark:text-[#ffad93] hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-xl font-bold tracking-tighter text-[#35322d] dark:text-[#f3ede6]">The Nurtured Atelier</h1>
+<button class="text-[#99472c] dark:text-[#ffad93] hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined">shopping_bag</span>
+</button>
+</div>
+</header>
+<main class="pt-20 px-4 max-w-2xl mx-auto">
+<!-- Product Hero Section -->
+<section class="relative mb-8">
+<div class="w-full h-[400px] overflow-hidden rounded-xl bg-surface-container shadow-sm flex items-center justify-center">
+<img alt="Organic Puppy Kibble" class="w-full h-full object-cover" data-alt="Premium organic puppy kibble in a rustic ceramic bowl on a wooden table, soft morning sunlight, warm artisanal atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDk1rguhfglXUfDz_F75_w2FwRO_zVRAeRSuwEEqcIF03DEWuKAcQMFx_2ar_YuPZjVm33aw65ZcbKTDl2MWpE4uyOZ24zC6A-0KpoyzFISW_MNwug5etDasC7C38l8Lh5CY1AqVGSKKPKTah_Mhuch1lxUkENouLC04quGLNoGNYmY1kg8eY5XEkUDFXXFo8BKTy7XHYPT_oJEpooIu7lG92WVVobvfo9bbwlKaVEjTjc8F0F01lGs4zOxH2R4jvyEFIex_hqfguc-"/>
+</div>
+<!-- Favorite Toggle Overlay -->
+<button class="absolute top-6 right-6 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg text-primary hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">favorite</span>
+</button>
+</section>
+<!-- Product Identity -->
+<section class="space-y-4 mb-8">
+<div class="flex justify-between items-start">
+<div class="space-y-1">
+<span class="text-on-tertiary-fixed-variant bg-tertiary-container px-3 py-1 rounded-full text-xs font-semibold tracking-wide">BESTSELLER</span>
+<h2 class="text-3xl font-bold tracking-tight text-on-surface leading-tight">Organic Puppy Kibble</h2>
+</div>
+<div class="text-2xl font-extrabold text-primary">$15.99</div>
+</div>
+<!-- Rating & Tags -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1 bg-secondary-container/30 px-2 py-1 rounded-lg">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-sm font-bold text-on-secondary-container">4.9</span>
+</div>
+<span class="text-on-surface-variant text-sm">124 Reviews</span>
+</div>
+</section>
+<!-- Product Description Card -->
+<div class="bg-surface-container-low rounded-lg p-6 mb-8 shadow-sm">
+<h3 class="font-bold text-lg mb-3">The Nurtured Recipe</h3>
+<p class="text-on-surface-variant leading-relaxed text-sm md:text-base">
+                Crafted with love for growing companions, our <span class="text-primary font-semibold">Organic Puppy Kibble</span> blends farm-raised poultry with ancient grains and sun-ripened garden vegetables. Every morsel is rich in DHA for brain development and organic probiotics for a happy, nurtured tummy. No synthetic fillers, just pure earth-grown goodness.
+            </p>
+<div class="grid grid-cols-2 gap-4 mt-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">eco</span>
+</div>
+<span class="text-xs font-medium">100% Organic</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">potted_plant</span>
+</div>
+<span class="text-xs font-medium">Non-GMO</span>
+</div>
+</div>
+</div>
+<!-- Purchase Controls -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<span class="font-bold text-on-surface">Quantity</span>
+<div class="flex items-center bg-surface-container-highest rounded-full p-1 border border-outline-variant/10">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface hover:bg-surface-variant rounded-full transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="w-12 text-center font-bold text-lg">1</span>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface hover:bg-surface-variant rounded-full transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Primary Action -->
+<button class="w-full py-5 rounded-full bg-gradient-to-r from-primary to-primary-dim text-white font-bold text-lg shadow-[0_8px_24px_rgba(153,71,44,0.15)] active:scale-95 transition-transform flex items-center justify-center gap-3">
+<span class="material-symbols-outlined">shopping_basket</span>
+                Add to Cart
+            </button>
+</section>
+<!-- Recommended Bento Grid -->
+<section class="mt-12 space-y-6">
+<h3 class="text-xl font-bold px-1">Complementary Treats</h3>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-highest rounded-lg overflow-hidden group">
+<div class="h-32 overflow-hidden">
+<img alt="Peanut Butter Biscuits" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Small star-shaped organic peanut butter dog treats on a light linen cloth" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYdOrqHKL0k5cwXTs7JGhlgaNjWXT4GfBNnLkW9DaqrZXnbIxF6w7i_qm0hjhM64dX-mKo6_TAw8FKRs-lF4Gc35boNyZydgdEF79tJrWu1wDr-5bkVmLTNefGXyKUJqNDd81UK06Aj4RyG1M0E8yYFjzy9ZFxaV73aurl1FD0GRNrltrTYztnd7XatQYdR_SkZlOqT0TzD7QHHKVKrcFmD_ztYMkiemKyncqdbp79RMcoJv_Aa_ghnjDb4HSqO8AzsB2aw4zTTf9J"/>
+</div>
+<div class="p-3">
+<p class="text-sm font-bold truncate">Peanut Biscuits</p>
+<p class="text-primary text-xs font-bold">$8.50</p>
+</div>
+</div>
+<div class="bg-surface-container-highest rounded-lg overflow-hidden group">
+<div class="h-32 overflow-hidden">
+<img alt="Calming Dental Sticks" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Dental chews for dogs infused with chamomile and lavender, aesthetic natural product shot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4r3lSEf6sqG5yLW2EJjC2yEiX1MDsGwi773_gs9WgME-h8zkekfgncboNODeL6xhTwcDlPzPhK-r2fmBx34WRk91FYzo8yL9bP5xPJOAMa6vmwUaAa3SX1cwNIciO2fYoAVFnLG9-Ukx6CmGswJ2-eYMbID2H3Hy_AfE2W3A2vc3MUt4_bHRdKtNCGVhRDQdKW7OS2xC_-vDwM2Mb4Au0BNh9WeCTsDlDrgqNEior1ggE6f95nOeVIHgV1Abcpgq2D8fTYlfU0gql"/>
+</div>
+<div class="p-3">
+<p class="text-sm font-bold truncate">Dental Sticks</p>
+<p class="text-primary text-xs font-bold">$12.00</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#fef8f3]/80 dark:bg-[#1a1a1a]/80 backdrop-blur-md rounded-t-[3rem] shadow-[0_-8px_24px_rgba(153,71,44,0.08)] z-50">
+<div class="flex flex-col items-center justify-center text-[#625e59] dark:text-[#b7b1aa] px-5 py-2 hover:bg-[#f3ede6] dark:hover:bg-[#2a2a2a] rounded-full active:scale-90 duration-200 transition-all">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#99472c] text-white rounded-full px-5 py-2 active:scale-90 duration-200 transition-all">
+<span class="material-symbols-outlined">storefront</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium">Shop</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#625e59] dark:text-[#b7b1aa] px-5 py-2 hover:bg-[#f3ede6] dark:hover:bg-[#2a2a2a] rounded-full active:scale-90 duration-200 transition-all">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium">Favorites</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#625e59] dark:text-[#b7b1aa] px-5 py-2 hover:bg-[#f3ede6] dark:hover:bg-[#2a2a2a] rounded-full active:scale-90 duration-200 transition-all relative">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium">Cart</span>
+<div class="absolute -top-1 right-3 w-4 h-4 bg-primary text-white text-[10px] flex items-center justify-center rounded-full border-2 border-background">2</div>
+</div>
+</nav>
+</body></html>
