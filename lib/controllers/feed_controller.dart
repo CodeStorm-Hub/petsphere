@@ -44,12 +44,17 @@ class FeedNotifier extends Notifier<FeedState> {
   }
 
   void _setupRealtimeSubscriptions() {
-    _likesChannel = feedRepository.subscribeToLikes(
-      onLikeChange: _handleRealtimeLike,
-    );
-    _commentsChannel = feedRepository.subscribeToComments(
-      onNewComment: _handleRealtimeComment,
-    );
+    try {
+      _likesChannel = feedRepository.subscribeToLikes(
+        onLikeChange: _handleRealtimeLike,
+      );
+      _commentsChannel = feedRepository.subscribeToComments(
+        onNewComment: _handleRealtimeComment,
+      );
+    } catch (e) {
+      _disposeChannels();
+      state = state.copyWith(error: e.toString());
+    }
   }
 
   void _disposeChannels() {
