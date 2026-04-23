@@ -12,9 +12,17 @@ class CartItemTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currencyFormat = NumberFormat.currency(symbol: '\$');
+    final theme = Theme.of(context);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(24), // Large rounded corners
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 16, offset: const Offset(0, 4))
+        ]
+      ),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
@@ -23,10 +31,12 @@ class CartItemTile extends ConsumerWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(16),
+                color: theme.colorScheme.surfaceContainerHighest,
                 image: DecorationImage(
                   image: NetworkImage(item.product.images.isNotEmpty ? item.product.images[0] : ''),
                   fit: BoxFit.cover,
+                  onError: (exception, stackTrace) {}, // Let it fall back to background color
                 ),
               ),
             ),
@@ -37,42 +47,49 @@ class CartItemTile extends ConsumerWidget {
                 children: [
                   Text(
                     item.product.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    currencyFormat.format(item.product.price),
-                    style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _QuantityButton(
-                        icon: Icons.remove,
-                        onTap: () {
-                          ref.read(cartProvider.notifier).updateQuantity(item.id, item.quantity - 1);
-                        },
+                      Text(
+                        currencyFormat.format(item.product.price),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold
+                        ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                        child: Text('${item.quantity}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      ),
-                      _QuantityButton(
-                        icon: Icons.add,
-                        onTap: () {
-                          ref.read(cartProvider.notifier).updateQuantity(item.id, item.quantity + 1);
-                        },
-                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(9999),
+                        ),
+                        child: Row(
+                          children: [
+                            _QuantityButton(
+                              icon: Icons.remove,
+                              onTap: () {
+                                ref.read(cartProvider.notifier).updateQuantity(item.id, item.quantity - 1);
+                              },
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                              child: Text('${item.quantity}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            ),
+                            _QuantityButton(
+                              icon: Icons.add,
+                              onTap: () {
+                                ref.read(cartProvider.notifier).updateQuantity(item.id, item.quantity + 1);
+                              },
+                            ),
+                          ],
+                        ),
+                      )
                     ],
                   )
                 ],
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.grey),
-              onPressed: () {
-                ref.read(cartProvider.notifier).removeCartItem(item.id);
-              },
             ),
           ],
         ),
@@ -91,13 +108,10 @@ class _QuantityButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(9999),
       child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Icon(icon, size: 16),
+        padding: const EdgeInsets.all(6),
+        child: Icon(icon, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     );
   }

@@ -12,6 +12,7 @@ class CartScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cartState = ref.watch(cartProvider);
     final currencyFormat = NumberFormat.currency(symbol: '\$');
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -21,37 +22,45 @@ class CartScreen extends ConsumerWidget {
             onPressed: () {
               ref.read(cartProvider.notifier).clearCart();
             },
-            child: const Text('Clear', style: TextStyle(color: Colors.red)),
+            child: Text('Clear', style: TextStyle(color: theme.colorScheme.error)),
           )
         ],
       ),
       body: cartState.items.isEmpty
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text('Your cart is empty', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                  Icon(Icons.shopping_bag_outlined, size: 80, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                  const SizedBox(height: 16),
+                  Text('Your basket is empty.', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  const SizedBox(height: 32),
+                  ElevatedButton(
+                    onPressed: () => context.pop(),
+                    child: const Text('Continue Shopping'),
+                  )
                 ],
               ),
             )
           : Column(
               children: [
                 Expanded(
-                  child: ListView.builder(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     itemCount: cartState.items.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 16),
                     itemBuilder: (context, index) {
                       return CartItemTile(item: cartState.items[index]);
                     },
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.colorScheme.surface,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
                     boxShadow: [
-                      BoxShadow(color: Colors.grey.shade200, blurRadius: 4, offset: const Offset(0, -2))
+                      BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 24, offset: const Offset(0, -8))
                     ]
                   ),
                   child: Column(
@@ -59,18 +68,36 @@ class CartScreen extends ConsumerWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Total:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text('Subtotal', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                          Text(currencyFormat.format(cartState.totalPrice), style: theme.textTheme.titleMedium),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Shipping', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                          Text('\$5.00', style: theme.textTheme.titleMedium),
+                        ],
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.0),
+                        child: Divider(),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Total', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                           Text(
-                            currencyFormat.format(cartState.totalPrice),
-                            style: TextStyle(
-                              fontSize: 24,
+                            currencyFormat.format(cartState.totalPrice + 5.0),
+                            style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
+                              color: theme.colorScheme.primary,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 32),
                       SizedBox(
                         width: double.infinity,
                         height: 56,
@@ -78,11 +105,15 @@ class CartScreen extends ConsumerWidget {
                           onPressed: () {
                              ref.read(cartProvider.notifier).clearCart();
                              ScaffoldMessenger.of(context).showSnackBar(
-                               const SnackBar(content: Text('Checkout successful!')),
+                               SnackBar(
+                                 content: const Text('Order placed successfully!'),
+                                 behavior: SnackBarBehavior.floating,
+                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                               ),
                              );
                              context.pop();
                           },
-                          child: const Text('Checkout', style: TextStyle(fontSize: 18)),
+                          child: const Text('Proceed to Checkout', style: TextStyle(fontSize: 18)),
                         ),
                       )
                     ],

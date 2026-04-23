@@ -1,0 +1,9 @@
+UI/UX Best Practices for Flutter Mobile Apps:
+
+1.  **Touch Targets:** Ensure interactive elements (buttons, icons) are at least 48x48 dp. The Amber Whisker design system uses large padding and full border radii, which aligns with this.
+2.  **Navigation:** Use standard bottom navigation bars with 3-5 destinations. Keep the current screen state persistent (already handled by GoRouter and IndexedStack).
+3.  **Feedback & States:** Provide visual feedback for interactions (loading spinners, snackbars, disabled states). The generated designs use primary gradients and soft shadows to indicate interactability.
+4.  **Accessibility:** Ensure sufficient color contrast. The Amber Whisker palette pairs `#35322D` (dark text) on `#FEF8F3` (light background), meeting WCAG guidelines.
+5.  **Typography:** Use legible font sizes (min 14sp for body text, 16sp+ for primary buttons/inputs). "Plus Jakarta Sans" is highly readable.
+6.  **Whitespace/Padding:** The Nurtured Nest aesthetic relies heavily on "breathing room." Use generous asymmetrical margins and large corner radii (e.g., 32px for cards).
+7.  **Form Validation:** Clear error messages and distinct focus states for input fields. (e.g., a subtle 20% opacity primary color border on focus).

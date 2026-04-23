@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../models/pet_model.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
+import '../models/pet_model.dart';
 import '../utils/image_upload_helper.dart';
 import '../utils/supabase_config.dart';
 
@@ -62,7 +62,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Post successfully shared!')),
+          SnackBar(
+            content: const Text('Post successfully shared!'),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          ),
         );
         context.go('/home');
       }
@@ -81,6 +85,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   Widget build(BuildContext context) {
     final petState = ref.watch(petProvider);
     final myPets = petState.myPets;
+    final theme = Theme.of(context);
 
     // Default select the first pet if none selected
     if (selectedPetId == null && myPets.isNotEmpty) {
@@ -93,45 +98,29 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         _captionController.text.trim().isNotEmpty;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          'New Post',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: const Text('New Post'),
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: FilledButton(
               onPressed: (isReadyToShare && !_isUploading)
                   ? () => _sharePost(myPets)
                   : null,
-              style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-              ),
               child: _isUploading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: theme.colorScheme.onPrimary,
                       ),
                     )
-                  : const Text(
-                      'Share',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                  : const Text('Share'),
             ),
           ),
         ],
@@ -140,22 +129,22 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.only(left: 16.0, top: 12.0, bottom: 8.0),
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, top: 16.0, bottom: 8.0),
               child: Text(
                 'Posting as...',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
             if (myPets.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(16.0),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Text(
                   'Create a pet profile first to post!',
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                 ),
               )
             else
@@ -170,12 +159,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     final isSelected = pet.id == selectedPetId;
                     return GestureDetector(
                       onTap: () => setState(() => selectedPetId = pet.id),
-                      child: _AuthorAvatar(pet: pet, isSelected: isSelected),
+                      child: _AuthorAvatar(pet: pet, isSelected: isSelected, theme: theme),
                     );
                   },
                 ),
               ),
-            const Divider(height: 1),
+            Divider(height: 1, color: theme.colorScheme.surfaceContainerHighest),
 
             // Photo Upload Region
             Padding(
@@ -186,8 +175,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                   width: double.infinity,
                   height: 300,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(24),
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(32), // lg radius
                     image: _selectedFile != null
                         ? DecorationImage(
                             image: FileImage(_selectedFile!),
@@ -202,15 +191,13 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                             Icon(
                               Icons.add_photo_alternate_rounded,
                               size: 64,
-                              color: Colors.grey.shade400,
+                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                             ),
                             const SizedBox(height: 16),
                             Text(
                               'Tap to select a photo',
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -229,37 +216,30 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 maxLines: 6,
                 minLines: 1,
                 onChanged: (_) => setState(() {}),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Write a caption...',
-                  hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+                  hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
+                  filled: false, // Override the global filled setting for this specific field
                   counterText: '',
+                  contentPadding: EdgeInsets.zero, // Remove padding to align with other elements
                 ),
               ),
             ),
 
-            const Divider(),
+            Divider(color: theme.colorScheme.surfaceContainerHighest),
             ListTile(
-              leading: const Icon(
-                Icons.location_on_outlined,
-                color: Colors.black87,
-              ),
-              title: const Text(
-                'Add Location',
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-              trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+              leading: Icon(Icons.location_on_outlined, color: theme.colorScheme.onSurface),
+              title: Text('Add Location', style: theme.textTheme.titleMedium),
+              trailing: Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
               onTap: () {},
             ),
             ListTile(
-              leading: const Icon(Icons.person_outline, color: Colors.black87),
-              title: const Text(
-                'Tag other Pets',
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-              trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+              leading: Icon(Icons.person_outline, color: theme.colorScheme.onSurface),
+              title: Text('Tag other Pets', style: theme.textTheme.titleMedium),
+              trailing: Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
               onTap: () {},
             ),
             const SizedBox(height: 40),
@@ -273,8 +253,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 class _AuthorAvatar extends StatelessWidget {
   final PetModel pet;
   final bool isSelected;
+  final ThemeData theme;
 
-  const _AuthorAvatar({required this.pet, required this.isSelected});
+  const _AuthorAvatar({required this.pet, required this.isSelected, required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -289,9 +270,9 @@ class _AuthorAvatar extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(
                 color: isSelected
-                    ? Theme.of(context).colorScheme.primary
+                    ? theme.colorScheme.primary
                     : Colors.transparent,
-                width: 3,
+                width: 2,
               ),
             ),
             child: CircleAvatar(
@@ -299,16 +280,16 @@ class _AuthorAvatar extends StatelessWidget {
               backgroundImage: pet.profileImageUrl.isNotEmpty
                   ? NetworkImage(pet.profileImageUrl)
                   : null,
-              child: pet.profileImageUrl.isEmpty ? Text(pet.name[0]) : null,
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              child: pet.profileImageUrl.isEmpty ? Icon(Icons.pets, color: theme.colorScheme.onSurfaceVariant) : null,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             pet.name,
-            style: TextStyle(
-              fontSize: 12,
+            style: theme.textTheme.labelMedium?.copyWith(
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? Colors.black : Colors.grey.shade700,
+              color: isSelected ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],

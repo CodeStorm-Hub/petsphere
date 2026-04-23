@@ -5,26 +5,27 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: const Center(
+      backgroundColor: theme.colorScheme.surface,
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.pets, size: 120, color: Colors.white),
-            SizedBox(height: 24),
+            Icon(Icons.pets, size: 120, color: theme.colorScheme.primary),
+            const SizedBox(height: 24),
             Text(
-              'PetSphere',
-              style: TextStyle(
-                fontSize: 40,
+              'The Nurtured Nest',
+              style: theme.textTheme.displaySmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
-                letterSpacing: 2,
+                color: theme.colorScheme.onSurface,
+                letterSpacing: -0.5,
               ),
+              textAlign: TextAlign.center,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 32),
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
             ),
           ],
         ),

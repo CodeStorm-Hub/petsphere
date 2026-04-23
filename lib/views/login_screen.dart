@@ -34,48 +34,59 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final theme = Theme.of(context);
 
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(32.0),
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.pets, size: 80, color: Colors.orange),
-                  const SizedBox(height: 24),
+                  Icon(Icons.pets, size: 80, color: theme.colorScheme.primary),
+                  const SizedBox(height: 32),
                   Text(
-                    'Welcome to PetSphere',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    'Welcome Back',
+                    style: theme.textTheme.headlineLarge?.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
                         ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Log in to connect with other pets!',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey.shade600,
+                    'Log in to your nurtured nest.',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 48),
                   if (authState.error != null) ...[
-                    Text(
-                      authState.error!,
-                      style: const TextStyle(color: Colors.red),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.errorContainer.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        authState.error!,
+                        style: TextStyle(color: theme.colorScheme.error),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                   ],
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    decoration: InputDecoration(
+                      labelText: 'Email Address',
+                      prefixIcon: Icon(Icons.email_outlined, color: theme.colorScheme.onSurfaceVariant),
                     ),
                     validator: (value) =>
                         value == null || value.isEmpty ? 'Enter email' : null,
@@ -84,29 +95,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Password',
-                      prefixIcon: Icon(Icons.lock_outline),
+                      prefixIcon: Icon(Icons.lock_outline, color: theme.colorScheme.onSurfaceVariant),
                     ),
                     validator: (value) => value == null || value.length < 6
                         ? 'Password must be at least 6 characters'
                         : null,
                   ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {}, // Forgot password placeholder
+                      child: const Text('Forgot Password?'),
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   SizedBox(
-                    width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
                       onPressed: authState.isLoading ? null : _login,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9999)),
+                      ),
                       child: authState.isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Login'),
+                          ? CircularProgressIndicator(color: theme.colorScheme.onPrimary)
+                          : const Text('Sign In', style: TextStyle(fontSize: 18)),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () => context.push('/register'),
-                    child: const Text('Don\'t have an account? Sign up here.'),
+                  const SizedBox(height: 32),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Don\'t have an account?', style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
+                      TextButton(
+                        onPressed: () => context.push('/register'),
+                        child: const Text('Register'),
+                      ),
+                    ],
                   ),
                 ],
               ),
