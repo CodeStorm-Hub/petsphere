@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/feed_controller.dart';
@@ -103,21 +104,26 @@ class HomeScreen extends ConsumerWidget {
                 ref.read(activePetProvider)?.name ?? 'Unknown',
               );
             },
-            onShareIconTap: () => _showShareSheet(context),
+            onShareIconTap: () => _showShareSheet(context, post.id),
+            onPetTap: () {
+              ref.read(profilePetNavigationProvider.notifier).navigateTo(post.pet.id);
+            },
           );
         },
       ),
     );
   }
 
-  void _showShareSheet(BuildContext context) {
+  void _showShareSheet(BuildContext context, String postId) {
+    final shareLink = 'https://petsphere.app/post/$postId';
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) {
+      builder: (ctx) {
         return Padding(
           padding: const EdgeInsets.only(top: 16, bottom: 32),
           child: Column(
@@ -132,21 +138,9 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search friends...',
-                    prefixIcon: const Icon(Icons.search),
-                    filled: true,
-                    fillColor: Colors.grey.shade100,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                  ),
-                ),
+              const Text(
+                'Share Post',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
               const SizedBox(height: 8),
               const Divider(),
@@ -154,35 +148,70 @@ class HomeScreen extends ConsumerWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                      shape: BoxShape.circle, color: Colors.grey.shade100),
-                  child: const Icon(Icons.add_to_photos_rounded),
-                ),
-                title: const Text('Add to your story'),
-                onTap: () => Navigator.pop(context),
-              ),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle, color: Colors.grey.shade100),
-                  child: const Icon(Icons.link),
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFFF8A65).withAlpha(26),
+                  ),
+                  child: const Icon(Icons.link, color: Color(0xFFFF8A65)),
                 ),
                 title: const Text('Copy Link'),
+                subtitle: Text(
+                  shareLink,
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 onTap: () {
-                  Navigator.pop(context);
+                  Clipboard.setData(ClipboardData(text: shareLink));
+                  Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Link copied!')));
+                    SnackBar(
+                      content: const Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.white, size: 16),
+                          SizedBox(width: 8),
+                          Text('Link copied to clipboard!'),
+                        ],
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      backgroundColor: const Color(0xFF81C784),
+                    ),
+                  );
                 },
               ),
               ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                      shape: BoxShape.circle, color: Colors.grey.shade100),
-                  child: const Icon(Icons.share),
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF4FC3F7).withAlpha(26),
+                  ),
+                  child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF4FC3F7)),
                 ),
-                title: const Text('Share via...'),
-                onTap: () => Navigator.pop(context),
+                title: const Text('Send in Message'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.push('/messages');
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF81C784).withAlpha(26),
+                  ),
+                  child: const Icon(Icons.add_to_photos_rounded, color: Color(0xFF81C784)),
+                ),
+                title: const Text('Add to your story'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Coming soon!')),
+                  );
+                },
               ),
             ],
           ),
@@ -301,7 +330,7 @@ class _CommentBottomSheetWidgetState
                         contentPadding:
                             const EdgeInsets.symmetric(vertical: 4),
                         leading: CircleAvatar(
-                          backgroundColor: bg.withOpacity(0.2),
+                          backgroundColor: bg.withAlpha(51),
                           child: Text(
                             comment.petName[0].toUpperCase(),
                             style: TextStyle(

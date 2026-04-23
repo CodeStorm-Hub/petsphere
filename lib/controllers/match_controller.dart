@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/match_request_model.dart';
 import '../models/pet_model.dart';
 import '../repositories/match_repository.dart';
+import 'auth_controller.dart';
 import 'pet_controller.dart';
 
 // ---------------------------------------------------------------------------
@@ -11,6 +12,7 @@ import 'pet_controller.dart';
 class MatchState {
   final List<PetModel> discoveryPets;
   final List<MatchRequestModel> myRequests;
+  final List<MatchRequestModel> sentRequests;
   final bool isLoading;
   final String? filterAnimal;
   final String? filterBreed;
@@ -19,6 +21,7 @@ class MatchState {
   MatchState({
     this.discoveryPets = const [],
     this.myRequests = const [],
+    this.sentRequests = const [],
     this.isLoading = false,
     this.filterAnimal,
     this.filterBreed,
@@ -28,6 +31,7 @@ class MatchState {
   MatchState copyWith({
     List<PetModel>? discoveryPets,
     List<MatchRequestModel>? myRequests,
+    List<MatchRequestModel>? sentRequests,
     bool? isLoading,
     String? filterAnimal,
     String? filterBreed,
@@ -39,6 +43,7 @@ class MatchState {
     return MatchState(
       discoveryPets: discoveryPets ?? this.discoveryPets,
       myRequests: myRequests ?? this.myRequests,
+      sentRequests: sentRequests ?? this.sentRequests,
       isLoading: isLoading ?? this.isLoading,
       filterAnimal: clearAnimal ? null : (filterAnimal ?? this.filterAnimal),
       filterBreed: clearBreed ? null : (filterBreed ?? this.filterBreed),
@@ -56,6 +61,7 @@ class MatchController extends Notifier<MatchState> {
   @override
   MatchState build() {
     final activePet = ref.watch(activePetProvider);
+    debugPrint('[MatchController] build: activePet=${activePet?.name}');
     if (activePet != null) {
       // Initial load — state already has filterAnimal/filterBreed as null
       Future.microtask(() => _load(activePet.id));
@@ -63,33 +69,43 @@ class MatchController extends Notifier<MatchState> {
     return MatchState(isLoading: true);
   }
 
-  /// Always reads filters from the current state, never from parameters.
-  /// Uses a generation counter so stale fetches don't overwrite newer state.
   Future<void> _load(String myPetId) async {
     final gen = ++_loadGeneration;
+    final userId = ref.read(authProvider).user?.id;
+    if (userId == null) return;
+
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       final futures = await Future.wait([
         matchRepository.fetchDiscoveryPets(
           myPetId: myPetId,
+          userId: userId,
           filterAnimal: state.filterAnimal,
           filterBreed: state.filterBreed,
         ),
         matchRepository.fetchMyRequests(myPetId),
+        matchRepository.fetchSentRequests(myPetId),
       ]);
 
-      // Only apply results if this is still the latest load
       if (gen != _loadGeneration) return;
 
       state = state.copyWith(
         discoveryPets: futures[0] as List<PetModel>,
         myRequests: futures[1] as List<MatchRequestModel>,
+        sentRequests: futures[2] as List<MatchRequestModel>,
         isLoading: false,
       );
     } catch (e) {
       if (gen != _loadGeneration) return;
       state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<void> refresh() async {
+    final activePet = ref.read(activePetProvider);
+    if (activePet != null) {
+      await _load(activePet.id);
     }
   }
 
@@ -137,22 +153,33 @@ class MatchController extends Notifier<MatchState> {
     _load(activePet.id);
   }
 
-  Future<void> sendLikeRequest(String receiverPetId) async {
+  Future<bool> sendLikeRequest(String receiverPetId) async {
     final activePet = ref.read(activePetProvider);
-    if (activePet == null) return;
+    if (activePet == null) return false;
+
+    // Prevent liking own pets
+    final myPetIds = ref.read(petProvider).myPets.map((p) => p.id).toSet();
+    if (myPetIds.contains(receiverPetId)) {
+      state = state.copyWith(error: 'You cannot like your own pet.');
+      return false;
+    }
+
     try {
       await matchRepository.sendLikeRequest(
         senderPetId: activePet.id,
         receiverPetId: receiverPetId,
       );
-      // Remove from discovery list optimistically
       state = state.copyWith(
         discoveryPets: state.discoveryPets
             .where((p) => p.id != receiverPetId)
             .toList(),
       );
+      // Refresh sent requests
+      _load(activePet.id);
+      return true;
     } catch (e) {
       state = state.copyWith(error: 'Could not send request: $e');
+      return false;
     }
   }
 

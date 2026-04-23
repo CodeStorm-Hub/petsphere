@@ -1,30 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../controllers/pet_controller.dart';
 import 'home_screen.dart';
 import 'pet_profile_screen.dart';
 import 'discovery_screen.dart';
 import 'marketplace_screen.dart';
 
-class MainLayout extends StatefulWidget {
+class MainLayout extends ConsumerStatefulWidget {
   const MainLayout({super.key});
 
   @override
-  State<MainLayout> createState() => _MainLayoutState();
+  ConsumerState<MainLayout> createState() => _MainLayoutState();
 }
 
-class _MainLayoutState extends State<MainLayout> {
+class _MainLayoutState extends ConsumerState<MainLayout> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
     const HomeScreen(),
     const DiscoveryScreen(),
-    const SizedBox.shrink(), // Index 2 is unused because we push a modal
+    const SizedBox.shrink(),
     const MarketplaceScreen(),
     const PetProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(profilePetNavigationProvider, (prev, next) {
+      if (next != null) {
+        setState(() => _currentIndex = 4);
+      }
+    });
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -34,8 +42,8 @@ class _MainLayoutState extends State<MainLayout> {
         currentIndex: _currentIndex,
         onTap: (index) {
           if (index == 2) {
-             context.push('/create_post');
-             return;
+            context.push('/create_post');
+            return;
           }
           setState(() {
             _currentIndex = index;
