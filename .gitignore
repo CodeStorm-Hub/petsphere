@@ -43,6 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+.env
 builder.exe
 dist/petsphere-217fd880.ipa
 dist/petsphere-e6d8abd0.ipa

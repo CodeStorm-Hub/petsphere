@@ -1,25 +1,35 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/auth_controller.dart';
 import '../views/main_layout.dart';
 import '../views/create_post_screen.dart';
+import '../views/add_pet_screen.dart';
 import '../views/messages_list_screen.dart';
 import '../views/chat_screen.dart';
 import '../views/match_pet_profile_screen.dart';
 import '../views/product_detail_screen.dart';
+import '../views/post_detail_screen.dart';
 import '../views/cart_screen.dart';
+import '../views/order_history_screen.dart';
 import '../views/notifications_screen.dart';
+import '../views/liked_pets_screen.dart';
 import '../views/login_screen.dart';
 import '../views/registration_screen.dart';
 import '../views/splash_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-  
+  final authNotifier = ValueNotifier<AuthState>(ref.read(authProvider));
+  ref.listen<AuthState>(authProvider, (_, next) {
+    authNotifier.value = next;
+  });
+  ref.onDispose(() => authNotifier.dispose());
+
   return GoRouter(
     initialLocation: '/splash',
+    refreshListenable: authNotifier,
     redirect: (context, state) {
-      final status = authState.status;
+      final status = authNotifier.value.status;
       final isGoingToAuth = state.matchedLocation == '/login' || state.matchedLocation == '/register';
       final isAtSplash = state.matchedLocation == '/splash';
       
@@ -58,11 +68,22 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/create_post',
-        builder: (context, state) => const CreatePostScreen(),
+        builder: (context, state) {
+          final petId = state.uri.queryParameters['petId'];
+          return CreatePostScreen(initialPetId: petId);
+        },
+      ),
+      GoRoute(
+        path: '/add_pet',
+        builder: (context, state) => const AddPetScreen(),
       ),
       GoRoute(
         path: '/notifications',
         builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/liked_pets',
+        builder: (context, state) => const LikedPetsScreen(),
       ),
       GoRoute(
         path: '/pet/:id',
@@ -83,8 +104,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: '/post/:id',
+        builder: (context, state) {
+          final postId = state.pathParameters['id']!;
+          return PostDetailScreen(postId: postId);
+        },
+      ),
+      GoRoute(
         path: '/cart',
         builder: (context, state) => const CartScreen(),
+      ),
+      GoRoute(
+        path: '/orders',
+        builder: (context, state) => const OrderHistoryScreen(),
       ),
       GoRoute(
         path: '/product/:id',

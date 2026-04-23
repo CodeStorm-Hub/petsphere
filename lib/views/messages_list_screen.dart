@@ -18,23 +18,33 @@ class MessagesListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Messages'),
       ),
-      body: threads.isEmpty
-          ? const Center(child: Text('No messages yet. Match with pets to chat!'))
-          : ListView.separated(
-              itemCount: threads.length,
-              separatorBuilder: (context, index) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final thread = threads[index];
-                return ChatThreadTile(
-                  thread: thread,
-                  myPetId: myCurrentPetId,
-                  onTap: () {
-                     ref.read(chatProvider.notifier).markThreadAsRead(thread.id);
-                     context.push('/chat/${thread.id}');
-                  },
-                );
-              },
-            ),
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(chatProvider.notifier).refresh(),
+        child: threads.isEmpty
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(height: 120),
+                  Center(child: Text('No messages yet. Match with pets to chat!')),
+                ],
+              )
+            : ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: threads.length,
+                separatorBuilder: (context, index) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final thread = threads[index];
+                  return ChatThreadTile(
+                    thread: thread,
+                    myPetId: myCurrentPetId,
+                    onTap: () {
+                       ref.read(chatProvider.notifier).markThreadAsRead(thread.id);
+                       context.push('/chat/${thread.id}');
+                    },
+                  );
+                },
+              ),
+      ),
     );
   }
 }
