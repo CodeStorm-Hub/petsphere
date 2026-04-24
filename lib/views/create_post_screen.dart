@@ -222,10 +222,10 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                   ? const SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
+                       child: CircularProgressIndicator(
+                         strokeWidth: 2,
+                         color: Theme.of(context).colorScheme.onPrimary,
+                       ),
                     )
                   : const Text(
                       'Share',
@@ -458,11 +458,13 @@ class _AuthorAvatar extends StatelessWidget {
           Text(
             pet.name,
             style: TextStyle(
-              fontSize: 12,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? Colors.black : Colors.grey.shade700,
-            ),
-          ),
+               fontSize: 12,
+               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+               color: isSelected
+                   ? Theme.of(context).colorScheme.onSurface
+                   : Theme.of(context).colorScheme.onSurfaceVariant,
+             ),
+           ),
         ],
       ),
     );

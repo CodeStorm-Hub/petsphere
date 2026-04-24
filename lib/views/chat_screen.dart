@@ -127,7 +127,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.shade200,
@@ -148,7 +148,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: Colors.grey.shade100,
+                        fillColor: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 10),
                       ),

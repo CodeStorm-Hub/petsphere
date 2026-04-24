@@ -1516,7 +1516,7 @@ class _PetCarouselAvatar extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(3),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
