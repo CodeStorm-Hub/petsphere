@@ -49,7 +49,7 @@ class PetNotifier extends Notifier<PetState> {
     ref.listen<AuthState>(authProvider, (prev, next) {
       if (next.status == AuthStatus.authenticated && next.user != null) {
         if (_lastLoadedUserId != next.user!.id) {
-          _loadMyPets(next.user!.id);
+          Future.microtask(() => _loadMyPets(next.user!.id));
         }
       } else if (next.status == AuthStatus.unauthenticated) {
         _lastLoadedUserId = null;
@@ -60,7 +60,8 @@ class PetNotifier extends Notifier<PetState> {
 
     final authState = ref.read(authProvider);
     if (authState.status == AuthStatus.authenticated && authState.user != null) {
-      _loadMyPets(authState.user!.id);
+      Future.microtask(() => _loadMyPets(authState.user!.id));
+      return PetState(isLoading: true);
     }
 
     return PetState();
@@ -134,12 +135,14 @@ class PetNotifier extends Notifier<PetState> {
   }
 
   Future<bool> updatePet(String petId, Map<String, dynamic> fields) async {
+    if (fields.isEmpty) return true;
+
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final updatedPet = await petRepository.updatePet(petId, fields);
-      final updatedList = state.myPets.map((p) {
-        return p.id == petId ? updatedPet : p;
-      }).toList();
+      final updatedList = state.myPets
+          .map((pet) => pet.id == petId ? updatedPet : pet)
+          .toList();
 
       state = state.copyWith(
         myPets: updatedList,

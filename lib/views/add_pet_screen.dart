@@ -1,7 +1,9 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import '../controllers/auth_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../utils/image_upload_helper.dart';
 import '../utils/supabase_config.dart';
@@ -15,6 +17,9 @@ class AddPetScreen extends ConsumerStatefulWidget {
 
 class _AddPetScreenState extends ConsumerState<AddPetScreen>
     with SingleTickerProviderStateMixin {
+  static const int _maxPetAge = 50;
+  static const int _maxImageBytes = 6 * 1024 * 1024;
+
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _breedController = TextEditingController();
@@ -22,7 +27,8 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
   final _bioController = TextEditingController();
 
   String _selectedAnimalType = 'Dog';
-  File? _selectedImage;
+  XFile? _selectedImage;
+  Uint8List? _selectedImageBytes;
   bool _isSaving = false;
   int _currentStep = 0;
 
@@ -45,7 +51,10 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeInOut);
+    _fadeAnim = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeInOut,
+    );
     _animController.forward();
   }
 
@@ -60,16 +69,52 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
   }
 
   Future<void> _pickImage() async {
-    final file = await ImageUploadHelper.pickFromGallery();
-    if (file != null) {
-      setState(() => _selectedImage = file);
+    try {
+      final file = await ImageUploadHelper.pickXFileFromGallery();
+      if (file != null) {
+        final bytes = await file.readAsBytes();
+        if (bytes.length > _maxImageBytes) {
+          if (!mounted) return;
+          _showError(
+            'Image is too large. Please choose one smaller than 6 MB.',
+          );
+          return;
+        }
+        if (!mounted) return;
+        setState(() {
+          _selectedImage = file;
+          _selectedImageBytes = bytes;
+        });
+      }
+    } catch (_) {
+      if (!mounted) return;
+      _showError('Could not open gallery. Please try again.');
     }
   }
 
   Future<void> _takePhoto() async {
-    final file = await ImageUploadHelper.pickFromCamera();
-    if (file != null) {
-      setState(() => _selectedImage = file);
+    try {
+      final file = await ImageUploadHelper.pickXFileFromCamera();
+      if (file != null) {
+        final bytes = await file.readAsBytes();
+        if (bytes.length > _maxImageBytes) {
+          if (!mounted) return;
+          _showError(
+            'Image is too large. Please choose one smaller than 6 MB.',
+          );
+          return;
+        }
+        if (!mounted) return;
+        setState(() {
+          _selectedImage = file;
+          _selectedImageBytes = bytes;
+        });
+      }
+    } catch (_) {
+      if (!mounted) return;
+      _showError(
+        'Could not open camera on this device. Please choose from gallery.',
+      );
     }
   }
 
@@ -113,11 +158,15 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                   color: const Color(0xFFFF8A65).withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.photo_library_rounded,
-                    color: Color(0xFFFF8A65)),
+                child: const Icon(
+                  Icons.photo_library_rounded,
+                  color: Color(0xFFFF8A65),
+                ),
               ),
-              title: const Text('Choose from Gallery',
-                  style: TextStyle(fontWeight: FontWeight.w600)),
+              title: const Text(
+                'Choose from Gallery',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               subtitle: const Text('Select an existing photo'),
               onTap: () {
                 Navigator.pop(ctx);
@@ -131,11 +180,15 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                   color: const Color(0xFF4FC3F7).withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.camera_alt_rounded,
-                    color: Color(0xFF4FC3F7)),
+                child: const Icon(
+                  Icons.camera_alt_rounded,
+                  color: Color(0xFF4FC3F7),
+                ),
               ),
-              title: const Text('Take a Photo',
-                  style: TextStyle(fontWeight: FontWeight.w600)),
+              title: const Text(
+                'Take a Photo',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               subtitle: const Text('Use your camera'),
               onTap: () {
                 Navigator.pop(ctx);
@@ -150,23 +203,15 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
   }
 
   void _nextStep() {
+    if (_isSaving) return;
+
     if (_currentStep == 0) {
       // Animal type selected, proceed
       setState(() => _currentStep = 1);
       _animController.reset();
       _animController.forward();
     } else if (_currentStep == 1) {
-      // Validate name + breed
-      if (_nameController.text.trim().isEmpty) {
-        _showError('Please enter your pet\'s name');
-        return;
-      }
-      if (_breedController.text.trim().isEmpty) {
-        _showError('Please enter the breed');
-        return;
-      }
-      if (_ageController.text.trim().isEmpty) {
-        _showError('Please enter age');
+      if (!_validatePetDetails()) {
         return;
       }
       setState(() => _currentStep = 2);
@@ -198,48 +243,54 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
   }
 
   Future<void> _submitPet() async {
+    if (_isSaving) return;
+    if (!_validatePetDetails()) return;
+
     setState(() => _isSaving = true);
 
     try {
       String profileImageUrl = '';
+      final userId = ref.read(authProvider).user?.id;
 
-      // Upload image if selected — gracefully skip if bucket doesn't exist
+      // Upload image if selected
       if (_selectedImage != null) {
+        if (userId == null) {
+          throw Exception('You must be signed in to upload a pet photo.');
+        }
+
+        if (_selectedImageBytes == null ||
+            _selectedImageBytes!.length > _maxImageBytes) {
+          throw Exception('Please choose an image smaller than 6 MB.');
+        }
+
+        final ext = _selectedImageExtension();
+        final path =
+            '$userId/pet_${DateTime.now().millisecondsSinceEpoch}.$ext';
         try {
-          final ext = _selectedImage!.path.split('.').last;
-          final path = 'new_pet/${DateTime.now().millisecondsSinceEpoch}.$ext';
-          profileImageUrl = await ImageUploadHelper.upload(
+          profileImageUrl = await ImageUploadHelper.uploadXFile(
             file: _selectedImage!,
             bucket: kBucketPetImages,
             path: path,
           );
-        } catch (uploadError) {
-          // Storage bucket may not exist — continue without image
-          debugPrint('Image upload failed (bucket may not exist): $uploadError');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Row(
-                  children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.white, size: 18),
-                    SizedBox(width: 8),
-                    Expanded(child: Text('Photo upload failed — saving pet without photo.')),
-                  ],
-                ),
-                backgroundColor: Colors.orange.shade700,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            );
-          }
+        } catch (_) {
+          throw Exception(
+            'Pet photo upload failed. Please check your connection and try again.',
+          );
         }
       }
 
-      final success = await ref.read(petProvider.notifier).createPet(
+      final age = _parsePositiveAge(_ageController.text.trim());
+      if (age == null) {
+        throw Exception('Please enter a valid age between 1 and $_maxPetAge.');
+      }
+
+      final success = await ref
+          .read(petProvider.notifier)
+          .createPet(
             name: _nameController.text.trim(),
             breed: _breedController.text.trim(),
             animalType: _selectedAnimalType,
-            age: int.tryParse(_ageController.text.trim()) ?? 1,
+            age: age,
             bio: _bioController.text.trim(),
             profileImageUrl: profileImageUrl,
           );
@@ -258,7 +309,8 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
               backgroundColor: const Color(0xFF81C784),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
           context.pop();
@@ -274,6 +326,79 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  String _selectedImageExtension() {
+    final fileName = _selectedImage?.name.trim() ?? '';
+    final lastDot = fileName.lastIndexOf('.');
+    if (lastDot > -1 && lastDot < fileName.length - 1) {
+      final ext = fileName.substring(lastDot + 1).trim().toLowerCase();
+      if (ext.isNotEmpty) return ext;
+    }
+    return 'jpg';
+  }
+
+  int? _parsePositiveAge(String input) {
+    final age = int.tryParse(input.trim());
+    if (age == null || age <= 0 || age > _maxPetAge) return null;
+    return age;
+  }
+
+  bool _validatePetDetails() {
+    final formState = _formKey.currentState;
+    if (formState != null && !formState.validate()) {
+      return false;
+    }
+
+    final nameError = _validateName(_nameController.text);
+    if (nameError != null) {
+      _showError(nameError);
+      return false;
+    }
+
+    final breedError = _validateBreed(_breedController.text);
+    if (breedError != null) {
+      _showError(breedError);
+      return false;
+    }
+
+    final ageError = _validateAge(_ageController.text);
+    if (ageError != null) {
+      _showError(ageError);
+      return false;
+    }
+
+    return true;
+  }
+
+  String? _validateName(String? value) {
+    final normalized = value?.trim() ?? '';
+    if (normalized.isEmpty) {
+      return 'Please enter your pet\'s name';
+    }
+    return null;
+  }
+
+  String? _validateBreed(String? value) {
+    final normalized = value?.trim() ?? '';
+    if (normalized.isEmpty) {
+      return 'Please enter the breed';
+    }
+    return null;
+  }
+
+  String? _validateAge(String? value) {
+    final normalized = value?.trim() ?? '';
+    if (normalized.isEmpty) {
+      return 'Please enter age';
+    }
+
+    final age = _parsePositiveAge(normalized);
+    if (age == null) {
+      return 'Enter a valid age between 1 and $_maxPetAge';
+    }
+
+    return null;
   }
 
   @override
@@ -298,13 +423,10 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
         actions: [
           if (_currentStep < 2)
             TextButton(
-              onPressed: _nextStep,
+              onPressed: _isSaving ? null : _nextStep,
               child: const Text(
                 'Next',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
         ],
@@ -355,7 +477,9 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
               value: (_currentStep + 1) / 3,
               minHeight: 4,
               backgroundColor: Colors.grey.shade200,
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFF8A65)),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Color(0xFFFF8A65),
+              ),
             ),
           ),
         ],
@@ -446,7 +570,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                               color: option.color.withAlpha(51),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
-                            )
+                            ),
                           ]
                         : [],
                   ),
@@ -463,8 +587,9 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                         option.label,
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w500,
                           color: isSelected
                               ? option.color
                               : Colors.grey.shade600,
@@ -515,6 +640,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
               decoration: _inputDecoration('e.g. Buddy, Luna, Tweety'),
+              validator: _validateName,
             ),
             const SizedBox(height: 24),
 
@@ -525,6 +651,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
               controller: _breedController,
               textCapitalization: TextCapitalization.words,
               decoration: _inputDecoration('e.g. Golden Retriever, Maine Coon'),
+              validator: _validateBreed,
             ),
             const SizedBox(height: 24),
 
@@ -535,6 +662,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
               controller: _ageController,
               keyboardType: TextInputType.number,
               decoration: _inputDecoration('e.g. 3'),
+              validator: _validateAge,
             ),
             const SizedBox(height: 24),
           ],
@@ -591,12 +719,12 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                             color: const Color(0xFFFF8A65).withAlpha(51),
                             blurRadius: 20,
                             offset: const Offset(0, 6),
-                          )
+                          ),
                         ]
                       : [],
-                  image: _selectedImage != null
+                  image: _selectedImage != null && _selectedImageBytes != null
                       ? DecorationImage(
-                          image: FileImage(_selectedImage!),
+                          image: MemoryImage(_selectedImageBytes!),
                           fit: BoxFit.cover,
                         )
                       : null,
@@ -605,8 +733,11 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.add_a_photo_rounded,
-                              size: 40, color: Colors.grey.shade400),
+                          Icon(
+                            Icons.add_a_photo_rounded,
+                            size: 40,
+                            color: Colors.grey.shade400,
+                          ),
                           const SizedBox(height: 8),
                           Text(
                             'Add Photo',
