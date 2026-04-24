@@ -24,6 +24,8 @@ class PetSphereApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'PetSphere',
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       routerConfig: goRouter,
       debugShowCheckedModeBanner: false,
     );

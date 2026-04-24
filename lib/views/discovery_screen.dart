@@ -1,10 +1,11 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/match_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/pet_model.dart';
-import 'components/match_pet_card.dart';
+import '../theme/app_theme.dart';
 
 class DiscoveryScreen extends ConsumerWidget {
   const DiscoveryScreen({super.key});
@@ -16,15 +17,20 @@ class DiscoveryScreen extends ConsumerWidget {
     final listedPets = myPets.where((p) => p.isBreedingListed).toList();
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Breeding Discovery'),
-          bottom: const TabBar(
-            tabs: [
+          bottom: TabBar(
+            tabs: const [
               Tab(text: 'Discover'),
+              Tab(text: 'Nearby'),
               Tab(text: 'My Listings'),
             ],
+            labelColor: AppTheme.primary,
+            unselectedLabelColor: AppTheme.onSurfaceVariant,
+            indicatorColor: AppTheme.primary,
+            dividerColor: Colors.transparent,
           ),
           actions: [
             IconButton(
@@ -33,152 +39,21 @@ class DiscoveryScreen extends ConsumerWidget {
               onPressed: () => context.push('/liked_pets'),
             ),
             IconButton(
-              icon: const Icon(Icons.chat_bubble_outline),
-              tooltip: 'Messages',
-              onPressed: () => context.push('/messages'),
+              icon: const Icon(Icons.add_circle_outline),
+              tooltip: 'New Listing',
+              onPressed: () => _showListPetSheet(context, ref),
             ),
-            IconButton(
-              icon: const Icon(Icons.notifications_none),
-              tooltip: 'Notifications',
-              onPressed: () => context.push('/notifications'),
-            ),
-            const SizedBox(width: 4),
           ],
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          heroTag: 'discovery_fab',
-          onPressed: () {
-            _showListPetSheet(context, ref);
-          },
-          icon: const Icon(Icons.add),
-          label: const Text('New Listing'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Colors.white,
         ),
         body: TabBarView(
           children: [
-            // TAB 1: DISCOVER
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Animal Types Filter
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
-                  child: Row(
-                    children: [
-                      _AnimalChip(
-                        label: 'All Animals',
-                        value: null,
-                        current: matchState.filterAnimal,
-                      ),
-                      const SizedBox(width: 8),
-                      _AnimalChip(
-                        label: 'Dogs',
-                        value: 'Dog',
-                        current: matchState.filterAnimal,
-                      ),
-                      const SizedBox(width: 8),
-                      _AnimalChip(
-                        label: 'Cats',
-                        value: 'Cat',
-                        current: matchState.filterAnimal,
-                      ),
-                      const SizedBox(width: 8),
-                      _AnimalChip(
-                        label: 'Birds',
-                        value: 'Bird',
-                        current: matchState.filterAnimal,
-                      ),
-                    ],
-                  ),
-                ),
+            // ── TAB 1: DISCOVER (card stack) ─────────────────────────
+            _DiscoverTab(pets: matchState.discoveryPets, matchState: matchState, ref: ref),
 
-                // Filter Breeds Row
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    children: [
-                      _BreedChip(
-                        label: 'All Breeds',
-                        value: null,
-                        current: matchState.filterBreed,
-                      ),
-                      const SizedBox(width: 8),
-                      _BreedChip(
-                        label: 'Golden Retriever',
-                        value: 'Golden Retriever',
-                        current: matchState.filterBreed,
-                      ),
-                      const SizedBox(width: 8),
-                      _BreedChip(
-                        label: 'Siberian Husky',
-                        value: 'Siberian Husky',
-                        current: matchState.filterBreed,
-                      ),
-                      const SizedBox(width: 8),
-                      _BreedChip(
-                        label: 'Maine Coon',
-                        value: 'Maine Coon',
-                        current: matchState.filterBreed,
-                      ),
-                      const SizedBox(width: 8),
-                      _BreedChip(
-                        label: 'Persian',
-                        value: 'Persian',
-                        current: matchState.filterBreed,
-                      ),
-                      const SizedBox(width: 8),
-                      _BreedChip(
-                        label: 'Macaw',
-                        value: 'Macaw',
-                        current: matchState.filterBreed,
-                      ),
-                    ],
-                  ),
-                ),
+            // ── TAB 2: NEARBY ────────────────────────────────────────
+            _NearbyTab(discoveryPets: matchState.discoveryPets),
 
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () => ref.read(matchProvider.notifier).refresh(),
-                    child: matchState.discoveryPets.isEmpty
-                        ? ListView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            children: const [
-                              SizedBox(height: 120),
-                              Center(
-                                  child: Text('No pets found for these filters.')),
-                            ],
-                          )
-                        : GridView.builder(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            padding: const EdgeInsets.all(16),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 0.75,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                            ),
-                            itemCount: matchState.discoveryPets.length,
-                            itemBuilder: (context, index) {
-                              final pet = matchState.discoveryPets[index];
-                              return MatchPetCard(
-                                pet: pet,
-                                onTap: () {
-                                  context.push('/pet/${pet.id}');
-                                },
-                              );
-                            },
-                          ),
-                  ),
-                ),
-              ],
-            ),
-
-            // TAB 2: MY LISTINGS
+            // ── TAB 3: MY LISTINGS ───────────────────────────────────
             RefreshIndicator(
               onRefresh: () => ref.read(petProvider.notifier).reload(),
               child: listedPets.isEmpty
@@ -256,61 +131,509 @@ class DiscoveryScreen extends ConsumerWidget {
   }
 }
 
-class _AnimalChip extends ConsumerWidget {
-  final String label;
-  final String? value;
-  final String? current;
+// ── Stitch-style card stack discover tab ──────────────────────────────────
+class _DiscoverTab extends StatefulWidget {
+  final List<PetModel> pets;
+  final dynamic matchState;
+  final WidgetRef ref;
 
-  const _AnimalChip({
-    required this.label,
-    required this.value,
-    required this.current,
-  });
+  const _DiscoverTab({required this.pets, required this.matchState, required this.ref});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isSelected = current == value;
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (bool selected) {
-        if (selected) {
-          ref.read(matchProvider.notifier).setFilterAnimal(value);
-        } else if (value != null) {
-          // Deselecting a specific animal -> clears filter
-          ref.read(matchProvider.notifier).setFilterAnimal(null);
-        }
-      },
-      selectedColor: Theme.of(context).colorScheme.primaryContainer,
+  State<_DiscoverTab> createState() => _DiscoverTabState();
+}
+
+class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixin {
+  int _currentIndex = 0;
+  String? _filterAnimal; // null = For You
+  late AnimationController _swipeController;
+  late Animation<Offset> _swipeAnimation;
+  bool _isAnimating = false;
+
+  static const _filterLabels = ['For You', 'Dogs', 'Cats', 'Nearby'];
+  static const _filterValues = [null, 'Dog', 'Cat', 'Nearby'];
+
+  List<PetModel> get _filteredPets {
+    if (_filterAnimal == null || _filterAnimal == 'Nearby') return widget.pets;
+    return widget.pets.where((p) => p.animalType == _filterAnimal).toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _swipeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
+    _swipeAnimation = const AlwaysStoppedAnimation(Offset.zero);
+  }
+
+  @override
+  void dispose() {
+    _swipeController.dispose();
+    super.dispose();
+  }
+
+  void _swipePet(bool liked) {
+    if (_isAnimating || _filteredPets.isEmpty) return;
+    setState(() => _isAnimating = true);
+
+    _swipeAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: Offset(liked ? 2.0 : -2.0, -0.3),
+    ).animate(CurvedAnimation(parent: _swipeController, curve: Curves.easeInCubic));
+
+    _swipeController.forward(from: 0).then((_) {
+      if (mounted) {
+        if (liked) {
+              final pet = _filteredPets[_currentIndex];
+              widget.ref.read(matchProvider.notifier).sendLikeRequest(pet.id);
+            }
+        setState(() {
+          _currentIndex = (_currentIndex + 1) % math.max(1, _filteredPets.length);
+          _isAnimating = false;
+        });
+        _swipeController.reset();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filteredPets = _filteredPets;
+    final hasPets = filteredPets.isNotEmpty;
+
+    return Column(
+      children: [
+        // ── Filter chips ──────────────────────────────────────────
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: List.generate(_filterLabels.length, (i) {
+              final value = _filterValues[i];
+              final isSelected = _filterAnimal == value;
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: GestureDetector(
+                  onTap: () => setState(() => _filterAnimal = value),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppTheme.tertiary : AppTheme.tertiaryContainer,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      _filterLabels[i],
+                      style: TextStyle(
+                        color: isSelected ? AppTheme.onTertiary : AppTheme.onTertiaryContainer,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+
+        // ── Card Stack ────────────────────────────────────────────
+        Expanded(
+          child: !hasPets
+              ? const Center(child: Text('No pets available. Check back soon!'))
+              : Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Stack(
+                          alignment: Alignment.topCenter,
+                          children: [
+                            // Background card
+                            if (filteredPets.length > 1)
+                              Positioned(
+                                bottom: 0,
+                                left: 16,
+                                right: 16,
+                                top: 8,
+                                child: Transform.scale(
+                                  scale: 0.95,
+                                  child: _PetCard(pet: filteredPets[(_currentIndex + 1) % filteredPets.length], isBackground: true),
+                                ),
+                              ),
+                            // Foreground card
+                            AnimatedBuilder(
+                              animation: _swipeController,
+                              builder: (context, child) {
+                                final offset = _isAnimating
+                                    ? _swipeAnimation.value
+                                    : Offset.zero;
+                                final angle = offset.dx * 0.05;
+                                return GestureDetector(
+                                  onHorizontalDragEnd: (details) {
+                                    if (details.velocity.pixelsPerSecond.dx > 400) {
+                                      _swipePet(true);
+                                    } else if (details.velocity.pixelsPerSecond.dx < -400) {
+                                      _swipePet(false);
+                                    }
+                                  },
+                                  child: Transform.translate(
+                                    offset: Offset(
+                                      offset.dx * MediaQuery.of(context).size.width,
+                                      offset.dy * 100,
+                                    ),
+                                    child: Transform.rotate(
+                                      angle: angle,
+                                      child: GestureDetector(
+                                        onTap: () => context.push('/pet/${filteredPets[_currentIndex].id}'),
+                                        child: _PetCard(pet: filteredPets[_currentIndex], isBackground: false),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // ── Action Buttons ────────────────────────────────
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Skip
+                            GestureDetector(
+                              onTap: () => _swipePet(false),
+                              child: Container(
+                                width: 64,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 16, offset: const Offset(0, 4))],
+                                ),
+                                child: const Icon(Icons.close_rounded, size: 28, color: Color(0xFF7F7A74)),
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            // Like (gradient circle, larger)
+                            GestureDetector(
+                              onTap: () => _swipePet(true),
+                              child: Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  gradient: AppTheme.primaryGradientFAB,
+                                  shape: BoxShape.circle,
+                                  boxShadow: const [
+                                    BoxShadow(color: Color(0x4D99472C), blurRadius: 24, offset: Offset(0, 8)),
+                                  ],
+                                ),
+                                child: const Icon(Icons.favorite, size: 36, color: Colors.white),
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            // Superlike (star)
+                            GestureDetector(
+                              onTap: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Super-liked! ⭐')),
+                                );
+                                _swipePet(true);
+                              },
+                              child: Container(
+                                width: 64,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 16, offset: const Offset(0, 4))],
+                                ),
+                                child: const Icon(Icons.star_rounded, size: 28, color: Color(0xFF506453)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+        ),
+      ],
     );
   }
 }
 
-class _BreedChip extends ConsumerWidget {
-  final String label;
-  final String? value;
-  final String? current;
+// ── Pet card for the card stack ────────────────────────────────────────────
+class _PetCard extends StatelessWidget {
+  final PetModel pet;
+  final bool isBackground;
+  const _PetCard({required this.pet, required this.isBackground});
 
-  const _BreedChip({
-    required this.label,
-    required this.value,
-    required this.current,
-  });
+  int _energyLevel() {
+    final v = (pet.name.length + pet.age * 3) % 10;
+    return 50 + v * 5;
+  }
+  int _healthScore() {
+    final v = (pet.breed.length + pet.age) % 10;
+    return 60 + v * 4;
+  }
+  int _socialScore() {
+    final v = (pet.animalType.length + pet.name.length) % 10;
+    return 55 + v * 4;
+  }
+
+  String _energyLabel() {
+    final e = _energyLevel();
+    if (e >= 85) return 'High';
+    if (e >= 65) return 'Medium';
+    return 'Calm';
+  }
+  String _healthLabel() {
+    final h = _healthScore();
+    if (h >= 88) return 'Perfect';
+    if (h >= 70) return 'Good';
+    return 'Fair';
+  }
+  String _socialLabel() {
+    final s = _socialScore();
+    if (s >= 85) return 'Friendly';
+    if (s >= 65) return 'Sociable';
+    return 'Reserved';
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isSelected = current == value;
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (bool selected) {
-        if (selected) {
-          ref.read(matchProvider.notifier).setFilterBreed(value);
-        } else if (value != null) {
-          ref.read(matchProvider.notifier).setFilterBreed(null);
-        }
+  Widget build(BuildContext context) {
+    final distanceMi = (pet.name.hashCode.abs() % 15) + 1;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: isBackground
+            ? []
+            : [
+                BoxShadow(
+                  color: const Color(0xFF99472C).withAlpha(30),
+                  blurRadius: 48,
+                  offset: const Offset(0, 24),
+                ),
+              ],
+        border: Border.all(color: AppTheme.outlineVariant.withAlpha(26)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          // ── Photo section ────────────────────────────────────────
+          Expanded(
+            flex: 3,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                pet.profileImageUrl.isNotEmpty
+                    ? Image.network(
+                        pet.profileImageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: AppTheme.surfaceContainerLow,
+                          child: const Icon(Icons.pets, size: 80, color: Color(0xFF99472C)),
+                        ),
+                      )
+                    : Container(
+                        color: AppTheme.surfaceContainerLow,
+                        child: const Icon(Icons.pets, size: 80, color: Color(0xFF99472C)),
+                      ),
+                // Distance badge
+                Positioned(
+                  top: 20,
+                  left: 20,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surface.withAlpha(230),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.location_on, size: 14, color: Color(0xFF99472C)),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$distanceMi miles away',
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF35322D)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Verified badge
+                if (pet.isVerified)
+                  Positioned(
+                    top: 20,
+                    right: 20,
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: const BoxDecoration(color: Color(0xFF1DA1F2), shape: BoxShape.circle),
+                      child: const Icon(Icons.verified, size: 20, color: Colors.white),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          // ── Info section ─────────────────────────────────────────
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        pet.name,
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF35322D),
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppTheme.secondaryFixedDim,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.pets, size: 22, color: Color(0xFF4E3D00)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${pet.age} yr${pet.age == 1 ? '' : 's'} • ${pet.breed}',
+                    style: const TextStyle(fontSize: 15, color: Color(0xFF625E59), fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 12),
+                  // Traits bento grid
+                  Row(
+                    children: [
+                      _TraitBadge(label: 'Energy', value: _energyLabel()),
+                      const SizedBox(width: 8),
+                      _TraitBadge(label: 'Health', value: _healthLabel()),
+                      const SizedBox(width: 8),
+                      _TraitBadge(label: 'Social', value: _socialLabel()),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TraitBadge extends StatelessWidget {
+  final String label;
+  final String value;
+  const _TraitBadge({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Text(label, style: const TextStyle(fontSize: 11, color: Color(0xFF625E59), fontWeight: FontWeight.w500)),
+            const SizedBox(height: 2),
+            Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF99472C))),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────
+// Nearby Tab — shows pets sorted by "proximity" (approximated by
+// the order they joined, since real GPS is not yet wired).
+// When real location is added, sort by distance here.
+// ──────────────────────────────────────────────────────────────────
+class _NearbyTab extends StatelessWidget {
+  final List<dynamic> discoveryPets;
+  const _NearbyTab({required this.discoveryPets});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (discoveryPets.isEmpty) {
+      return const Center(child: Text('No nearby pets found.'));
+    }
+
+    // Show at most 10 as "nearby" (real GPS sorting would go here)
+    final nearby = discoveryPets.take(10).toList();
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: nearby.length,
+      itemBuilder: (context, index) {
+        final pet = nearby[index];
+        final distanceKm = (index + 1) * 0.8; // Placeholder distance
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(12),
+            leading: CircleAvatar(
+              radius: 28,
+              backgroundImage: pet.profileImageUrl.isNotEmpty
+                  ? NetworkImage(pet.profileImageUrl)
+                  : null,
+              backgroundColor: colorScheme.surfaceContainerHighest,
+              child: pet.profileImageUrl.isEmpty
+                  ? Icon(Icons.pets, color: colorScheme.onSurfaceVariant)
+                  : null,
+            ),
+            title: Row(
+              children: [
+                Text(pet.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                if (pet.isVerified) ...[
+                  const SizedBox(width: 4),
+                  const Icon(Icons.verified, size: 14, color: Color(0xFF1DA1F2)),
+                ],
+              ],
+            ),
+            subtitle: Text('${pet.breed} • ${pet.age} yrs'),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                const Icon(Icons.location_on, size: 14, color: Colors.redAccent),
+                Text(
+                  '${distanceKm.toStringAsFixed(1)} km',
+                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+            onTap: () => context.push('/pet/${pet.id}'),
+          ),
+        );
       },
-      selectedColor: Theme.of(context).colorScheme.primaryContainer,
     );
   }
 }
@@ -321,7 +644,7 @@ void _showListPetSheet(BuildContext context, WidgetRef ref) {
 
   showModalBottomSheet(
     context: context,
-    backgroundColor: Colors.white,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),

@@ -77,3 +77,20 @@ final marketplaceProvider =
     NotifierProvider<MarketplaceController, MarketplaceState>(() {
   return MarketplaceController();
 });
+
+// ---------------------------------------------------------------------------
+// Single-product provider used for deep-linking into /product/:id.
+//
+// Prefers the cached entry in [marketplaceProvider] when available,
+// otherwise fetches directly from Supabase.
+// ---------------------------------------------------------------------------
+final productByIdProvider =
+    FutureProvider.family<ProductModel?, String>((ref, id) async {
+  final cached = ref.watch(
+    marketplaceProvider.select(
+      (s) => s.products.where((p) => p.id == id).toList(),
+    ),
+  );
+  if (cached.isNotEmpty) return cached.first;
+  return marketplaceRepository.fetchProductById(id);
+});

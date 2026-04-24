@@ -197,3 +197,21 @@ class FeedNotifier extends Notifier<FeedState> {
 final feedProvider = NotifierProvider<FeedNotifier, FeedState>(() {
   return FeedNotifier();
 });
+
+// ---------------------------------------------------------------------------
+// Single-post provider used for deep-linking into /post/:id.
+//
+// Prefers the cached entry in [feedProvider] when available, otherwise
+// fetches directly from Supabase. This keeps the detail screen functional
+// when opened via a link even if the feed has not been loaded yet.
+// ---------------------------------------------------------------------------
+final postByIdProvider =
+    FutureProvider.family<PostModel?, String>((ref, postId) async {
+  final cached = ref.watch(
+    feedProvider.select(
+      (s) => s.posts.where((p) => p.id == postId).toList(),
+    ),
+  );
+  if (cached.isNotEmpty) return cached.first;
+  return feedRepository.fetchPostById(postId);
+});
