@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
 import '../utils/supabase_config.dart';
@@ -32,11 +34,15 @@ class AuthRepository {
       throw Exception('Registration failed. Check your email for a confirmation link.');
     }
 
-    // Upsert the profile row
-    await supabase.from('profiles').upsert({
-      'id': user.id,
-      'name': name,
-    });
+    // Upsert the profile row — non-fatal if it fails (RLS may block)
+    try {
+      await supabase.from('profiles').upsert({
+        'id': user.id,
+        'name': name,
+      });
+    } catch (e) {
+      debugPrint('Profile upsert during signup failed (non-fatal): $e');
+    }
 
     return UserModel(id: user.id, email: email, name: name);
   }
@@ -59,6 +65,44 @@ class AuthRepository {
     } catch (_) {
       return UserModel(id: user.id, email: user.email ?? '');
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // Update the user's profile fields (name, bio, location, profile_image_url)
+  // -------------------------------------------------------------------------
+  Future<UserModel> updateProfile(String userId, Map<String, dynamic> fields) async {
+    final email = supabase.auth.currentUser?.email ?? '';
+
+    final data = await supabase
+        .from('profiles')
+        .upsert({'id': userId, ...fields})
+        .select()
+        .single();
+
+    return UserModel.fromJson({...data, 'email': email});
+  }
+
+  // -------------------------------------------------------------------------
+  // Upload a profile avatar to Supabase Storage — returns the public URL
+  // -------------------------------------------------------------------------
+  Future<String> uploadAvatar(String userId, File imageFile) async {
+    final ext = imageFile.path.split('.').last.toLowerCase();
+    final contentType = switch (ext) {
+      'jpg' || 'jpeg' => 'image/jpeg',
+      'png' => 'image/png',
+      'gif' => 'image/gif',
+      'webp' => 'image/webp',
+      _ => 'image/jpeg',
+    };
+    final path = 'avatars/${userId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+
+    await supabase.storage.from(kBucketPetImages).upload(
+      path,
+      imageFile,
+      fileOptions: FileOptions(contentType: contentType),
+    );
+
+    return supabase.storage.from(kBucketPetImages).getPublicUrl(path);
   }
 
   // -------------------------------------------------------------------------

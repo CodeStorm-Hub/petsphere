@@ -39,6 +39,7 @@ class ProductCard extends StatelessWidget {
           children: [
             // Image with top rounded corners only slightly smaller
             Expanded(
+<<<<<<< HEAD
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: ClipRRect(
@@ -57,6 +58,22 @@ class ProductCard extends StatelessWidget {
                   ),
                 ),
               ),
+=======
+              child: product.images.isNotEmpty
+                  ? Image.network(
+                      product.images[0],
+                      fit: BoxFit.cover,
+                      errorBuilder: (ctx, err, stack) => Container(
+                        color: Colors.grey.shade200,
+                        child: const Icon(Icons.broken_image, color: Colors.grey),
+                      ),
+                    )
+                  : Container(
+                      color: Colors.grey.shade100,
+                      child: Icon(Icons.inventory_2_outlined,
+                          size: 40, color: Colors.grey.shade400),
+                    ),
+>>>>>>> origin/main
             ),
             Padding(
               padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),

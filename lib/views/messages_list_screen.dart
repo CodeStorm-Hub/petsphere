@@ -19,6 +19,7 @@ class MessagesListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Messages'),
       ),
+<<<<<<< HEAD
       body: threads.isEmpty
           ? Center(
               child: Column(
@@ -41,16 +42,42 @@ class MessagesListScreen extends ConsumerWidget {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: ChatThreadTile(
+=======
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(chatProvider.notifier).refresh(),
+        child: threads.isEmpty
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(height: 120),
+                  Center(child: Text('No messages yet. Match with pets to chat!')),
+                ],
+              )
+            : ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: threads.length,
+                separatorBuilder: (context, index) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final thread = threads[index];
+                  return ChatThreadTile(
+>>>>>>> origin/main
                     thread: thread,
                     myPetId: myCurrentPetId,
                     onTap: () {
                        ref.read(chatProvider.notifier).markThreadAsRead(thread.id);
                        context.push('/chat/${thread.id}');
                     },
+<<<<<<< HEAD
                   ),
                 );
               },
             ),
+=======
+                  );
+                },
+              ),
+      ),
+>>>>>>> origin/main
     );
   }
 }

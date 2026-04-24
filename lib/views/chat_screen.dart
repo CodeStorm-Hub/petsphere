@@ -115,6 +115,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       body: Column(
         children: [
           Expanded(
+<<<<<<< HEAD
             child: messages.isEmpty
                 ? Center(
                     child: Text('Say hello to ${otherPet.name}! 👋',
@@ -129,6 +130,35 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       return _AmberMessageBubble(text: msg.text, isMe: isMe);
                     },
                   ),
+=======
+            child: RefreshIndicator(
+              onRefresh: () async {
+                ref.read(threadMessagesProvider.notifier).init(widget.threadId);
+              },
+              child: messages.isEmpty
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        SizedBox(height: 120),
+                        Center(
+                          child: Text('Say hello! 👋',
+                              style: TextStyle(color: Colors.grey)),
+                        ),
+                      ],
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        final msg = messages[index];
+                        final isMe = msg.senderPetId == myPetId;
+                        return MessageBubble(message: msg, isMe: isMe);
+                      },
+                    ),
+            ),
+>>>>>>> origin/main
           ),
           SafeArea(
             child: Container(

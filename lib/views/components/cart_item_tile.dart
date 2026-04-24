@@ -31,6 +31,7 @@ class CartItemTile extends ConsumerWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
+<<<<<<< HEAD
                 borderRadius: BorderRadius.circular(16),
                 color: theme.colorScheme.surfaceContainerHighest,
                 image: DecorationImage(
@@ -38,7 +39,21 @@ class CartItemTile extends ConsumerWidget {
                   fit: BoxFit.cover,
                   onError: (exception, stackTrace) {}, // Let it fall back to background color
                 ),
+=======
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.grey.shade100,
+                image: item.product.images.isNotEmpty
+                    ? DecorationImage(
+                        image: NetworkImage(item.product.images[0]),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+>>>>>>> origin/main
               ),
+              child: item.product.images.isEmpty
+                  ? Icon(Icons.inventory_2_outlined,
+                      size: 28, color: Colors.grey.shade400)
+                  : null,
             ),
             const SizedBox(width: 16),
             Expanded(

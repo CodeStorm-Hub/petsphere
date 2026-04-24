@@ -8,6 +8,7 @@ class PostCard extends StatefulWidget {
   final VoidCallback onLikeToggle;
   final VoidCallback onCommentIconTap;
   final VoidCallback onShareIconTap;
+  final VoidCallback? onPetTap;
 
   const PostCard({
     super.key,
@@ -16,6 +17,7 @@ class PostCard extends StatefulWidget {
     required this.onLikeToggle,
     required this.onCommentIconTap,
     required this.onShareIconTap,
+    this.onPetTap,
   });
 
   @override
@@ -24,6 +26,18 @@ class PostCard extends StatefulWidget {
 
 class _PostCardState extends State<PostCard> {
   bool _isSaved = false;
+  bool _showHeart = false;
+
+  void _handleDoubleTap() {
+    final isLiked = widget.post.likedByPetIds.contains(widget.currentPetId);
+    if (!isLiked) {
+      widget.onLikeToggle();
+    }
+    setState(() => _showHeart = true);
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (mounted) setState(() => _showHeart = false);
+    });
+  }
 
   void _showSettingsSheet() {
     showModalBottomSheet(
@@ -100,17 +114,24 @@ class _PostCardState extends State<PostCard> {
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
           child: Row(
             children: [
-              PetAvatar(
-                imageUrl: widget.post.pet.profileImageUrl,
-                hasStory: true,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  widget.post.pet.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+              GestureDetector(
+                onTap: widget.onPetTap,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    PetAvatar(
+                      imageUrl: widget.post.pet.profileImageUrl,
+                      hasStory: true,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      widget.post.pet.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
               ),
+              const Spacer(),
               IconButton(
                 icon: const Icon(Icons.more_vert),
                 onPressed: _showSettingsSheet,
@@ -119,6 +140,7 @@ class _PostCardState extends State<PostCard> {
           ),
         ),
 
+<<<<<<< HEAD
         // Image
         AspectRatio(
           aspectRatio: 1, // Square image
@@ -136,6 +158,47 @@ class _PostCardState extends State<PostCard> {
               color: Colors.grey.shade200,
               child: const Icon(Icons.error, color: Colors.grey),
             ),
+=======
+        // Image with double-tap to like
+        GestureDetector(
+          onDoubleTap: _handleDoubleTap,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              AspectRatio(
+                aspectRatio: 1,
+                child: Image.network(
+                  widget.post.mediaUrl,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      color: Colors.grey.shade200,
+                      child: const Center(child: CircularProgressIndicator()),
+                    );
+                  },
+                  errorBuilder: (_, _, _) => Container(
+                    color: Colors.grey.shade200,
+                    child: const Icon(Icons.error, color: Colors.grey),
+                  ),
+                ),
+              ),
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: _showHeart ? 1.0 : 0.0,
+                child: AnimatedScale(
+                  scale: _showHeart ? 1.0 : 0.5,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutBack,
+                  child: const Icon(
+                    Icons.favorite,
+                    size: 80,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+>>>>>>> origin/main
           ),
         ),
 
@@ -143,9 +206,15 @@ class _PostCardState extends State<PostCard> {
         Row(
           children: [
             IconButton(
-              icon: Icon(
-                isLiked ? Icons.favorite : Icons.favorite_border,
-                color: isLiked ? Colors.red : Colors.black87,
+              icon: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                transitionBuilder: (child, animation) =>
+                    ScaleTransition(scale: animation, child: child),
+                child: Icon(
+                  isLiked ? Icons.favorite : Icons.favorite_border,
+                  key: ValueKey(isLiked),
+                  color: isLiked ? Colors.red : Colors.black87,
+                ),
               ),
               onPressed: widget.onLikeToggle,
             ),
@@ -160,7 +229,7 @@ class _PostCardState extends State<PostCard> {
             const Spacer(),
             IconButton(
               icon: Icon(_isSaved ? Icons.bookmark : Icons.bookmark_border),
-              color: _isSaved ? Colors.black87 : Colors.black87,
+              color: Colors.black87,
               onPressed: () {
                 setState(() {
                   _isSaved = !_isSaved;
