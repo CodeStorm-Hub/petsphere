@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../models/pet_model.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
-import '../models/pet_model.dart';
 import '../utils/image_upload_helper.dart';
 import '../utils/supabase_config.dart';
 
@@ -219,12 +219,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
               ),
               child: _isUploading
-                  ? SizedBox(
+                  ? const SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                        color: Colors.white,
                       ),
                     )
                   : const Text(
@@ -436,7 +436,7 @@ class _AuthorAvatar extends StatelessWidget {
                 color: isSelected
                     ? Theme.of(context).colorScheme.primary
                     : Colors.transparent,
-                width: 2,
+                width: 3,
               ),
             ),
             child: CircleAvatar(
@@ -458,13 +458,11 @@ class _AuthorAvatar extends StatelessWidget {
           Text(
             pet.name,
             style: TextStyle(
-               fontSize: 12,
-               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-               color: isSelected
-                   ? Theme.of(context).colorScheme.onSurface
-                   : Theme.of(context).colorScheme.onSurfaceVariant,
-             ),
-           ),
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? Colors.black : Colors.grey.shade700,
+            ),
+          ),
         ],
       ),
     );

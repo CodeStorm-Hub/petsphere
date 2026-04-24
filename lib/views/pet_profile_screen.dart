@@ -388,7 +388,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         Image.network(
                           post.mediaUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (ctx, _, _) => Container(color: Colors.grey.shade200),
+                          errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey.shade200),
                         ),
                         if (isOwnerView)
                           Positioned(
@@ -800,7 +800,7 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
                       backgroundColor: const Color(0xFFFF8A65).withAlpha(26),
                       backgroundImage: _newAvatar != null
                           ? FileImage(_newAvatar!)
-                          : (hasAvatar ? NetworkImage(currentAvatarUrl) : null),
+                          : (hasAvatar ? NetworkImage(currentAvatarUrl) : null) as ImageProvider?,
                       child: (_newAvatar == null && !hasAvatar)
                           ? Text(
                               widget.user.initials,
@@ -1192,7 +1192,7 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
                       backgroundImage: _newAvatar != null
                           ? FileImage(_newAvatar!)
                           : (widget.pet.profileImageUrl.isNotEmpty
-                              ? NetworkImage(widget.pet.profileImageUrl)
+                              ? NetworkImage(widget.pet.profileImageUrl) as ImageProvider?
                               : null),
                       child: (_newAvatar == null && widget.pet.profileImageUrl.isEmpty)
                           ? Icon(Icons.pets, size: 32, color: Colors.grey.shade400)
@@ -1471,7 +1471,7 @@ class _OwnerCarouselAvatar extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
@@ -1516,7 +1516,7 @@ class _PetCarouselAvatar extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
@@ -1589,11 +1589,7 @@ class _StatColumn extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        Text(
-          label,
-          style:
-              TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-        ),
+        Text(label, style: const TextStyle(color: Colors.black54)),
       ],
     );
   }
