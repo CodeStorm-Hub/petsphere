@@ -37,6 +37,7 @@ lib/
     post_model.dart            # Also contains CommentModel
     product_model.dart
     cart_item_model.dart
+    order_model.dart
     chat_thread_model.dart
     message_model.dart
     match_request_model.dart
@@ -47,6 +48,7 @@ lib/
     marketplace_repository.dart
     match_repository.dart
     chat_repository.dart
+    follow_repository.dart
   controllers/                 # Riverpod Notifiers – one per feature; file-level providers
     auth_controller.dart
     pet_controller.dart
@@ -55,6 +57,7 @@ lib/
     match_controller.dart
     chat_controller.dart
     cart_controller.dart
+    follow_controller.dart
   views/                       # Flutter screens (one file per screen)
     splash_screen.dart
     login_screen.dart
@@ -64,13 +67,25 @@ lib/
     discovery_screen.dart      # Pet matching / swipe
     pet_profile_screen.dart    # Current user's pet profile
     match_pet_profile_screen.dart
+    add_pet_screen.dart
     create_post_screen.dart
+    post_detail_screen.dart
+    liked_pets_screen.dart
     messages_list_screen.dart
     chat_screen.dart
     marketplace_screen.dart
     product_detail_screen.dart
     cart_screen.dart
+    order_history_screen.dart
     notifications_screen.dart
+    components/                # Reusable UI widgets
+      cart_item_tile.dart
+      chat_thread_tile.dart
+      match_pet_card.dart
+      message_bubble.dart
+      pet_avatar.dart
+      post_card.dart
+      product_card.dart
 ```
 
 ---
@@ -200,12 +215,16 @@ Named routes:
 | `/login` | LoginScreen |
 | `/register` | RegistrationScreen |
 | `/home` | MainLayout (tab shell) |
+| `/add_pet` | AddPetScreen |
 | `/create_post` | CreatePostScreen |
+| `/liked_pets` | LikedPetsScreen |
 | `/notifications` | NotificationsScreen |
 | `/pet/:id` | MatchPetProfileScreen |
+| `/post/:id` | PostDetailScreen |
 | `/messages` | MessagesListScreen |
 | `/chat/:threadId` | ChatScreen |
 | `/cart` | CartScreen |
+| `/orders` | OrdersScreen |
 | `/product/:id` | ProductDetailScreen |
 
 The router watches `authProvider` and redirects unauthenticated users to `/login` and authenticated users away from auth screens to `/home`.
@@ -255,4 +274,4 @@ The helper uploads with `upsert: true` and returns the public URL.
 - **Supabase credentials in source**: `supabaseUrl` and `supabaseAnonKey` are committed as plaintext in `lib/utils/supabase_config.dart`. This is intentional for development convenience on this project; do not rotate the keys without updating this file.
 - **Cart is in-memory only**: `CartController` stores cart items in local Riverpod state. Cart is cleared after a successful order. There is no persistence across app restarts.
 - **Chat Realtime subscription lifecycle**: `ThreadMessagesNotifier` intentionally does **not** auto-dispose so the Realtime subscription survives soft navigations. The channel is cancelled in `ref.onDispose`.
-- **Match request filtering edge case**: `MatchRepository.fetchDiscoveryPets` manually builds a NOT IN clause by querying sent and received requests separately. If the set is empty, Supabase may error on an empty IN list – handle accordingly when modifying this query.
+- **Match discovery filtering is simplified**: `MatchRepository.fetchDiscoveryPets` currently filters discovery results with `is_breeding_listed = true` and `user_id != userId`. It does **not** currently exclude pets based on existing sent/received match requests, so reintroduce that logic explicitly if request-based exclusions are needed.
