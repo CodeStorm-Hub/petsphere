@@ -12,7 +12,11 @@ class FeedState {
   final bool isLoading;
   final String? error;
 
-  FeedState({this.posts = const [], this.isLoading = false, this.error});
+  FeedState({
+    this.posts = const [],
+    this.isLoading = false,
+    this.error,
+  });
 
   FeedState copyWith({
     List<PostModel>? posts,
@@ -39,22 +43,17 @@ class FeedNotifier extends Notifier<FeedState> {
   FeedState build() {
     _setupRealtimeSubscriptions();
     ref.onDispose(_disposeChannels);
-    Future.microtask(_fetchPosts);
+    _fetchPosts();
     return FeedState(isLoading: true);
   }
 
   void _setupRealtimeSubscriptions() {
-    try {
-      _likesChannel = feedRepository.subscribeToLikes(
-        onLikeChange: _handleRealtimeLike,
-      );
-      _commentsChannel = feedRepository.subscribeToComments(
-        onNewComment: _handleRealtimeComment,
-      );
-    } catch (e) {
-      _disposeChannels();
-      state = state.copyWith(error: e.toString());
-    }
+    _likesChannel = feedRepository.subscribeToLikes(
+      onLikeChange: _handleRealtimeLike,
+    );
+    _commentsChannel = feedRepository.subscribeToComments(
+      onNewComment: _handleRealtimeComment,
+    );
   }
 
   void _disposeChannels() {
@@ -123,10 +122,8 @@ class FeedNotifier extends Notifier<FeedState> {
     );
 
     try {
-      final updatedLikes = await feedRepository.toggleLike(
-        postId,
-        currentPetId,
-      );
+      final updatedLikes =
+          await feedRepository.toggleLike(postId, currentPetId);
       state = state.copyWith(
         posts: state.posts.map((post) {
           if (post.id != postId) return post;
@@ -174,11 +171,7 @@ class FeedNotifier extends Notifier<FeedState> {
   // Add Comment
   // -------------------------------------------------------------------------
   Future<void> addComment(
-    String postId,
-    String petId,
-    String petName,
-    String text,
-  ) async {
+      String postId, String petId, String petName, String text) async {
     try {
       final newComment = await feedRepository.addComment(
         postId: postId,
@@ -188,7 +181,8 @@ class FeedNotifier extends Notifier<FeedState> {
       state = state.copyWith(
         posts: state.posts.map((post) {
           if (post.id != postId) return post;
-          return post.copyWith(comments: [...post.comments, newComment]);
+          return post.copyWith(
+              comments: [...post.comments, newComment]);
         }).toList(),
       );
     } catch (e) {
@@ -202,4 +196,22 @@ class FeedNotifier extends Notifier<FeedState> {
 // ---------------------------------------------------------------------------
 final feedProvider = NotifierProvider<FeedNotifier, FeedState>(() {
   return FeedNotifier();
+});
+
+// ---------------------------------------------------------------------------
+// Single-post provider used for deep-linking into /post/:id.
+//
+// Prefers the cached entry in [feedProvider] when available, otherwise
+// fetches directly from Supabase. This keeps the detail screen functional
+// when opened via a link even if the feed has not been loaded yet.
+// ---------------------------------------------------------------------------
+final postByIdProvider =
+    FutureProvider.family<PostModel?, String>((ref, postId) async {
+  final cached = ref.watch(
+    feedProvider.select(
+      (s) => s.posts.where((p) => p.id == postId).toList(),
+    ),
+  );
+  if (cached.isNotEmpty) return cached.first;
+  return feedRepository.fetchPostById(postId);
 });

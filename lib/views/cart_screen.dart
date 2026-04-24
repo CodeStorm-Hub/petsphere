@@ -118,15 +118,16 @@ class _CheckoutBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isFreeShipping = total >= 25;
     return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      decoration: const BoxDecoration(
+        color: Color(0xFFFEF8F3),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade200,
-            blurRadius: 8,
-            offset: const Offset(0, -2),
+            color: Color(0x14994720),
+            blurRadius: 24,
+            offset: Offset(0, -8),
           ),
         ],
       ),
@@ -135,59 +136,152 @@ class _CheckoutBar extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$itemCount ${itemCount == 1 ? 'item' : 'items'}',
-                      style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+            // Order summary card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3EDE6),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  _SummaryRow(
+                    label: 'Subtotal',
+                    value: currencyFormat.format(total),
+                    valueColor: const Color(0xFF35322D),
+                  ),
+                  const SizedBox(height: 10),
+                  _SummaryRow(
+                    label: 'Shipping',
+                    value: isFreeShipping ? 'FREE' : '\$${(25 - total).toStringAsFixed(2)} away',
+                    valueColor: const Color(0xFF506453),
+                    valueWeight: FontWeight.w700,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Divider(
+                      height: 1,
+                      color: const Color(0xFF7F7A74).withAlpha(30),
                     ),
-                    const SizedBox(height: 2),
-                    const Text('Total',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                  ],
-                ),
-                Text(
-                  currencyFormat.format(total),
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: FilledButton(
-                onPressed: isCheckingOut ? null : onCheckout,
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF8A65),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: isCheckingOut
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Total',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF35322D),
                         ),
-                      )
-                    : const Text('Place Order',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      ),
+                      Text(
+                        currencyFormat.format(total),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF99472C),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
+            const SizedBox(height: 14),
+            // Gradient checkout button
+            GestureDetector(
+              onTap: isCheckingOut ? null : onCheckout,
+              child: Container(
+                width: double.infinity,
+                height: 58,
+                decoration: BoxDecoration(
+                  gradient: isCheckingOut
+                      ? null
+                      : const LinearGradient(
+                          colors: [Color(0xFF99472C), Color(0xFFFFAD93)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                  color: isCheckingOut ? const Color(0xFFE8E1DA) : null,
+                  borderRadius: BorderRadius.circular(9999),
+                  boxShadow: isCheckingOut
+                      ? null
+                      : [
+                          const BoxShadow(
+                            color: Color(0x2699472C),
+                            blurRadius: 24,
+                            offset: Offset(0, 8),
+                          ),
+                        ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isCheckingOut) ...[
+                      const SizedBox(
+                        width: 22, height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2.5, color: Color(0xFF99472C)),
+                      ),
+                    ] else ...[
+                      const Text(
+                        'Proceed to Checkout',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color valueColor;
+  final FontWeight valueWeight;
+
+  const _SummaryRow({
+    required this.label,
+    required this.value,
+    required this.valueColor,
+    this.valueWeight = FontWeight.w600,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF625E59),
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: valueWeight,
+            color: valueColor,
+          ),
+        ),
+      ],
     );
   }
 }

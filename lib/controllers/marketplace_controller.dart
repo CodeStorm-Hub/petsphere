@@ -28,9 +28,8 @@ class MarketplaceState {
   }) {
     return MarketplaceState(
       products: products ?? this.products,
-      filterCategory: clearCategory
-          ? null
-          : (filterCategory ?? this.filterCategory),
+      filterCategory:
+          clearCategory ? null : (filterCategory ?? this.filterCategory),
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
     );
@@ -43,16 +42,15 @@ class MarketplaceState {
 class MarketplaceController extends Notifier<MarketplaceState> {
   @override
   MarketplaceState build() {
-    Future.microtask(_fetchProducts);
+    _fetchProducts();
     return MarketplaceState(isLoading: true);
   }
 
   Future<void> _fetchProducts({String? category}) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final products = await marketplaceRepository.fetchProducts(
-        category: category,
-      );
+      final products =
+          await marketplaceRepository.fetchProducts(category: category);
       state = state.copyWith(products: products, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -77,5 +75,22 @@ class MarketplaceController extends Notifier<MarketplaceState> {
 // ---------------------------------------------------------------------------
 final marketplaceProvider =
     NotifierProvider<MarketplaceController, MarketplaceState>(() {
-      return MarketplaceController();
-    });
+  return MarketplaceController();
+});
+
+// ---------------------------------------------------------------------------
+// Single-product provider used for deep-linking into /product/:id.
+//
+// Prefers the cached entry in [marketplaceProvider] when available,
+// otherwise fetches directly from Supabase.
+// ---------------------------------------------------------------------------
+final productByIdProvider =
+    FutureProvider.family<ProductModel?, String>((ref, id) async {
+  final cached = ref.watch(
+    marketplaceProvider.select(
+      (s) => s.products.where((p) => p.id == id).toList(),
+    ),
+  );
+  if (cached.isNotEmpty) return cached.first;
+  return marketplaceRepository.fetchProductById(id);
+});

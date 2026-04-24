@@ -20,6 +20,20 @@ class FeedRepository {
   }
 
   // -------------------------------------------------------------------------
+  // Fetch a single post by ID — used for deep-linking into /post/:id
+  // -------------------------------------------------------------------------
+  Future<PostModel?> fetchPostById(String postId) async {
+    final data = await supabase
+        .from('posts')
+        .select('*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
+        .eq('id', postId)
+        .maybeSingle();
+
+    if (data == null) return null;
+    return PostModel.fromJson(data);
+  }
+
+  // -------------------------------------------------------------------------
   // Create a new post (media already uploaded; pass the public URL)
   // -------------------------------------------------------------------------
   Future<PostModel> createPost({

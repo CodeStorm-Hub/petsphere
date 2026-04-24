@@ -7,6 +7,10 @@ class ProductModel {
   final List<String> images;
   final int stock;
   final String category;
+  final double rating;
+  final int reviewCount;
+  final List<String> tags;
+  final bool isBestseller;
 
   ProductModel({
     required this.id,
@@ -17,6 +21,10 @@ class ProductModel {
     required this.images,
     required this.stock,
     required this.category,
+    this.rating = 0,
+    this.reviewCount = 0,
+    this.tags = const [],
+    this.isBestseller = false,
   });
 
   ProductModel copyWith({
@@ -28,6 +36,10 @@ class ProductModel {
     List<String>? images,
     int? stock,
     String? category,
+    double? rating,
+    int? reviewCount,
+    List<String>? tags,
+    bool? isBestseller,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -38,6 +50,10 @@ class ProductModel {
       images: images ?? this.images,
       stock: stock ?? this.stock,
       category: category ?? this.category,
+      rating: rating ?? this.rating,
+      reviewCount: reviewCount ?? this.reviewCount,
+      tags: tags ?? this.tags,
+      isBestseller: isBestseller ?? this.isBestseller,
     );
   }
 
@@ -54,6 +70,10 @@ class ProductModel {
           [],
       stock: (json['stock'] as num?)?.toInt() ?? 0,
       category: json['category'] as String? ?? '',
+      rating: (json['rating'] as num?)?.toDouble() ?? 0,
+      reviewCount: (json['review_count'] as num?)?.toInt() ?? 0,
+      tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      isBestseller: json['is_bestseller'] as bool? ?? false,
     );
   }
 
@@ -65,5 +85,9 @@ class ProductModel {
         'images': images,
         'stock': stock,
         'category': category,
+        'rating': rating,
+        'review_count': reviewCount,
+        'tags': tags,
+        'is_bestseller': isBestseller,
       };
 }

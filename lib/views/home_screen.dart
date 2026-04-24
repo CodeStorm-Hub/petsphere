@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
+import '../controllers/auth_controller.dart';
+import '../controllers/notification_controller.dart';
 import 'components/post_card.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -14,28 +16,44 @@ class HomeScreen extends ConsumerWidget {
     final feedState = ref.watch(feedProvider);
     final activePet = ref.watch(activePetProvider);
     final currentPetId = activePet?.id ?? '';
+    final authState = ref.watch(authProvider);
+    final userName = authState.user?.name ?? 'Pet Lover';
+    final myPets = ref.watch(petProvider).myPets;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final firstName = userName.split(' ').first;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'PetSphere',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w600,
-          ),
+        titleSpacing: 16,
+        title: Row(
+          children: [
+            const Icon(Icons.pets, size: 22, color: Color(0xFF99472C)),
+            const SizedBox(width: 8),
+            Text(
+              'The Nurtured Atelier',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite_border),
-            onPressed: () => context.push('/notifications'),
+          _NotificationIconButton(
+            onTap: () => context.push('/notifications'),
           ),
           IconButton(
+            tooltip: 'Messages',
             icon: const Icon(Icons.chat_bubble_outline),
             onPressed: () => context.push('/messages'),
           ),
         ],
       ),
-      body: _buildBody(context, ref, feedState, currentPetId),
+      body: _buildBody(context, ref, feedState, currentPetId, firstName, myPets),
     );
   }
 
@@ -44,7 +62,12 @@ class HomeScreen extends ConsumerWidget {
     WidgetRef ref,
     FeedState feedState,
     String currentPetId,
+    String userName,
+    List myPets,
   ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     if (feedState.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -54,30 +77,14 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            Icon(Icons.error_outline, size: 48, color: colorScheme.error),
             const SizedBox(height: 12),
             Text(feedState.error!, textAlign: TextAlign.center),
             const SizedBox(height: 16),
-            ElevatedButton(
+            FilledButton.icon(
               onPressed: () => ref.read(feedProvider.notifier).refresh(),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (feedState.posts.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.pets, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text(
-              'No posts yet!\nBe the first to share.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 16),
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Retry'),
             ),
           ],
         ),
@@ -86,137 +93,258 @@ class HomeScreen extends ConsumerWidget {
 
     return RefreshIndicator(
       onRefresh: () => ref.read(feedProvider.notifier).refresh(),
-      child: ListView.builder(
-        itemCount: feedState.posts.length,
-        itemBuilder: (context, index) {
-          final post = feedState.posts[index];
-          return PostCard(
-            post: post,
-            currentPetId: currentPetId,
-            onLikeToggle: () {
-              ref.read(feedProvider.notifier).toggleLike(post.id, currentPetId);
-            },
-            onCommentIconTap: () {
-              _showCommentSheet(
-                context,
-                post.id,
-                currentPetId,
-                ref.read(activePetProvider)?.name ?? 'Unknown',
-              );
-            },
-            onShareIconTap: () => _showShareSheet(context, post.id),
-            onPetTap: () {
-              ref.read(profilePetNavigationProvider.notifier).navigateTo(post.pet.id);
-            },
-          );
-        },
+      child: CustomScrollView(
+        slivers: [
+          // ── Personalized greeting + search ─────────────────────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Hello, $userName!',
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: colorScheme.onSurface,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Discover your next furry friend or share a tail-wagging moment.',
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Search bar
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8E1DA),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: TextField(
+                      readOnly: true,
+                      onTap: () {},
+                      decoration: InputDecoration(
+                        hintText: 'Search breeds, moments, or friends...',
+                        hintStyle: TextStyle(
+                          color: colorScheme.onSurfaceVariant.withAlpha(160),
+                          fontSize: 14,
+                        ),
+                        prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant, size: 20),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+                        fillColor: Colors.transparent,
+                        filled: true,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ── Category chips ──────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: _CategoryChipsRow(),
+          ),
+
+          // Pet avatars row
+          if (myPets.isNotEmpty)
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  itemCount: myPets.length + 1, // +1 for "Add" button
+                  itemBuilder: (context, index) {
+                    if (index == myPets.length) {
+                      // "Add Pet" button
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: GestureDetector(
+                          onTap: () => context.push('/add_pet'),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: colorScheme.outline.withAlpha(60),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.add,
+                                  color: colorScheme.primary,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Add Pet',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    final pet = myPets[index];
+                    final isActive = pet.id == currentPetId;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: GestureDetector(
+                        onTap: () {
+                          ref.read(profilePetNavigationProvider.notifier).navigateTo(pet.id);
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: isActive
+                                    ? LinearGradient(
+                                        colors: [
+                                          colorScheme.primary,
+                                          colorScheme.tertiary,
+                                        ],
+                                      )
+                                    : null,
+                                border: !isActive
+                                    ? Border.all(
+                                        color: colorScheme.outline.withAlpha(60),
+                                        width: 1.5,
+                                      )
+                                    : null,
+                              ),
+                              child: CircleAvatar(
+                                radius: 26,
+                                backgroundColor: colorScheme.surface,
+                                backgroundImage: pet.profileImageUrl.isNotEmpty
+                                    ? NetworkImage(pet.profileImageUrl)
+                                    : null,
+                                child: pet.profileImageUrl.isEmpty
+                                    ? Icon(Icons.pets,
+                                        size: 20,
+                                        color: colorScheme.onSurfaceVariant)
+                                    : null,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            SizedBox(
+                              width: 60,
+                              child: Text(
+                                pet.name,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                                  color: isActive
+                                      ? colorScheme.primary
+                                      : colorScheme.onSurfaceVariant,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+
+          // Divider
+          if (myPets.isNotEmpty)
+            SliverToBoxAdapter(
+              child: Divider(
+                height: 1,
+                color: colorScheme.outline.withAlpha(30),
+              ),
+            ),
+
+          // Empty state
+          if (feedState.posts.isEmpty)
+            SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.pets, size: 64, color: colorScheme.outline.withAlpha(80)),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No posts yet!\nBe the first to share.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    FilledButton.icon(
+                      onPressed: () => context.push('/create_post'),
+                      icon: const Icon(Icons.add_a_photo_outlined, size: 18),
+                      label: const Text('Create Post'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final post = feedState.posts[index];
+                  return PostCard(
+                    post: post,
+                    currentPetId: currentPetId,
+                    onLikeToggle: () {
+                      ref.read(feedProvider.notifier).toggleLike(post.id, currentPetId);
+                    },
+                    onCommentIconTap: () {
+                      _showCommentSheet(
+                        context,
+                        post.id,
+                        currentPetId,
+                        ref.read(activePetProvider)?.name ?? 'Unknown',
+                      );
+                    },
+                    onShareIconTap: () => _showShareSheet(context, post.id),
+                    onPetTap: () {
+                      ref.read(profilePetNavigationProvider.notifier).navigateTo(post.pet.id);
+                    },
+                  );
+                },
+                childCount: feedState.posts.length,
+              ),
+            ),
+        ],
       ),
     );
   }
 
   void _showShareSheet(BuildContext context, String postId) {
     final shareLink = 'https://petsphere.app/post/$postId';
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return Padding(
-          padding: const EdgeInsets.only(top: 16, bottom: 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Share Post',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              const SizedBox(height: 8),
-              const Divider(),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFFFF8A65).withAlpha(26),
-                  ),
-                  child: const Icon(Icons.link, color: Color(0xFFFF8A65)),
-                ),
-                title: const Text('Copy Link'),
-                subtitle: Text(
-                  shareLink,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                onTap: () {
-                  Clipboard.setData(ClipboardData(text: shareLink));
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Row(
-                        children: [
-                          Icon(Icons.check_circle, color: Colors.white, size: 16),
-                          SizedBox(width: 8),
-                          Text('Link copied to clipboard!'),
-                        ],
-                      ),
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      backgroundColor: const Color(0xFF81C784),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFF4FC3F7).withAlpha(26),
-                  ),
-                  child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF4FC3F7)),
-                ),
-                title: const Text('Send in Message'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  context.push('/messages');
-                },
-              ),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFF81C784).withAlpha(26),
-                  ),
-                  child: const Icon(Icons.add_to_photos_rounded, color: Color(0xFF81C784)),
-                ),
-                title: const Text('Add to your story'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Coming soon!')),
-                  );
-                },
-              ),
-            ],
-          ),
-        );
-      },
+    Share.share(
+      'Check out this pet on PetSphere!\n$shareLink',
+      subject: 'PetSphere',
     );
   }
 
@@ -225,7 +353,7 @@ class HomeScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -280,16 +408,38 @@ class _CommentBottomSheetWidgetState
     }
   }
 
+  String _formatTimeAgo(DateTime dt) {
+    final now = DateTime.now();
+    final diff = now.difference(dt);
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    return '${dt.month}/${dt.day}/${dt.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final feedState = ref.watch(feedProvider);
-    // Find post for reactive comment list updates
-    final post = feedState.posts.firstWhere(
-      (p) => p.id == widget.postId,
-      orElse: () => feedState.posts.isNotEmpty
-          ? feedState.posts.first
-          : throw StateError('Post not found'),
-    );
+    final colorScheme = Theme.of(context).colorScheme;
+
+    // Safely find post — use try/catch to prevent StateError
+    final postIndex = feedState.posts.indexWhere((p) => p.id == widget.postId);
+    if (postIndex == -1) {
+      return Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: colorScheme.outline),
+            const SizedBox(height: 12),
+            Text('Post not found',
+                style: TextStyle(color: colorScheme.onSurfaceVariant)),
+          ],
+        ),
+      );
+    }
+    final post = feedState.posts[postIndex];
 
     return Padding(
       padding: EdgeInsets.only(
@@ -301,16 +451,34 @@ class _CommentBottomSheetWidgetState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: colorScheme.outline.withAlpha(76),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 12),
           const Text('Comments',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          const Divider(),
+          Divider(color: colorScheme.outline.withAlpha(40)),
           SizedBox(
             height: 300,
             child: post.comments.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No comments yet. Start the conversation!',
-                      style: TextStyle(color: Colors.grey),
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.chat_bubble_outline,
+                            size: 40, color: colorScheme.outline.withAlpha(80)),
+                        const SizedBox(height: 8),
+                        Text(
+                          'No comments yet.\nStart the conversation!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
+                        ),
+                      ],
                     ),
                   )
                 : ListView.builder(
@@ -318,11 +486,11 @@ class _CommentBottomSheetWidgetState
                     itemBuilder: (context, index) {
                       final comment = post.comments[index];
                       final colors = [
-                        Colors.red,
-                        Colors.blue,
-                        Colors.green,
-                        Colors.orange,
-                        Colors.purple
+                        const Color(0xFFE57373),
+                        const Color(0xFF4FC3F7),
+                        const Color(0xFF81C784),
+                        const Color(0xFFFF8A65),
+                        const Color(0xFFBA68C8),
                       ];
                       final bg = colors[comment.petName.length % colors.length];
 
@@ -330,7 +498,7 @@ class _CommentBottomSheetWidgetState
                         contentPadding:
                             const EdgeInsets.symmetric(vertical: 4),
                         leading: CircleAvatar(
-                          backgroundColor: bg.withAlpha(51),
+                          backgroundColor: bg.withAlpha(40),
                           child: Text(
                             comment.petName[0].toUpperCase(),
                             style: TextStyle(
@@ -343,16 +511,19 @@ class _CommentBottomSheetWidgetState
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 13)),
                             const Spacer(),
-                            Text('Just now',
-                                style: TextStyle(
-                                    color: Colors.grey.shade500, fontSize: 11)),
+                            Text(
+                              _formatTimeAgo(comment.createdAt),
+                              style: TextStyle(
+                                  color: colorScheme.onSurfaceVariant,
+                                  fontSize: 11),
+                            ),
                           ],
                         ),
                         subtitle: Padding(
                           padding: const EdgeInsets.only(top: 4.0),
                           child: Text(comment.text,
-                              style: const TextStyle(
-                                  color: Colors.black87, fontSize: 14)),
+                              style: TextStyle(
+                                  color: colorScheme.onSurface, fontSize: 14)),
                         ),
                       );
                     },
@@ -372,7 +543,8 @@ class _CommentBottomSheetWidgetState
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
                       suffixIcon: IconButton(
-                        icon: const Icon(Icons.send_rounded, color: Colors.blue),
+                        icon: Icon(Icons.send_rounded,
+                            color: colorScheme.primary),
                         onPressed: _submitComment,
                       ),
                     ),
@@ -388,3 +560,108 @@ class _CommentBottomSheetWidgetState
     );
   }
 }
+
+// ── Category chip filter row ───────────────────────────────────────────────
+class _CategoryChipsRow extends StatefulWidget {
+  @override
+  State<_CategoryChipsRow> createState() => _CategoryChipsRowState();
+}
+
+class _CategoryChipsRowState extends State<_CategoryChipsRow> {
+  String? _selected; // null = All Stories
+
+  static const _chips = [
+    (label: 'All Stories', value: null as String?),
+    (label: 'Dogs', value: 'Dog' as String?),
+    (label: 'Cats', value: 'Cat' as String?),
+    (label: 'Exotic', value: 'Exotic' as String?),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Row(
+        children: _chips.map((chip) {
+          final isSelected = _selected == chip.value;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () => setState(() => _selected = chip.value),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFF506453) : const Color(0xFFE5FDE6),
+                  borderRadius: BorderRadius.circular(999),
+                  boxShadow: isSelected
+                      ? [BoxShadow(color: const Color(0xFF506453).withAlpha(40), blurRadius: 8, offset: const Offset(0, 2))]
+                      : null,
+                ),
+                child: Text(
+                  chip.label,
+                  style: TextStyle(
+                    color: isSelected ? const Color(0xFFE8FFE8) : const Color(0xFF4E6251),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _NotificationIconButton extends ConsumerWidget {
+  final VoidCallback onTap;
+  const _NotificationIconButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unread =
+        ref.watch(notificationProvider.select((s) => s.unreadCount));
+
+    return IconButton(
+      tooltip: unread > 0 ? 'Notifications ($unread unread)' : 'Notifications',
+      icon: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          const Icon(Icons.favorite_border),
+          if (unread > 0)
+            Positioned(
+              right: -4,
+              top: -4,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.surface,
+                    width: 1.5,
+                  ),
+                ),
+                constraints:
+                    const BoxConstraints(minWidth: 16, minHeight: 16),
+                child: Text(
+                  unread > 99 ? '99+' : '$unread',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+        ],
+      ),
+      onPressed: onTap,
+    );
+  }
+}
+

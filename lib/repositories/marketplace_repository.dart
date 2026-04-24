@@ -22,6 +22,19 @@ class MarketplaceRepository {
   }
 
   // -------------------------------------------------------------------------
+  // Fetch a single product by ID — used for deep-linking into /product/:id
+  // -------------------------------------------------------------------------
+  Future<ProductModel?> fetchProductById(String id) async {
+    final data = await supabase
+        .from('products')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+    if (data == null) return null;
+    return ProductModel.fromJson(data);
+  }
+
+  // -------------------------------------------------------------------------
   // Submit an order (called at checkout)
   // Cart stays local; only the final order lands in Supabase
   // -------------------------------------------------------------------------

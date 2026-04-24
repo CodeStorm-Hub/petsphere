@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/auth_controller.dart';
@@ -16,6 +16,7 @@ import '../views/notifications_screen.dart';
 import '../views/liked_pets_screen.dart';
 import '../views/login_screen.dart';
 import '../views/registration_screen.dart';
+import '../views/settings_screen.dart';
 import '../views/splash_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -125,6 +126,43 @@ final routerProvider = Provider<GoRouter>((ref) {
            return ProductDetailScreen(productId: productId);
         },
       ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
     ],
+    errorBuilder: (context, state) => Scaffold(
+      appBar: AppBar(title: const Text('Page not found')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline, size: 56, color: Colors.redAccent),
+              const SizedBox(height: 12),
+              Text(
+                'We could not find what you were looking for.',
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                state.uri.toString(),
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 12),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: () => context.go('/home'),
+                icon: const Icon(Icons.home_outlined),
+                label: const Text('Go home'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
   );
 });

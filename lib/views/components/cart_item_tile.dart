@@ -11,10 +11,12 @@ class CartItemTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final currencyFormat = NumberFormat.currency(symbol: '\$');
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
@@ -23,8 +25,8 @@ class CartItemTile extends ConsumerWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(16),
+                color: colorScheme.surface,
                 image: item.product.images.isNotEmpty
                     ? DecorationImage(
                         image: NetworkImage(item.product.images[0]),
@@ -34,7 +36,7 @@ class CartItemTile extends ConsumerWidget {
               ),
               child: item.product.images.isEmpty
                   ? Icon(Icons.inventory_2_outlined,
-                      size: 28, color: Colors.grey.shade400)
+                    size: 28, color: colorScheme.onSurfaceVariant)
                   : null,
             ),
             const SizedBox(width: 16),
@@ -49,7 +51,7 @@ class CartItemTile extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     currencyFormat.format(item.product.price),
-                    style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -76,7 +78,7 @@ class CartItemTile extends ConsumerWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.grey),
+              icon: Icon(Icons.delete_outline, color: colorScheme.onSurfaceVariant),
               onPressed: () {
                 ref.read(cartProvider.notifier).removeCartItem(item.id);
               },
@@ -96,12 +98,14 @@ class _QuantityButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: Colors.grey.shade200,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(4),
         ),
         child: Icon(icon, size: 16),

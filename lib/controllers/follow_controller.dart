@@ -84,10 +84,6 @@ class FollowController extends Notifier<void> {
 
       if (isFollowing) {
         // If following via owner, this is a direct pet unfollow only
-        // Check if it's a direct pet follow first
-        final isDirectFollow =
-            await followRepository.isFollowingPet(userId, petId);
-        // Use unfollowPet which only removes the direct pet follow row
         await followRepository.unfollowPet(userId, petId);
       } else {
         await followRepository.followPet(userId, petId);

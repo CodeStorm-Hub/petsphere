@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/marketplace_controller.dart';
 import '../controllers/cart_controller.dart';
+import '../controllers/auth_controller.dart';
 import 'components/product_card.dart';
 
 class MarketplaceScreen extends ConsumerWidget {
@@ -12,6 +13,9 @@ class MarketplaceScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final marketState = ref.watch(marketplaceProvider);
     final cartState = ref.watch(cartProvider);
+    final user = ref.watch(authProvider).user;
+    final firstName = (user?.name ?? '').split(' ').first;
+    final greeting = firstName.isNotEmpty ? 'Welcome back, $firstName' : 'Pet Marketplace';
 
     return Scaffold(
       appBar: AppBar(
@@ -52,28 +56,82 @@ class MarketplaceScreen extends ConsumerWidget {
         ],
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Personalized greeting
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  greeting,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                Text(
+                  'Discover curated items for your companions',
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
+              ],
+            ),
+          ),
+          // Member Exclusive promo banner
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: GestureDetector(
+              onTap: () => ref.read(marketplaceProvider.notifier).setFilter('Grooming'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFD67657), Color(0xFFFFAD93)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 28),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Member Exclusive', style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
+                          Text('Summer Grooming Kit — Now 20% Off', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.chevron_right, color: Colors.white),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Category filter chips — includes Bedding
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
               children: [
-                _CategoryChip(
-                    label: 'All', value: null, current: marketState.filterCategory),
+                _CategoryChip(label: 'All', value: null, current: marketState.filterCategory),
                 const SizedBox(width: 8),
-                _CategoryChip(
-                    label: 'Food', value: 'Food', current: marketState.filterCategory),
+                _CategoryChip(label: 'Food', value: 'Food', current: marketState.filterCategory),
                 const SizedBox(width: 8),
-                _CategoryChip(
-                    label: 'Toys', value: 'Toys', current: marketState.filterCategory),
+                _CategoryChip(label: 'Toys', value: 'Toys', current: marketState.filterCategory),
                 const SizedBox(width: 8),
-                _CategoryChip(
-                    label: 'Accessories',
-                    value: 'Accessories',
-                    current: marketState.filterCategory),
+                _CategoryChip(label: 'Accessories', value: 'Accessories', current: marketState.filterCategory),
                 const SizedBox(width: 8),
-                _CategoryChip(
-                    label: 'Treats', value: 'Treats', current: marketState.filterCategory),
+                _CategoryChip(label: 'Bedding', value: 'Bedding', current: marketState.filterCategory),
+                const SizedBox(width: 8),
+                _CategoryChip(label: 'Grooming', value: 'Grooming', current: marketState.filterCategory),
+                const SizedBox(width: 8),
+                _CategoryChip(label: 'Treats', value: 'Treats', current: marketState.filterCategory),
               ],
             ),
           ),

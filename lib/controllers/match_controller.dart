@@ -4,6 +4,7 @@ import '../models/match_request_model.dart';
 import '../models/pet_model.dart';
 import '../repositories/match_repository.dart';
 import 'auth_controller.dart';
+import 'chat_controller.dart';
 import 'pet_controller.dart';
 
 // ---------------------------------------------------------------------------
@@ -11,30 +12,38 @@ import 'pet_controller.dart';
 // ---------------------------------------------------------------------------
 class MatchState {
   final List<PetModel> discoveryPets;
+  final List<PetModel> _allDiscoveryPets; // unfiltered set for search
   final List<MatchRequestModel> myRequests;
   final List<MatchRequestModel> sentRequests;
   final bool isLoading;
   final String? filterAnimal;
   final String? filterBreed;
+  final String searchQuery;
   final String? error;
 
   MatchState({
     this.discoveryPets = const [],
+    List<PetModel>? allDiscoveryPets,
     this.myRequests = const [],
     this.sentRequests = const [],
     this.isLoading = false,
     this.filterAnimal,
     this.filterBreed,
+    this.searchQuery = '',
     this.error,
-  });
+  }) : _allDiscoveryPets = allDiscoveryPets ?? discoveryPets;
+
+  List<PetModel> get allDiscoveryPets => _allDiscoveryPets;
 
   MatchState copyWith({
     List<PetModel>? discoveryPets,
+    List<PetModel>? allDiscoveryPets,
     List<MatchRequestModel>? myRequests,
     List<MatchRequestModel>? sentRequests,
     bool? isLoading,
     String? filterAnimal,
     String? filterBreed,
+    String? searchQuery,
     String? error,
     bool clearAnimal = false,
     bool clearBreed = false,
@@ -42,11 +51,13 @@ class MatchState {
   }) {
     return MatchState(
       discoveryPets: discoveryPets ?? this.discoveryPets,
+      allDiscoveryPets: allDiscoveryPets ?? _allDiscoveryPets,
       myRequests: myRequests ?? this.myRequests,
       sentRequests: sentRequests ?? this.sentRequests,
       isLoading: isLoading ?? this.isLoading,
       filterAnimal: clearAnimal ? null : (filterAnimal ?? this.filterAnimal),
       filterBreed: clearBreed ? null : (filterBreed ?? this.filterBreed),
+      searchQuery: searchQuery ?? this.searchQuery,
       error: clearError ? null : (error ?? this.error),
     );
   }
@@ -64,7 +75,7 @@ class MatchController extends Notifier<MatchState> {
     debugPrint('[MatchController] build: activePet=${activePet?.name}');
     if (activePet != null) {
       // Initial load — state already has filterAnimal/filterBreed as null
-      Future.microtask(() => _load(activePet.id));
+      _load(activePet.id);
     }
     return MatchState(isLoading: true);
   }
@@ -90,8 +101,12 @@ class MatchController extends Notifier<MatchState> {
 
       if (gen != _loadGeneration) return;
 
+      final allPets = futures[0] as List<PetModel>;
+      final filtered = _applySearchFilter(allPets, state.searchQuery);
+
       state = state.copyWith(
-        discoveryPets: futures[0] as List<PetModel>,
+        discoveryPets: filtered,
+        allDiscoveryPets: allPets,
         myRequests: futures[1] as List<MatchRequestModel>,
         sentRequests: futures[2] as List<MatchRequestModel>,
         isLoading: false,
@@ -111,13 +126,9 @@ class MatchController extends Notifier<MatchState> {
 
   void setFilterBreed(String? breed) {
     final activePet = ref.read(activePetProvider);
-    debugPrint(
-      '[MatchController] setFilterBreed($breed) — activePet=${activePet?.name}',
-    );
+    debugPrint('[MatchController] setFilterBreed($breed) — activePet=${activePet?.name}');
     if (activePet == null) {
-      debugPrint(
-        '[MatchController] ⚠️ activePet is NULL — filter change ignored!',
-      );
+      debugPrint('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
       return;
     }
     if (breed == null || breed.isEmpty) {
@@ -125,21 +136,15 @@ class MatchController extends Notifier<MatchState> {
     } else {
       state = state.copyWith(filterBreed: breed);
     }
-    debugPrint(
-      '[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}',
-    );
+    debugPrint('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
     _load(activePet.id);
   }
 
   void setFilterAnimal(String? animal) {
     final activePet = ref.read(activePetProvider);
-    debugPrint(
-      '[MatchController] setFilterAnimal($animal) — activePet=${activePet?.name}',
-    );
+    debugPrint('[MatchController] setFilterAnimal($animal) — activePet=${activePet?.name}');
     if (activePet == null) {
-      debugPrint(
-        '[MatchController] ⚠️ activePet is NULL — filter change ignored!',
-      );
+      debugPrint('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
       return;
     }
     if (animal == null || animal.isEmpty) {
@@ -147,10 +152,26 @@ class MatchController extends Notifier<MatchState> {
     } else {
       state = state.copyWith(filterAnimal: animal, clearBreed: true);
     }
-    debugPrint(
-      '[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}',
-    );
+    debugPrint('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
     _load(activePet.id);
+  }
+
+  void setSearchQuery(String query) {
+    final trimmed = query.trim().toLowerCase();
+    final filtered = _applySearchFilter(state.allDiscoveryPets, trimmed);
+    state = state.copyWith(
+      searchQuery: trimmed,
+      discoveryPets: filtered,
+    );
+  }
+
+  List<PetModel> _applySearchFilter(List<PetModel> pets, String query) {
+    if (query.isEmpty) return pets;
+    return pets.where((pet) {
+      return pet.name.toLowerCase().contains(query) ||
+          pet.breed.toLowerCase().contains(query) ||
+          pet.animalType.toLowerCase().contains(query);
+    }).toList();
   }
 
   Future<bool> sendLikeRequest(String receiverPetId) async {
@@ -170,9 +191,8 @@ class MatchController extends Notifier<MatchState> {
         receiverPetId: receiverPetId,
       );
       state = state.copyWith(
-        discoveryPets: state.discoveryPets
-            .where((p) => p.id != receiverPetId)
-            .toList(),
+        discoveryPets:
+            state.discoveryPets.where((p) => p.id != receiverPetId).toList(),
       );
       // Refresh sent requests
       _load(activePet.id);
@@ -192,6 +212,9 @@ class MatchController extends Notifier<MatchState> {
           return req;
         }).toList(),
       );
+      // A DB trigger creates the chat_threads row — refresh thread list so
+      // the new thread immediately appears in the inbox.
+      await ref.read(chatProvider.notifier).refresh();
     } catch (e) {
       state = state.copyWith(error: 'Could not accept request: $e');
     }

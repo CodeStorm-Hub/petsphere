@@ -14,6 +14,8 @@ class PetAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       decoration: hasStory
           ? BoxDecoration(
@@ -28,9 +30,9 @@ class PetAvatar extends StatelessWidget {
       child: CircleAvatar(
         radius: radius,
         backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
-        backgroundColor: Colors.grey.shade300,
+        backgroundColor: colorScheme.surface,
         child: imageUrl.isEmpty
-            ? Icon(Icons.pets, size: radius, color: Colors.grey.shade500)
+            ? Icon(Icons.pets, size: radius, color: colorScheme.onSurfaceVariant)
             : null,
       ),
     );

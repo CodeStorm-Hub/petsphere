@@ -17,8 +17,6 @@ class AuthRepository {
     final user = response.user;
     if (user == null) throw Exception('Sign in failed. Please try again.');
 
-    await _createProfileIfMissing(user);
-
     return _fetchProfile(user.id, email);
   }
 
@@ -33,9 +31,7 @@ class AuthRepository {
 
     final user = response.user;
     if (user == null) {
-      throw Exception(
-        'Registration failed. Check your email for a confirmation link.',
-      );
+      throw Exception('Registration failed. Check your email for a confirmation link.');
     }
 
     // Upsert the profile row — non-fatal if it fails (RLS may block)
@@ -64,7 +60,6 @@ class AuthRepository {
   Future<UserModel?> getCurrentUser() async {
     final user = supabase.auth.currentUser;
     if (user == null) return null;
-    await _createProfileIfMissing(user);
     try {
       return await _fetchProfile(user.id, user.email ?? '');
     } catch (_) {
@@ -118,26 +113,6 @@ class AuthRepository {
   // -------------------------------------------------------------------------
   // Private helpers
   // -------------------------------------------------------------------------
-  Future<void> _createProfileIfMissing(User user) async {
-    final metadataName = user.userMetadata?['name'];
-    final trimmedMetadataName = metadataName?.toString().trim();
-    final resolvedName =
-        (trimmedMetadataName != null && trimmedMetadataName.isNotEmpty)
-        ? trimmedMetadataName
-        : (user.email?.split('@').first ?? 'Pet Lover');
-
-    try {
-      await supabase.from('profiles').insert({
-        'id': user.id,
-        'name': resolvedName,
-      });
-    } on PostgrestException catch (e) {
-      // Duplicate key means profile already exists — safe to ignore.
-      if (e.code == '23505') return;
-      rethrow;
-    }
-  }
-
   Future<UserModel> _fetchProfile(String userId, String email) async {
     final data = await supabase
         .from('profiles')

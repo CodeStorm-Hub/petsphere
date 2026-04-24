@@ -35,6 +35,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     super.dispose();
   }
 
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
   void _sendMessage() {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
@@ -74,22 +77,75 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFEF8F3),
       appBar: AppBar(
+        backgroundColor: const Color(0xCCFEF8F3),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 0,
         title: Row(
           children: [
-            CircleAvatar(
-              backgroundImage: otherPet.profileImageUrl.isNotEmpty
-                  ? NetworkImage(otherPet.profileImageUrl)
-                  : null,
-              radius: 16,
-              child: otherPet.profileImageUrl.isEmpty
-                  ? Text(otherPet.name[0])
-                  : null,
+            // Avatar with online indicator
+            Stack(
+              children: [
+                CircleAvatar(
+                  backgroundImage: otherPet.profileImageUrl.isNotEmpty
+                      ? NetworkImage(otherPet.profileImageUrl)
+                      : null,
+                  radius: 20,
+                  backgroundColor: const Color(0xFFE5FDE6),
+                  child: otherPet.profileImageUrl.isEmpty
+                      ? Text(otherPet.name[0], style: const TextStyle(color: Color(0xFF506453)))
+                      : null,
+                ),
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFAD04B),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFFFEF8F3), width: 2),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Text(otherPet.name),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  otherPet.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 17,
+                    color: Color(0xFF35322D),
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const Text(
+                  'ONLINE',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF506453),
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert, color: Color(0xFF35322D)),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -101,66 +157,114 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               child: messages.isEmpty
                   ? ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      children: const [
-                        SizedBox(height: 120),
+                      children: [
+                        const SizedBox(height: 120),
                         Center(
-                          child: Text('Say hello! 👋',
-                              style: TextStyle(color: Colors.grey)),
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 72,
+                                height: 72,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFE5FDE6),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.chat_bubble_outline, size: 32, color: Color(0xFF506453)),
+                              ),
+                              const SizedBox(height: 16),
+                              const Text('Say hello! 👋',
+                                  style: TextStyle(color: Color(0xFF625E59), fontSize: 16, fontWeight: FontWeight.w500)),
+                            ],
+                          ),
                         ),
                       ],
                     )
                   : ListView.builder(
                       controller: _scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                       itemCount: messages.length,
                       itemBuilder: (context, index) {
                         final msg = messages[index];
                         final isMe = msg.senderPetId == myPetId;
-                        return MessageBubble(message: msg, isMe: isMe);
+                        final showSeparator = index == 0 ||
+                            !_isSameDay(messages[index - 1].createdAt, msg.createdAt);
+
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (showSeparator) DateSeparator(date: msg.createdAt),
+                            MessageBubble(message: msg, isMe: isMe),
+                          ],
+                        );
                       },
                     ),
             ),
           ),
-          SafeArea(
+
+          // ── Floating pill input ──────────────────────────────────
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              12,
+              8,
+              12,
+              8 + MediaQuery.of(context).padding.bottom,
+            ),
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade200,
-                    blurRadius: 4,
-                    offset: const Offset(0, -2),
-                  )
+                color: Colors.white.withAlpha(230),
+                borderRadius: BorderRadius.circular(999),
+                boxShadow: const [
+                  BoxShadow(color: Color(0x1F000000), blurRadius: 16, offset: Offset(0, 4)),
                 ],
               ),
               child: Row(
                 children: [
+                  // Attachment button with tertiary-container bg
+                  GestureDetector(
+                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Attachment support coming soon')),
+                    ),
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE5FDE6),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.add, color: Color(0xFF506453), size: 22),
+                    ),
+                  ),
                   Expanded(
                     child: TextField(
                       controller: _textController,
-                      decoration: InputDecoration(
-                        hintText: 'Message...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
+                      decoration: const InputDecoration(
+                        hintText: 'Type a message...',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        filled: false,
                       ),
                       onSubmitted: (_) => _sendMessage(),
                       textInputAction: TextInputAction.send,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: Icon(Icons.send,
-                        color: Theme.of(context).colorScheme.primary),
-                    onPressed: _sendMessage,
+                  // Send button with gradient
+                  GestureDetector(
+                    onTap: _sendMessage,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF99472C), Color(0xFFFFAD93)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                    ),
                   ),
                 ],
               ),

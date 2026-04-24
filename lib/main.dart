@@ -8,12 +8,6 @@ import 'theme/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
-    throw StateError(
-      'Missing Supabase configuration. Provide SUPABASE_URL and SUPABASE_ANON_KEY via --dart-define or --dart-define-from-file.',
-    );
-  }
-
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
 
   runApp(const ProviderScope(child: PetSphereApp()));
@@ -30,6 +24,8 @@ class PetSphereApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'PetSphere',
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       routerConfig: goRouter,
       debugShowCheckedModeBanner: false,
     );
