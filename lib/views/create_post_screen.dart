@@ -219,7 +219,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
               ),
               child: _isUploading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 16,
                       height: 16,
                        child: CircularProgressIndicator(

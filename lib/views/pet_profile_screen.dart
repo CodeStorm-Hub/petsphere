@@ -102,11 +102,11 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                  const Padding(
                    padding: EdgeInsets.only(left: 16.0, top: 12.0),
                    child: Text(
-                     'Manage Context', 
+                     'Manage Context',
                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                    ),
                  ),
-                 
+
                  // Horizontal Pet Carousel
                  SizedBox(
                    height: 115,
@@ -124,18 +124,18 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                            ),
                          );
                        }
-                       
+
                        if (index == myOwnedPets.length + 1) {
                          return GestureDetector(
                            onTap: () => context.push('/add_pet'),
                            child: const _AddPetAvatar(),
                          );
                        }
-                       
+
                        final petIndex = index - 1;
                        final pet = myOwnedPets[petIndex];
                        final isSelected = pet.id == selectedId;
-                       
+
                        return GestureDetector(
                          onTap: () => setState(() => selectedId = pet.id),
                          child: _PetCarouselAvatar(pet: pet, isSelected: isSelected),
@@ -143,9 +143,9 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                      },
                    ),
                  ),
-                 
+
                  const Divider(),
-                 
+
                  // Active Context Summary
                  Padding(
                    padding: const EdgeInsets.all(16.0),
@@ -187,10 +187,10 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                          ],
                        ),
                        const SizedBox(height: 12),
-                       
+
                        // Dynamic name
                        Text(
-                         isOwnerView ? userName : (selectedPet?.name ?? ''), 
+                         isOwnerView ? userName : (selectedPet?.name ?? ''),
                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                        ),
 
@@ -203,28 +203,28 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
 
                        if (!isOwnerView && selectedPet != null)
                          Text(
-                           selectedPet.breed, 
+                           selectedPet.breed,
                            style: TextStyle(
-                             color: Theme.of(context).colorScheme.primary, 
+                             color: Theme.of(context).colorScheme.primary,
                              fontWeight: FontWeight.bold,
                            ),
                          ),
-                       
+
                        const SizedBox(height: 6),
 
                        // Dynamic bio
                        Text(
-                         isOwnerView 
-                             ? (user?.bio?.isNotEmpty == true 
-                                 ? user!.bio! 
+                         isOwnerView
+                             ? (user?.bio?.isNotEmpty == true
+                                 ? user!.bio!
                                  : 'Tap "Edit Account" to add a bio!')
                              : (selectedPet?.bio ?? ''),
                          style: TextStyle(
                            color: isOwnerView && (user?.bio?.isEmpty ?? true)
-                               ? Colors.grey.shade400 
+                               ? Colors.grey.shade400
                                : null,
                            fontStyle: isOwnerView && (user?.bio?.isEmpty ?? true)
-                               ? FontStyle.italic 
+                               ? FontStyle.italic
                                : null,
                          ),
                        ),
@@ -284,7 +284,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                        ],
 
                        const SizedBox(height: 16),
-                       
+
                        Row(
                          children: [
                            Expanded(
@@ -328,8 +328,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                ],
              ),
           ),
-          
-          // Empty state with add pet CTA 
+
+          // Empty state with add pet CTA
           if (myOwnedPets.isEmpty && isOwnerView)
             SliverToBoxAdapter(
               child: _EmptyPetsCta(
@@ -539,8 +539,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
       ),
       child: CircleAvatar(
         radius: 40,
-        backgroundColor: isOwnerView 
-            ? const Color(0xFFFF8A65).withAlpha(26) 
+        backgroundColor: isOwnerView
+            ? const Color(0xFFFF8A65).withAlpha(26)
             : Colors.white,
         backgroundImage: isOwnerView
             ? (user?.profileImageUrl != null && user!.profileImageUrl!.isNotEmpty
@@ -678,7 +678,7 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
       if (_newAvatar != null) {
         try {
           final avatarUrl = await authRepository.uploadAvatar(
-            widget.user.id, 
+            widget.user.id,
             _newAvatar!,
           );
           fields['profile_image_url'] = avatarUrl;
@@ -1459,9 +1459,9 @@ class _InfoChip extends StatelessWidget {
 class _OwnerCarouselAvatar extends StatelessWidget {
   final UserModel? user;
   final bool isSelected;
-  
+
   const _OwnerCarouselAvatar({required this.user, required this.isSelected});
-  
+
   @override
   Widget build(BuildContext context) {
     final hasImage = user?.profileImageUrl != null && user!.profileImageUrl!.isNotEmpty;
@@ -1506,9 +1506,9 @@ class _OwnerCarouselAvatar extends StatelessWidget {
 class _PetCarouselAvatar extends StatelessWidget {
   final PetModel pet;
   final bool isSelected;
-  
+
   const _PetCarouselAvatar({required this.pet, required this.isSelected});
-  
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -1580,9 +1580,9 @@ class _AddPetAvatar extends StatelessWidget {
 class _StatColumn extends StatelessWidget {
   final String label;
   final String value;
-  
+
   const _StatColumn({required this.label, required this.value});
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
