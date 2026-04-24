@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/chat_controller.dart';
 import '../controllers/pet_controller.dart';
-
+import 'components/message_bubble.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String threadId;
@@ -60,13 +60,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chatState = ref.watch(chatProvider);
     final messages = ref.watch(threadMessagesProvider);
     final myPetId = ref.watch(activePetProvider)?.id ?? '';
-    final theme = Theme.of(context);
 
     // Find the thread from the list
     final threadList = chatState.threads.where((t) => t.id == widget.threadId);
     if (threadList.isEmpty) {
-      return Scaffold(
-          body: Center(child: CircularProgressIndicator(color: theme.colorScheme.primary)));
+      return const Scaffold(
+          body: Center(child: CircularProgressIndicator()));
     }
     final thread = threadList.first;
     final otherPet = thread.participantPets.firstWhere(
@@ -82,55 +81,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               backgroundImage: otherPet.profileImageUrl.isNotEmpty
                   ? NetworkImage(otherPet.profileImageUrl)
                   : null,
-              radius: 18,
+              radius: 16,
               child: otherPet.profileImageUrl.isEmpty
                   ? Text(otherPet.name[0])
                   : null,
             ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(otherPet.name, style: const TextStyle(fontSize: 16)),
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.green, // Online indicator
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text('Online', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                  ],
-                )
-              ],
-            ),
+            const SizedBox(width: 8),
+            Text(otherPet.name),
           ],
         ),
       ),
       body: Column(
         children: [
           Expanded(
-<<<<<<< HEAD
-            child: messages.isEmpty
-                ? Center(
-                    child: Text('Say hello to ${otherPet.name}! 👋',
-                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant)))
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      final msg = messages[index];
-                      final isMe = msg.senderPetId == myPetId;
-                      return _AmberMessageBubble(text: msg.text, isMe: isMe);
-                    },
-                  ),
-=======
             child: RefreshIndicator(
               onRefresh: () async {
                 ref.read(threadMessagesProvider.notifier).init(widget.threadId);
@@ -158,106 +121,52 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       },
                     ),
             ),
->>>>>>> origin/main
           ),
           SafeArea(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
+                color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 16,
-                    offset: const Offset(0, -4),
+                    color: Colors.grey.shade200,
+                    blurRadius: 4,
+                    offset: const Offset(0, -2),
                   )
                 ],
               ),
               child: Row(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: () {},
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
                       controller: _textController,
                       decoration: InputDecoration(
-                        hintText: 'Type a message...',
+                        hintText: 'Message...',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: theme.colorScheme.surfaceContainerHighest,
+                        fillColor: Colors.grey.shade100,
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
+                            horizontal: 16, vertical: 10),
                       ),
                       onSubmitted: (_) => _sendMessage(),
                       textInputAction: TextInputAction.send,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.send),
-                      color: theme.colorScheme.onPrimary,
-                      onPressed: _sendMessage,
-                    ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: Icon(Icons.send,
+                        color: Theme.of(context).colorScheme.primary),
+                    onPressed: _sendMessage,
                   ),
                 ],
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _AmberMessageBubble extends StatelessWidget {
-  final String text;
-  final bool isMe;
-
-  const _AmberMessageBubble({required this.text, required this.isMe});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12, top: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isMe ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(20),
-            topRight: const Radius.circular(20),
-            bottomLeft: isMe ? const Radius.circular(20) : const Radius.circular(4),
-            bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(20),
-          ),
-        ),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
-        child: Text(
-          text,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: isMe ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
-          ),
-        ),
       ),
     );
   }

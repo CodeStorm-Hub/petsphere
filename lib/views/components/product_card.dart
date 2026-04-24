@@ -17,48 +17,17 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(symbol: '\$');
-    final theme = Theme.of(context);
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(32), // lg (2rem)
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            )
-          ]
-        ),
+      child: Card(
         clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 2,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Image with top rounded corners only slightly smaller
             Expanded(
-<<<<<<< HEAD
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: Image.network(
-                    product.images.isNotEmpty ? product.images[0] : '',
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return Container(color: theme.colorScheme.surfaceContainerHighest);
-                    },
-                    errorBuilder: (ctx, error, stackTrace) => Container(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      child: Icon(Icons.pets, color: theme.colorScheme.onSurfaceVariant)
-                    ),
-                  ),
-                ),
-              ),
-=======
               child: product.images.isNotEmpty
                   ? Image.network(
                       product.images[0],
@@ -73,10 +42,9 @@ class ProductCard extends StatelessWidget {
                       child: Icon(Icons.inventory_2_outlined,
                           size: 40, color: Colors.grey.shade400),
                     ),
->>>>>>> origin/main
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -84,42 +52,25 @@ class ProductCard extends StatelessWidget {
                      product.name,
                      maxLines: 2,
                      overflow: TextOverflow.ellipsis,
-                     style: theme.textTheme.titleSmall?.copyWith(
-                       fontWeight: FontWeight.bold,
-                       color: theme.colorScheme.onSurface,
-                     ),
+                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                    ),
-                   const SizedBox(height: 8),
+                   const SizedBox(height: 4),
                    Row(
                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                      children: [
                        Text(
                          currencyFormat.format(product.price),
-                         style: theme.textTheme.titleMedium?.copyWith(
-                           color: theme.colorScheme.primary,
-                           fontWeight: FontWeight.bold
-                         ),
+                         style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold),
                        ),
                        InkWell(
                          onTap: onAdd,
                          child: Container(
-                           padding: const EdgeInsets.all(8),
+                           padding: const EdgeInsets.all(4),
                            decoration: BoxDecoration(
-                             gradient: LinearGradient(
-                               colors: [theme.colorScheme.primary, theme.colorScheme.primary.withValues(alpha: 0.8)],
-                               begin: Alignment.topLeft,
-                               end: Alignment.bottomRight,
-                             ),
+                             color: Theme.of(context).primaryColor,
                              shape: BoxShape.circle,
-                             boxShadow: [
-                               BoxShadow(
-                                 color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                                 blurRadius: 8,
-                                 offset: const Offset(0, 4),
-                               )
-                             ]
                            ),
-                           child: const Icon(Icons.add, color: Colors.white, size: 20),
+                           child: const Icon(Icons.add, color: Colors.white, size: 16),
                          ),
                        )
                      ],

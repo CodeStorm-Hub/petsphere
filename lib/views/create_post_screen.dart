@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../models/pet_model.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
-import '../models/pet_model.dart';
 import '../utils/image_upload_helper.dart';
 import '../utils/supabase_config.dart';
 
@@ -146,11 +146,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-<<<<<<< HEAD
-            content: const Text('Post successfully shared!'),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-=======
             content: Row(
               children: [
                 const Icon(Icons.check_circle, color: Colors.white, size: 18),
@@ -162,7 +157,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12)),
->>>>>>> origin/main
           ),
         );
         context.pop();
@@ -191,7 +185,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   Widget build(BuildContext context) {
     final petState = ref.watch(petProvider);
     final myPets = petState.myPets;
-    final theme = Theme.of(context);
 
     if (selectedPetId == null && myPets.isNotEmpty) {
       selectedPetId = myPets.first.id;
@@ -202,21 +195,20 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         _captionController.text.trim().isNotEmpty;
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => context.pop(),
         ),
-        title: const Text('New Post'),
+        title: const Text(
+          'New Post',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: FilledButton(
-<<<<<<< HEAD
-              onPressed: (isReadyToShare && !_isUploading)
-                  ? () => _sharePost(myPets)
-                  : null,
-=======
               onPressed:
                   (isReadyToShare && !_isUploading) ? () => _sharePost(myPets) : null,
               style: FilledButton.styleFrom(
@@ -226,144 +218,23 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 20),
               ),
->>>>>>> origin/main
               child: _isUploading
-                  ? SizedBox(
+                  ? const SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: theme.colorScheme.onPrimary,
+                        color: Colors.white,
                       ),
                     )
-                  : const Text('Share'),
+                  : const Text(
+                      'Share',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
             ),
           ),
         ],
       ),
-<<<<<<< HEAD
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 16.0, top: 16.0, bottom: 8.0),
-              child: Text(
-                'Posting as...',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            if (myPets.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'Create a pet profile first to post!',
-                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-                ),
-              )
-            else
-              SizedBox(
-                height: 115,
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: myPets.length,
-                  itemBuilder: (context, index) {
-                    final pet = myPets[index];
-                    final isSelected = pet.id == selectedPetId;
-                    return GestureDetector(
-                      onTap: () => setState(() => selectedPetId = pet.id),
-                      child: _AuthorAvatar(pet: pet, isSelected: isSelected, theme: theme),
-                    );
-                  },
-                ),
-              ),
-            Divider(height: 1, color: theme.colorScheme.surfaceContainerHighest),
-
-            // Photo Upload Region
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: GestureDetector(
-                onTap: _pickPhoto,
-                child: Container(
-                  width: double.infinity,
-                  height: 300,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(32), // lg radius
-                    image: _selectedFile != null
-                        ? DecorationImage(
-                            image: FileImage(_selectedFile!),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
-                  ),
-                  child: _selectedFile == null
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.add_photo_alternate_rounded,
-                              size: 64,
-                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Tap to select a photo',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                ),
-              ),
-            ),
-
-            // Caption Area
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: TextField(
-                controller: _captionController,
-                maxLength: 2000,
-                maxLines: 6,
-                minLines: 1,
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(
-                  hintText: 'Write a caption...',
-                  hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  filled: false, // Override the global filled setting for this specific field
-                  counterText: '',
-                  contentPadding: EdgeInsets.zero, // Remove padding to align with other elements
-                ),
-              ),
-            ),
-
-            Divider(color: theme.colorScheme.surfaceContainerHighest),
-            ListTile(
-              leading: Icon(Icons.location_on_outlined, color: theme.colorScheme.onSurface),
-              title: Text('Add Location', style: theme.textTheme.titleMedium),
-              trailing: Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: Icon(Icons.person_outline, color: theme.colorScheme.onSurface),
-              title: Text('Tag other Pets', style: theme.textTheme.titleMedium),
-              trailing: Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
-              onTap: () {},
-            ),
-            const SizedBox(height: 40),
-          ],
-        ),
-      ),
-=======
       body: myPets.isEmpty
           ? Center(
               child: Padding(
@@ -540,7 +411,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 ],
               ),
             ),
->>>>>>> origin/main
     );
   }
 }
@@ -548,9 +418,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 class _AuthorAvatar extends StatelessWidget {
   final PetModel pet;
   final bool isSelected;
-  final ThemeData theme;
 
-  const _AuthorAvatar({required this.pet, required this.isSelected, required this.theme});
+  const _AuthorAvatar({required this.pet, required this.isSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -565,9 +434,9 @@ class _AuthorAvatar extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(
                 color: isSelected
-                    ? theme.colorScheme.primary
+                    ? Theme.of(context).colorScheme.primary
                     : Colors.transparent,
-                width: 2,
+                width: 3,
               ),
             ),
             child: CircleAvatar(
@@ -576,10 +445,6 @@ class _AuthorAvatar extends StatelessWidget {
               backgroundImage: pet.profileImageUrl.isNotEmpty
                   ? NetworkImage(pet.profileImageUrl)
                   : null,
-<<<<<<< HEAD
-              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              child: pet.profileImageUrl.isEmpty ? Icon(Icons.pets, color: theme.colorScheme.onSurfaceVariant) : null,
-=======
               child: pet.profileImageUrl.isEmpty
                   ? Text(
                       pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
@@ -587,15 +452,15 @@ class _AuthorAvatar extends StatelessWidget {
                           fontWeight: FontWeight.bold, fontSize: 18),
                     )
                   : null,
->>>>>>> origin/main
             ),
           ),
           const SizedBox(height: 6),
           Text(
             pet.name,
-            style: theme.textTheme.labelMedium?.copyWith(
+            style: TextStyle(
+              fontSize: 12,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
+              color: isSelected ? Colors.black : Colors.grey.shade700,
             ),
           ),
         ],

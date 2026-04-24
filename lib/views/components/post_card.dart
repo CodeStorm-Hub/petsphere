@@ -140,25 +140,6 @@ class _PostCardState extends State<PostCard> {
           ),
         ),
 
-<<<<<<< HEAD
-        // Image
-        AspectRatio(
-          aspectRatio: 1, // Square image
-          child: Image.network(
-            widget.post.mediaUrl,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Container(
-                color: Colors.grey.shade200,
-                child: const Center(child: CircularProgressIndicator()),
-              );
-            },
-            errorBuilder: (context, error, stackTrace) => Container(
-              color: Colors.grey.shade200,
-              child: const Icon(Icons.error, color: Colors.grey),
-            ),
-=======
         // Image with double-tap to like
         GestureDetector(
           onDoubleTap: _handleDoubleTap,
@@ -198,7 +179,6 @@ class _PostCardState extends State<PostCard> {
                 ),
               ),
             ],
->>>>>>> origin/main
           ),
         ),
 
