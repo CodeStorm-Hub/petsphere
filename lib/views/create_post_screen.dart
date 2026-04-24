@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../models/pet_model.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
+import '../models/pet_model.dart';
 import '../utils/image_upload_helper.dart';
 import '../utils/supabase_config.dart';
 
@@ -436,7 +436,7 @@ class _AuthorAvatar extends StatelessWidget {
                 color: isSelected
                     ? Theme.of(context).colorScheme.primary
                     : Colors.transparent,
-                width: 3,
+                width: 2,
               ),
             ),
             child: CircleAvatar(

@@ -1471,7 +1471,7 @@ class _OwnerCarouselAvatar extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(3),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
@@ -1589,7 +1589,11 @@ class _StatColumn extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        Text(label, style: const TextStyle(color: Colors.black54)),
+        Text(
+          label,
+          style:
+              TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
       ],
     );
   }
