@@ -1,5 +1,6 @@
 import '../models/product_model.dart';
 import '../models/cart_item_model.dart';
+import '../models/order_model.dart';
 import '../utils/supabase_config.dart';
 
 class MarketplaceRepository {
@@ -46,6 +47,21 @@ class MarketplaceRepository {
       'total': total,
       'status': 'pending',
     });
+  }
+
+  // -------------------------------------------------------------------------
+  // Fetch orders for a user
+  // -------------------------------------------------------------------------
+  Future<List<OrderModel>> fetchOrders(String userId) async {
+    final data = await supabase
+        .from('orders')
+        .select()
+        .eq('user_id', userId)
+        .order('created_at', ascending: false);
+
+    return (data as List<dynamic>)
+        .map((e) => OrderModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }
 

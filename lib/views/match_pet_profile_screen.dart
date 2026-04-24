@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../repositories/pet_repository.dart';
 import '../models/pet_model.dart';
 import '../controllers/match_controller.dart';
+import '../controllers/follow_controller.dart';
+import '../controllers/auth_controller.dart';
 import 'package:go_router/go_router.dart';
 
 // Load pet by ID from Supabase
@@ -34,8 +36,13 @@ class MatchPetProfileScreen extends ConsumerWidget {
           appBar: AppBar(
             title: Text(pet.name),
           ),
-          body: SingleChildScrollView(
-            child: Column(
+          body: RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(_petByIdProvider(petId));
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(
@@ -53,15 +60,18 @@ class MatchPetProfileScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Name + Age
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            pet.name,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
+                          Expanded(
+                            child: Text(
+                              pet.name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -85,6 +95,15 @@ class MatchPetProfileScreen extends ConsumerWidget {
                         style:
                             const TextStyle(fontSize: 16, color: Colors.grey),
                       ),
+
+                      // Follower count
+                      const SizedBox(height: 8),
+                      _PetFollowerCount(petId: pet.id),
+
+                      // Follow Buttons
+                      const SizedBox(height: 16),
+                      _FollowButtonsRow(pet: pet),
+
                       const SizedBox(height: 24),
                       const Text('About',
                           style: TextStyle(
@@ -109,33 +128,252 @@ class MatchPetProfileScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 48),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.favorite),
-                          label: const Text('Send Match Request'),
-                          onPressed: () {
-                            ref
-                                .read(matchProvider.notifier)
-                                .sendLikeRequest(pet.id);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text(
-                                      'Breeding request sent for ${pet.name}!')),
-                            );
-                            context.pop();
-                          },
+                      if (ref.watch(authProvider).user?.id != pet.userId)
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.favorite),
+                            label: const Text('Send Match Request'),
+                            onPressed: () async {
+                              final success = await ref
+                                  .read(matchProvider.notifier)
+                                  .sendLikeRequest(pet.id);
+                              if (!context.mounted) return;
+                              if (success) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          'Breeding request sent for ${pet.name}!')),
+                                );
+                                context.pop();
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Could not send request.')),
+                                );
+                              }
+                            },
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
               ],
             ),
           ),
+          ),
         );
       },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Follow Buttons Row — Follow Pet + Follow Owner
+// ---------------------------------------------------------------------------
+class _FollowButtonsRow extends ConsumerWidget {
+  final PetModel pet;
+
+  const _FollowButtonsRow({required this.pet});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentUserId = ref.watch(authProvider).user?.id;
+    final isOwnPet = currentUserId == pet.userId;
+
+    // Don't show follow buttons for your own pets
+    if (isOwnPet || currentUserId == null) return const SizedBox.shrink();
+
+    final isFollowingPet = ref.watch(isFollowingPetProvider(pet.id));
+    final isFollowingOwner = ref.watch(isFollowingOwnerProvider(pet.userId));
+
+    return Row(
+      children: [
+        // Follow Pet button
+        Expanded(
+          child: isFollowingPet.when(
+            loading: () => const _FollowButtonSkeleton(label: 'Follow Pet'),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (following) => _FollowButton(
+              label: following ? 'Following' : 'Follow Pet',
+              icon: following ? Icons.pets : Icons.pets_outlined,
+              isFollowing: following,
+              color: const Color(0xFFFF8A65),
+              onPressed: () async {
+                await ref
+                    .read(followControllerProvider.notifier)
+                    .toggleFollowPet(pet.id);
+                // Also refresh owner follow state in case it changed
+                ref.invalidate(isFollowingOwnerProvider(pet.userId));
+              },
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Follow Owner button
+        Expanded(
+          child: isFollowingOwner.when(
+            loading: () =>
+                const _FollowButtonSkeleton(label: 'Follow Owner'),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (following) => _FollowButton(
+              label: following ? 'Following Owner' : 'Follow Owner',
+              icon: following
+                  ? Icons.person_rounded
+                  : Icons.person_add_alt_1_outlined,
+              isFollowing: following,
+              color: const Color(0xFF4FC3F7),
+              onPressed: () async {
+                await ref
+                    .read(followControllerProvider.notifier)
+                    .toggleFollowOwner(pet.userId);
+                // Refresh pet follow state too (owner follow implies pet follow)
+                ref.invalidate(isFollowingPetProvider(pet.id));
+                ref.invalidate(petFollowerCountProvider(pet.id));
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Reusable Follow Button
+// ---------------------------------------------------------------------------
+class _FollowButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isFollowing;
+  final Color color;
+  final VoidCallback onPressed;
+
+  const _FollowButton({
+    required this.label,
+    required this.icon,
+    required this.isFollowing,
+    required this.color,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      child: isFollowing
+          ? OutlinedButton.icon(
+              onPressed: onPressed,
+              icon: Icon(icon, size: 18, color: color),
+              label: Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: color),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            )
+          : FilledButton.icon(
+              onPressed: onPressed,
+              icon: Icon(icon, size: 18),
+              label: Text(
+                label,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+              style: FilledButton.styleFrom(
+                backgroundColor: color,
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Follow Button Skeleton (loading state)
+// ---------------------------------------------------------------------------
+class _FollowButtonSkeleton extends StatelessWidget {
+  final String label;
+
+  const _FollowButtonSkeleton({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: null,
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          const SizedBox(width: 8),
+          Text(label, style: const TextStyle(fontSize: 13)),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pet Follower Count
+// ---------------------------------------------------------------------------
+class _PetFollowerCount extends ConsumerWidget {
+  final String petId;
+
+  const _PetFollowerCount({required this.petId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final countAsync = ref.watch(petFollowerCountProvider(petId));
+
+    return countAsync.when(
+      loading: () => Text(
+        'Loading followers...',
+        style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (count) => Row(
+        children: [
+          Icon(Icons.people_outline, size: 16, color: Colors.grey.shade600),
+          const SizedBox(width: 4),
+          Text(
+            '$count ${count == 1 ? 'follower' : 'followers'}',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
