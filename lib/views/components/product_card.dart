@@ -16,14 +16,15 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final currencyFormat = NumberFormat.currency(symbol: '\$');
 
     return GestureDetector(
       onTap: onTap,
       child: Card(
         clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        elevation: 0,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -33,14 +34,17 @@ class ProductCard extends StatelessWidget {
                       product.images[0],
                       fit: BoxFit.cover,
                       errorBuilder: (ctx, err, stack) => Container(
-                        color: Colors.grey.shade200,
-                        child: const Icon(Icons.broken_image, color: Colors.grey),
+                        color: colorScheme.surface,
+                        child: Icon(Icons.broken_image, color: colorScheme.onSurfaceVariant),
                       ),
                     )
                   : Container(
-                      color: Colors.grey.shade100,
-                      child: Icon(Icons.inventory_2_outlined,
-                          size: 40, color: Colors.grey.shade400),
+                      color: colorScheme.surface,
+                      child: Icon(
+                        Icons.inventory_2_outlined,
+                        size: 40,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
             ),
             Padding(
@@ -60,14 +64,14 @@ class ProductCard extends StatelessWidget {
                      children: [
                        Text(
                          currencyFormat.format(product.price),
-                         style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold),
+                         style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
                        ),
                        InkWell(
                          onTap: onAdd,
                          child: Container(
                            padding: const EdgeInsets.all(4),
                            decoration: BoxDecoration(
-                             color: Theme.of(context).primaryColor,
+                             color: colorScheme.primary,
                              shape: BoxShape.circle,
                            ),
                            child: const Icon(Icons.add, color: Colors.white, size: 16),

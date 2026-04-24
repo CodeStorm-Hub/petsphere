@@ -428,9 +428,11 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
   }
 
   void _showProfileShareSheet(BuildContext context, String shareLink, String name) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -444,7 +446,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: colorScheme.outline.withAlpha(76),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -460,14 +462,14 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFFFF8A65).withAlpha(26),
+                    color: colorScheme.primary.withAlpha(26),
                   ),
-                  child: const Icon(Icons.link, color: Color(0xFFFF8A65)),
+                  child: Icon(Icons.link, color: colorScheme.primary),
                 ),
                 title: const Text('Copy Profile Link'),
                 subtitle: Text(
                   shareLink,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -487,7 +489,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      backgroundColor: const Color(0xFF81C784),
+                      backgroundColor:
+                          Theme.of(context).snackBarTheme.backgroundColor,
                     ),
                   );
                 },
@@ -497,9 +500,9 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF4FC3F7).withAlpha(26),
+                    color: colorScheme.secondary.withAlpha(26),
                   ),
-                  child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF4FC3F7)),
+                  child: Icon(Icons.chat_bubble_outline, color: colorScheme.secondary),
                 ),
                 title: const Text('Send in Message'),
                 onTap: () {
@@ -512,15 +515,61 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF81C784).withAlpha(26),
+                    color: colorScheme.tertiary.withAlpha(26),
                   ),
-                  child: const Icon(Icons.qr_code, color: Color(0xFF81C784)),
+                  child: Icon(Icons.qr_code, color: colorScheme.tertiary),
                 ),
                 title: const Text('QR Code'),
                 onTap: () {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('QR Code coming soon!')),
+                  showDialog(
+                    context: context,
+                    builder: (dialogContext) => AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      title: const Text('Profile QR'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.qr_code_2_rounded,
+                            size: 140,
+                            color: colorScheme.primary,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Scan or copy this profile link',
+                            style: TextStyle(color: colorScheme.onSurfaceVariant),
+                          ),
+                          const SizedBox(height: 12),
+                          SelectableText(
+                            shareLink,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: colorScheme.primary),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(dialogContext),
+                          child: const Text('Close'),
+                        ),
+                        FilledButton.icon(
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: shareLink));
+                            Navigator.pop(dialogContext);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Profile link copied!'),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.copy_rounded, size: 16),
+                          label: const Text('Copy Link'),
+                        ),
+                      ],
+                    ),
                   );
                 },
               ),

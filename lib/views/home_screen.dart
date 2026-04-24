@@ -116,10 +116,11 @@ class HomeScreen extends ConsumerWidget {
 
   void _showShareSheet(BuildContext context, String postId) {
     final shareLink = 'https://petsphere.app/post/$postId';
+    final colorScheme = Theme.of(context).colorScheme;
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -133,7 +134,7 @@ class HomeScreen extends ConsumerWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: colorScheme.outline.withAlpha(76),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -149,14 +150,14 @@ class HomeScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFFFF8A65).withAlpha(26),
+                    color: colorScheme.primary.withAlpha(26),
                   ),
-                  child: const Icon(Icons.link, color: Color(0xFFFF8A65)),
+                  child: Icon(Icons.link, color: colorScheme.primary),
                 ),
                 title: const Text('Copy Link'),
                 subtitle: Text(
                   shareLink,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -176,7 +177,7 @@ class HomeScreen extends ConsumerWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      backgroundColor: const Color(0xFF81C784),
+                      backgroundColor: Theme.of(context).snackBarTheme.backgroundColor,
                     ),
                   );
                 },
@@ -186,9 +187,9 @@ class HomeScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF4FC3F7).withAlpha(26),
+                    color: colorScheme.secondary.withAlpha(26),
                   ),
-                  child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF4FC3F7)),
+                  child: Icon(Icons.chat_bubble_outline, color: colorScheme.secondary),
                 ),
                 title: const Text('Send in Message'),
                 onTap: () {
@@ -201,16 +202,14 @@ class HomeScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF81C784).withAlpha(26),
+                    color: colorScheme.tertiary.withAlpha(26),
                   ),
-                  child: const Icon(Icons.add_to_photos_rounded, color: Color(0xFF81C784)),
+                  child: Icon(Icons.add_to_photos_rounded, color: colorScheme.tertiary),
                 ),
                 title: const Text('Add to your story'),
                 onTap: () {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Coming soon!')),
-                  );
+                  context.push('/create_post');
                 },
               ),
             ],

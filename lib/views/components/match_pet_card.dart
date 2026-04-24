@@ -13,12 +13,14 @@ class MatchPetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: onTap,
       child: Card(
         clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        elevation: 0,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -26,7 +28,10 @@ class MatchPetCard extends StatelessWidget {
               child: Image.network(
                 pet.profileImageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (ctx, err, stack) => Container(color: Colors.grey.shade200, child: const Icon(Icons.broken_image, color: Colors.grey)),
+                errorBuilder: (ctx, err, stack) => Container(
+                  color: colorScheme.surface,
+                  child: Icon(Icons.broken_image, color: colorScheme.onSurfaceVariant),
+                ),
               ),
             ),
             Padding(
@@ -45,7 +50,7 @@ class MatchPetCard extends StatelessWidget {
                      pet.breed,
                      maxLines: 1,
                      overflow: TextOverflow.ellipsis,
-                     style: const TextStyle(fontSize: 11, color: Colors.grey),
+                     style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant),
                    ),
                    const SizedBox(height: 4),
                    Row(
@@ -54,19 +59,19 @@ class MatchPetCard extends StatelessWidget {
                        Container(
                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                          decoration: BoxDecoration(
-                           color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+                             color: colorScheme.secondary.withAlpha(36),
                            borderRadius: BorderRadius.circular(4),
                          ),
                          child: Text(
                            '${pet.age} yrs',
                            style: TextStyle(
                              fontSize: 11,
-                             color: Theme.of(context).colorScheme.primary,
+                             color: colorScheme.primary,
                              fontWeight: FontWeight.bold,
                            ),
                          ),
                        ),
-                       const Icon(Icons.favorite_border, size: 16, color: Colors.grey),
+                       Icon(Icons.favorite_border, size: 16, color: colorScheme.onSurfaceVariant),
                      ],
                    ),
                 ],

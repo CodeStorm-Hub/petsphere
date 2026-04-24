@@ -40,6 +40,8 @@ class _PostCardState extends State<PostCard> {
   }
 
   void _showSettingsSheet() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -55,7 +57,7 @@ class _PostCardState extends State<PostCard> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: colorScheme.outline.withAlpha(76),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -85,11 +87,11 @@ class _PostCardState extends State<PostCard> {
               ListTile(
                 leading: const Icon(
                   Icons.report_problem_outlined,
-                  color: Colors.red,
+                  color: Colors.redAccent,
                 ),
                 title: const Text(
                   'Report',
-                  style: TextStyle(color: Colors.red),
+                  style: TextStyle(color: Colors.redAccent),
                 ),
                 onTap: () {
                   Navigator.pop(context);
@@ -104,6 +106,7 @@ class _PostCardState extends State<PostCard> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isLiked = widget.post.likedByPetIds.contains(widget.currentPetId);
 
     return Column(
@@ -154,13 +157,13 @@ class _PostCardState extends State<PostCard> {
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return Container(
-                      color: Colors.grey.shade200,
+                      color: colorScheme.surface,
                       child: const Center(child: CircularProgressIndicator()),
                     );
                   },
                   errorBuilder: (context, error, stackTrace) => Container(
-                    color: Colors.grey.shade200,
-                    child: const Icon(Icons.error, color: Colors.grey),
+                    color: colorScheme.surface,
+                    child: Icon(Icons.error, color: colorScheme.onSurfaceVariant),
                   ),
                 ),
               ),
@@ -193,7 +196,7 @@ class _PostCardState extends State<PostCard> {
                 child: Icon(
                   isLiked ? Icons.favorite : Icons.favorite_border,
                   key: ValueKey(isLiked),
-                  color: isLiked ? Colors.red : Colors.black87,
+                  color: isLiked ? Colors.redAccent : colorScheme.onSurface,
                 ),
               ),
               onPressed: widget.onLikeToggle,
@@ -209,7 +212,7 @@ class _PostCardState extends State<PostCard> {
             const Spacer(),
             IconButton(
               icon: Icon(_isSaved ? Icons.bookmark : Icons.bookmark_border),
-              color: Colors.black87,
+              color: colorScheme.onSurface,
               onPressed: () {
                 setState(() {
                   _isSaved = !_isSaved;
@@ -239,7 +242,7 @@ class _PostCardState extends State<PostCard> {
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
           child: RichText(
             text: TextSpan(
-              style: const TextStyle(color: Colors.black87),
+              style: TextStyle(color: colorScheme.onSurface),
               children: [
                 TextSpan(
                   text: '${widget.post.pet.name} ',
@@ -259,7 +262,7 @@ class _PostCardState extends State<PostCard> {
               onTap: widget.onCommentIconTap,
               child: Text(
                 'View all ${widget.post.comments.length} comments',
-                style: const TextStyle(color: Colors.grey),
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
               ),
             ),
           ),
