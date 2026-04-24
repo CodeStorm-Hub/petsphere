@@ -388,7 +388,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         Image.network(
                           post.mediaUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey.shade200),
+                          errorBuilder: (ctx, _, __) => Container(color: Colors.grey.shade200),
                         ),
                         if (isOwnerView)
                           Positioned(
@@ -848,8 +848,8 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
                       radius: 50,
                       backgroundColor: const Color(0xFFFF8A65).withAlpha(26),
                       backgroundImage: _newAvatar != null
-                          ? FileImage(_newAvatar!)
-                          : (hasAvatar ? NetworkImage(currentAvatarUrl) : null) as ImageProvider?,
+                          ? FileImage(_newAvatar!) as ImageProvider
+                          : (hasAvatar ? NetworkImage(currentAvatarUrl) as ImageProvider : null),
                       child: (_newAvatar == null && !hasAvatar)
                           ? Text(
                               widget.user.initials,
@@ -1239,9 +1239,9 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
                       radius: 50,
                       backgroundColor: Colors.grey.shade200,
                       backgroundImage: _newAvatar != null
-                          ? FileImage(_newAvatar!)
+                          ? FileImage(_newAvatar!) as ImageProvider
                           : (widget.pet.profileImageUrl.isNotEmpty
-                              ? NetworkImage(widget.pet.profileImageUrl) as ImageProvider?
+                              ? NetworkImage(widget.pet.profileImageUrl) as ImageProvider
                               : null),
                       child: (_newAvatar == null && widget.pet.profileImageUrl.isEmpty)
                           ? Icon(Icons.pets, size: 32, color: Colors.grey.shade400)
@@ -1520,7 +1520,7 @@ class _OwnerCarouselAvatar extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(3),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
@@ -1565,7 +1565,7 @@ class _PetCarouselAvatar extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(3),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
@@ -1638,7 +1638,11 @@ class _StatColumn extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        Text(label, style: const TextStyle(color: Colors.black54)),
+        Text(
+          label,
+          style:
+              TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
       ],
     );
   }

@@ -385,36 +385,38 @@ class _ListPetSheetWidgetState extends State<_ListPetSheetWidget> {
                 )
               else
                 Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: availablePets.length,
-                    itemBuilder: (context, index) {
-                      final pet = availablePets[index];
-                      return RadioListTile<String>(
-                        title: Row(
-                          children: [
-                            CircleAvatar(
-                              backgroundImage: NetworkImage(pet.profileImageUrl),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              pet.name,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                        subtitle: Text(pet.breed),
-                        value: pet.id,
-                        groupValue: _selectedPetId,
-                        activeColor: Theme.of(context).colorScheme.primary,
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedPetId = val;
-                          });
-                        },
-                      );
+                  child: RadioGroup<String>(
+                    groupValue: _selectedPetId,
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedPetId = val;
+                      });
                     },
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: availablePets.length,
+                      itemBuilder: (context, index) {
+                        final pet = availablePets[index];
+                        return RadioListTile<String>(
+                          title: Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundImage: NetworkImage(pet.profileImageUrl),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                pet.name,
+                                style:
+                                    const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          subtitle: Text(pet.breed),
+                          value: pet.id,
+                          activeColor: Theme.of(context).colorScheme.primary,
+                        );
+                      },
+                    ),
                   ),
                 ),
               const SizedBox(height: 24),

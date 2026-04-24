@@ -18,14 +18,12 @@ class AppTheme {
       brightness: Brightness.light,
       primary: primaryColor,
       secondary: secondaryColor,
-      surface: surfaceColor,
+      surface: backgroundColor,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
       onSurface: textPrimaryColor,
       onError: Colors.white,
       error: errorColor,
-      background: backgroundColor,
-      onBackground: textPrimaryColor,
       outline: const Color(0xFFB7B1AA),
     );
 

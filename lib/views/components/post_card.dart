@@ -161,7 +161,7 @@ class _PostCardState extends State<PostCard> {
                       child: const Center(child: CircularProgressIndicator()),
                     );
                   },
-                  errorBuilder: (context, error, stackTrace) => Container(
+                  errorBuilder: (ctx, err, stack) => Container(
                     color: colorScheme.surface,
                     child: Icon(Icons.error, color: colorScheme.onSurfaceVariant),
                   ),

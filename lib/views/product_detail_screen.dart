@@ -77,7 +77,7 @@ class ProductDetailScreen extends ConsumerWidget {
                         ? Image.network(
                             product.images[0],
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
+                            errorBuilder: (ctx, err, stack) =>
                                 _ImagePlaceholder(icon: Icons.broken_image),
                           )
                         : _ImagePlaceholder(icon: Icons.inventory_2_outlined),
@@ -100,7 +100,7 @@ class ProductDetailScreen extends ConsumerWidget {
                                 width: 64,
                                 height: 64,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => Container(
+                                errorBuilder: (ctx, err, stack) => Container(
                                   width: 64,
                                   height: 64,
                                   color: Colors.grey.shade200,
