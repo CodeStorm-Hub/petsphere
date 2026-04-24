@@ -222,10 +222,10 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                   ? SizedBox(
                       width: 16,
                       height: 16,
-                       child: CircularProgressIndicator(
-                         strokeWidth: 2,
-                         color: Theme.of(context).colorScheme.onPrimary,
-                       ),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     )
                   : const Text(
                       'Share',
