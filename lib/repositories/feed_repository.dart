@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post_model.dart';
 import '../utils/supabase_config.dart';
 
@@ -111,3 +112,5 @@ class FeedRepository {
 }
 
 final feedRepository = FeedRepository();
+
+final feedRepositoryProvider = Provider((ref) => feedRepository);

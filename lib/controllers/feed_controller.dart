@@ -35,6 +35,8 @@ class FeedState {
 // Notifier
 // ---------------------------------------------------------------------------
 class FeedNotifier extends Notifier<FeedState> {
+  FeedRepository get _repository => ref.read(feedRepositoryProvider);
+
   @override
   FeedState build() {
     _fetchPosts();
@@ -43,7 +45,7 @@ class FeedNotifier extends Notifier<FeedState> {
 
   Future<void> _fetchPosts() async {
     try {
-      final posts = await feedRepository.fetchPosts();
+      final posts = await _repository.fetchPosts();
       state = state.copyWith(posts: posts, isLoading: false, clearError: true);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -72,7 +74,7 @@ class FeedNotifier extends Notifier<FeedState> {
 
     try {
       final updatedLikes =
-          await feedRepository.toggleLike(postId, currentPetId);
+          await _repository.toggleLike(postId, currentPetId);
       state = state.copyWith(
         posts: state.posts.map((post) {
           if (post.id != postId) return post;
@@ -81,7 +83,18 @@ class FeedNotifier extends Notifier<FeedState> {
       );
     } catch (_) {
       // Revert optimistic update on failure
-      await _fetchPosts();
+      state = state.copyWith(
+        posts: state.posts.map((post) {
+          if (post.id != postId) return post;
+          final revertedLikes = List<String>.from(post.likedByPetIds);
+          if (revertedLikes.contains(currentPetId)) {
+            revertedLikes.remove(currentPetId);
+          } else {
+            revertedLikes.add(currentPetId);
+          }
+          return post.copyWith(likedByPetIds: revertedLikes);
+        }).toList(),
+      );
     }
   }
 
@@ -90,7 +103,7 @@ class FeedNotifier extends Notifier<FeedState> {
   // -------------------------------------------------------------------------
   Future<void> addPost(PetModel pet, String mediaUrl, String caption) async {
     try {
-      final newPost = await feedRepository.createPost(
+      final newPost = await _repository.createPost(
         petId: pet.id,
         mediaUrl: mediaUrl,
         caption: caption,
@@ -107,7 +120,7 @@ class FeedNotifier extends Notifier<FeedState> {
   Future<void> addComment(
       String postId, String petId, String petName, String text) async {
     try {
-      final newComment = await feedRepository.addComment(
+      final newComment = await _repository.addComment(
         postId: postId,
         petId: petId,
         text: text,
@@ -128,6 +141,4 @@ class FeedNotifier extends Notifier<FeedState> {
 // ---------------------------------------------------------------------------
 // Provider
 // ---------------------------------------------------------------------------
-final feedProvider = NotifierProvider<FeedNotifier, FeedState>(() {
-  return FeedNotifier();
-});
+final feedProvider = NotifierProvider<FeedNotifier, FeedState>(FeedNotifier.new);
