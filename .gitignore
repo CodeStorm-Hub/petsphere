@@ -48,3 +48,4 @@ builder.exe
 dist/petsphere-217fd880.ipa
 dist/petsphere-e6d8abd0.ipa
 .env.local
+android/gradle.properties
