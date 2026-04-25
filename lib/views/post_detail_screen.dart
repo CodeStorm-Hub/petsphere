@@ -5,6 +5,7 @@ import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../controllers/auth_controller.dart';
 import '../models/post_model.dart';
+import '../utils/pet_navigation.dart';
 import 'components/post_card.dart';
 
 class PostDetailScreen extends ConsumerWidget {
@@ -105,8 +106,13 @@ class _PostDetailContent extends ConsumerWidget {
                     _showCommentSheet(context, post.id, currentPetId, activePet?.name ?? ''),
                 onShareIconTap: () => _sharePost(context, post),
                 onPetTap: () {
-                  ref.read(profilePetNavigationProvider.notifier).navigateTo(post.pet.id);
                   Navigator.pop(context);
+                  openPetProfile(
+                    context,
+                    ref,
+                    petId: post.pet.id,
+                    petUserId: post.pet.userId,
+                  );
                 },
               ),
               Padding(
@@ -150,22 +156,30 @@ class _PostDetailContent extends ConsumerWidget {
                           Colors.orange, Colors.purple,
                         ];
                         final bg = colors[comment.petName.length % colors.length];
+                        void openCommenter() => openPetProfile(
+                              context,
+                              ref,
+                              petId: comment.petId,
+                            );
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundColor: bg.withAlpha(38),
-                                child: Text(
-                                  comment.petName.isNotEmpty
-                                      ? comment.petName[0].toUpperCase()
-                                      : '?',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                      color: bg),
+                              GestureDetector(
+                                onTap: openCommenter,
+                                child: CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: bg.withAlpha(38),
+                                  child: Text(
+                                    comment.petName.isNotEmpty
+                                        ? comment.petName[0].toUpperCase()
+                                        : '?',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                        color: bg),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -175,10 +189,13 @@ class _PostDetailContent extends ConsumerWidget {
                                   children: [
                                     Row(
                                       children: [
-                                        Text(comment.petName,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13)),
+                                        GestureDetector(
+                                          onTap: openCommenter,
+                                          child: Text(comment.petName,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13)),
+                                        ),
                                         const SizedBox(width: 8),
                                         Text(ago,
                                             style: TextStyle(

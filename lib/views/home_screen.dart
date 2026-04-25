@@ -9,6 +9,7 @@ import '../controllers/pet_controller.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/notification_controller.dart';
 import '../models/pet_model.dart';
+import '../utils/pet_navigation.dart';
 import 'components/post_card.dart';
 import 'main_layout.dart' show bottomNavSpaceFor;
 
@@ -218,11 +219,12 @@ class HomeScreen extends ConsumerWidget {
                         },
                         onShareIconTap: () =>
                             _showShareSheet(context, post.id),
-                        onPetTap: () {
-                          ref
-                              .read(profilePetNavigationProvider.notifier)
-                              .navigateTo(post.pet.id);
-                        },
+                        onPetTap: () => openPetProfile(
+                          context,
+                          ref,
+                          petId: post.pet.id,
+                          petUserId: post.pet.userId,
+                        ),
                       );
                     },
                     childCount: feedState.posts.length,
@@ -389,22 +391,38 @@ class _CommentBottomSheetWidgetState
                       ];
                       final bg = colors[comment.petName.length % colors.length];
 
+                      void openCommenter() {
+                        Navigator.pop(context);
+                        openPetProfile(
+                          context,
+                          ref,
+                          petId: comment.petId,
+                        );
+                      }
+
                       return ListTile(
                         contentPadding:
                             const EdgeInsets.symmetric(vertical: 4),
-                        leading: CircleAvatar(
-                          backgroundColor: bg.withAlpha(40),
-                          child: Text(
-                            comment.petName[0].toUpperCase(),
-                            style: TextStyle(
-                                color: bg, fontWeight: FontWeight.bold),
+                        leading: GestureDetector(
+                          onTap: openCommenter,
+                          child: CircleAvatar(
+                            backgroundColor: bg.withAlpha(40),
+                            child: Text(
+                              comment.petName[0].toUpperCase(),
+                              style: TextStyle(
+                                  color: bg, fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
                         title: Row(
                           children: [
-                            Text(comment.petName,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 13)),
+                            GestureDetector(
+                              onTap: openCommenter,
+                              child: Text(comment.petName,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13)),
+                            ),
                             const Spacer(),
                             Text(
                               _formatTimeAgo(comment.createdAt),

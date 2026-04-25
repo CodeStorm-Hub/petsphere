@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import '../models/post_model.dart';
 import '../models/pet_model.dart';
 import '../repositories/feed_repository.dart';
+import 'auth_controller.dart';
 
 // ---------------------------------------------------------------------------
 // State wrapper
@@ -38,12 +39,30 @@ class FeedState {
 class FeedNotifier extends Notifier<FeedState> {
   RealtimeChannel? _likesChannel;
   RealtimeChannel? _commentsChannel;
+  String? _lastFetchedForUserId;
 
   @override
   FeedState build() {
+    // Auto-refetch the feed whenever the auth status flips to authenticated
+    // or the active user changes. This guarantees fresh content on cold
+    // start (saved session) and on fresh login without forcing the user to
+    // pull-to-refresh. Manual refresh via `refresh()` is still available.
+    ref.listen(authProvider, (prev, next) {
+      if (next.status == AuthStatus.authenticated &&
+          next.user != null &&
+          _lastFetchedForUserId != next.user!.id) {
+        _lastFetchedForUserId = next.user!.id;
+        _fetchPosts();
+      } else if (next.status == AuthStatus.unauthenticated) {
+        _lastFetchedForUserId = null;
+      }
+    });
+
     _setupRealtimeSubscriptions();
     ref.onDispose(_disposeChannels);
     _fetchPosts();
+    final authedUser = ref.read(authProvider).user;
+    if (authedUser != null) _lastFetchedForUserId = authedUser.id;
     return FeedState(isLoading: true);
   }
 
