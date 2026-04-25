@@ -5,6 +5,7 @@ import '../controllers/marketplace_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/auth_controller.dart';
 import 'components/product_card.dart';
+import 'main_layout.dart' show bottomNavSpaceFor;
 
 class MarketplaceScreen extends ConsumerWidget {
   const MarketplaceScreen({super.key});
@@ -143,54 +144,65 @@ class MarketplaceScreen extends ConsumerWidget {
 
   Widget _buildBody(
       BuildContext context, WidgetRef ref, MarketplaceState marketState) {
+    final navSpace = bottomNavSpaceFor(context);
+
     if (marketState.isLoading && marketState.products.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return Padding(
+        padding: EdgeInsets.only(bottom: navSpace),
+        child: const Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (marketState.error != null && marketState.products.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 64, color: Colors.grey.shade400),
-              const SizedBox(height: 16),
-              Text(
-                'Failed to load products',
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade600),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                marketState.error!,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
-              ),
-              const SizedBox(height: 24),
-              OutlinedButton.icon(
-                onPressed: () => ref.read(marketplaceProvider.notifier).refresh(),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
-              ),
-            ],
+      return Padding(
+        padding: EdgeInsets.only(bottom: navSpace),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 64, color: Colors.grey.shade400),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to load products',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  marketState.error!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                ),
+                const SizedBox(height: 24),
+                OutlinedButton.icon(
+                  onPressed: () => ref.read(marketplaceProvider.notifier).refresh(),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Retry'),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
     if (marketState.products.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.storefront_outlined, size: 64, color: Colors.grey.shade300),
-            const SizedBox(height: 16),
-            Text('No products found',
-                style: TextStyle(fontSize: 16, color: Colors.grey.shade500)),
-          ],
+      return Padding(
+        padding: EdgeInsets.only(bottom: navSpace),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.storefront_outlined, size: 64, color: Colors.grey.shade300),
+              const SizedBox(height: 16),
+              Text('No products found',
+                  style: TextStyle(fontSize: 16, color: Colors.grey.shade500)),
+            ],
+          ),
         ),
       );
     }
@@ -199,7 +211,7 @@ class MarketplaceScreen extends ConsumerWidget {
       onRefresh: () => ref.read(marketplaceProvider.notifier).refresh(),
       child: GridView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + navSpace),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 0.75,

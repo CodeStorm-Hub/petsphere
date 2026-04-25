@@ -9,6 +9,33 @@ import 'pet_profile_screen.dart';
 import 'discovery_screen.dart';
 import 'marketplace_screen.dart';
 
+// ── Glass nav-bar layout tokens ────────────────────────────────────────────
+// The bottom navigation bar is a glassmorphic pill that floats above content
+// (the parent Scaffold uses extendBody: true). Every screen rendered inside
+// MainLayout must reserve enough bottom space for the bar plus the system
+// safe-area inset so content (last list item, FABs, buttons, etc.) is not
+// hidden behind it. Use [bottomNavSpaceFor] from inside any of those screens
+// to get a responsive bottom padding value.
+
+/// Visual height of the floating bottom nav bar (excluding the system safe
+/// area inset). Derived from its inner padding (14 + 14) plus the largest
+/// child size — the central create button at 52px → 80px total.
+const double kBottomNavBarHeight = 80.0;
+
+/// Extra breathing room placed between the last piece of in-screen content
+/// and the top edge of the floating nav bar. Prevents content from butting
+/// directly up against the glass surface.
+const double kBottomNavBarGap = 12.0;
+
+/// Total bottom padding screens hosted in [MainLayout] should reserve so
+/// scrollable content is fully visible above the floating glassmorphic
+/// bottom navigation bar on every device (with or without a home-indicator
+/// safe area).
+double bottomNavSpaceFor(BuildContext context) {
+  final inset = MediaQuery.viewPaddingOf(context).bottom;
+  return kBottomNavBarHeight + kBottomNavBarGap + inset;
+}
+
 class MainLayout extends ConsumerStatefulWidget {
   const MainLayout({super.key});
 

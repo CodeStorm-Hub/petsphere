@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,7 +8,13 @@ import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/notification_controller.dart';
+import '../models/pet_model.dart';
 import 'components/post_card.dart';
+import 'main_layout.dart' show bottomNavSpaceFor;
+
+// Maximum feed column width on wide screens (tablets, foldables, web).
+// Below this, the feed is full-width edge-to-edge like the Instagram phone app.
+const double _kFeedMaxWidth = 560.0;
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -32,9 +40,9 @@ class HomeScreen extends ConsumerWidget {
             const Icon(Icons.pets, size: 22, color: Color(0xFF99472C)),
             const SizedBox(width: 8),
             Text(
-              'The Nurtured Atelier',
+              'Atelier',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 22,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
                 color: colorScheme.onSurface,
@@ -43,17 +51,24 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: 'New Post',
+            icon: const Icon(Icons.add_box_outlined),
+            onPressed: () => context.push('/create_post'),
+          ),
           _NotificationIconButton(
             onTap: () => context.push('/notifications'),
           ),
           IconButton(
             tooltip: 'Messages',
-            icon: const Icon(Icons.chat_bubble_outline),
+            icon: const Icon(Icons.send_outlined),
             onPressed: () => context.push('/messages'),
           ),
+          const SizedBox(width: 4),
         ],
       ),
-      body: _buildBody(context, ref, feedState, currentPetId, firstName, myPets),
+      body: _buildBody(
+          context, ref, feedState, currentPetId, firstName, myPets),
     );
   }
 
@@ -63,279 +78,159 @@ class HomeScreen extends ConsumerWidget {
     FeedState feedState,
     String currentPetId,
     String userName,
-    List myPets,
+    List<PetModel> myPets,
   ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final navSpace = bottomNavSpaceFor(context);
+
+    Widget centerWrap(Widget child) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final width = math.min(constraints.maxWidth, _kFeedMaxWidth);
+          return Center(
+            child: SizedBox(width: width, child: child),
+          );
+        },
+      );
+    }
 
     if (feedState.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Padding(
+        padding: EdgeInsets.only(bottom: navSpace),
+        child: const Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (feedState.error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: colorScheme.error),
-            const SizedBox(height: 12),
-            Text(feedState.error!, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: () => ref.read(feedProvider.notifier).refresh(),
-              icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('Retry'),
-            ),
-          ],
+      return Padding(
+        padding: EdgeInsets.only(bottom: navSpace),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 48, color: colorScheme.error),
+              const SizedBox(height: 12),
+              Text(feedState.error!, textAlign: TextAlign.center),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: () => ref.read(feedProvider.notifier).refresh(),
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Retry'),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     return RefreshIndicator(
       onRefresh: () => ref.read(feedProvider.notifier).refresh(),
-      child: CustomScrollView(
-        slivers: [
-          // ── Personalized greeting + search ─────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Hello, $userName!',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: colorScheme.onSurface,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Discover your next furry friend or share a tail-wagging moment.',
-                    style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Search bar
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8E1DA),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: TextField(
-                      readOnly: true,
-                      onTap: () {},
-                      decoration: InputDecoration(
-                        hintText: 'Search breeds, moments, or friends...',
-                        hintStyle: TextStyle(
-                          color: colorScheme.onSurfaceVariant.withAlpha(160),
-                          fontSize: 14,
-                        ),
-                        prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant, size: 20),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
-                        fillColor: Colors.transparent,
-                        filled: true,
-                      ),
-                    ),
-                  ),
-                ],
+      child: centerWrap(
+        CustomScrollView(
+          slivers: [
+            // ── Stories row (Instagram-style) ────────────────────────
+            if (myPets.isNotEmpty)
+              SliverToBoxAdapter(
+                child: _StoriesRow(
+                  pets: myPets,
+                  currentPetId: currentPetId,
+                  onPetTap: (pet) => ref
+                      .read(profilePetNavigationProvider.notifier)
+                      .navigateTo(pet.id),
+                  onAddPet: () => context.push('/add_pet'),
+                ),
               ),
-            ),
-          ),
 
-          // ── Category chips ──────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: _CategoryChipsRow(),
-          ),
+            // ── Hairline separator under stories ─────────────────────
+            if (myPets.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Divider(
+                  height: 1,
+                  thickness: 0.5,
+                  color: colorScheme.outline.withAlpha(40),
+                ),
+              ),
 
-          // Pet avatars row
-          if (myPets.isNotEmpty)
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: 100,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  itemCount: myPets.length + 1, // +1 for "Add" button
-                  itemBuilder: (context, index) {
-                    if (index == myPets.length) {
-                      // "Add Pet" button
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: GestureDetector(
-                          onTap: () => context.push('/add_pet'),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 56,
-                                height: 56,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: colorScheme.outline.withAlpha(60),
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.add,
-                                  color: colorScheme.primary,
-                                  size: 24,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Add Pet',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
+            // ── Empty state ──────────────────────────────────────────
+            if (feedState.posts.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: navSpace),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.photo_camera_outlined,
+                            size: 56, color: colorScheme.outline.withAlpha(120)),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No posts yet',
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      );
-                    }
-
-                    final pet = myPets[index];
-                    final isActive = pet.id == currentPetId;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: GestureDetector(
-                        onTap: () {
-                          ref.read(profilePetNavigationProvider.notifier).navigateTo(pet.id);
-                        },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: isActive
-                                    ? LinearGradient(
-                                        colors: [
-                                          colorScheme.primary,
-                                          colorScheme.tertiary,
-                                        ],
-                                      )
-                                    : null,
-                                border: !isActive
-                                    ? Border.all(
-                                        color: colorScheme.outline.withAlpha(60),
-                                        width: 1.5,
-                                      )
-                                    : null,
-                              ),
-                              child: CircleAvatar(
-                                radius: 26,
-                                backgroundColor: colorScheme.surface,
-                                backgroundImage: pet.profileImageUrl.isNotEmpty
-                                    ? NetworkImage(pet.profileImageUrl)
-                                    : null,
-                                child: pet.profileImageUrl.isEmpty
-                                    ? Icon(Icons.pets,
-                                        size: 20,
-                                        color: colorScheme.onSurfaceVariant)
-                                    : null,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            SizedBox(
-                              width: 60,
-                              child: Text(
-                                pet.name,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-                                  color: isActive
-                                      ? colorScheme.primary
-                                      : colorScheme.onSurfaceVariant,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 4),
+                        Text(
+                          'Share your first moment.',
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 14,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-
-          // Divider
-          if (myPets.isNotEmpty)
-            SliverToBoxAdapter(
-              child: Divider(
-                height: 1,
-                color: colorScheme.outline.withAlpha(30),
-              ),
-            ),
-
-          // Empty state
-          if (feedState.posts.isEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.pets, size: 64, color: colorScheme.outline.withAlpha(80)),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No posts yet!\nBe the first to share.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 16,
-                      ),
+                        const SizedBox(height: 20),
+                        FilledButton.icon(
+                          onPressed: () => context.push('/create_post'),
+                          icon: const Icon(Icons.add_a_photo_outlined,
+                              size: 18),
+                          label: const Text('Create Post'),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 20),
-                    FilledButton.icon(
-                      onPressed: () => context.push('/create_post'),
-                      icon: const Icon(Icons.add_a_photo_outlined, size: 18),
-                      label: const Text('Create Post'),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            )
-          else
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final post = feedState.posts[index];
-                  return PostCard(
-                    post: post,
-                    currentPetId: currentPetId,
-                    onLikeToggle: () {
-                      ref.read(feedProvider.notifier).toggleLike(post.id, currentPetId);
-                    },
-                    onCommentIconTap: () {
-                      _showCommentSheet(
-                        context,
-                        post.id,
-                        currentPetId,
-                        ref.read(activePetProvider)?.name ?? 'Unknown',
+              )
+            else
+              SliverPadding(
+                padding: EdgeInsets.only(bottom: navSpace),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final post = feedState.posts[index];
+                      return PostCard(
+                        post: post,
+                        currentPetId: currentPetId,
+                        onLikeToggle: () {
+                          ref
+                              .read(feedProvider.notifier)
+                              .toggleLike(post.id, currentPetId);
+                        },
+                        onCommentIconTap: () {
+                          _showCommentSheet(
+                            context,
+                            post.id,
+                            currentPetId,
+                            ref.read(activePetProvider)?.name ?? 'Unknown',
+                          );
+                        },
+                        onShareIconTap: () =>
+                            _showShareSheet(context, post.id),
+                        onPetTap: () {
+                          ref
+                              .read(profilePetNavigationProvider.notifier)
+                              .navigateTo(post.pet.id);
+                        },
                       );
                     },
-                    onShareIconTap: () => _showShareSheet(context, post.id),
-                    onPetTap: () {
-                      ref.read(profilePetNavigationProvider.notifier).navigateTo(post.pet.id);
-                    },
-                  );
-                },
-                childCount: feedState.posts.length,
+                    childCount: feedState.posts.length,
+                  ),
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -561,59 +456,266 @@ class _CommentBottomSheetWidgetState
   }
 }
 
-// ── Category chip filter row ───────────────────────────────────────────────
-class _CategoryChipsRow extends StatefulWidget {
-  @override
-  State<_CategoryChipsRow> createState() => _CategoryChipsRowState();
-}
+// ── Instagram-style stories row ────────────────────────────────────────────
+//
+// Renders the user's pets as horizontally scrolling story bubbles. The active
+// pet is shown first as "Your story" (with a + overlay so the user can post
+// their own moment); other pets get the iconic multi-color gradient ring.
+// Sized intrinsically so it never overflows on any device or text scale.
+class _StoriesRow extends StatelessWidget {
+  final List<PetModel> pets;
+  final String currentPetId;
+  final ValueChanged<PetModel> onPetTap;
+  final VoidCallback onAddPet;
 
-class _CategoryChipsRowState extends State<_CategoryChipsRow> {
-  String? _selected; // null = All Stories
-
-  static const _chips = [
-    (label: 'All Stories', value: null as String?),
-    (label: 'Dogs', value: 'Dog' as String?),
-    (label: 'Cats', value: 'Cat' as String?),
-    (label: 'Exotic', value: 'Exotic' as String?),
-  ];
+  const _StoriesRow({
+    required this.pets,
+    required this.currentPetId,
+    required this.onPetTap,
+    required this.onAddPet,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final activePet = pets.firstWhere(
+      (p) => p.id == currentPetId,
+      orElse: () => pets.first,
+    );
+    final others = pets.where((p) => p.id != activePet.id).toList();
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
       child: Row(
-        children: _chips.map((chip) {
-          final isSelected = _selected == chip.value;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () => setState(() => _selected = chip.value),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF506453) : const Color(0xFFE5FDE6),
-                  borderRadius: BorderRadius.circular(999),
-                  boxShadow: isSelected
-                      ? [BoxShadow(color: const Color(0xFF506453).withAlpha(40), blurRadius: 8, offset: const Offset(0, 2))]
-                      : null,
-                ),
-                child: Text(
-                  chip.label,
-                  style: TextStyle(
-                    color: isSelected ? const Color(0xFFE8FFE8) : const Color(0xFF4E6251),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _StoryItem(
+            imageUrl: activePet.profileImageUrl,
+            label: 'Your story',
+            ringStyle: _RingStyle.none,
+            badge: _StoryBadge.plus,
+            onTap: onAddPet,
+          ),
+          for (final pet in others)
+            _StoryItem(
+              imageUrl: pet.profileImageUrl,
+              label: pet.name,
+              ringStyle: _RingStyle.gradient,
+              onTap: () => onPetTap(pet),
             ),
-          );
-        }).toList(),
+          _StoryItem(
+            imageUrl: '',
+            label: 'Add Pet',
+            ringStyle: _RingStyle.dashed,
+            iconOverride: Icons.add,
+            onTap: onAddPet,
+          ),
+        ],
       ),
     );
   }
+}
+
+enum _RingStyle { none, gradient, dashed }
+
+enum _StoryBadge { none, plus }
+
+class _StoryItem extends StatelessWidget {
+  final String imageUrl;
+  final String label;
+  final _RingStyle ringStyle;
+  final _StoryBadge badge;
+  final IconData? iconOverride;
+  final VoidCallback onTap;
+
+  const _StoryItem({
+    required this.imageUrl,
+    required this.label,
+    required this.ringStyle,
+    this.badge = _StoryBadge.none,
+    this.iconOverride,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    const innerRadius = 30.0;
+
+    Widget avatar = CircleAvatar(
+      radius: innerRadius,
+      backgroundColor: colorScheme.surfaceContainerHighest,
+      backgroundImage:
+          imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+      child: imageUrl.isEmpty
+          ? Icon(
+              iconOverride ?? Icons.pets,
+              size: innerRadius * 0.8,
+              color: colorScheme.onSurfaceVariant,
+            )
+          : null,
+    );
+
+    Widget ringed;
+    switch (ringStyle) {
+      case _RingStyle.gradient:
+        ringed = Container(
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFFFFC837),
+                Color(0xFFFF8008),
+                Color(0xFFFE2D49),
+                Color(0xFFBC2A8D),
+                Color(0xFF4F5BD5),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          padding: const EdgeInsets.all(2.5),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
+            padding: const EdgeInsets.all(2),
+            child: avatar,
+          ),
+        );
+        break;
+      case _RingStyle.dashed:
+        ringed = DottedCircle(
+          color: colorScheme.outline.withAlpha(140),
+          padding: 4,
+          child: avatar,
+        );
+        break;
+      case _RingStyle.none:
+        ringed = Padding(
+          padding: const EdgeInsets.all(4.5),
+          child: avatar,
+        );
+    }
+
+    if (badge == _StoryBadge.plus) {
+      ringed = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          ringed,
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                color: colorScheme.primary,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  width: 2,
+                ),
+              ),
+              child: Icon(
+                Icons.add,
+                size: 14,
+                color: colorScheme.onPrimary,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ringed,
+            const SizedBox(height: 6),
+            SizedBox(
+              width: 72,
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Simple dashed circular border for the "Add Pet" story bubble.
+class DottedCircle extends StatelessWidget {
+  final Widget child;
+  final Color color;
+  final double padding;
+
+  const DottedCircle({
+    super.key,
+    required this.child,
+    required this.color,
+    this.padding = 4,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _DashedCirclePainter(color: color),
+      child: Padding(
+        padding: EdgeInsets.all(padding),
+        child: child,
+      ),
+    );
+  }
+}
+
+class _DashedCirclePainter extends CustomPainter {
+  final Color color;
+  _DashedCirclePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    final radius = math.min(size.width, size.height) / 2;
+    final center = Offset(size.width / 2, size.height / 2);
+    const dashes = 28;
+    const gapFraction = 0.45;
+    final segment = (2 * math.pi) / dashes;
+    final stroke = segment * (1 - gapFraction);
+
+    for (var i = 0; i < dashes; i++) {
+      final start = i * segment;
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius - 1),
+        start,
+        stroke,
+        false,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedCirclePainter old) => old.color != color;
 }
 
 class _NotificationIconButton extends ConsumerWidget {

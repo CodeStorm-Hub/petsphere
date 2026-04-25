@@ -12,6 +12,7 @@ import '../repositories/auth_repository.dart';
 import '../controllers/follow_controller.dart';
 import '../utils/image_upload_helper.dart';
 import '../utils/supabase_config.dart';
+import 'main_layout.dart' show bottomNavSpaceFor;
 
 class PetProfileScreen extends ConsumerStatefulWidget {
   const PetProfileScreen({super.key});
@@ -179,37 +180,37 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                 // Spacer for avatar overlap
                 const SizedBox(height: 52),
 
-                // Pet carousel selector
-                SizedBox(
-                  height: 88,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: myOwnedPets.length + 2,
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return GestureDetector(
-                          onTap: () => setState(() => selectedId = 'owner'),
-                          child: _OwnerCarouselAvatar(
-                            user: user,
-                            isSelected: isOwnerView,
+                // Pet carousel selector — content-sized so it never overflows
+                // on any device, font scale, or accessibility setting.
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => setState(() => selectedId = 'owner'),
+                        child: _OwnerCarouselAvatar(
+                          user: user,
+                          isSelected: isOwnerView,
+                        ),
+                      ),
+                      for (final pet in myOwnedPets)
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => setState(() => selectedId = pet.id),
+                          child: _PetCarouselAvatar(
+                            pet: pet,
+                            isSelected: pet.id == selectedId,
                           ),
-                        );
-                      }
-                      if (index == myOwnedPets.length + 1) {
-                        return GestureDetector(
-                          onTap: () => context.push('/add_pet'),
-                          child: const _AddPetAvatar(),
-                        );
-                      }
-                      final petIndex = index - 1;
-                      final pet = myOwnedPets[petIndex];
-                      final isSelected = pet.id == selectedId;
-                      return GestureDetector(
-                        onTap: () => setState(() => selectedId = pet.id),
-                        child: _PetCarouselAvatar(pet: pet, isSelected: isSelected),
-                      );
-                    },
+                        ),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => context.push('/add_pet'),
+                        child: const _AddPetAvatar(),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -503,16 +504,19 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               ),
             ),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          SliverToBoxAdapter(child: SizedBox(height: bottomNavSpaceFor(context))),
         ],
         ),
       ),
       floatingActionButton: !isOwnerView && selectedPet != null
-          ? FloatingActionButton(
-              heroTag: 'profile_fab',
-              onPressed: () => context.push('/create_post?petId=${selectedPet!.id}'),
-              backgroundColor: const Color(0xFFFF8A65),
-              child: const Icon(Icons.add_a_photo_outlined, color: Colors.white),
+          ? Padding(
+              padding: EdgeInsets.only(bottom: bottomNavSpaceFor(context)),
+              child: FloatingActionButton(
+                heroTag: 'profile_fab',
+                onPressed: () => context.push('/create_post?petId=${selectedPet!.id}'),
+                backgroundColor: const Color(0xFFFF8A65),
+                child: const Icon(Icons.add_a_photo_outlined, color: Colors.white),
+              ),
             )
           : null,
     );
@@ -1570,6 +1574,7 @@ class _OwnerCarouselAvatar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 16.0),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.all(4),
@@ -1597,7 +1602,19 @@ class _OwnerCarouselAvatar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text('All', style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+          SizedBox(
+            width: 68,
+            child: Text(
+              'All',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1615,6 +1632,7 @@ class _PetCarouselAvatar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 16.0),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.all(4),
@@ -1638,7 +1656,19 @@ class _PetCarouselAvatar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(pet.name, style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+          SizedBox(
+            width: 68,
+            child: Text(
+              pet.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1653,6 +1683,7 @@ class _AddPetAvatar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 16.0),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.all(3),
@@ -1671,7 +1702,20 @@ class _AddPetAvatar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          const Text('Add Pet', style: TextStyle(fontSize: 12, color: Color(0xFFFF8A65), fontWeight: FontWeight.w600)),
+          const SizedBox(
+            width: 68,
+            child: Text(
+              'Add Pet',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: Color(0xFFFF8A65),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );

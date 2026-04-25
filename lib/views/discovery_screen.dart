@@ -6,6 +6,7 @@ import '../controllers/match_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/pet_model.dart';
 import '../theme/app_theme.dart';
+import 'main_layout.dart' show bottomNavSpaceFor;
 
 class DiscoveryScreen extends ConsumerWidget {
   const DiscoveryScreen({super.key});
@@ -15,6 +16,7 @@ class DiscoveryScreen extends ConsumerWidget {
     final matchState = ref.watch(matchProvider);
     final myPets = ref.watch(petProvider).myPets;
     final listedPets = myPets.where((p) => p.isBreedingListed).toList();
+    final navSpace = bottomNavSpaceFor(context);
 
     return DefaultTabController(
       length: 3,
@@ -59,6 +61,7 @@ class DiscoveryScreen extends ConsumerWidget {
               child: listedPets.isEmpty
                   ? ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.only(bottom: navSpace),
                       children: [
                         const SizedBox(height: 100),
                         const Icon(Icons.favorite_border,
@@ -84,7 +87,7 @@ class DiscoveryScreen extends ConsumerWidget {
                     )
                   : ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + navSpace),
                       itemCount: listedPets.length,
                       itemBuilder: (context, index) {
                         final pet = listedPets[index];
@@ -202,6 +205,7 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
   Widget build(BuildContext context) {
     final filteredPets = _filteredPets;
     final hasPets = filteredPets.isNotEmpty;
+    final navSpace = bottomNavSpaceFor(context);
 
     return Column(
       children: [
@@ -242,9 +246,13 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
         // ── Card Stack ────────────────────────────────────────────
         Expanded(
           child: !hasPets
-              ? const Center(child: Text('No pets available. Check back soon!'))
+              ? Padding(
+                  padding: EdgeInsets.only(bottom: navSpace),
+                  child: const Center(
+                      child: Text('No pets available. Check back soon!')),
+                )
               : Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.fromLTRB(20, 0, 20, navSpace),
                   child: Column(
                     children: [
                       Expanded(
@@ -580,16 +588,20 @@ class _NearbyTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final navSpace = bottomNavSpaceFor(context);
 
     if (discoveryPets.isEmpty) {
-      return const Center(child: Text('No nearby pets found.'));
+      return Padding(
+        padding: EdgeInsets.only(bottom: navSpace),
+        child: const Center(child: Text('No nearby pets found.')),
+      );
     }
 
     // Show at most 10 as "nearby" (real GPS sorting would go here)
     final nearby = discoveryPets.take(10).toList();
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + navSpace),
       itemCount: nearby.length,
       itemBuilder: (context, index) {
         final pet = nearby[index];
