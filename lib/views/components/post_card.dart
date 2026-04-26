@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:video_player/video_player.dart';
 import '../../models/post_model.dart';
+import '../../utils/media_utils.dart';
 
 /// Instagram-style edge-to-edge post card.
 ///
@@ -213,7 +215,29 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                             ],
                           ],
                         ),
-                        if (widget.post.pet.breed.isNotEmpty)
+                        if (widget.post.location.isNotEmpty)
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                size: 11,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 2),
+                              Flexible(
+                                child: Text(
+                                  widget.post.location,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        else if (widget.post.pet.breed.isNotEmpty)
                           Text(
                             widget.post.pet.breed,
                             maxLines: 1,
@@ -245,35 +269,21 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    widget.post.mediaUrl,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xFF211F1B), Color(0xFF2E2B26)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
+                  isVideoMedia(widget.post.mediaUrl)
+                      ? _PostVideoPlayer(
+                          key: ValueKey(widget.post.mediaUrl),
+                          url: widget.post.mediaUrl,
+                        )
+                      : Image.network(
+                          widget.post.mediaUrl,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return const _MediaLoadingPlaceholder();
+                          },
+                          errorBuilder: (ctx, err, stack) =>
+                              _MediaErrorPlaceholder(colorScheme: colorScheme),
                         ),
-                        child: const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFD4845A))),
-                      );
-                    },
-                    errorBuilder: (ctx, err, stack) => Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF211F1B), Color(0xFF2E2B26)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
-                      child: Icon(Icons.pets,
-                          size: 56, color: colorScheme.onSurfaceVariant),
-                    ),
-                  ),
                   IgnorePointer(
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 250),
@@ -390,6 +400,37 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
               ),
             ),
 
+          if (widget.post.taggedPetNames.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: widget.post.taggedPetNames
+                    .map(
+                      (name) => Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD4845A).withAlpha(24),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          '@$name',
+                          style: const TextStyle(
+                            color: Color(0xFFD4845A),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+
           // ── "View all N comments" ──────────────────────────────────
           if (commentCount > 0)
             Padding(
@@ -423,6 +464,131 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
         ],
       ),
       ),
+    );
+  }
+}
+
+class _PostVideoPlayer extends StatefulWidget {
+  final String url;
+
+  const _PostVideoPlayer({super.key, required this.url});
+
+  @override
+  State<_PostVideoPlayer> createState() => _PostVideoPlayerState();
+}
+
+class _PostVideoPlayerState extends State<_PostVideoPlayer> {
+  late final VideoPlayerController _controller;
+  bool _isReady = false;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
+      ..setLooping(true)
+      ..initialize().then((_) {
+        if (!mounted) return;
+        setState(() => _isReady = true);
+        _controller.play();
+      }).catchError((_) {
+        if (mounted) setState(() => _hasError = true);
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _togglePlayback() {
+    if (!_isReady) return;
+    setState(() {
+      _controller.value.isPlaying ? _controller.pause() : _controller.play();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    if (_hasError) return _MediaErrorPlaceholder(colorScheme: colorScheme);
+    if (!_isReady) return const _MediaLoadingPlaceholder();
+
+    return GestureDetector(
+      onTap: _togglePlayback,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: _controller.value.size.width,
+              height: _controller.value.size.height,
+              child: VideoPlayer(_controller),
+            ),
+          ),
+          if (!_controller.value.isPlaying)
+            Container(
+              color: Colors.black26,
+              child: const Center(
+                child: Icon(
+                  Icons.play_circle_fill_rounded,
+                  size: 72,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          const Positioned(
+            top: 12,
+            right: 12,
+            child: Icon(Icons.videocam_rounded, color: Colors.white, size: 22),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MediaLoadingPlaceholder extends StatelessWidget {
+  const _MediaLoadingPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF211F1B), Color(0xFF2E2B26)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Color(0xFFD4845A),
+        ),
+      ),
+    );
+  }
+}
+
+class _MediaErrorPlaceholder extends StatelessWidget {
+  final ColorScheme colorScheme;
+
+  const _MediaErrorPlaceholder({required this.colorScheme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF211F1B), Color(0xFF2E2B26)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Icon(Icons.pets, size: 56, color: colorScheme.onSurfaceVariant),
     );
   }
 }

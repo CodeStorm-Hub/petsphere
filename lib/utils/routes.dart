@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../controllers/auth_controller.dart';
 import '../views/main_layout.dart';
 import '../views/create_post_screen.dart';
+import '../views/create_story_screen.dart';
 import '../views/add_pet_screen.dart';
 import '../views/messages_list_screen.dart';
 import '../views/chat_screen.dart';
@@ -19,6 +20,7 @@ import '../views/registration_screen.dart';
 import '../views/settings_screen.dart';
 import '../views/splash_screen.dart';
 import '../views/pet_care_screen.dart';
+import '../views/story_viewer_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authNotifier = ValueNotifier<AuthState>(ref.read(authProvider));
@@ -76,6 +78,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: '/create_story',
+        builder: (context, state) {
+          final petId = state.uri.queryParameters['petId'];
+          return CreateStoryScreen(initialPetId: petId);
+        },
+      ),
+      GoRoute(
         path: '/add_pet',
         builder: (context, state) => const AddPetScreen(),
       ),
@@ -121,6 +130,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final postId = state.pathParameters['id']!;
           return PostDetailScreen(postId: postId);
+        },
+      ),
+      GoRoute(
+        path: '/story/:petId',
+        builder: (context, state) {
+          final petId = state.pathParameters['petId']!;
+          return StoryViewerScreen(petId: petId);
         },
       ),
       GoRoute(

@@ -7,6 +7,7 @@ import '../controllers/auth_controller.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/follow_controller.dart';
 import '../controllers/match_controller.dart';
+import '../utils/media_utils.dart';
 import 'package:go_router/go_router.dart';
 
 typedef ProfileArgs = ({String? petId, String? userId});
@@ -272,9 +273,36 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                           final post = displayedPosts[index];
                           return GestureDetector(
                             onTap: () => context.push('/post/${post.id}'),
-                            child: post.mediaUrl.isNotEmpty
-                                ? Image.network(post.mediaUrl, fit: BoxFit.cover)
-                                : Container(color: Colors.grey.shade200),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                if (post.mediaUrl.isEmpty)
+                                  Container(color: Colors.grey.shade200)
+                                else if (isVideoMedia(post.mediaUrl))
+                                  Container(
+                                    color: const Color(0xFF211F1B),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.play_circle_fill_rounded,
+                                        color: Color(0xFFD4845A),
+                                        size: 42,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  Image.network(post.mediaUrl, fit: BoxFit.cover),
+                                if (isVideoMedia(post.mediaUrl))
+                                  const Positioned(
+                                    top: 4,
+                                    right: 4,
+                                    child: Icon(
+                                      Icons.videocam_rounded,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                  ),
+                              ],
+                            ),
                           );
                         },
                         childCount: displayedPosts.length,

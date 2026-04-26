@@ -11,6 +11,7 @@ import '../controllers/notification_controller.dart';
 import '../repositories/notification_repository.dart';
 import '../models/pet_model.dart';
 import '../models/post_model.dart';
+import '../models/story_model.dart';
 import '../utils/pet_navigation.dart';
 import 'components/post_card.dart';
 import 'main_layout.dart' show bottomNavSpaceFor;
@@ -135,11 +136,20 @@ class HomeScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: _StoriesRow(
                   pets: myPets,
+                  stories: feedState.stories,
                   currentPetId: currentPetId,
-                  onPetTap: (pet) => ref
-                      .read(profilePetNavigationProvider.notifier)
-                      .navigateTo(pet.id),
-                  onAddPet: () => context.push('/add_pet'),
+                  onCreateStory: () => _openCreateStoryForPet(
+                    context,
+                    myPets,
+                    currentPetId: currentPetId,
+                  ),
+                  onStoryTap: (petId) => context.push('/story/$petId'),
+                  onYourStoryTap: (petId) => _onYourStoryTap(
+                    context,
+                    myPets,
+                    currentPetId: currentPetId,
+                    storyPetId: petId,
+                  ),
                 ),
               ),
 
@@ -262,6 +272,223 @@ class HomeScreen extends ConsumerWidget {
         }
       } catch (_) {}
     }
+  }
+
+  Future<void> _openCreateStoryForPet(
+    BuildContext context,
+    List<PetModel> myPets, {
+    required String currentPetId,
+  }) async {
+    if (myPets.isEmpty) {
+      context.push('/add_pet');
+      return;
+    }
+
+    if (myPets.length == 1) {
+      context.push('/create_story?petId=${myPets.first.id}');
+      return;
+    }
+
+    final selectedPetId = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          margin: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1814),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: const Color(0xFF2E2B26)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF625E59),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Post story as',
+                  style: TextStyle(
+                    color: Color(0xFFF2EDE4),
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Choose which pet should post this story.',
+                  style: TextStyle(color: Color(0xFFB8B0A4)),
+                ),
+                const SizedBox(height: 12),
+                ...myPets.map((pet) {
+                  final isCurrent = pet.id == currentPetId;
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    onTap: () => Navigator.pop(sheetContext, pet.id),
+                    leading: CircleAvatar(
+                      backgroundColor: const Color(0xFF211F1B),
+                      backgroundImage: pet.profileImageUrl.isNotEmpty
+                          ? NetworkImage(pet.profileImageUrl)
+                          : null,
+                      child: pet.profileImageUrl.isEmpty
+                          ? Text(
+                              pet.name.isNotEmpty
+                                  ? pet.name[0].toUpperCase()
+                                  : '?',
+                            )
+                          : null,
+                    ),
+                    title: Text(
+                      pet.name,
+                      style: const TextStyle(
+                        color: Color(0xFFF2EDE4),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    subtitle: Text(
+                      pet.breed,
+                      style: const TextStyle(color: Color(0xFFB8B0A4)),
+                    ),
+                    trailing: isCurrent
+                        ? const Icon(
+                            Icons.check_circle,
+                            color: Color(0xFFD4845A),
+                          )
+                        : const Icon(
+                            Icons.chevron_right,
+                            color: Color(0xFF8D867B),
+                          ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!context.mounted || selectedPetId == null) return;
+    context.push('/create_story?petId=$selectedPetId');
+  }
+
+  Future<void> _onYourStoryTap(
+    BuildContext context,
+    List<PetModel> myPets, {
+    required String currentPetId,
+    required String? storyPetId,
+  }) async {
+    if (storyPetId == null) {
+      await _openCreateStoryForPet(
+        context,
+        myPets,
+        currentPetId: currentPetId,
+      );
+      return;
+    }
+
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          margin: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1814),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: const Color(0xFF2E2B26)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF625E59),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Your story',
+                  style: TextStyle(
+                    color: Color(0xFFF2EDE4),
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Choose what you want to do.',
+                  style: TextStyle(color: Color(0xFFB8B0A4)),
+                ),
+                const SizedBox(height: 12),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(
+                    Icons.visibility_outlined,
+                    color: Color(0xFFD4845A),
+                  ),
+                  title: const Text(
+                    'View story',
+                    style: TextStyle(
+                      color: Color(0xFFF2EDE4),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  onTap: () => Navigator.pop(sheetContext, 'view'),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(
+                    Icons.add_circle_outline,
+                    color: Color(0xFFD4845A),
+                  ),
+                  title: const Text(
+                    'Post story',
+                    style: TextStyle(
+                      color: Color(0xFFF2EDE4),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  onTap: () => Navigator.pop(sheetContext, 'post'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!context.mounted || action == null) return;
+    if (action == 'view') {
+      context.push('/story/$storyPetId');
+      return;
+    }
+
+    await _openCreateStoryForPet(
+      context,
+      myPets,
+      currentPetId: currentPetId,
+    );
   }
 
   void _showCommentSheet(
@@ -495,21 +722,24 @@ class _CommentBottomSheetWidgetState
 
 // ── Instagram-style stories row ────────────────────────────────────────────
 //
-// Renders the user's pets as horizontally scrolling story bubbles. The active
-// pet is shown first as "Your story" (with a + overlay so the user can post
-// their own moment); other pets get the iconic multi-color gradient ring.
+// Renders active 24-hour stories plus the user's pets as horizontally scrolling
+// story bubbles. The active pet is shown first as "Your story" with a + overlay.
 // Sized intrinsically so it never overflows on any device or text scale.
 class _StoriesRow extends StatelessWidget {
   final List<PetModel> pets;
+  final List<StoryModel> stories;
   final String currentPetId;
-  final ValueChanged<PetModel> onPetTap;
-  final VoidCallback onAddPet;
+  final VoidCallback onCreateStory;
+  final ValueChanged<String> onStoryTap;
+  final ValueChanged<String?> onYourStoryTap;
 
   const _StoriesRow({
     required this.pets,
+    required this.stories,
     required this.currentPetId,
-    required this.onPetTap,
-    required this.onAddPet,
+    required this.onCreateStory,
+    required this.onStoryTap,
+    required this.onYourStoryTap,
   });
 
   @override
@@ -518,7 +748,25 @@ class _StoriesRow extends StatelessWidget {
       (p) => p.id == currentPetId,
       orElse: () => pets.first,
     );
-    final others = pets.where((p) => p.id != activePet.id).toList();
+    final storyPetIds = stories.map((story) => story.pet.id).toSet();
+    final myPetIds = pets.map((pet) => pet.id).toSet();
+    final myStoryPets = <PetModel>[
+      ...pets.where((pet) => storyPetIds.contains(pet.id)),
+    ];
+    final externalStoryPetsById = <String, PetModel>{};
+    for (final story in stories) {
+      if (!myPetIds.contains(story.pet.id)) {
+        externalStoryPetsById[story.pet.id] = story.pet;
+      }
+    }
+    final activePetHasStory = storyPetIds.contains(activePet.id);
+    final primaryMyStoryPet = activePetHasStory
+        ? activePet
+        : (myStoryPets.isNotEmpty ? myStoryPets.first : null);
+    final additionalMyStoryPets = myStoryPets
+        .where((pet) => pet.id != primaryMyStoryPet?.id)
+        .toList();
+    final followedStoryPets = externalStoryPetsById.values.toList();
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -527,26 +775,27 @@ class _StoriesRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _StoryItem(
-            imageUrl: activePet.profileImageUrl,
+            imageUrl: (primaryMyStoryPet ?? activePet).profileImageUrl,
             label: 'Your story',
-            ringStyle: _RingStyle.none,
+            ringStyle: primaryMyStoryPet != null ? _RingStyle.gradient : _RingStyle.none,
             badge: _StoryBadge.plus,
-            onTap: onAddPet,
+            onBadgeTap: onCreateStory,
+            onTap: () => onYourStoryTap(primaryMyStoryPet?.id),
           ),
-          for (final pet in others)
+          for (final pet in additionalMyStoryPets)
             _StoryItem(
               imageUrl: pet.profileImageUrl,
               label: pet.name,
               ringStyle: _RingStyle.gradient,
-              onTap: () => onPetTap(pet),
+              onTap: () => onStoryTap(pet.id),
             ),
-          _StoryItem(
-            imageUrl: '',
-            label: 'Add Pet',
-            ringStyle: _RingStyle.dashed,
-            iconOverride: Icons.add,
-            onTap: onAddPet,
-          ),
+          for (final pet in followedStoryPets)
+            _StoryItem(
+              imageUrl: pet.profileImageUrl,
+              label: pet.name,
+              ringStyle: _RingStyle.gradient,
+              onTap: () => onStoryTap(pet.id),
+            ),
         ],
       ),
     );
@@ -564,6 +813,7 @@ class _StoryItem extends StatelessWidget {
   final _StoryBadge badge;
   final IconData? iconOverride;
   final VoidCallback onTap;
+  final VoidCallback? onBadgeTap;
 
   const _StoryItem({
     required this.imageUrl,
@@ -572,6 +822,7 @@ class _StoryItem extends StatelessWidget {
     this.badge = _StoryBadge.none,
     this.iconOverride,
     required this.onTap,
+    this.onBadgeTap,
   });
 
   @override
@@ -642,21 +893,24 @@ class _StoryItem extends StatelessWidget {
           Positioned(
             right: 0,
             bottom: 0,
-            child: Container(
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                color: colorScheme.primary,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  width: 2,
+            child: GestureDetector(
+              onTap: onBadgeTap,
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    width: 2,
+                  ),
                 ),
-              ),
-              child: Icon(
-                Icons.add,
-                size: 14,
-                color: colorScheme.onPrimary,
+                child: Icon(
+                  Icons.add,
+                  size: 14,
+                  color: colorScheme.onPrimary,
+                ),
               ),
             ),
           ),
