@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../models/chat_thread_model.dart';
+import '../../utils/pet_navigation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
-class ChatThreadTile extends StatelessWidget {
+class ChatThreadTile extends ConsumerWidget {
   final ChatThreadModel thread;
   final String myPetId;
   final VoidCallback onTap;
@@ -15,7 +16,7 @@ class ChatThreadTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Find the other pet in the conversation
     final otherPet = thread.participantPets.firstWhere(
       (p) => p.id != myPetId,
@@ -28,11 +29,21 @@ class ChatThreadTile extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: CircleAvatar(
-        radius: 28,
-        backgroundImage: otherPet.profileImageUrl.isNotEmpty ? NetworkImage(otherPet.profileImageUrl) : null,
-        backgroundColor: theme.colorScheme.surfaceContainerHighest,
-        child: otherPet.profileImageUrl.isEmpty ? Icon(Icons.pets, color: theme.colorScheme.onSurfaceVariant) : null,
+      leading: GestureDetector(
+        onTap: () {
+          openPetProfile(
+            context,
+            ref,
+            petId: otherPet.id,
+            petUserId: otherPet.userId,
+          );
+        },
+        child: CircleAvatar(
+          radius: 28,
+          backgroundImage: otherPet.profileImageUrl.isNotEmpty ? NetworkImage(otherPet.profileImageUrl) : null,
+          backgroundColor: theme.colorScheme.surfaceContainerHighest,
+          child: otherPet.profileImageUrl.isEmpty ? Icon(Icons.pets, color: theme.colorScheme.onSurfaceVariant) : null,
+        ),
       ),
       title: Text(
         otherPet.name,

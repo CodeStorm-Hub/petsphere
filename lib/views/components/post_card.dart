@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import '../../models/post_model.dart';
 
 /// Instagram-style edge-to-edge post card.
@@ -510,7 +511,9 @@ class _ExpandableCaption extends StatelessWidget {
         fontSize: 13.5,
         color: onSurface,
       ),
-      recognizer: null,
+      recognizer: onUsernameTap != null
+          ? (TapGestureRecognizer()..onTap = onUsernameTap)
+          : null,
     );
     final captionStyle = TextStyle(
       fontSize: 13.5,

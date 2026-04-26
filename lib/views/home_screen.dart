@@ -8,7 +8,9 @@ import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/notification_controller.dart';
+import '../repositories/notification_repository.dart';
 import '../models/pet_model.dart';
+import '../models/post_model.dart';
 import '../utils/pet_navigation.dart';
 import 'components/post_card.dart';
 import 'main_layout.dart' show bottomNavSpaceFor;
@@ -60,10 +62,8 @@ class HomeScreen extends ConsumerWidget {
           _NotificationIconButton(
             onTap: () => context.push('/notifications'),
           ),
-          IconButton(
-            tooltip: 'Messages',
-            icon: const Icon(Icons.send_outlined),
-            onPressed: () => context.push('/messages'),
+          _MessageIconButton(
+            onTap: () => context.push('/messages'),
           ),
           const SizedBox(width: 4),
         ],
@@ -218,7 +218,7 @@ class HomeScreen extends ConsumerWidget {
                           );
                         },
                         onShareIconTap: () =>
-                            _showShareSheet(context, post.id),
+                            _showShareSheet(context, ref, post),
                         onPetTap: () => openPetProfile(
                           context,
                           ref,
@@ -237,12 +237,29 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  void _showShareSheet(BuildContext context, String postId) {
-    final shareLink = 'https://petsphere.app/post/$postId';
-    Share.share(
+  void _showShareSheet(BuildContext context, WidgetRef ref, PostModel post) async {
+    final shareLink = 'https://petsphere.app/post/${post.id}';
+    
+    final result = await Share.share(
       'Check out this pet on PetSphere!\n$shareLink',
       subject: 'PetSphere',
     );
+
+    if (result.status == ShareResultStatus.success) {
+      try {
+        final authedUser = ref.read(authProvider).user;
+        if (authedUser != null && post.pet.userId != authedUser.id) {
+          notificationRepository.sendNotification(
+            targetUserId: post.pet.userId,
+            title: 'Post Shared',
+            body: 'Someone shared your post!',
+            type: 'post_share',
+            entityType: 'post',
+            entityId: post.id,
+          );
+        }
+      } catch (_) {}
+    }
   }
 
   void _showCommentSheet(
@@ -751,6 +768,55 @@ class _NotificationIconButton extends ConsumerWidget {
         clipBehavior: Clip.none,
         children: [
           const Icon(Icons.favorite_border),
+          if (unread > 0)
+            Positioned(
+              right: -4,
+              top: -4,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.surface,
+                    width: 1.5,
+                  ),
+                ),
+                constraints:
+                    const BoxConstraints(minWidth: 16, minHeight: 16),
+                child: Text(
+                  unread > 99 ? '99+' : '$unread',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+        ],
+      ),
+      onPressed: onTap,
+    );
+  }
+}
+
+class _MessageIconButton extends ConsumerWidget {
+  final VoidCallback onTap;
+  const _MessageIconButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unread =
+        ref.watch(notificationProvider.select((s) => s.unreadMessageCount));
+
+    return IconButton(
+      tooltip: unread > 0 ? 'Messages ($unread unread)' : 'Messages',
+      icon: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          const Icon(Icons.send_outlined),
           if (unread > 0)
             Positioned(
               right: -4,

@@ -3,13 +3,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/chat_controller.dart';
 import '../controllers/pet_controller.dart';
+import '../controllers/notification_controller.dart';
 import 'components/chat_thread_tile.dart';
 
-class MessagesListScreen extends ConsumerWidget {
+class MessagesListScreen extends ConsumerStatefulWidget {
   const MessagesListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MessagesListScreen> createState() => _MessagesListScreenState();
+}
+
+class _MessagesListScreenState extends ConsumerState<MessagesListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(notificationProvider.notifier).markMessagesAsRead();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
     final threads = chatState.threads;
     final myCurrentPetId = ref.watch(activePetProvider)?.id ?? '';

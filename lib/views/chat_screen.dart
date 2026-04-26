@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/chat_controller.dart';
 import '../controllers/pet_controller.dart';
+import '../utils/pet_navigation.dart';
 import 'components/message_bubble.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -84,61 +85,69 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleSpacing: 0,
-        title: Row(
-          children: [
-            // Avatar with online indicator
-            Stack(
-              children: [
-                CircleAvatar(
-                  backgroundImage: otherPet.profileImageUrl.isNotEmpty
-                      ? NetworkImage(otherPet.profileImageUrl)
-                      : null,
-                  radius: 20,
-                  backgroundColor: const Color(0xFFE5FDE6),
-                  child: otherPet.profileImageUrl.isEmpty
-                      ? Text(otherPet.name[0], style: const TextStyle(color: Color(0xFF506453)))
-                      : null,
-                ),
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFAD04B),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFFEF8F3), width: 2),
+        title: GestureDetector(
+          onTap: () => openPetProfile(
+            context,
+            ref,
+            petId: otherPet.id,
+            petUserId: otherPet.userId,
+          ),
+          child: Row(
+            children: [
+              // Avatar with online indicator
+              Stack(
+                children: [
+                  CircleAvatar(
+                    backgroundImage: otherPet.profileImageUrl.isNotEmpty
+                        ? NetworkImage(otherPet.profileImageUrl)
+                        : null,
+                    radius: 20,
+                    backgroundColor: const Color(0xFFE5FDE6),
+                    child: otherPet.profileImageUrl.isEmpty
+                        ? Text(otherPet.name[0], style: const TextStyle(color: Color(0xFF506453)))
+                        : null,
+                  ),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFAD04B),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFFFEF8F3), width: 2),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  otherPet.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 17,
-                    color: Color(0xFF35322D),
-                    letterSpacing: -0.3,
+                ],
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    otherPet.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 17,
+                      color: Color(0xFF35322D),
+                      letterSpacing: -0.3,
+                    ),
                   ),
-                ),
-                const Text(
-                  'ONLINE',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF506453),
-                    letterSpacing: 1.2,
+                  const Text(
+                    'ONLINE',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF506453),
+                      letterSpacing: 1.2,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
         actions: [
           IconButton(

@@ -113,6 +113,19 @@ class AuthRepository {
   // -------------------------------------------------------------------------
   // Private helpers
   // -------------------------------------------------------------------------
+  Future<UserModel> fetchPublicProfile(String userId) async {
+    final data = await supabase
+        .from('profiles')
+        .select()
+        .eq('id', userId)
+        .maybeSingle();
+
+    if (data == null) {
+      return UserModel(id: userId, email: '');
+    }
+
+    return UserModel.fromJson({...data, 'email': ''});
+  }
   Future<UserModel> _fetchProfile(String userId, String email) async {
     final data = await supabase
         .from('profiles')

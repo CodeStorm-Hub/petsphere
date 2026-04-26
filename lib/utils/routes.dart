@@ -94,6 +94,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: '/user/:id',
+        builder: (context, state) {
+           final userId = state.pathParameters['id']!;
+           return MatchPetProfileScreen(userId: userId);
+        },
+      ),
+      GoRoute(
         path: '/messages',
         builder: (context, state) => const MessagesListScreen(),
       ),

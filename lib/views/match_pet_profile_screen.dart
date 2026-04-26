@@ -1,168 +1,289 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../repositories/pet_repository.dart';
 import '../models/pet_model.dart';
-import '../controllers/match_controller.dart';
-import '../controllers/follow_controller.dart';
+import '../models/user_model.dart';
+import '../repositories/pet_repository.dart';
 import '../controllers/auth_controller.dart';
+import '../controllers/feed_controller.dart';
+import '../controllers/follow_controller.dart';
+import '../controllers/match_controller.dart';
 import 'package:go_router/go_router.dart';
 
-// Load pet by ID from Supabase
-final _petByIdProvider = FutureProvider.family<PetModel?, String>((ref, petId) {
-  return petRepository.fetchPetById(petId);
+typedef ProfileArgs = ({String? petId, String? userId});
+
+final _publicProfileDataProvider = FutureProvider.family<Map<String, dynamic>, ProfileArgs>((ref, args) async {
+  final petId = args.petId;
+  final userIdArg = args.userId;
+
+  String targetUserId;
+  PetModel? initialPet;
+
+  if (petId != null) {
+    initialPet = await petRepository.fetchPetById(petId);
+    if (initialPet == null) throw Exception('Pet not found');
+    targetUserId = initialPet.userId;
+  } else if (userIdArg != null) {
+    targetUserId = userIdArg;
+  } else {
+    throw Exception('Must provide petId or userId');
+  }
+
+  final user = await ref.read(publicUserProvider(targetUserId).future);
+  final allPets = await petRepository.fetchMyPets(targetUserId);
+  
+  return {
+    'user': user,
+    'pets': allPets,
+    'initialPet': initialPet,
+  };
 });
 
-class MatchPetProfileScreen extends ConsumerWidget {
-  final String petId;
-
-  const MatchPetProfileScreen({super.key, required this.petId});
+class MatchPetProfileScreen extends ConsumerStatefulWidget {
+  final String? petId;
+  final String? userId;
+  const MatchPetProfileScreen({super.key, this.petId, this.userId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final petAsync = ref.watch(_petByIdProvider(petId));
+  ConsumerState<MatchPetProfileScreen> createState() => _MatchPetProfileScreenState();
+}
 
-    return petAsync.when(
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (e, _) =>
-          Scaffold(body: Center(child: Text('Error loading pet: $e'))),
-      data: (pet) {
-        if (pet == null) {
-          return const Scaffold(
-              body: Center(child: Text('Pet not found')));
+class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
+  String? selectedId;
+  String? _postCategory;
+
+  @override
+  Widget build(BuildContext context) {
+    final args = (petId: widget.petId, userId: widget.userId);
+    final asyncData = ref.watch(_publicProfileDataProvider(args));
+
+    return asyncData.when(
+      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (e, _) => Scaffold(
+        appBar: AppBar(),
+        body: Center(child: Text('Error: $e')),
+      ),
+      data: (data) {
+        final UserModel user = data['user'];
+        final List<PetModel> pets = data['pets'];
+        final PetModel? initialPet = data['initialPet'];
+
+        selectedId ??= (initialPet?.id ?? 'owner');
+        final isOwnerView = selectedId == 'owner';
+
+        PetModel? selectedPet;
+        if (!isOwnerView) {
+          selectedPet = pets.firstWhere((p) => p.id == selectedId, orElse: () => pets.first);
         }
+
+        final feedState = ref.watch(feedProvider);
+        final allPosts = isOwnerView
+            ? feedState.posts.where((post) => post.pet.userId == user.id).toList()
+            : feedState.posts.where((post) => post.pet.id == selectedPet?.id).toList();
+
+        final displayedPosts = (_postCategory == null || isOwnerView)
+            ? allPosts
+            : allPosts.where((p) => p.caption.toLowerCase().contains(_postCategory!.toLowerCase())).toList();
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(pet.name),
+            title: Text(isOwnerView ? user.name ?? 'Pet Lover' : (selectedPet?.name ?? 'Pet')),
           ),
           body: RefreshIndicator(
             onRefresh: () async {
-              ref.invalidate(_petByIdProvider(petId));
+              ref.invalidate(_publicProfileDataProvider(args));
+              await ref.read(feedProvider.notifier).refresh();
             },
-            child: SingleChildScrollView(
+            child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  height: 300,
-                  child: pet.profileImageUrl.isNotEmpty
-                      ? Image.network(pet.profileImageUrl, fit: BoxFit.cover)
-                      : Container(
-                          color: Colors.grey.shade200,
-                          child: const Icon(Icons.pets,
-                              size: 80, color: Colors.grey),
-                        ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(24.0),
+              slivers: [
+                SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Name + Age
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      // Banner
+                      Stack(
+                        clipBehavior: Clip.none,
                         children: [
-                          Expanded(
-                            child: Text(
-                              pet.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
+                          SizedBox(
+                            height: 200,
+                            width: double.infinity,
+                            child: () {
+                              final coverUrl = isOwnerView ? (user.profileImageUrl ?? '') : (selectedPet?.profileImageUrl ?? '');
+                              return coverUrl.isNotEmpty
+                                  ? Image.network(coverUrl, fit: BoxFit.cover)
+                                  : Container(
+                                      decoration: const BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [Color(0xFFFFAD93), Color(0xFFFFE087)],
+                                        ),
+                                      ),
+                                    );
+                            }(),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              '${pet.age} yrs',
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
+                          Positioned(
+                            bottom: -44,
+                            left: 20,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: const Color(0xFFFEF8F3), width: 4),
+                              ),
+                              child: CircleAvatar(
+                                radius: 40,
+                                backgroundColor: const Color(0xFFE5FDE6),
+                                backgroundImage: () {
+                                  final url = isOwnerView ? user.profileImageUrl : selectedPet?.profileImageUrl;
+                                  return (url != null && url.isNotEmpty) ? NetworkImage(url) : null;
+                                }(),
+                                child: () {
+                                  final url = isOwnerView ? user.profileImageUrl : selectedPet?.profileImageUrl;
+                                  if (url != null && url.isNotEmpty) return null;
+                                  return Icon(isOwnerView ? Icons.person : Icons.pets, size: 40, color: const Color(0xFF99472C));
+                                }(),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Breed: ${pet.breed}',
-                        style:
-                            const TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
+                      const SizedBox(height: 52),
 
-                      // Follower count
-                      const SizedBox(height: 8),
-                      _PetFollowerCount(petId: pet.id),
-
-                      // Follow Buttons
-                      const SizedBox(height: 16),
-                      _FollowButtonsRow(pet: pet),
-
-                      const SizedBox(height: 24),
-                      const Text('About',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Text(pet.bio,
-                          style:
-                              const TextStyle(fontSize: 16, height: 1.5)),
-                      const SizedBox(height: 32),
-                      const Text('Medical Details',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.check_circle, color: Colors.green),
-                          const SizedBox(width: 8),
-                          const Text('Fully Vaccinated'),
-                          const Spacer(),
-                          if (pet.isPublicOwner)
-                            const Chip(label: Text('Owner Info Public')),
-                        ],
-                      ),
-                      const SizedBox(height: 48),
-                      if (ref.watch(authProvider).user?.id != pet.userId)
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: ElevatedButton.icon(
-                            icon: const Icon(Icons.favorite),
-                            label: const Text('Send Match Request'),
-                            onPressed: () async {
-                              final success = await ref
-                                  .read(matchProvider.notifier)
-                                  .sendLikeRequest(pet.id);
-                              if (!context.mounted) return;
-                              if (success) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          'Breeding request sent for ${pet.name}!')),
-                                );
-                                context.pop();
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'Could not send request.')),
-                                );
-                              }
-                            },
-                          ),
+                      // Carousel
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GestureDetector(
+                              onTap: () => setState(() => selectedId = 'owner'),
+                              child: _AvatarRing(
+                                isSelected: isOwnerView,
+                                child: CircleAvatar(
+                                  radius: 30,
+                                  backgroundImage: (user.profileImageUrl?.isNotEmpty ?? false) ? NetworkImage(user.profileImageUrl!) : null,
+                                  child: (user.profileImageUrl?.isEmpty ?? true) ? const Icon(Icons.person) : null,
+                                ),
+                              ),
+                            ),
+                            for (final pet in pets)
+                              GestureDetector(
+                                onTap: () => setState(() => selectedId = pet.id),
+                                child: _AvatarRing(
+                                  isSelected: pet.id == selectedId,
+                                  child: CircleAvatar(
+                                    radius: 30,
+                                    backgroundImage: pet.profileImageUrl.isNotEmpty ? NetworkImage(pet.profileImageUrl) : null,
+                                    child: pet.profileImageUrl.isEmpty ? const Icon(Icons.pets) : null,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
+                      ),
+
+                      // Info
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isOwnerView ? (user.name ?? '') : (selectedPet?.name ?? ''),
+                              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                            ),
+                            if (!isOwnerView && selectedPet != null)
+                              Text('${selectedPet!.breed} · ${selectedPet!.animalType} · ${selectedPet!.age} yrs', style: const TextStyle(color: Colors.grey)),
+                            const SizedBox(height: 8),
+                            Text(
+                              isOwnerView ? (user.bio ?? 'No bio yet') : (selectedPet?.bio ?? 'No bio yet'),
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            const SizedBox(height: 16),
+                            
+                            // Stats
+                            Row(
+                              children: [
+                                _StatColumn(label: 'Posts', value: '${displayedPosts.length}'),
+                                const SizedBox(width: 28),
+                                if (isOwnerView) ...[
+                                  ref.watch(ownerFollowerCountProvider(user.id)).when(
+                                    data: (c) => _StatColumn(label: 'Followers', value: '$c'),
+                                    loading: () => const _StatColumn(label: 'Followers', value: '···'),
+                                    error: (_, __) => const _StatColumn(label: 'Followers', value: '0'),
+                                  ),
+                                ] else if (selectedPet != null) ...[
+                                  ref.watch(petFollowerCountProvider(selectedPet!.id)).when(
+                                    data: (c) => _StatColumn(label: 'Followers', value: '$c'),
+                                    loading: () => const _StatColumn(label: 'Followers', value: '···'),
+                                    error: (_, __) => const _StatColumn(label: 'Followers', value: '0'),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Follow/Match Buttons
+                            if (!isOwnerView && selectedPet != null) ...[
+                              _FollowButtonsRow(pet: selectedPet!),
+                              const SizedBox(height: 8),
+                              SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton.icon(
+                                  icon: const Icon(Icons.favorite),
+                                  label: const Text('Send Match Request'),
+                                  onPressed: () async {
+                                    final success = await ref.read(matchProvider.notifier).sendLikeRequest(selectedPet!.id);
+                                    if (mounted && success) {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Request sent to ${selectedPet!.name}!')));
+                                    }
+                                  },
+                                ),
+                              ),
+                            ] else if (isOwnerView) ...[
+                              SizedBox(
+                                width: double.infinity,
+                                child: _OwnerFollowButton(userId: user.id),
+                              ),
+                            ],
+                            const SizedBox(height: 16),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
+                // Posts Grid
+                if (displayedPosts.isEmpty)
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(child: Text('No posts yet', style: TextStyle(color: Colors.grey))),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    sliver: SliverGrid(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        mainAxisSpacing: 2,
+                        crossAxisSpacing: 2,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final post = displayedPosts[index];
+                          return GestureDetector(
+                            onTap: () => context.push('/post/${post.id}'),
+                            child: post.mediaUrl.isNotEmpty
+                                ? Image.network(post.mediaUrl, fit: BoxFit.cover)
+                                : Container(color: Colors.grey.shade200),
+                          );
+                        },
+                        childCount: displayedPosts.length,
+                      ),
+                    ),
+                  ),
+                const SliverToBoxAdapter(child: SizedBox(height: 40)),
               ],
             ),
-          ),
           ),
         );
       },
@@ -170,70 +291,72 @@ class MatchPetProfileScreen extends ConsumerWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Follow Buttons Row — Follow Pet + Follow Owner
-// ---------------------------------------------------------------------------
+class _AvatarRing extends StatelessWidget {
+  final bool isSelected;
+  final Widget child;
+  const _AvatarRing({required this.isSelected, required this.child});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: isSelected ? const Color(0xFFFAD04B) : Colors.transparent,
+          width: 2,
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _StatColumn extends StatelessWidget {
+  final String label;
+  final String value;
+  const _StatColumn({required this.label, required this.value});
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+      ],
+    );
+  }
+}
+
 class _FollowButtonsRow extends ConsumerWidget {
   final PetModel pet;
-
   const _FollowButtonsRow({required this.pet});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUserId = ref.watch(authProvider).user?.id;
-    final isOwnPet = currentUserId == pet.userId;
-
-    // Don't show follow buttons for your own pets
-    if (isOwnPet || currentUserId == null) return const SizedBox.shrink();
-
-    final isFollowingPet = ref.watch(isFollowingPetProvider(pet.id));
-    final isFollowingOwner = ref.watch(isFollowingOwnerProvider(pet.userId));
-
+    final followsAsync = ref.watch(isFollowingPetProvider(pet.id));
+    final follows = followsAsync.value ?? false;
     return Row(
       children: [
-        // Follow Pet button
         Expanded(
-          child: isFollowingPet.when(
-            loading: () => const _FollowButtonSkeleton(label: 'Follow Pet'),
-            error: (_, __) => const SizedBox.shrink(),
-            data: (following) => _FollowButton(
-              label: following ? 'Following' : 'Follow Pet',
-              icon: following ? Icons.pets : Icons.pets_outlined,
-              isFollowing: following,
-              color: const Color(0xFFFF8A65),
-              onPressed: () async {
-                await ref
-                    .read(followControllerProvider.notifier)
-                    .toggleFollowPet(pet.id);
-                // Also refresh owner follow state in case it changed
-                ref.invalidate(isFollowingOwnerProvider(pet.userId));
-              },
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: follows ? Colors.grey.shade200 : Theme.of(context).colorScheme.primary,
+              foregroundColor: follows ? Colors.black : Colors.white,
             ),
+            onPressed: () {
+              ref.read(followControllerProvider.notifier).toggleFollowPet(pet.id);
+            },
+            child: Text(follows ? 'Unfollow' : 'Follow'),
           ),
         ),
-        const SizedBox(width: 12),
-        // Follow Owner button
+        const SizedBox(width: 8),
         Expanded(
-          child: isFollowingOwner.when(
-            loading: () =>
-                const _FollowButtonSkeleton(label: 'Follow Owner'),
-            error: (_, __) => const SizedBox.shrink(),
-            data: (following) => _FollowButton(
-              label: following ? 'Following Owner' : 'Follow Owner',
-              icon: following
-                  ? Icons.person_rounded
-                  : Icons.person_add_alt_1_outlined,
-              isFollowing: following,
-              color: const Color(0xFF4FC3F7),
-              onPressed: () async {
-                await ref
-                    .read(followControllerProvider.notifier)
-                    .toggleFollowOwner(pet.userId);
-                // Refresh pet follow state too (owner follow implies pet follow)
-                ref.invalidate(isFollowingPetProvider(pet.id));
-                ref.invalidate(petFollowerCountProvider(pet.id));
-              },
-            ),
+          child: OutlinedButton(
+            onPressed: () {
+              // TODO: Implement messaging
+            },
+            child: const Text('Message'),
           ),
         ),
       ],
@@ -241,139 +364,23 @@ class _FollowButtonsRow extends ConsumerWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Reusable Follow Button
-// ---------------------------------------------------------------------------
-class _FollowButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool isFollowing;
-  final Color color;
-  final VoidCallback onPressed;
-
-  const _FollowButton({
-    required this.label,
-    required this.icon,
-    required this.isFollowing,
-    required this.color,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      child: isFollowing
-          ? OutlinedButton.icon(
-              onPressed: onPressed,
-              icon: Icon(icon, size: 18, color: color),
-              label: Text(
-                label,
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: color),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            )
-          : FilledButton.icon(
-              onPressed: onPressed,
-              icon: Icon(icon, size: 18),
-              label: Text(
-                label,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
-              style: FilledButton.styleFrom(
-                backgroundColor: color,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Follow Button Skeleton (loading state)
-// ---------------------------------------------------------------------------
-class _FollowButtonSkeleton extends StatelessWidget {
-  final String label;
-
-  const _FollowButtonSkeleton({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: null,
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(
-            width: 14,
-            height: 14,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontSize: 13)),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Pet Follower Count
-// ---------------------------------------------------------------------------
-class _PetFollowerCount extends ConsumerWidget {
-  final String petId;
-
-  const _PetFollowerCount({required this.petId});
+class _OwnerFollowButton extends ConsumerWidget {
+  final String userId;
+  const _OwnerFollowButton({required this.userId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final countAsync = ref.watch(petFollowerCountProvider(petId));
-
-    return countAsync.when(
-      loading: () => Text(
-        'Loading followers...',
-        style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+    final followsAsync = ref.watch(isFollowingOwnerProvider(userId));
+    final follows = followsAsync.value ?? false;
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: follows ? Colors.grey.shade200 : Theme.of(context).colorScheme.primary,
+        foregroundColor: follows ? Colors.black : Colors.white,
       ),
-      error: (_, __) => const SizedBox.shrink(),
-      data: (count) => Row(
-        children: [
-          Icon(Icons.people_outline, size: 16, color: Colors.grey.shade600),
-          const SizedBox(width: 4),
-          Text(
-            '$count ${count == 1 ? 'follower' : 'followers'}',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
+      onPressed: () {
+        ref.read(followControllerProvider.notifier).toggleFollowOwner(userId);
+      },
+      child: Text(follows ? 'Unfollow Owner' : 'Follow Owner'),
     );
   }
 }

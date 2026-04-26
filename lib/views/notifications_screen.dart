@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../utils/pet_navigation.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/chat_controller.dart';
 import '../controllers/match_controller.dart';
@@ -23,6 +25,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    
+    // Mark notifications as read automatically upon viewing the page
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(notificationProvider.notifier).markAllAsRead();
+      }
+    });
   }
 
   @override
@@ -54,15 +63,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
             ),
           ],
         ),
-        actions: [
-          if (notifState.unreadCount > 0)
-            IconButton(
-              tooltip: 'Mark all as read',
-              icon: const Icon(Icons.done_all),
-              onPressed: () =>
-                  ref.read(notificationProvider.notifier).markAllAsRead(),
-            ),
-        ],
+        actions: [],
       ),
       body: TabBarView(
         controller: _tabController,
@@ -80,13 +81,15 @@ class _ActivityTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(notificationProvider);
 
-    if (state.isLoading && state.items.isEmpty) {
+    final items = state.items.where((n) => n.type != 'message' && n.type != 'match_request').toList();
+
+    if (state.isLoading && items.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
     return RefreshIndicator(
       onRefresh: () => ref.read(notificationProvider.notifier).refresh(),
-      child: state.items.isEmpty
+      child: items.isEmpty
           ? ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               children: const [
@@ -96,10 +99,10 @@ class _ActivityTab extends ConsumerWidget {
             )
           : ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: state.items.length,
+              itemCount: items.length,
               separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, index) {
-                final n = state.items[index];
+                final n = items[index];
                 return _NotificationTile(notification: n);
               },
             ),
@@ -131,6 +134,23 @@ class _NotificationTile extends ConsumerWidget {
       case 'order_status':
         icon = Icons.shopping_bag_rounded;
         bg = colors.tertiary;
+        break;
+      case 'post_like':
+        icon = Icons.favorite;
+        bg = Colors.red;
+        break;
+      case 'post_comment':
+        icon = Icons.comment;
+        bg = colors.secondary;
+        break;
+      case 'post_share':
+        icon = Icons.share;
+        bg = Colors.green;
+        break;
+      case 'profile_follow':
+      case 'pet_follow':
+        icon = Icons.person_add;
+        bg = Colors.blue;
         break;
       default:
         icon = Icons.notifications;
@@ -248,6 +268,13 @@ class _RequestsTab extends ConsumerWidget {
                         TextSpan(
                           text: senderPet.name,
                           style: const TextStyle(fontWeight: FontWeight.bold),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => openPetProfile(
+                                  context,
+                                  ref,
+                                  petId: senderPet.id,
+                                  petUserId: senderPet.userId,
+                                ),
                         ),
                         const TextSpan(text: ' liked your pet for breeding.'),
                       ],

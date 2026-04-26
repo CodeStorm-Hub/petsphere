@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import '../models/post_model.dart';
 import '../models/pet_model.dart';
 import '../repositories/feed_repository.dart';
+import '../repositories/notification_repository.dart';
 import 'auth_controller.dart';
 
 // ---------------------------------------------------------------------------
@@ -143,6 +144,27 @@ class FeedNotifier extends Notifier<FeedState> {
     try {
       final updatedLikes =
           await feedRepository.toggleLike(postId, currentPetId);
+      
+      // Notify the post owner if it's a new like (not an unlike)
+      if (updatedLikes.contains(currentPetId)) {
+        try {
+          final post = state.posts.firstWhere((p) => p.id == postId);
+          final authedUser = ref.read(authProvider).user;
+          // Don't notify if liking own post
+          if (authedUser != null && post.pet.userId != authedUser.id) {
+            notificationRepository.sendNotification(
+              targetUserId: post.pet.userId,
+              title: 'New Like',
+              body: 'Someone liked your post!',
+              type: 'post_like',
+              entityType: 'post',
+              entityId: postId,
+              actorPetId: currentPetId,
+            );
+          }
+        } catch (_) {}
+      }
+
       state = state.copyWith(
         posts: state.posts.map((post) {
           if (post.id != postId) return post;
@@ -204,6 +226,23 @@ class FeedNotifier extends Notifier<FeedState> {
               comments: [...post.comments, newComment]);
         }).toList(),
       );
+      
+      // Notify the post owner
+      try {
+        final post = state.posts.firstWhere((p) => p.id == postId);
+        final authedUser = ref.read(authProvider).user;
+        if (authedUser != null && post.pet.userId != authedUser.id) {
+          notificationRepository.sendNotification(
+            targetUserId: post.pet.userId,
+            title: 'New Comment',
+            body: '$petName commented: $text',
+            type: 'post_comment',
+            entityType: 'post',
+            entityId: postId,
+            actorPetId: petId,
+          );
+        }
+      } catch (_) {}
     } catch (e) {
       state = state.copyWith(error: 'Failed to add comment: $e');
     }
