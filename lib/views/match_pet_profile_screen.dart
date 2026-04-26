@@ -192,7 +192,7 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                               style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                             ),
                             if (!isOwnerView && selectedPet != null)
-                              Text('${selectedPet!.breed} · ${selectedPet!.animalType} · ${selectedPet!.age} yrs', style: const TextStyle(color: Colors.grey)),
+                              Text('${selectedPet.breed} · ${selectedPet.animalType} · ${selectedPet.age} yrs', style: const TextStyle(color: Colors.grey)),
                             const SizedBox(height: 8),
                             Text(
                               isOwnerView ? (user.bio ?? 'No bio yet') : (selectedPet?.bio ?? 'No bio yet'),
@@ -212,7 +212,7 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                                     error: (_, __) => const _StatColumn(label: 'Followers', value: '0'),
                                   ),
                                 ] else if (selectedPet != null) ...[
-                                  ref.watch(petFollowerCountProvider(selectedPet!.id)).when(
+                                  ref.watch(petFollowerCountProvider(selectedPet.id)).when(
                                     data: (c) => _StatColumn(label: 'Followers', value: '$c'),
                                     loading: () => const _StatColumn(label: 'Followers', value: '···'),
                                     error: (_, __) => const _StatColumn(label: 'Followers', value: '0'),
@@ -224,7 +224,7 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
 
                             // Follow/Match Buttons
                             if (!isOwnerView && selectedPet != null) ...[
-                              _FollowButtonsRow(pet: selectedPet!),
+                              _FollowButtonsRow(pet: selectedPet),
                               const SizedBox(height: 8),
                               SizedBox(
                                 width: double.infinity,
@@ -233,8 +233,8 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                                   label: const Text('Send Match Request'),
                                   onPressed: () async {
                                     final success = await ref.read(matchProvider.notifier).sendLikeRequest(selectedPet!.id);
-                                    if (mounted && success) {
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Request sent to ${selectedPet!.name}!')));
+                                    if (context.mounted && success) {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Request sent to ${selectedPet.name}!')));
                                     }
                                   },
                                 ),

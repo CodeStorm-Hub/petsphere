@@ -289,9 +289,11 @@ class _PostDetailContent extends ConsumerWidget {
     final caption = post.caption.isNotEmpty
         ? '"${post.caption}"\n\n'
         : '';
-    Share.share(
-      'Check out ${post.pet.name} on PetSphere! $caption$link',
-      subject: 'PetSphere — ${post.pet.name}',
+    SharePlus.instance.share(
+      ShareParams(
+        text: 'Check out ${post.pet.name} on PetSphere! $caption$link',
+        subject: 'PetSphere — ${post.pet.name}',
+      ),
     );
   }
 

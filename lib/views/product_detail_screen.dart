@@ -124,9 +124,11 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                     icon: Icon(Icons.share_outlined,
                         color: colorScheme.onSurface),
                     onPressed: () {
-                      Share.share(
-                        'Check out ${product.name} on PetSphere — \$${product.price.toStringAsFixed(2)}\nhttps://petsphere.app/product/${product.id}',
-                        subject: 'PetSphere — ${product.name}',
+                      SharePlus.instance.share(
+                        ShareParams(
+                          text: 'Check out ${product.name} on PetSphere — \$${product.price.toStringAsFixed(2)}\nhttps://petsphere.app/product/${product.id}',
+                          subject: 'PetSphere — ${product.name}',
+                        ),
                       );
                     },
                   ),

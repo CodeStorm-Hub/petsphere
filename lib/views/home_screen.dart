@@ -240,9 +240,11 @@ class HomeScreen extends ConsumerWidget {
   void _showShareSheet(BuildContext context, WidgetRef ref, PostModel post) async {
     final shareLink = 'https://petsphere.app/post/${post.id}';
     
-    final result = await Share.share(
-      'Check out this pet on PetSphere!\n$shareLink',
-      subject: 'PetSphere',
+    final result = await SharePlus.instance.share(
+      ShareParams(
+        text: 'Check out this pet on PetSphere!\n$shareLink',
+        subject: 'PetSphere',
+      ),
     );
 
     if (result.status == ShareResultStatus.success) {
