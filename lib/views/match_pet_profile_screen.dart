@@ -233,7 +233,7 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                                   label: const Text('Send Match Request'),
                                   onPressed: () async {
                                     final success = await ref.read(matchProvider.notifier).sendLikeRequest(selectedPet!.id);
-                                    if (mounted && success) {
+                                    if (context.mounted && success) {
                                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Request sent to ${selectedPet.name}!')));
                                     }
                                   },
