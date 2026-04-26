@@ -49,84 +49,102 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
   void _showMediaPicker() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
-        return Container(
-          margin: const EdgeInsets.all(12),
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
-          decoration: BoxDecoration(
-            color: const Color(0xFF171617),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: const Color(0xFF2B292B)),
-          ),
-          child: SafeArea(
-            top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 44,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF5F5A5F),
-                      borderRadius: BorderRadius.circular(99),
+        final mediaQuery = MediaQuery.of(sheetContext);
+        final maxSheetHeight = mediaQuery.size.height * 0.85;
+
+        return Padding(
+          padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Container(
+                margin: const EdgeInsets.all(12),
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF171617),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: const Color(0xFF2B292B)),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: maxSheetHeight),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                            child: Container(
+                              width: 44,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF5F5A5F),
+                                borderRadius: BorderRadius.circular(99),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          const Text(
+                            'Choose Story Media',
+                            style: TextStyle(
+                              color: Color(0xFFF5F1EE),
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            'Pick a photo or video to post as a story.',
+                            style: TextStyle(color: Color(0xFFB8B2AA)),
+                          ),
+                          const SizedBox(height: 18),
+                          _MediaPickerTile(
+                            icon: Icons.photo_library_outlined,
+                            title: 'Choose Photo',
+                            onTap: () async {
+                              Navigator.pop(sheetContext);
+                              final file = await ImageUploadHelper.pickFromGallery();
+                              if (file != null) _setSelectedMedia(file);
+                            },
+                          ),
+                          _MediaPickerTile(
+                            icon: Icons.camera_alt_outlined,
+                            title: 'Take Photo',
+                            onTap: () async {
+                              Navigator.pop(sheetContext);
+                              final file = await ImageUploadHelper.pickFromCamera();
+                              if (file != null) _setSelectedMedia(file);
+                            },
+                          ),
+                          _MediaPickerTile(
+                            icon: Icons.video_library_outlined,
+                            title: 'Choose Video',
+                            onTap: () async {
+                              Navigator.pop(sheetContext);
+                              final file = await ImageUploadHelper.pickVideoFromGallery();
+                              if (file != null) _setSelectedMedia(file);
+                            },
+                          ),
+                          _MediaPickerTile(
+                            icon: Icons.videocam_outlined,
+                            title: 'Record Video',
+                            onTap: () async {
+                              Navigator.pop(sheetContext);
+                              final file = await ImageUploadHelper.pickVideoFromCamera();
+                              if (file != null) _setSelectedMedia(file);
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 18),
-                const Text(
-                  'Choose Story Media',
-                  style: TextStyle(
-                    color: Color(0xFFF5F1EE),
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Pick a photo or video to post as a story.',
-                  style: TextStyle(color: Color(0xFFB8B2AA)),
-                ),
-                const SizedBox(height: 18),
-                _MediaPickerTile(
-                  icon: Icons.photo_library_outlined,
-                  title: 'Choose Photo',
-                  onTap: () async {
-                    Navigator.pop(sheetContext);
-                    final file = await ImageUploadHelper.pickFromGallery();
-                    if (file != null) _setSelectedMedia(file);
-                  },
-                ),
-                _MediaPickerTile(
-                  icon: Icons.camera_alt_outlined,
-                  title: 'Take Photo',
-                  onTap: () async {
-                    Navigator.pop(sheetContext);
-                    final file = await ImageUploadHelper.pickFromCamera();
-                    if (file != null) _setSelectedMedia(file);
-                  },
-                ),
-                _MediaPickerTile(
-                  icon: Icons.video_library_outlined,
-                  title: 'Choose Video',
-                  onTap: () async {
-                    Navigator.pop(sheetContext);
-                    final file = await ImageUploadHelper.pickVideoFromGallery();
-                    if (file != null) _setSelectedMedia(file);
-                  },
-                ),
-                _MediaPickerTile(
-                  icon: Icons.videocam_outlined,
-                  title: 'Record Video',
-                  onTap: () async {
-                    Navigator.pop(sheetContext);
-                    final file = await ImageUploadHelper.pickVideoFromCamera();
-                    if (file != null) _setSelectedMedia(file);
-                  },
-                ),
-              ],
+              ),
             ),
           ),
         );
@@ -243,9 +261,18 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                   colors: [Color(0x332A1B16), Color(0x000F0E10)],
                 ),
               ),
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 18),
-                children: [
+              child: LayoutBuilder(
+                builder: (context, _) {
+                  final screenHeight = MediaQuery.sizeOf(context).height;
+                  final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+                  final mediaCardHeight = (screenHeight * 0.46).clamp(260.0, 460.0);
+
+                  return Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 720),
+                      child: ListView(
+                        padding: EdgeInsets.fromLTRB(16, 8, 16, 18 + keyboardInset),
+                        children: [
                   const Text(
                     'Post As',
                     style: TextStyle(
@@ -316,10 +343,10 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: _showMediaPicker,
-                    child: Container(
-                      height: 460,
+                          GestureDetector(
+                            onTap: _showMediaPicker,
+                            child: Container(
+                              height: mediaCardHeight,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
                         color: const Color(0xFF1B191C),
@@ -338,10 +365,10 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                               )
                             : null,
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: Stack(
-                          children: [
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(30),
+                                child: Stack(
+                                  children: [
                             if (_selectedFile == null)
                               const Center(
                                 child: Column(
@@ -403,55 +430,59 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                                   ),
                                 ),
                               ),
-                            Positioned(
-                              top: 14,
-                              right: 14,
-                              child: FilledButton.icon(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: Colors.black.withAlpha(120),
-                                  foregroundColor: const Color(0xFFF5F1EE),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                ),
-                                onPressed: _showMediaPicker,
-                                icon: const Icon(Icons.edit_rounded, size: 16),
-                                label: Text(
-                                  _selectedFile == null ? 'Add' : 'Change',
+                                    Positioned(
+                                      top: 14,
+                                      right: 14,
+                                      child: FilledButton.icon(
+                                        style: FilledButton.styleFrom(
+                                          backgroundColor: Colors.black.withAlpha(120),
+                                          foregroundColor: const Color(0xFFF5F1EE),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 8,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(999),
+                                          ),
+                                        ),
+                                        onPressed: _showMediaPicker,
+                                        icon: const Icon(Icons.edit_rounded, size: 16),
+                                        label: Text(
+                                          _selectedFile == null ? 'Add' : 'Change',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1B191C),
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(color: const Color(0xFF2B292B)),
+                            ),
+                            child: TextField(
+                              controller: _captionController,
+                              maxLength: 280,
+                              maxLines: 3,
+                              style: const TextStyle(color: Color(0xFFF5F1EE)),
+                              decoration: const InputDecoration(
+                                counterStyle: TextStyle(color: Color(0xFF9A948C)),
+                                hintText: 'Write a caption...',
+                                hintStyle: TextStyle(color: Color(0xFF88827B)),
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1B191C),
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: const Color(0xFF2B292B)),
-                    ),
-                    child: TextField(
-                      controller: _captionController,
-                      maxLength: 280,
-                      maxLines: 3,
-                      style: const TextStyle(color: Color(0xFFF5F1EE)),
-                      decoration: const InputDecoration(
-                        counterStyle: TextStyle(color: Color(0xFF9A948C)),
-                        hintText: 'Write a caption...',
-                        hintStyle: TextStyle(color: Color(0xFF88827B)),
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
     );

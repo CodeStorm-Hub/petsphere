@@ -434,11 +434,14 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 16,
                 MediaQuery.paddingOf(context).top + kToolbarHeight + 24,
                 16,
-                32,
+                32 + MediaQuery.viewInsetsOf(context).bottom,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 720),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   const _ComposerHero(),
                   const SizedBox(height: 20),
                   const _SectionLabel('Posting as'),
@@ -495,7 +498,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     onLocationTap: _showLocationSheet,
                     onTagTap: () => _showTagPetsSheet(myPets),
                   ),
-                ],
+                    ],
+                  ),
+                ),
               ),
             ),
     );

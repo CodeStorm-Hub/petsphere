@@ -291,88 +291,110 @@ class HomeScreen extends ConsumerWidget {
 
     final selectedPetId = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
-        return Container(
-          margin: const EdgeInsets.all(12),
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1814),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: const Color(0xFF2E2B26)),
-          ),
-          child: SafeArea(
-            top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 44,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF625E59),
-                      borderRadius: BorderRadius.circular(99),
-                    ),
-                  ),
+        final mediaQuery = MediaQuery.of(sheetContext);
+        final maxSheetHeight = mediaQuery.size.height * 0.78;
+
+        return Padding(
+          padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Container(
+                margin: const EdgeInsets.all(12),
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A1814),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: const Color(0xFF2E2B26)),
                 ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Post story as',
-                  style: TextStyle(
-                    color: Color(0xFFF2EDE4),
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Choose which pet should post this story.',
-                  style: TextStyle(color: Color(0xFFB8B0A4)),
-                ),
-                const SizedBox(height: 12),
-                ...myPets.map((pet) {
-                  final isCurrent = pet.id == currentPetId;
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    onTap: () => Navigator.pop(sheetContext, pet.id),
-                    leading: CircleAvatar(
-                      backgroundColor: const Color(0xFF211F1B),
-                      backgroundImage: pet.profileImageUrl.isNotEmpty
-                          ? NetworkImage(pet.profileImageUrl)
-                          : null,
-                      child: pet.profileImageUrl.isEmpty
-                          ? Text(
-                              pet.name.isNotEmpty
-                                  ? pet.name[0].toUpperCase()
-                                  : '?',
-                            )
-                          : null,
-                    ),
-                    title: Text(
-                      pet.name,
-                      style: const TextStyle(
-                        color: Color(0xFFF2EDE4),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    subtitle: Text(
-                      pet.breed,
-                      style: const TextStyle(color: Color(0xFFB8B0A4)),
-                    ),
-                    trailing: isCurrent
-                        ? const Icon(
-                            Icons.check_circle,
-                            color: Color(0xFFD4845A),
-                          )
-                        : const Icon(
-                            Icons.chevron_right,
-                            color: Color(0xFF8D867B),
+                child: SafeArea(
+                  top: false,
+                  child: SizedBox(
+                    height: maxSheetHeight,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 44,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF625E59),
+                              borderRadius: BorderRadius.circular(99),
+                            ),
                           ),
-                  );
-                }),
-              ],
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Post story as',
+                          style: TextStyle(
+                            color: Color(0xFFF2EDE4),
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Choose which pet should post this story.',
+                          style: TextStyle(color: Color(0xFFB8B0A4)),
+                        ),
+                        const SizedBox(height: 12),
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: myPets.length,
+                            itemBuilder: (context, index) {
+                              final pet = myPets[index];
+                              final isCurrent = pet.id == currentPetId;
+                              return ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                onTap: () => Navigator.pop(sheetContext, pet.id),
+                                leading: CircleAvatar(
+                                  backgroundColor: const Color(0xFF211F1B),
+                                  backgroundImage: pet.profileImageUrl.isNotEmpty
+                                      ? NetworkImage(pet.profileImageUrl)
+                                      : null,
+                                  child: pet.profileImageUrl.isEmpty
+                                      ? Text(
+                                          pet.name.isNotEmpty
+                                              ? pet.name[0].toUpperCase()
+                                              : '?',
+                                        )
+                                      : null,
+                                ),
+                                title: Text(
+                                  pet.name,
+                                  style: const TextStyle(
+                                    color: Color(0xFFF2EDE4),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  pet.breed,
+                                  style: const TextStyle(color: Color(0xFFB8B0A4)),
+                                ),
+                                trailing: isCurrent
+                                    ? const Icon(
+                                        Icons.check_circle,
+                                        color: Color(0xFFD4845A),
+                                      )
+                                    : const Icon(
+                                        Icons.chevron_right,
+                                        color: Color(0xFF8D867B),
+                                      ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         );
