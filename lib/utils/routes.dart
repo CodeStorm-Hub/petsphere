@@ -18,6 +18,7 @@ import '../views/login_screen.dart';
 import '../views/registration_screen.dart';
 import '../views/settings_screen.dart';
 import '../views/splash_screen.dart';
+import '../views/pet_care_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authNotifier = ValueNotifier<AuthState>(ref.read(authProvider));
@@ -77,6 +78,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/add_pet',
         builder: (context, state) => const AddPetScreen(),
+      ),
+      GoRoute(
+        path: '/pet_care',
+        builder: (context, state) => const PetCareScreen(),
       ),
       GoRoute(
         path: '/notifications',

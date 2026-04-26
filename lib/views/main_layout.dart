@@ -71,7 +71,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
             profileImageUrl: activePet?.profileImageUrl ?? '',
             onTap: (index) {
               if (index == 2) {
-                context.push('/create_post');
+                context.push('/pet_care');
                 return;
               }
               setState(() => _currentIndex = index);
