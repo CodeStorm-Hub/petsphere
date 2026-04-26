@@ -11,6 +11,7 @@ import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
 import '../controllers/follow_controller.dart';
 import '../utils/image_upload_helper.dart';
+import '../utils/media_utils.dart';
 import '../utils/supabase_config.dart';
 import 'main_layout.dart' show bottomNavSpaceFor;
 
@@ -435,14 +436,36 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            Image.network(
-                              post.mediaUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (ctx, _, __) => Container(
-                                color: const Color(0xFFF3EDE6),
-                                child: const Icon(Icons.image_outlined, color: Color(0xFFB7B1AA)),
+                            if (isVideoMedia(post.mediaUrl))
+                              Container(
+                                color: const Color(0xFF211F1B),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.play_circle_fill_rounded,
+                                    color: Color(0xFFD4845A),
+                                    size: 42,
+                                  ),
+                                ),
+                              )
+                            else
+                              Image.network(
+                                post.mediaUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (ctx, _, __) => Container(
+                                  color: const Color(0xFFF3EDE6),
+                                  child: const Icon(Icons.image_outlined, color: Color(0xFFB7B1AA)),
+                                ),
                               ),
-                            ),
+                            if (isVideoMedia(post.mediaUrl))
+                              const Positioned(
+                                top: 4,
+                                right: 4,
+                                child: Icon(
+                                  Icons.videocam_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                              ),
                             if (isOwnerView)
                               Positioned(
                                 bottom: 4,
