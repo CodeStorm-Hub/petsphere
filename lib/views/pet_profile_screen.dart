@@ -1544,7 +1544,7 @@ class _OwnerCarouselAvatar extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD4845A).withOpacity(0.15) : const Color(0xFF211F1B),
+          color: isSelected ? const Color(0xFFD4845A).withValues(alpha: 0.15) : const Color(0xFF211F1B),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
             color: isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
@@ -1556,7 +1556,7 @@ class _OwnerCarouselAvatar extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 14,
-              backgroundColor: const Color(0xFFD4845A).withOpacity(0.2),
+              backgroundColor: const Color(0xFFD4845A).withValues(alpha: 0.2),
               backgroundImage: hasImage ? NetworkImage(user!.profileImageUrl!) : null,
               child: !hasImage
                   ? Text(
@@ -1595,7 +1595,7 @@ class _PetCarouselAvatar extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD4845A).withOpacity(0.15) : const Color(0xFF211F1B),
+          color: isSelected ? const Color(0xFFD4845A).withValues(alpha: 0.15) : const Color(0xFF211F1B),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
             color: isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
@@ -1647,7 +1647,7 @@ class _AddPetAvatar extends StatelessWidget {
           color: const Color(0xFF211F1B),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: const Color(0xFFD4845A).withOpacity(0.5),
+            color: const Color(0xFFD4845A).withValues(alpha: 0.5),
             width: 1.5,
           ),
         ),
@@ -1656,7 +1656,7 @@ class _AddPetAvatar extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 14,
-              backgroundColor: const Color(0xFFD4845A).withOpacity(0.1),
+              backgroundColor: const Color(0xFFD4845A).withValues(alpha: 0.1),
               child: const Icon(Icons.add_rounded, color: Color(0xFFD4845A), size: 16),
             ),
             const SizedBox(width: 8),

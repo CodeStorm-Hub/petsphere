@@ -172,7 +172,7 @@ class _DashboardTabState extends ConsumerState<_DashboardTab> {
                       height: 32,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isComplete ? AppTheme.primaryAccent.withOpacity(0.2) : AppTheme.surface,
+                        color: isComplete ? AppTheme.primaryAccent.withValues(alpha: 0.2) : AppTheme.surface,
                         border: Border.all(color: isComplete ? AppTheme.primaryAccent : AppTheme.border),
                       ),
                       alignment: Alignment.center,
@@ -271,7 +271,7 @@ class _DashboardTabState extends ConsumerState<_DashboardTab> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDone ? AppTheme.secondaryAccent.withOpacity(0.1) : AppTheme.cardColor,
+          color: isDone ? AppTheme.secondaryAccent.withValues(alpha: 0.1) : AppTheme.cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: isDone ? AppTheme.secondaryAccent : AppTheme.border),
         ),
@@ -323,7 +323,7 @@ class _DashboardTabState extends ConsumerState<_DashboardTab> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryAccent.withOpacity(0.2) : AppTheme.cardColor,
+          color: isSelected ? AppTheme.primaryAccent.withValues(alpha: 0.2) : AppTheme.cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: isSelected ? AppTheme.primaryAccent : AppTheme.border),
         ),
@@ -410,9 +410,9 @@ class _HealthLogTab extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.primaryAccent.withOpacity(0.1),
+                color: AppTheme.primaryAccent.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.primaryAccent.withOpacity(0.3)),
+                border: Border.all(color: AppTheme.primaryAccent.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
@@ -533,7 +533,7 @@ class _HealthLogTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: isComplete ? AppTheme.secondaryAccent.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+              color: isComplete ? AppTheme.secondaryAccent.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
@@ -639,7 +639,7 @@ class _FeedingTabState extends State<_FeedingTab> {
                   width: 48,
                   height: 64,
                   decoration: BoxDecoration(
-                    color: isFilled ? Colors.blue.withOpacity(0.2) : AppTheme.cardColor,
+                    color: isFilled ? Colors.blue.withValues(alpha: 0.2) : AppTheme.cardColor,
                     border: Border.all(color: isFilled ? Colors.blue : AppTheme.border, width: 2),
                     borderRadius: BorderRadius.circular(24),
                   ),

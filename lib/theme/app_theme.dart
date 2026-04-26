@@ -118,7 +118,7 @@ class AppTheme {
           side: const BorderSide(color: border),
         ),
         backgroundColor: cardColor,
-        selectedColor: primaryAccent.withOpacity(0.2),
+        selectedColor: primaryAccent.withValues(alpha: 0.2),
         labelStyle: GoogleFonts.dmSans(
           color: textPrimary,
           fontWeight: FontWeight.w600,
