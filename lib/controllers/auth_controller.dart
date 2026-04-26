@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
+import '../utils/care_cache.dart';
 
 // ---------------------------------------------------------------------------
 // State
@@ -178,6 +181,7 @@ class AuthNotifier extends Notifier<AuthState> {
   // -------------------------------------------------------------------------
   Future<void> logout() async {
     await authRepository.signOut();
+    unawaited(CareCache.clearAll());
     state = AuthState(status: AuthStatus.unauthenticated);
   }
 }
