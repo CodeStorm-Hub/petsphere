@@ -14,7 +14,8 @@ class DiscoveryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final matchState = ref.watch(matchProvider);
-    final myPets = ref.watch(petProvider).myPets;
+    final petState = ref.watch(petProvider);
+    final myPets = petState.myPets;
     final listedPets = myPets.where((p) => p.isBreedingListed).toList();
     final navSpace = bottomNavSpaceFor(context);
 
@@ -50,7 +51,13 @@ class DiscoveryScreen extends ConsumerWidget {
         body: TabBarView(
           children: [
             // ── TAB 1: DISCOVER (card stack) ─────────────────────────
-            _DiscoverTab(pets: matchState.discoveryPets, matchState: matchState, ref: ref),
+            _DiscoverTab(
+              pets: matchState.discoveryPets,
+              matchState: matchState,
+              ref: ref,
+              hasActivePet: petState.activePet != null,
+              isPetLoading: petState.isLoading,
+            ),
 
             // ── TAB 2: NEARBY ────────────────────────────────────────
             _NearbyTab(discoveryPets: matchState.discoveryPets),
@@ -137,10 +144,18 @@ class DiscoveryScreen extends ConsumerWidget {
 // ── Stitch-style card stack discover tab ──────────────────────────────────
 class _DiscoverTab extends StatefulWidget {
   final List<PetModel> pets;
-  final dynamic matchState;
+  final MatchState matchState;
   final WidgetRef ref;
+  final bool hasActivePet;
+  final bool isPetLoading;
 
-  const _DiscoverTab({required this.pets, required this.matchState, required this.ref});
+  const _DiscoverTab({
+    required this.pets,
+    required this.matchState,
+    required this.ref,
+    required this.hasActivePet,
+    required this.isPetLoading,
+  });
 
   @override
   State<_DiscoverTab> createState() => _DiscoverTabState();
@@ -149,6 +164,7 @@ class _DiscoverTab extends StatefulWidget {
 class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixin {
   int _currentIndex = 0;
   String? _filterAnimal; // null = For You
+  final Set<String> _dismissedPetIds = {};
   late AnimationController _swipeController;
   late Animation<Offset> _swipeAnimation;
   bool _isAnimating = false;
@@ -157,8 +173,17 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
   static const _filterValues = [null, 'Dog', 'Cat', 'Nearby'];
 
   List<PetModel> get _filteredPets {
-    if (_filterAnimal == null || _filterAnimal == 'Nearby') return widget.pets;
-    return widget.pets.where((p) => p.animalType == _filterAnimal).toList();
+    final visiblePets = widget.pets
+        .where((pet) => !_dismissedPetIds.contains(pet.id))
+        .toList();
+    if (_filterAnimal == null) return visiblePets;
+    if (_filterAnimal == 'Nearby') {
+      visiblePets.sort(
+        (a, b) => _distanceMilesForPet(a).compareTo(_distanceMilesForPet(b)),
+      );
+      return visiblePets;
+    }
+    return visiblePets.where((p) => p.animalType == _filterAnimal).toList();
   }
 
   @override
@@ -177,8 +202,29 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(covariant _DiscoverTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final currentPetIds = widget.pets.map((pet) => pet.id).toSet();
+    _dismissedPetIds.removeWhere((petId) => !currentPetIds.contains(petId));
+    _clampCurrentIndex();
+  }
+
+  int _distanceMilesForPet(PetModel pet) => (pet.id.hashCode.abs() % 25) + 1;
+
+  void _clampCurrentIndex() {
+    final pets = _filteredPets;
+    if (pets.isEmpty) {
+      _currentIndex = 0;
+    } else if (_currentIndex >= pets.length) {
+      _currentIndex = pets.length - 1;
+    }
+  }
+
   void _swipePet(bool liked) {
-    if (_isAnimating || _filteredPets.isEmpty) return;
+    final pets = _filteredPets;
+    if (_isAnimating || pets.isEmpty) return;
+    final pet = pets[_currentIndex];
     setState(() => _isAnimating = true);
 
     _swipeAnimation = Tween<Offset>(
@@ -187,17 +233,36 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
     ).animate(CurvedAnimation(parent: _swipeController, curve: Curves.easeInCubic));
 
     _swipeController.forward(from: 0).then((_) {
-      if (mounted) {
-        if (liked) {
-              final pet = _filteredPets[_currentIndex];
-              widget.ref.read(matchProvider.notifier).sendLikeRequest(pet.id);
-            }
+      if (!mounted) return;
+      setState(() {
+        _dismissedPetIds.add(pet.id);
+        _currentIndex = math.min(_currentIndex, math.max(0, _filteredPets.length - 1));
+        _isAnimating = false;
+      });
+      _swipeController.reset();
+
+      if (!liked) return;
+      widget.ref.read(matchProvider.notifier).sendLikeRequest(pet.id).then((success) {
+        if (!mounted) return;
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Like sent to ${pet.name}.')),
+          );
+          return;
+        }
+
         setState(() {
-          _currentIndex = (_currentIndex + 1) % math.max(1, _filteredPets.length);
-          _isAnimating = false;
+          _dismissedPetIds.remove(pet.id);
+          _clampCurrentIndex();
         });
-        _swipeController.reset();
-      }
+        final error = widget.ref.read(matchProvider).error;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error ?? 'Could not send like. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      });
     });
   }
 
@@ -206,6 +271,62 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
     final filteredPets = _filteredPets;
     final hasPets = filteredPets.isNotEmpty;
     final navSpace = bottomNavSpaceFor(context);
+
+    if (widget.isPetLoading || widget.matchState.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (!widget.hasActivePet) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
+        children: [
+          const Icon(Icons.pets_outlined, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          const Center(
+            child: Text(
+              'Add a pet to start discovering breeding matches.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: FilledButton.icon(
+              onPressed: () => context.push('/add_pet'),
+              icon: const Icon(Icons.add),
+              label: const Text('Add Pet'),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (widget.matchState.error != null && !hasPets) {
+      return RefreshIndicator(
+        onRefresh: () => widget.ref.read(matchProvider.notifier).refresh(),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.redAccent),
+            const SizedBox(height: 16),
+            Text(
+              widget.matchState.error!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.redAccent),
+            ),
+            const SizedBox(height: 24),
+            Center(
+              child: OutlinedButton(
+                onPressed: () => widget.ref.read(matchProvider.notifier).refresh(),
+                child: const Text('Try Again'),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Column(
       children: [
@@ -220,7 +341,10 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: GestureDetector(
-                  onTap: () => setState(() => _filterAnimal = value),
+                  onTap: () => setState(() {
+                    _filterAnimal = value;
+                    _currentIndex = 0;
+                  }),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -250,10 +374,22 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
         // ── Card Stack ────────────────────────────────────────────
         Expanded(
           child: !hasPets
-              ? Padding(
-                  padding: EdgeInsets.only(bottom: navSpace),
-                  child: const Center(
-                      child: Text('No pets available. Check back soon!')),
+              ? RefreshIndicator(
+                  onRefresh: () => widget.ref.read(matchProvider.notifier).refresh(),
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
+                    children: const [
+                      Icon(Icons.favorite_border, size: 64, color: Colors.grey),
+                      SizedBox(height: 16),
+                      Center(
+                        child: Text(
+                          'No more pets available. Check back soon!',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
                 )
               : Padding(
                   padding: EdgeInsets.fromLTRB(20, 0, 20, navSpace),
@@ -333,14 +469,11 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
                               ),
                             ),
                             const SizedBox(width: 24),
-                            // Superlike (star)
+                            // Details
                             GestureDetector(
-                              onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Super-liked! ⭐')),
-                                );
-                                _swipePet(true);
-                              },
+                              onTap: () => context.push(
+                                '/pet/${filteredPets[_currentIndex].id}',
+                              ),
                               child: Container(
                                 width: 64,
                                 height: 64,
@@ -426,7 +559,7 @@ class _PetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final distanceMi = (pet.name.hashCode.abs() % 15) + 1;
+    final distanceMi = (pet.id.hashCode.abs() % 25) + 1;
 
     return Container(
       decoration: BoxDecoration(
@@ -594,7 +727,7 @@ class _TraitBadge extends StatelessWidget {
 // When real location is added, sort by distance here.
 // ──────────────────────────────────────────────────────────────────
 class _NearbyTab extends StatelessWidget {
-  final List<dynamic> discoveryPets;
+  final List<PetModel> discoveryPets;
   const _NearbyTab({required this.discoveryPets});
 
   @override
@@ -609,15 +742,16 @@ class _NearbyTab extends StatelessWidget {
       );
     }
 
-    // Show at most 10 as "nearby" (real GPS sorting would go here)
-    final nearby = discoveryPets.take(10).toList();
+    final nearby = [...discoveryPets]
+      ..sort((a, b) => _distanceKmForPet(a).compareTo(_distanceKmForPet(b)));
+    final nearbyPreview = nearby.take(10).toList();
 
     return ListView.builder(
       padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + navSpace),
-      itemCount: nearby.length,
+      itemCount: nearbyPreview.length,
       itemBuilder: (context, index) {
-        final pet = nearby[index];
-        final distanceKm = (index + 1) * 0.8; // Placeholder distance
+        final pet = nearbyPreview[index];
+        final distanceKm = _distanceKmForPet(pet);
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -659,6 +793,10 @@ class _NearbyTab extends StatelessWidget {
         );
       },
     );
+  }
+
+  double _distanceKmForPet(PetModel pet) {
+    return ((pet.id.hashCode.abs() % 40) + 3) / 2;
   }
 }
 

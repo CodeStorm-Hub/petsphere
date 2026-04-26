@@ -76,14 +76,18 @@ class MatchController extends Notifier<MatchState> {
     if (activePet != null) {
       // Initial load — state already has filterAnimal/filterBreed as null
       _load(activePet.id);
+      return MatchState(isLoading: true);
     }
-    return MatchState(isLoading: true);
+    return MatchState();
   }
 
   Future<void> _load(String myPetId) async {
     final gen = ++_loadGeneration;
     final userId = ref.read(authProvider).user?.id;
-    if (userId == null) return;
+    if (userId == null) {
+      state = state.copyWith(isLoading: false);
+      return;
+    }
 
     state = state.copyWith(isLoading: true, clearError: true);
 
@@ -190,9 +194,13 @@ class MatchController extends Notifier<MatchState> {
         senderPetId: activePet.id,
         receiverPetId: receiverPetId,
       );
+      final discoveryPets =
+          state.discoveryPets.where((p) => p.id != receiverPetId).toList();
+      final allDiscoveryPets =
+          state.allDiscoveryPets.where((p) => p.id != receiverPetId).toList();
       state = state.copyWith(
-        discoveryPets:
-            state.discoveryPets.where((p) => p.id != receiverPetId).toList(),
+        discoveryPets: discoveryPets,
+        allDiscoveryPets: allDiscoveryPets,
       );
       // Refresh sent requests
       _load(activePet.id);

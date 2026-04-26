@@ -40,6 +40,9 @@ class PostModel {
   final PetModel pet;
   final String mediaUrl;
   final String caption;
+  final String location;
+  final List<String> taggedPetIds;
+  final List<String> taggedPetNames;
   final List<String> likedByPetIds;
   final List<CommentModel> comments;
   final DateTime createdAt;
@@ -49,6 +52,9 @@ class PostModel {
     required this.pet,
     required this.mediaUrl,
     required this.caption,
+    this.location = '',
+    this.taggedPetIds = const [],
+    this.taggedPetNames = const [],
     required this.likedByPetIds,
     this.comments = const [],
     required this.createdAt,
@@ -59,6 +65,9 @@ class PostModel {
     PetModel? pet,
     String? mediaUrl,
     String? caption,
+    String? location,
+    List<String>? taggedPetIds,
+    List<String>? taggedPetNames,
     List<String>? likedByPetIds,
     List<CommentModel>? comments,
     DateTime? createdAt,
@@ -68,6 +77,9 @@ class PostModel {
       pet: pet ?? this.pet,
       mediaUrl: mediaUrl ?? this.mediaUrl,
       caption: caption ?? this.caption,
+      location: location ?? this.location,
+      taggedPetIds: taggedPetIds ?? this.taggedPetIds,
+      taggedPetNames: taggedPetNames ?? this.taggedPetNames,
       likedByPetIds: likedByPetIds ?? this.likedByPetIds,
       comments: comments ?? this.comments,
       createdAt: createdAt ?? this.createdAt,
@@ -86,6 +98,15 @@ class PostModel {
       pet: PetModel.fromJson(petJson),
       mediaUrl: json['media_url'] as String? ?? '',
       caption: json['caption'] as String? ?? '',
+      location: json['location'] as String? ?? '',
+      taggedPetIds: (json['tagged_pet_ids'] as List<dynamic>?)
+              ?.map((id) => id as String)
+              .toList() ??
+          [],
+      taggedPetNames: (json['tagged_pet_names'] as List<dynamic>?)
+              ?.map((name) => name as String)
+              .toList() ??
+          [],
       likedByPetIds: likesJson
           .map((l) => (l as Map<String, dynamic>)['pet_id'] as String)
           .toList(),

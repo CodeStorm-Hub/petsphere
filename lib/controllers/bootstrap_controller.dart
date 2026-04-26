@@ -23,12 +23,11 @@ import 'pet_controller.dart';
 ///   - [petProvider]          (the current user's pets)
 ///   - [notificationProvider] (the current user's notifications)
 ///
-/// The first time a provider is materialised, its `build()` runs an initial
-/// fetch on its own. For account-switch scenarios where the providers are
-/// already built, we explicitly call their `refresh()` / `reload()` so the
-/// data is re-pulled for the new user. Each provider also has its own
-/// auth listener that catches auth changes after it is built, so this
-/// bootstrap is a complementary safety net rather than the only path.
+/// Supabase v2 restores the saved session immediately, then may refresh the
+/// access token shortly after app launch. If the first fetch runs against an
+/// expired startup token, the later auth event must re-pull data even though
+/// the user ID did not change. This provider therefore refreshes on every
+/// authenticated auth event, not just account switches.
 ///
 /// `chatProvider` and `matchProvider` are intentionally NOT hydrated here —
 /// they already react automatically to `activePetProvider` changes once
@@ -44,28 +43,16 @@ final bootstrapProvider = Provider<void>((ref) {
   void hydrate(String userId) {
     final isAccountSwitch =
         lastHydratedUserId != null && lastHydratedUserId != userId;
-    final alreadyHydrated = lastHydratedUserId == userId;
-    if (alreadyHydrated) return;
+    final isSameUserRefresh = lastHydratedUserId == userId;
     lastHydratedUserId = userId;
     debugPrint(
-        '[bootstrap] hydrating data for user=$userId (switch=$isAccountSwitch)');
+        '[bootstrap] hydrating data for user=$userId '
+        '(switch=$isAccountSwitch, sameUser=$isSameUserRefresh)');
 
-    if (isAccountSwitch) {
-      // Providers were already built for the previous user — force a
-      // fresh fetch so stale data from that account is replaced.
-      ref.read(feedProvider.notifier).refresh();
-      ref.read(marketplaceProvider.notifier).refresh();
-      ref.read(petProvider.notifier).reload();
-      ref.read(notificationProvider.notifier).refresh();
-    } else {
-      // First-time hydration in this session: just touch each provider so
-      // its `build()` runs the initial fetch and registers its own auth
-      // listener for future changes. Avoids redundant double-fetches.
-      ref.read(feedProvider.notifier);
-      ref.read(marketplaceProvider.notifier);
-      ref.read(petProvider.notifier);
-      ref.read(notificationProvider.notifier);
-    }
+    ref.read(feedProvider.notifier).refresh();
+    ref.read(marketplaceProvider.notifier).refresh();
+    ref.read(petProvider.notifier).reload();
+    ref.read(notificationProvider.notifier).refresh();
   }
 
   ref.listen<AuthState>(authProvider, (prev, next) {
