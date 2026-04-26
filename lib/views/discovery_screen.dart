@@ -349,7 +349,7 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppTheme.primaryAccent.withOpacity(0.15) : AppTheme.cardColor,
+                      color: isSelected ? AppTheme.primaryAccent.withValues(alpha: 0.15) : AppTheme.cardColor,
                       border: Border.all(
                         color: isSelected ? AppTheme.primaryAccent : AppTheme.border,
                         width: 1.5,
@@ -605,7 +605,7 @@ class _PetCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1A1814).withOpacity(0.85),
+                      color: const Color(0xFF1A1814).withValues(alpha: 0.85),
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(color: const Color(0xFF2E2B26)),
                     ),
@@ -661,7 +661,7 @@ class _PetCard extends StatelessWidget {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4845A).withOpacity(0.15),
+                          color: const Color(0xFFD4845A).withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.pets, size: 22, color: Color(0xFFD4845A)),

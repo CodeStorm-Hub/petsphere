@@ -115,7 +115,7 @@ class _GlassNavBar extends StatelessWidget {
         child: Container(
           height: 64,
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.95),
+            color: Colors.black.withValues(alpha: 0.95),
             borderRadius: BorderRadius.circular(30),
             border: Border.all(
               color: const Color(0xFF2E2B26),

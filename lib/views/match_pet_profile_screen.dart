@@ -382,7 +382,9 @@ class _FollowButtonsRow extends ConsumerWidget {
         Expanded(
           child: OutlinedButton(
             onPressed: () {
-              // TODO: Implement messaging
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Messaging feature coming soon!')),
+              );
             },
             child: const Text('Message'),
           ),
