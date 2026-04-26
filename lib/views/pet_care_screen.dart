@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../controllers/health_controller.dart';
 import '../controllers/pet_care_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/pet_care_log_model.dart';
 import '../models/pet_health_models.dart';
 import '../theme/app_theme.dart';
+import 'health_tab.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Symptom preset types
@@ -58,12 +60,15 @@ class _PetCareScreenState extends ConsumerState<PetCareScreen>
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.read(petCareProvider.notifier).refresh(),
+        onRefresh: () async {
+          await ref.read(petCareProvider.notifier).refresh();
+          await ref.read(healthProvider.notifier).refresh();
+        },
         child: TabBarView(
           controller: _tabController,
           children: const [
             _DashboardTab(),
-            _HealthLogTab(),
+            HealthTab(),
             _FeedingTab(),
           ],
         ),

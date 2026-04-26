@@ -304,14 +304,24 @@ class PetCareNotifier extends Notifier<PetCareState> {
   }
 
   /// Immediately persists today's weight and refreshes the chart series.
-  Future<void> logWeight(double weightLbs) async {
+  Future<void> logWeight({
+    required double weight,
+    String? notes,
+    int? bcsScore,
+  }) async {
     final petId = state.activePetId;
     if (petId == null) return;
     final today = DateTime.now();
 
     try {
       await petCareRepository.upsertWeight(
-        PetWeightLog(petId: petId, logDate: today, weightLbs: weightLbs),
+        PetWeightLog(
+          petId:    petId,
+          logDate:  today,
+          weightLbs:weight,
+          notes:    notes,
+          bcsScore: bcsScore,
+        ),
       );
       final fresh = await petCareRepository.fetchRecentWeights(
         petId,

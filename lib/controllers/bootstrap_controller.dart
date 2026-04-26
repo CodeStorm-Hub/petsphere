@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'auth_controller.dart';
 import 'feed_controller.dart';
+import 'health_controller.dart';
 import 'marketplace_controller.dart';
 import 'notification_controller.dart';
 import 'pet_care_controller.dart';
@@ -59,6 +60,7 @@ final bootstrapProvider = Provider<void>((ref) {
       ref.read(petProvider.notifier).reload();
       ref.read(notificationProvider.notifier).refresh();
       ref.read(petCareProvider.notifier).refresh();
+      ref.read(healthProvider.notifier).refresh();
     } else {
       // First-time hydration in this session: just touch each provider so
       // its `build()` runs the initial fetch and registers its own auth
@@ -67,9 +69,10 @@ final bootstrapProvider = Provider<void>((ref) {
       ref.read(marketplaceProvider.notifier);
       ref.read(petProvider.notifier);
       ref.read(notificationProvider.notifier);
-      // pet_care_controller hooks into activePetProvider, so just
-      // materialise it once so its listener registers.
+      // pet_care_controller and health_controller hook into activePetProvider,
+      // so just materialise them once so their listeners register.
       ref.read(petCareProvider.notifier);
+      ref.read(healthProvider.notifier);
     }
   }
 
