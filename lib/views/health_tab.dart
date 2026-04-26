@@ -353,6 +353,8 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
       icon:  Icons.monitor_weight_outlined,
       onAdd: () => _showLogWeightSheet(context),
       addTooltip: 'Log weight',
+      emptyState: const _EmptyHint(
+          text: 'No weight logs yet', icon: Icons.monitor_weight_outlined),
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -486,8 +488,6 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
             ),
           ),
       ],
-      emptyState: const _EmptyHint(
-          text: 'No weight logs yet', icon: Icons.monitor_weight_outlined),
     );
   }
 
@@ -699,7 +699,7 @@ class _MedicationsSection extends ConsumerWidget {
               _sheetTextField(purposeCtrl, 'Purpose (optional)'),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
-                value: freq,
+                initialValue: freq,
                 dropdownColor: AppTheme.cardColor,
                 style: const TextStyle(color: AppTheme.textPrimary),
                 decoration: InputDecoration(
@@ -981,7 +981,7 @@ class _AppointmentsSection extends ConsumerWidget {
                 _sheetTextField(locCtrl, 'Location (optional)'),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
-                  value: type,
+                  initialValue: type,
                   dropdownColor: AppTheme.cardColor,
                   style: const TextStyle(color: AppTheme.textPrimary),
                   decoration: InputDecoration(
@@ -1445,7 +1445,7 @@ class _ParasiteSection extends ConsumerWidget {
                 _sheetTextField(productCtrl, 'Product name (e.g. NexGard)'),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
-                  value: type,
+                  initialValue: type,
                   dropdownColor: AppTheme.cardColor,
                   style: const TextStyle(color: AppTheme.textPrimary),
                   decoration: InputDecoration(
@@ -1574,7 +1574,7 @@ class _DentalSection extends ConsumerWidget {
         .map((l) => l.logDate)
         .fold<DateTime?>(null, (best, d) => best == null || d.isAfter(best) ? d : best);
 
-    String _ago(DateTime? d) {
+    String ago(DateTime? d) {
       if (d == null) return 'Never';
       final days = DateTime.now().difference(d).inDays;
       if (days == 0) return 'Today';
@@ -1587,15 +1587,17 @@ class _DentalSection extends ConsumerWidget {
       icon:       Icons.sentiment_satisfied_alt,
       onAdd:      () => _showLogSheet(context, ref),
       addTooltip: 'Log dental care',
+      emptyState: const _EmptyHint(
+          text: 'No dental logs yet', icon: Icons.sentiment_satisfied_alt),
       children: [
         _DentalRow(
             label: 'Last home brushing',
-            value: _ago(lastBrush),
+            value: ago(lastBrush),
             icon: Icons.brush),
         const SizedBox(height: 6),
         _DentalRow(
             label: 'Last professional cleaning',
-            value: _ago(lastProf),
+            value: ago(lastProf),
             icon: Icons.medical_services),
         if (logs.isNotEmpty) ...[
           const SizedBox(height: 10),
@@ -1618,8 +1620,6 @@ class _DentalSection extends ConsumerWidget {
               )),
         ],
       ],
-      emptyState: const _EmptyHint(
-          text: 'No dental logs yet', icon: Icons.sentiment_satisfied_alt),
     );
   }
 
@@ -1651,7 +1651,7 @@ class _DentalSection extends ConsumerWidget {
                       color: AppTheme.textPrimary)),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: type,
+                initialValue: type,
                 dropdownColor: AppTheme.cardColor,
                 style: const TextStyle(color: AppTheme.textPrimary),
                 decoration: InputDecoration(
@@ -1861,7 +1861,7 @@ class _AllergySection extends ConsumerWidget {
               _sheetTextField(allergenCtrl, 'Allergen (e.g. Chicken, Grass)'),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
-                value: allergenType,
+                initialValue: allergenType,
                 dropdownColor: AppTheme.cardColor,
                 style: const TextStyle(color: AppTheme.textPrimary),
                 decoration: InputDecoration(
@@ -1886,7 +1886,7 @@ class _AllergySection extends ConsumerWidget {
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
-                value: severity,
+                initialValue: severity,
                 dropdownColor: AppTheme.cardColor,
                 style: const TextStyle(color: AppTheme.textPrimary),
                 decoration: InputDecoration(
