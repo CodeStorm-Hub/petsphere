@@ -29,9 +29,9 @@ class DiscoveryScreen extends ConsumerWidget {
               Tab(text: 'Nearby'),
               Tab(text: 'My Listings'),
             ],
-            labelColor: AppTheme.primary,
-            unselectedLabelColor: AppTheme.onSurfaceVariant,
-            indicatorColor: AppTheme.primary,
+            labelColor: AppTheme.primaryAccent,
+            unselectedLabelColor: AppTheme.textSecondary,
+            indicatorColor: AppTheme.primaryAccent,
             dividerColor: Colors.transparent,
           ),
           actions: [
@@ -225,13 +225,17 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppTheme.tertiary : AppTheme.tertiaryContainer,
+                      color: isSelected ? AppTheme.primaryAccent.withOpacity(0.15) : AppTheme.cardColor,
+                      border: Border.all(
+                        color: isSelected ? AppTheme.primaryAccent : AppTheme.border,
+                        width: 1.5,
+                      ),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
                       _filterLabels[i],
                       style: TextStyle(
-                        color: isSelected ? AppTheme.onTertiary : AppTheme.onTertiaryContainer,
+                        color: isSelected ? AppTheme.primaryAccent : AppTheme.textSecondary,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -320,28 +324,12 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
                                 width: 64,
                                 height: 64,
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: const Color(0xFF1A1814),
                                   shape: BoxShape.circle,
-                                  boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 16, offset: const Offset(0, 4))],
+                                  border: Border.all(color: const Color(0xFF2E2B26), width: 1.5),
+                                  boxShadow: [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 16, offset: const Offset(0, 4))],
                                 ),
-                                child: const Icon(Icons.close_rounded, size: 28, color: Color(0xFF7F7A74)),
-                              ),
-                            ),
-                            const SizedBox(width: 24),
-                            // Like (gradient circle, larger)
-                            GestureDetector(
-                              onTap: () => _swipePet(true),
-                              child: Container(
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  gradient: AppTheme.primaryGradientFAB,
-                                  shape: BoxShape.circle,
-                                  boxShadow: const [
-                                    BoxShadow(color: Color(0x4D99472C), blurRadius: 24, offset: Offset(0, 8)),
-                                  ],
-                                ),
-                                child: const Icon(Icons.favorite, size: 36, color: Colors.white),
+                                child: const Icon(Icons.close_rounded, size: 28, color: Color(0xFFB8B0A4)),
                               ),
                             ),
                             const SizedBox(width: 24),
@@ -357,11 +345,33 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
                                 width: 64,
                                 height: 64,
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: const Color(0xFF1A1814),
                                   shape: BoxShape.circle,
-                                  boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 16, offset: const Offset(0, 4))],
+                                  border: Border.all(color: const Color(0xFF2E2B26), width: 1.5),
+                                  boxShadow: [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 16, offset: const Offset(0, 4))],
                                 ),
-                                child: const Icon(Icons.star_rounded, size: 28, color: Color(0xFF506453)),
+                                child: const Icon(Icons.star_rounded, size: 28, color: Color(0xFF4A7C59)),
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            // Like (gradient circle, larger)
+                            GestureDetector(
+                              onTap: () => _swipePet(true),
+                              child: Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [Color(0xFFD4845A), Color(0xFFB86A44)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  shape: BoxShape.circle,
+                                  boxShadow: const [
+                                    BoxShadow(color: Color(0x4DD4845A), blurRadius: 24, offset: Offset(0, 8)),
+                                  ],
+                                ),
+                                child: const Icon(Icons.favorite, size: 36, color: Colors.white),
                               ),
                             ),
                           ],
@@ -420,18 +430,18 @@ class _PetCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF211F1B),
         borderRadius: BorderRadius.circular(32),
         boxShadow: isBackground
             ? []
             : [
                 BoxShadow(
-                  color: const Color(0xFF99472C).withAlpha(30),
+                  color: Colors.black.withAlpha(60),
                   blurRadius: 48,
                   offset: const Offset(0, 24),
                 ),
               ],
-        border: Border.all(color: AppTheme.outlineVariant.withAlpha(26)),
+        border: Border.all(color: const Color(0xFF2E2B26), width: 1.5),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -447,32 +457,33 @@ class _PetCard extends StatelessWidget {
                         pet.profileImageUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
-                          color: AppTheme.surfaceContainerLow,
-                          child: const Icon(Icons.pets, size: 80, color: Color(0xFF99472C)),
+                          color: const Color(0xFF211F1B),
+                          child: const Icon(Icons.pets, size: 80, color: Color(0xFFD4845A)),
                         ),
                       )
                     : Container(
-                        color: AppTheme.surfaceContainerLow,
-                        child: const Icon(Icons.pets, size: 80, color: Color(0xFF99472C)),
+                        color: const Color(0xFF211F1B),
+                        child: const Icon(Icons.pets, size: 80, color: Color(0xFFD4845A)),
                       ),
                 // Distance badge
                 Positioned(
-                  top: 20,
+                  bottom: 20,
                   left: 20,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
-                      color: AppTheme.surface.withAlpha(230),
+                      color: const Color(0xFF1A1814).withOpacity(0.85),
                       borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: const Color(0xFF2E2B26)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.location_on, size: 14, color: Color(0xFF99472C)),
+                        const Icon(Icons.location_on, size: 14, color: Color(0xFFD4845A)),
                         const SizedBox(width: 4),
                         Text(
                           '$distanceMi miles away',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF35322D)),
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFF2EDE4)),
                         ),
                       ],
                     ),
@@ -508,7 +519,7 @@ class _PetCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 26,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF35322D),
+                          color: Color(0xFFF2EDE4),
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -517,17 +528,17 @@ class _PetCard extends StatelessWidget {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: AppTheme.secondaryFixedDim,
+                          color: const Color(0xFFD4845A).withOpacity(0.15),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.pets, size: 22, color: Color(0xFF4E3D00)),
+                        child: const Icon(Icons.pets, size: 22, color: Color(0xFFD4845A)),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${pet.age} yr${pet.age == 1 ? '' : 's'} • ${pet.breed}',
-                    style: const TextStyle(fontSize: 15, color: Color(0xFF625E59), fontWeight: FontWeight.w500),
+                    style: const TextStyle(fontSize: 15, color: Color(0xFFB8B0A4), fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 12),
                   // Traits bento grid
@@ -561,14 +572,15 @@ class _TraitBadge extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceContainer,
+          color: const Color(0xFF1A1814),
+          border: Border.all(color: const Color(0xFF2E2B26)),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           children: [
-            Text(label, style: const TextStyle(fontSize: 11, color: Color(0xFF625E59), fontWeight: FontWeight.w500)),
+            Text(label, style: const TextStyle(fontSize: 11, color: Color(0xFFB8B0A4), fontWeight: FontWeight.w500)),
             const SizedBox(height: 2),
-            Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF99472C))),
+            Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFFD4845A))),
           ],
         ),
       ),

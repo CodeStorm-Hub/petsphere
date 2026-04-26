@@ -102,136 +102,131 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-          // ── Cover banner + profile header ──────────────────
-          // ── Profile Header (Instagram style) ──────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Top Row: Avatar + Stats
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Avatar with badge
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.grey.shade800, width: 2),
-                            ),
-                            child: _buildAvatar(isOwnerView, user, selectedPet),
-                          ),
-                          // The + badge
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).scaffoldBackgroundColor,
-                                shape: BoxShape.circle,
-                              ),
+            // ── Profile Header ──────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Avatar & Stats Row
+                    Row(
+                      children: [
+                        // Avatar
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
                               padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFF0F0E0C),
+                                border: Border.all(color: const Color(0xFF2E2B26), width: 2),
+                              ),
+                              child: _buildAvatar(isOwnerView, user, selectedPet),
+                            ),
+                            // The + badge
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
                               child: Container(
                                 decoration: const BoxDecoration(
-                                  color: Colors.white,
+                                  color: Color(0xFF0F0E0C),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.add_circle, size: 20, color: Colors.black),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 24),
-                      // Name and Stats
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    isOwnerView ? userName : (selectedPet?.name ?? ''),
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: -0.5,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                padding: const EdgeInsets.all(2),
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFD4845A),
+                                    shape: BoxShape.circle,
                                   ),
+                                  child: const Icon(Icons.add, size: 18, color: Colors.white),
                                 ),
-                                if (!isOwnerView && (selectedPet?.isVerified ?? false))
-                                  const Icon(Icons.verified, size: 18, color: Color(0xFF99472C)),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _StatColumn(label: 'posts', value: '${displayedPosts.length}'),
-                                if (isOwnerView) ...[
-                                  ref.watch(ownerFollowerCountProvider(myUserId)).when(
-                                    data: (c) => _StatColumn(label: 'followers', value: '$c'),
-                                    loading: () => const _StatColumn(label: 'followers', value: '···'),
-                                    error: (_, __) => const _StatColumn(label: 'followers', value: '0'),
-                                  ),
-                                  ref.watch(followingCountProvider(myUserId)).when(
-                                    data: (c) => _StatColumn(label: 'following', value: '$c'),
-                                    loading: () => const _StatColumn(label: 'following', value: '···'),
-                                    error: (_, __) => const _StatColumn(label: 'following', value: '0'),
-                                  ),
-                                ] else if (selectedPet != null) ...[
-                                  ref.watch(petFollowerCountProvider(selectedPet.id)).when(
-                                    data: (c) => _StatColumn(label: 'followers', value: '$c'),
-                                    loading: () => const _StatColumn(label: 'followers', value: '···'),
-                                    error: (_, __) => const _StatColumn(label: 'followers', value: '0'),
-                                  ),
-                                  _StatColumn(label: 'pets', value: '${myOwnedPets.length}'),
-                                ],
-                              ],
+                              ),
                             ),
                           ],
                         ),
+                        const SizedBox(width: 24),
+                        // Stats
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _StatColumn(label: 'posts', value: '${displayedPosts.length}'),
+                              if (isOwnerView) ...[
+                                ref.watch(ownerFollowerCountProvider(myUserId)).when(
+                                  data: (c) => _StatColumn(label: 'followers', value: '$c'),
+                                  loading: () => const _StatColumn(label: 'followers', value: '···'),
+                                  error: (_, __) => const _StatColumn(label: 'followers', value: '0'),
+                                ),
+                                ref.watch(followingCountProvider(myUserId)).when(
+                                  data: (c) => _StatColumn(label: 'following', value: '$c'),
+                                  loading: () => const _StatColumn(label: 'following', value: '···'),
+                                  error: (_, __) => const _StatColumn(label: 'following', value: '0'),
+                                ),
+                              ] else if (selectedPet != null) ...[
+                                ref.watch(petFollowerCountProvider(selectedPet.id)).when(
+                                  data: (c) => _StatColumn(label: 'followers', value: '$c'),
+                                  loading: () => const _StatColumn(label: 'followers', value: '···'),
+                                  error: (_, __) => const _StatColumn(label: 'followers', value: '0'),
+                                ),
+                                _StatColumn(label: 'pets', value: '${myOwnedPets.length}'),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // Name
+                    Row(
+                      children: [
+                        Text(
+                          isOwnerView ? userName : (selectedPet?.name ?? ''),
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (!isOwnerView && (selectedPet?.isVerified ?? false))
+                          const Padding(
+                            padding: EdgeInsets.only(left: 4),
+                            child: Icon(Icons.verified, size: 18, color: Color(0xFFD4845A)),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    // Info & Bio
+                    if (isOwnerView && user?.email != null)
+                      Text(
+                        '${user!.email}${user.location?.isNotEmpty == true ? " · ${user.location}" : ""}',
+                        style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Info & Bio
-                  if (isOwnerView && user?.email != null)
+                    if (!isOwnerView && selectedPet != null)
+                      Text(
+                        '${selectedPet.breed} · ${selectedPet.animalType}',
+                        style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                    const SizedBox(height: 4),
                     Text(
-                      '${user!.email}${user.location?.isNotEmpty == true ? " · ${user.location}" : ""}',
-                      style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
+                      isOwnerView
+                          ? (user?.bio?.isNotEmpty == true ? user!.bio! : 'Tap "Edit profile" to add a bio')
+                          : (selectedPet?.bio.isNotEmpty == true ? selectedPet!.bio : 'No bio yet'),
+                      style: TextStyle(
+                        color: (isOwnerView && (user?.bio?.isEmpty ?? true)) ||
+                                (!isOwnerView && selectedPet?.bio.isEmpty == true)
+                            ? Colors.grey
+                            : Theme.of(context).colorScheme.onSurface,
+                        fontSize: 14,
+                        fontStyle: (isOwnerView && (user?.bio?.isEmpty ?? true))
+                            ? FontStyle.italic
+                            : null,
+                      ),
                     ),
-                  if (!isOwnerView && selectedPet != null)
-                    Text(
-                      '${selectedPet.breed} · ${selectedPet.animalType}',
-                      style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
-                    ),
-                  const SizedBox(height: 4),
-                  Text(
-                    isOwnerView
-                        ? (user?.bio?.isNotEmpty == true ? user!.bio! : 'Tap "Edit profile" to add a bio')
-                        : (selectedPet?.bio.isNotEmpty == true ? selectedPet!.bio : 'No bio yet'),
-                    style: TextStyle(
-                      color: (isOwnerView && (user?.bio?.isEmpty ?? true)) ||
-                              (!isOwnerView && selectedPet?.bio.isEmpty == true)
-                          ? Colors.grey
-                          : Theme.of(context).colorScheme.onSurface,
-                      fontSize: 14,
-                      fontStyle: (isOwnerView && (user?.bio?.isEmpty ?? true))
-                          ? FontStyle.italic
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
                   
                   // Action buttons
                   Row(
@@ -1544,50 +1539,43 @@ class _OwnerCarouselAvatar extends StatelessWidget {
     final hasImage = user?.profileImageUrl != null && user!.profileImageUrl!.isNotEmpty;
 
     return Padding(
-      padding: const EdgeInsets.only(right: 16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
-                width: 2,
-              ),
-            ),
-            child: CircleAvatar(
-              radius: 28,
-              backgroundColor: const Color(0xFFFF8A65).withAlpha(26),
+      padding: const EdgeInsets.only(right: 12.0, bottom: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFD4845A).withOpacity(0.15) : const Color(0xFF211F1B),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+            color: isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 14,
+              backgroundColor: const Color(0xFFD4845A).withOpacity(0.2),
               backgroundImage: hasImage ? NetworkImage(user!.profileImageUrl!) : null,
               child: !hasImage
                   ? Text(
                       user?.initials ?? '?',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Color(0xFFFF8A65),
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: Color(0xFFD4845A)),
                     )
                   : null,
             ),
-          ),
-          const SizedBox(height: 4),
-          SizedBox(
-            width: 68,
-            child: Text(
+            const SizedBox(width: 8),
+            Text(
               'All',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1602,46 +1590,45 @@ class _PetCarouselAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
-                width: 2,
-              ),
-            ),
-            child: CircleAvatar(
-              radius: 28,
+      padding: const EdgeInsets.only(right: 12.0, bottom: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFD4845A).withOpacity(0.15) : const Color(0xFF211F1B),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+            color: isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 14,
               backgroundImage: pet.profileImageUrl.isNotEmpty
                   ? NetworkImage(pet.profileImageUrl)
                   : null,
-              backgroundColor: Colors.grey.shade200,
+              backgroundColor: Colors.grey.shade800,
               child: pet.profileImageUrl.isEmpty
                   ? Text(pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10))
                   : null,
             ),
-          ),
-          const SizedBox(height: 4),
-          SizedBox(
-            width: 68,
-            child: Text(
+            const SizedBox(width: 8),
+            Text(
               pet.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1653,42 +1640,36 @@ class _AddPetAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0xFFFF8A65).withAlpha(77),
-                width: 1.5,
-                strokeAlign: BorderSide.strokeAlignOutside,
-              ),
-            ),
-            child: CircleAvatar(
-              radius: 28,
-              backgroundColor: const Color(0xFFFF8A65).withAlpha(26),
-              child: const Icon(Icons.add_rounded, color: Color(0xFFFF8A65), size: 28),
-            ),
+      padding: const EdgeInsets.only(right: 12.0, bottom: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF211F1B),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+            color: const Color(0xFFD4845A).withOpacity(0.5),
+            width: 1.5,
           ),
-          const SizedBox(height: 4),
-          const SizedBox(
-            width: 68,
-            child: Text(
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 14,
+              backgroundColor: const Color(0xFFD4845A).withOpacity(0.1),
+              child: const Icon(Icons.add_rounded, color: Color(0xFFD4845A), size: 16),
+            ),
+            const SizedBox(width: 8),
+            const Text(
               'Add Pet',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFFFF8A65),
+                fontSize: 13,
+                color: Color(0xFFD4845A),
                 fontWeight: FontWeight.w600,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

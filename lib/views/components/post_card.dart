@@ -159,11 +159,18 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     final caption = widget.post.caption;
     final timeAgo = _formatTimeAgo(widget.post.createdAt);
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1814),
+        border: Border.all(color: const Color(0xFF2E2B26)),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // ── Header ─────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
@@ -244,13 +251,25 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                     loadingBuilder: (context, child, progress) {
                       if (progress == null) return child;
                       return Container(
-                        color: colorScheme.surfaceContainerHighest,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF211F1B), Color(0xFF2E2B26)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
                         child: const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2)),
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFD4845A))),
                       );
                     },
                     errorBuilder: (ctx, err, stack) => Container(
-                      color: colorScheme.surfaceContainerHighest,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF211F1B), Color(0xFF2E2B26)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
                       child: Icon(Icons.pets,
                           size: 56, color: colorScheme.onSurfaceVariant),
                     ),
@@ -391,7 +410,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
 
           // ── Timestamp ──────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 6, 14, 4),
+            padding: const EdgeInsets.fromLTRB(14, 6, 14, 16),
             child: Text(
               timeAgo,
               style: TextStyle(
@@ -402,6 +421,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             ),
           ),
         ],
+      ),
       ),
     );
   }

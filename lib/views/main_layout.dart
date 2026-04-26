@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -62,28 +63,33 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
         index: _currentIndex,
         children: _screens,
       ),
-      bottomNavigationBar: _InstagramNavBar(
-        currentIndex: _currentIndex,
-        profileImageUrl: activePet?.profileImageUrl ?? '',
-        onTap: (index) {
-          if (index == 2) {
-            context.push('/create_post');
-            return;
-          }
-          setState(() => _currentIndex = index);
-        },
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: _GlassNavBar(
+            currentIndex: _currentIndex,
+            profileImageUrl: activePet?.profileImageUrl ?? '',
+            onTap: (index) {
+              if (index == 2) {
+                context.push('/create_post');
+                return;
+              }
+              setState(() => _currentIndex = index);
+            },
+          ),
+        ),
       ),
     );
   }
 }
 
-// ── Instagram-style bottom nav (flat, opaque, hairline top divider) ────────
-class _InstagramNavBar extends StatelessWidget {
+
+class _GlassNavBar extends StatelessWidget {
   final int currentIndex;
   final String profileImageUrl;
   final ValueChanged<int> onTap;
 
-  const _InstagramNavBar({
+  const _GlassNavBar({
     required this.currentIndex,
     required this.profileImageUrl,
     required this.onTap,
@@ -92,9 +98,8 @@ class _InstagramNavBar extends StatelessWidget {
   static const _items = [
     _NavItem(Icons.home_outlined, Icons.home),
     _NavItem(Icons.search, Icons.search),
-    _NavItem(Icons.add_box_outlined, Icons.add_box),
+    _NavItem(Icons.add, Icons.add), // Center FAB
     _NavItem(Icons.storefront_outlined, Icons.storefront),
-    // Profile slot uses an avatar instead of an icon — values here are unused.
     _NavItem(Icons.person_outline, Icons.person),
   ];
 
@@ -102,56 +107,72 @@ class _InstagramNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          top: BorderSide(
-            color: colorScheme.outline.withAlpha(46),
-            width: 0.5,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(30),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          height: 64,
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.95),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: const Color(0xFF2E2B26),
+              width: 1,
+            ),
           ),
-        ),
-      ),
-      padding: EdgeInsets.only(bottom: bottomPadding),
-      child: SizedBox(
-        height: kBottomNavBarHeight,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(_items.length, (i) {
-            final isActive = currentIndex == i;
-            final isProfile = i == 4;
-            final iconColor = colorScheme.onSurface;
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(_items.length, (i) {
+              final isActive = currentIndex == i;
+              final isCenter = i == 2;
+              final isProfile = i == 4;
+              final iconColor = isActive ? colorScheme.primary : const Color(0xFFB8B0A4);
 
-            final Widget child;
-            if (isProfile) {
-              child = _ProfileTabAvatar(
-                imageUrl: profileImageUrl,
-                isActive: isActive,
-                ringColor: iconColor,
-              );
-            } else {
-              child = Icon(
-                isActive ? _items[i].active : _items[i].inactive,
-                color: iconColor,
-                size: 28,
-              );
-            }
-
-            return Expanded(
-              child: InkResponse(
-                onTap: () => onTap(i),
-                radius: 32,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    child: child,
+              if (isCenter) {
+                return GestureDetector(
+                  onTap: () => onTap(i),
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [Color(0xFFD4845A), Color(0xFFB86A44)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: const Icon(Icons.add, color: Colors.white, size: 28),
                   ),
+                );
+              }
+
+              final Widget child;
+              if (isProfile) {
+                child = _ProfileTabAvatar(
+                  imageUrl: profileImageUrl,
+                  isActive: isActive,
+                  ringColor: iconColor,
+                );
+              } else {
+                child = Icon(
+                  isActive ? _items[i].active : _items[i].inactive,
+                  color: iconColor,
+                  size: 26,
+                );
+              }
+
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => onTap(i),
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(child: child),
                 ),
-              ),
-            );
-          }),
+              );
+            }),
+          ),
         ),
       ),
     );

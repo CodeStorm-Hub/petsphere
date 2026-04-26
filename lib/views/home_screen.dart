@@ -599,11 +599,9 @@ class _StoryItem extends StatelessWidget {
             shape: BoxShape.circle,
             gradient: LinearGradient(
               colors: [
-                Color(0xFFFFC837),
-                Color(0xFFFF8008),
-                Color(0xFFFE2D49),
-                Color(0xFFBC2A8D),
-                Color(0xFF4F5BD5),
+                Color(0xFFD4845A),
+                Color(0xFFB86A44),
+                Color(0xFF4A7C59),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
