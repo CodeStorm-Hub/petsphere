@@ -9,4 +9,5 @@ PostMediaType postMediaTypeFromPath(String path) {
   };
 }
 
-bool isVideoMedia(String path) => postMediaTypeFromPath(path) == PostMediaType.video;
+bool isVideoMedia(String path) =>
+    postMediaTypeFromPath(path) == PostMediaType.video;

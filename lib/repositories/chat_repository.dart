@@ -10,8 +10,7 @@ class ChatRepository {
   Future<List<ChatThreadModel>> fetchThreads(String myPetId) async {
     final data = await supabase
         .from('chat_threads')
-        .select(
-            'id, pet_id_1, pet_id_2, created_at, '
+        .select('id, pet_id_1, pet_id_2, created_at, '
             'pet1:pets!pet_id_1(id, name, breed, animal_type, age, bio, profile_image_url, images, is_public_owner, user_id), '
             'pet2:pets!pet_id_2(id, name, breed, animal_type, age, bio, profile_image_url, images, is_public_owner, user_id)')
         .or('pet_id_1.eq.$myPetId,pet_id_2.eq.$myPetId')

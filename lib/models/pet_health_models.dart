@@ -80,7 +80,7 @@ class PetWeightLog {
   final double weightLbs;
   final String? notes;
   final int? bcsScore; // 1–9 Body Condition Score
-  final String unit;   // lbs | kg
+  final String unit; // lbs | kg
 
   const PetWeightLog({
     this.id,
@@ -95,37 +95,47 @@ class PetWeightLog {
   String get bcsLabel {
     switch (bcsScore) {
       case 1:
-      case 2:  return 'Very Thin';
-      case 3:  return 'Thin';
-      case 4:  return 'Underweight';
-      case 5:  return 'Ideal';
-      case 6:  return 'Slightly Overweight';
-      case 7:  return 'Overweight';
-      case 8:  return 'Obese';
-      case 9:  return 'Severely Obese';
-      default: return 'Not set';
+      case 2:
+        return 'Very Thin';
+      case 3:
+        return 'Thin';
+      case 4:
+        return 'Underweight';
+      case 5:
+        return 'Ideal';
+      case 6:
+        return 'Slightly Overweight';
+      case 7:
+        return 'Overweight';
+      case 8:
+        return 'Obese';
+      case 9:
+        return 'Severely Obese';
+      default:
+        return 'Not set';
     }
   }
 
   factory PetWeightLog.fromJson(Map<String, dynamic> json) {
     return PetWeightLog(
-      id:        json['id'] as String?,
-      petId:     json['pet_id'] as String,
-      logDate:   DateTime.parse(json['log_date'] as String),
+      id: json['id'] as String?,
+      petId: json['pet_id'] as String,
+      logDate: DateTime.parse(json['log_date'] as String),
       weightLbs: (json['weight_lbs'] as num).toDouble(),
-      notes:     json['notes'] as String?,
-      bcsScore:  json['bcs_score'] as int?,
-      unit:      json['unit'] as String? ?? 'lbs',
+      notes: json['notes'] as String?,
+      bcsScore: json['bcs_score'] as int?,
+      unit: json['unit'] as String? ?? 'lbs',
     );
   }
 
   Map<String, dynamic> toUpsertJson() => {
-        'pet_id':     petId,
-        'log_date':   '${logDate.year.toString().padLeft(4, '0')}-${logDate.month.toString().padLeft(2, '0')}-${logDate.day.toString().padLeft(2, '0')}',
+        'pet_id': petId,
+        'log_date':
+            '${logDate.year.toString().padLeft(4, '0')}-${logDate.month.toString().padLeft(2, '0')}-${logDate.day.toString().padLeft(2, '0')}',
         'weight_lbs': weightLbs,
-        if (notes != null)    'notes':     notes,
+        if (notes != null) 'notes': notes,
         if (bcsScore != null) 'bcs_score': bcsScore,
-        'unit':       unit,
+        'unit': unit,
       };
 }
 
@@ -138,7 +148,8 @@ class PetVetAppointment {
   final DateTime scheduledAt;
   final String? notes;
   final String status; // scheduled | completed | cancelled
-  final String appointmentType; // routine | emergency | specialist | dental | surgery | follow_up
+  final String
+      appointmentType; // routine | emergency | specialist | dental | surgery | follow_up
   final String? location;
   final double? cost;
 
@@ -159,41 +170,47 @@ class PetVetAppointment {
 
   String get appointmentTypeLabel {
     switch (appointmentType) {
-      case 'emergency':  return 'Emergency';
-      case 'specialist': return 'Specialist';
-      case 'dental':     return 'Dental';
-      case 'surgery':    return 'Surgery';
-      case 'follow_up':  return 'Follow-up';
-      default:           return 'Routine';
+      case 'emergency':
+        return 'Emergency';
+      case 'specialist':
+        return 'Specialist';
+      case 'dental':
+        return 'Dental';
+      case 'surgery':
+        return 'Surgery';
+      case 'follow_up':
+        return 'Follow-up';
+      default:
+        return 'Routine';
     }
   }
 
   factory PetVetAppointment.fromJson(Map<String, dynamic> json) {
     return PetVetAppointment(
-      id:              json['id'] as String,
-      petId:           json['pet_id'] as String,
-      title:           json['title'] as String,
-      doctor:          json['doctor'] as String?,
-      scheduledAt:     DateTime.parse(json['scheduled_at'] as String).toLocal(),
-      notes:           json['notes'] as String?,
-      status:          json['status'] as String? ?? 'scheduled',
+      id: json['id'] as String,
+      petId: json['pet_id'] as String,
+      title: json['title'] as String,
+      doctor: json['doctor'] as String?,
+      scheduledAt: DateTime.parse(json['scheduled_at'] as String).toLocal(),
+      notes: json['notes'] as String?,
+      status: json['status'] as String? ?? 'scheduled',
       appointmentType: json['appointment_type'] as String? ?? 'routine',
-      location:        json['location'] as String?,
-      cost:            (json['cost'] as num?)?.toDouble(),
+      location: json['location'] as String?,
+      cost: (json['cost'] as num?)?.toDouble(),
     );
   }
 
   Map<String, dynamic> toUpsertJson() => {
         if (id.isNotEmpty) 'id': id,
-        'pet_id':           petId,
-        'title':            title,
-        if (doctor != null)   'doctor':           doctor,
-        'scheduled_at':     scheduledAt.toUtc().toIso8601String(),
-        if (notes != null)    'notes':             notes,
-        'status':           status,
+        'pet_id': petId,
+        'title': title,
+        if (doctor != null) 'doctor': doctor,
+        'scheduled_at': scheduledAt.toUtc().toIso8601String(),
+        if (notes != null) 'notes': notes,
+        'status': status,
         'appointment_type': appointmentType,
-        if (location != null) 'location':          location,
-        if (cost != null)     'cost':              cost,
+        if (location != null) 'location': location,
+        if (cost != null) 'cost': cost,
       };
 }
 
@@ -234,24 +251,24 @@ class PetVaccination {
     DateTime? parseDate(dynamic v) =>
         v == null ? null : DateTime.parse(v as String);
     return PetVaccination(
-      id:             json['id'] as String,
-      petId:          json['pet_id'] as String,
-      vaccineName:    json['vaccine_name'] as String,
-      status:         json['status'] as String? ?? 'scheduled',
-      scheduledFor:   parseDate(json['scheduled_for']),
-      completedOn:    parseDate(json['completed_on']),
-      nextDueDate:    parseDate(json['next_due_date']),
+      id: json['id'] as String,
+      petId: json['pet_id'] as String,
+      vaccineName: json['vaccine_name'] as String,
+      status: json['status'] as String? ?? 'scheduled',
+      scheduledFor: parseDate(json['scheduled_for']),
+      completedOn: parseDate(json['completed_on']),
+      nextDueDate: parseDate(json['next_due_date']),
       administeredBy: json['administered_by'] as String?,
-      batchNumber:    json['batch_number'] as String?,
-      notes:          json['notes'] as String?,
+      batchNumber: json['batch_number'] as String?,
+      notes: json['notes'] as String?,
     );
   }
 
   Map<String, dynamic> toUpsertJson() => {
         if (id.isNotEmpty) 'id': id,
-        'pet_id':      petId,
-        'vaccine_name':vaccineName,
-        'status':      status,
+        'pet_id': petId,
+        'vaccine_name': vaccineName,
+        'status': status,
         if (scheduledFor != null)
           'scheduled_for': scheduledFor!.toIso8601String().split('T').first,
         if (completedOn != null)
@@ -259,7 +276,7 @@ class PetVaccination {
         if (nextDueDate != null)
           'next_due_date': nextDueDate!.toIso8601String().split('T').first,
         if (administeredBy != null) 'administered_by': administeredBy,
-        if (batchNumber != null)    'batch_number':    batchNumber,
-        if (notes != null)          'notes':           notes,
+        if (batchNumber != null) 'batch_number': batchNumber,
+        if (notes != null) 'notes': notes,
       };
 }

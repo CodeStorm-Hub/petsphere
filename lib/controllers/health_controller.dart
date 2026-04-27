@@ -12,21 +12,21 @@ import 'pet_controller.dart';
 
 @immutable
 class HealthState {
-  final List<PetMedication>     medications;
-  final List<MedicationDose>    todayDoses;
-  final List<PetAllergy>        allergies;
-  final List<ParasitePrevention>parasitePrevention;
-  final List<DentalLog>         dentalLogs;
+  final List<PetMedication> medications;
+  final List<MedicationDose> todayDoses;
+  final List<PetAllergy> allergies;
+  final List<ParasitePrevention> parasitePrevention;
+  final List<DentalLog> dentalLogs;
   final bool isLoading;
   final String? error;
   final String? activePetId;
 
   const HealthState({
-    this.medications        = const [],
-    this.todayDoses         = const [],
-    this.allergies          = const [],
+    this.medications = const [],
+    this.todayDoses = const [],
+    this.allergies = const [],
     this.parasitePrevention = const [],
-    this.dentalLogs         = const [],
+    this.dentalLogs = const [],
     this.isLoading = false,
     this.error,
     this.activePetId,
@@ -58,7 +58,9 @@ class HealthState {
   DentalLog? get lastHomeBrushing => dentalLogs.firstWhere(
         (d) => d.cleaningType == 'home_brushing',
         orElse: () => DentalLog(
-          id: '', petId: '', logDate: DateTime(2000),
+          id: '',
+          petId: '',
+          logDate: DateTime(2000),
           cleaningType: 'home_brushing',
         ),
       );
@@ -66,7 +68,9 @@ class HealthState {
   DentalLog? get lastProfessionalCleaning => dentalLogs.firstWhere(
         (d) => d.cleaningType == 'professional_cleaning',
         orElse: () => DentalLog(
-          id: '', petId: '', logDate: DateTime(2000),
+          id: '',
+          petId: '',
+          logDate: DateTime(2000),
           cleaningType: 'professional_cleaning',
         ),
       );
@@ -89,24 +93,24 @@ class HealthState {
   }
 
   HealthState copyWith({
-    List<PetMedication>?      medications,
-    List<MedicationDose>?     todayDoses,
-    List<PetAllergy>?         allergies,
+    List<PetMedication>? medications,
+    List<MedicationDose>? todayDoses,
+    List<PetAllergy>? allergies,
     List<ParasitePrevention>? parasitePrevention,
-    List<DentalLog>?          dentalLogs,
-    bool?    isLoading,
-    String?  error,
-    String?  activePetId,
+    List<DentalLog>? dentalLogs,
+    bool? isLoading,
+    String? error,
+    String? activePetId,
   }) =>
       HealthState(
-        medications:        medications        ?? this.medications,
-        todayDoses:         todayDoses         ?? this.todayDoses,
-        allergies:          allergies          ?? this.allergies,
+        medications: medications ?? this.medications,
+        todayDoses: todayDoses ?? this.todayDoses,
+        allergies: allergies ?? this.allergies,
         parasitePrevention: parasitePrevention ?? this.parasitePrevention,
-        dentalLogs:         dentalLogs         ?? this.dentalLogs,
-        isLoading:          isLoading          ?? this.isLoading,
-        error:              error,
-        activePetId:        activePetId        ?? this.activePetId,
+        dentalLogs: dentalLogs ?? this.dentalLogs,
+        isLoading: isLoading ?? this.isLoading,
+        error: error,
+        activePetId: activePetId ?? this.activePetId,
       );
 }
 
@@ -141,11 +145,11 @@ class HealthNotifier extends Notifier<HealthState> {
       ]);
       if (!ref.mounted) return;
       state = state.copyWith(
-        medications:        results[0] as List<PetMedication>,
-        todayDoses:         results[1] as List<MedicationDose>,
-        allergies:          results[2] as List<PetAllergy>,
+        medications: results[0] as List<PetMedication>,
+        todayDoses: results[1] as List<MedicationDose>,
+        allergies: results[2] as List<PetAllergy>,
         parasitePrevention: results[3] as List<ParasitePrevention>,
-        dentalLogs:         results[4] as List<DentalLog>,
+        dentalLogs: results[4] as List<DentalLog>,
         isLoading: false,
       );
     } catch (e) {
@@ -176,7 +180,8 @@ class HealthNotifier extends Notifier<HealthState> {
     try {
       final saved = await _repo.upsertMedication(med);
       state = state.copyWith(
-        medications: state.medications.map((m) => m.id == saved.id ? saved : m).toList(),
+        medications:
+            state.medications.map((m) => m.id == saved.id ? saved : m).toList(),
       );
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -219,7 +224,9 @@ class HealthNotifier extends Notifier<HealthState> {
     final existing = state.todayDoses.any((d) => d.id == updated.id);
     state = state.copyWith(
       todayDoses: existing
-          ? state.todayDoses.map((d) => d.id == updated.id ? updated : d).toList()
+          ? state.todayDoses
+              .map((d) => d.id == updated.id ? updated : d)
+              .toList()
           : [updated, ...state.todayDoses],
     );
   }

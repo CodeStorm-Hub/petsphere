@@ -115,7 +115,10 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                   Row(
                     children: [
                       CircleAvatar(
-                        backgroundImage: stories[_index].pet.profileImageUrl.isNotEmpty
+                        backgroundImage: stories[_index]
+                                .pet
+                                .profileImageUrl
+                                .isNotEmpty
                             ? NetworkImage(stories[_index].pet.profileImageUrl)
                             : null,
                         child: stories[_index].pet.profileImageUrl.isEmpty

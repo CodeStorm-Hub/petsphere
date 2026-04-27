@@ -17,7 +17,8 @@ class FollowRepository {
   // -------------------------------------------------------------------------
   // Unfollow an owner
   // -------------------------------------------------------------------------
-  Future<void> unfollowOwner(String followerUserId, String followedUserId) async {
+  Future<void> unfollowOwner(
+      String followerUserId, String followedUserId) async {
     await supabase
         .from('follows')
         .delete()

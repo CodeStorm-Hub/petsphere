@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/care_badge_model.dart';
 import '../models/pet_model.dart';
 import '../models/user_model.dart';
+import '../repositories/pet_care_repository.dart';
 import '../repositories/pet_repository.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/follow_controller.dart';
 import '../controllers/match_controller.dart';
 import '../utils/media_utils.dart';
+import 'components/public_care_badges_row.dart';
 import 'package:go_router/go_router.dart';
 
 typedef ProfileArgs = ({String? petId, String? userId});
 
-final _publicProfileDataProvider = FutureProvider.family<Map<String, dynamic>, ProfileArgs>((ref, args) async {
+final _publicProfileDataProvider =
+    FutureProvider.family<Map<String, dynamic>, ProfileArgs>((ref, args) async {
   final petId = args.petId;
   final userIdArg = args.userId;
 
@@ -31,7 +35,7 @@ final _publicProfileDataProvider = FutureProvider.family<Map<String, dynamic>, P
 
   final user = await ref.read(publicUserProvider(targetUserId).future);
   final allPets = await petRepository.fetchMyPets(targetUserId);
-  
+
   return {
     'user': user,
     'pets': allPets,
@@ -45,7 +49,8 @@ class MatchPetProfileScreen extends ConsumerStatefulWidget {
   const MatchPetProfileScreen({super.key, this.petId, this.userId});
 
   @override
-  ConsumerState<MatchPetProfileScreen> createState() => _MatchPetProfileScreenState();
+  ConsumerState<MatchPetProfileScreen> createState() =>
+      _MatchPetProfileScreenState();
 }
 
 class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
@@ -58,7 +63,8 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
     final asyncData = ref.watch(_publicProfileDataProvider(args));
 
     return asyncData.when(
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(
         appBar: AppBar(),
         body: Center(child: Text('Error: $e')),
@@ -73,21 +79,32 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
 
         PetModel? selectedPet;
         if (!isOwnerView) {
-          selectedPet = pets.firstWhere((p) => p.id == selectedId, orElse: () => pets.first);
+          selectedPet = pets.firstWhere((p) => p.id == selectedId,
+              orElse: () => pets.first);
         }
 
         final feedState = ref.watch(feedProvider);
         final allPosts = isOwnerView
-            ? feedState.posts.where((post) => post.pet.userId == user.id).toList()
-            : feedState.posts.where((post) => post.pet.id == selectedPet?.id).toList();
+            ? feedState.posts
+                .where((post) => post.pet.userId == user.id)
+                .toList()
+            : feedState.posts
+                .where((post) => post.pet.id == selectedPet?.id)
+                .toList();
 
         final displayedPosts = (_postCategory == null || isOwnerView)
             ? allPosts
-            : allPosts.where((p) => p.caption.toLowerCase().contains(_postCategory!.toLowerCase())).toList();
+            : allPosts
+                .where((p) => p.caption
+                    .toLowerCase()
+                    .contains(_postCategory!.toLowerCase()))
+                .toList();
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(isOwnerView ? user.name ?? 'Pet Lover' : (selectedPet?.name ?? 'Pet')),
+            title: Text(isOwnerView
+                ? user.name ?? 'Pet Lover'
+                : (selectedPet?.name ?? 'Pet')),
           ),
           body: RefreshIndicator(
             onRefresh: () async {
@@ -109,13 +126,18 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                             height: 200,
                             width: double.infinity,
                             child: () {
-                              final coverUrl = isOwnerView ? (user.profileImageUrl ?? '') : (selectedPet?.profileImageUrl ?? '');
+                              final coverUrl = isOwnerView
+                                  ? (user.profileImageUrl ?? '')
+                                  : (selectedPet?.profileImageUrl ?? '');
                               return coverUrl.isNotEmpty
                                   ? Image.network(coverUrl, fit: BoxFit.cover)
                                   : Container(
                                       decoration: const BoxDecoration(
                                         gradient: LinearGradient(
-                                          colors: [Color(0xFFFFAD93), Color(0xFFFFE087)],
+                                          colors: [
+                                            Color(0xFFFFAD93),
+                                            Color(0xFFFFE087)
+                                          ],
                                         ),
                                       ),
                                     );
@@ -127,19 +149,31 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                             child: Container(
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                border: Border.all(color: const Color(0xFFFEF8F3), width: 4),
+                                border: Border.all(
+                                    color: const Color(0xFFFEF8F3), width: 4),
                               ),
                               child: CircleAvatar(
                                 radius: 40,
                                 backgroundColor: const Color(0xFFE5FDE6),
                                 backgroundImage: () {
-                                  final url = isOwnerView ? user.profileImageUrl : selectedPet?.profileImageUrl;
-                                  return (url != null && url.isNotEmpty) ? NetworkImage(url) : null;
+                                  final url = isOwnerView
+                                      ? user.profileImageUrl
+                                      : selectedPet?.profileImageUrl;
+                                  return (url != null && url.isNotEmpty)
+                                      ? NetworkImage(url)
+                                      : null;
                                 }(),
                                 child: () {
-                                  final url = isOwnerView ? user.profileImageUrl : selectedPet?.profileImageUrl;
-                                  if (url != null && url.isNotEmpty) return null;
-                                  return Icon(isOwnerView ? Icons.person : Icons.pets, size: 40, color: const Color(0xFF99472C));
+                                  final url = isOwnerView
+                                      ? user.profileImageUrl
+                                      : selectedPet?.profileImageUrl;
+                                  if (url != null && url.isNotEmpty) {
+                                    return null;
+                                  }
+                                  return Icon(
+                                      isOwnerView ? Icons.person : Icons.pets,
+                                      size: 40,
+                                      color: const Color(0xFF99472C));
                                 }(),
                               ),
                             ),
@@ -151,7 +185,8 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                       // Carousel
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -161,20 +196,32 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                                 isSelected: isOwnerView,
                                 child: CircleAvatar(
                                   radius: 30,
-                                  backgroundImage: (user.profileImageUrl?.isNotEmpty ?? false) ? NetworkImage(user.profileImageUrl!) : null,
-                                  child: (user.profileImageUrl?.isEmpty ?? true) ? const Icon(Icons.person) : null,
+                                  backgroundImage:
+                                      (user.profileImageUrl?.isNotEmpty ??
+                                              false)
+                                          ? NetworkImage(user.profileImageUrl!)
+                                          : null,
+                                  child: (user.profileImageUrl?.isEmpty ?? true)
+                                      ? const Icon(Icons.person)
+                                      : null,
                                 ),
                               ),
                             ),
                             for (final pet in pets)
                               GestureDetector(
-                                onTap: () => setState(() => selectedId = pet.id),
+                                onTap: () =>
+                                    setState(() => selectedId = pet.id),
                                 child: _AvatarRing(
                                   isSelected: pet.id == selectedId,
                                   child: CircleAvatar(
                                     radius: 30,
-                                    backgroundImage: pet.profileImageUrl.isNotEmpty ? NetworkImage(pet.profileImageUrl) : null,
-                                    child: pet.profileImageUrl.isEmpty ? const Icon(Icons.pets) : null,
+                                    backgroundImage:
+                                        pet.profileImageUrl.isNotEmpty
+                                            ? NetworkImage(pet.profileImageUrl)
+                                            : null,
+                                    child: pet.profileImageUrl.isEmpty
+                                        ? const Icon(Icons.pets)
+                                        : null,
                                   ),
                                 ),
                               ),
@@ -189,35 +236,64 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isOwnerView ? (user.name ?? '') : (selectedPet?.name ?? ''),
-                              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                              isOwnerView
+                                  ? (user.name ?? '')
+                                  : (selectedPet?.name ?? ''),
+                              style: const TextStyle(
+                                  fontSize: 26, fontWeight: FontWeight.bold),
                             ),
                             if (!isOwnerView && selectedPet != null)
-                              Text('${selectedPet.breed} · ${selectedPet.animalType} · ${selectedPet.age} yrs', style: const TextStyle(color: Colors.grey)),
+                              Text(
+                                  '${selectedPet.breed} · ${selectedPet.animalType} · ${selectedPet.age} yrs',
+                                  style: const TextStyle(color: Colors.grey)),
                             const SizedBox(height: 8),
                             Text(
-                              isOwnerView ? (user.bio ?? 'No bio yet') : (selectedPet?.bio ?? 'No bio yet'),
+                              isOwnerView
+                                  ? (user.bio ?? 'No bio yet')
+                                  : (selectedPet?.bio ?? 'No bio yet'),
                               style: const TextStyle(fontSize: 14),
                             ),
+                            if (isOwnerView) ...[
+                              const SizedBox(height: 12),
+                              PublicCareBadgesRow(userId: user.id),
+                            ],
+                            if (isOwnerView) ...[
+                              const SizedBox(height: 12),
+                              _PublicCareBadgeRow(userId: user.id),
+                            ],
                             const SizedBox(height: 16),
-                            
+
                             // Stats
                             Row(
                               children: [
-                                _StatColumn(label: 'Posts', value: '${displayedPosts.length}'),
+                                _StatColumn(
+                                    label: 'Posts',
+                                    value: '${displayedPosts.length}'),
                                 const SizedBox(width: 28),
                                 if (isOwnerView) ...[
-                                  ref.watch(ownerFollowerCountProvider(user.id)).when(
-                                    data: (c) => _StatColumn(label: 'Followers', value: '$c'),
-                                    loading: () => const _StatColumn(label: 'Followers', value: '···'),
-                                    error: (_, __) => const _StatColumn(label: 'Followers', value: '0'),
-                                  ),
+                                  ref
+                                      .watch(
+                                          ownerFollowerCountProvider(user.id))
+                                      .when(
+                                        data: (c) => _StatColumn(
+                                            label: 'Followers', value: '$c'),
+                                        loading: () => const _StatColumn(
+                                            label: 'Followers', value: '···'),
+                                        error: (_, __) => const _StatColumn(
+                                            label: 'Followers', value: '0'),
+                                      ),
                                 ] else if (selectedPet != null) ...[
-                                  ref.watch(petFollowerCountProvider(selectedPet.id)).when(
-                                    data: (c) => _StatColumn(label: 'Followers', value: '$c'),
-                                    loading: () => const _StatColumn(label: 'Followers', value: '···'),
-                                    error: (_, __) => const _StatColumn(label: 'Followers', value: '0'),
-                                  ),
+                                  ref
+                                      .watch(petFollowerCountProvider(
+                                          selectedPet.id))
+                                      .when(
+                                        data: (c) => _StatColumn(
+                                            label: 'Followers', value: '$c'),
+                                        loading: () => const _StatColumn(
+                                            label: 'Followers', value: '···'),
+                                        error: (_, __) => const _StatColumn(
+                                            label: 'Followers', value: '0'),
+                                      ),
                                 ],
                               ],
                             ),
@@ -233,9 +309,14 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                                   icon: const Icon(Icons.favorite),
                                   label: const Text('Send Match Request'),
                                   onPressed: () async {
-                                    final success = await ref.read(matchProvider.notifier).sendLikeRequest(selectedPet!.id);
+                                    final success = await ref
+                                        .read(matchProvider.notifier)
+                                        .sendLikeRequest(selectedPet!.id);
                                     if (context.mounted && success) {
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Request sent to ${selectedPet.name}!')));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: Text(
+                                                  'Request sent to ${selectedPet.name}!')));
                                     }
                                   },
                                 ),
@@ -257,13 +338,16 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                 if (displayedPosts.isEmpty)
                   const SliverFillRemaining(
                     hasScrollBody: false,
-                    child: Center(child: Text('No posts yet', style: TextStyle(color: Colors.grey))),
+                    child: Center(
+                        child: Text('No posts yet',
+                            style: TextStyle(color: Colors.grey))),
                   )
                 else
                   SliverPadding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
                     sliver: SliverGrid(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
                         mainAxisSpacing: 2,
                         crossAxisSpacing: 2,
@@ -290,7 +374,8 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                                     ),
                                   )
                                 else
-                                  Image.network(post.mediaUrl, fit: BoxFit.cover),
+                                  Image.network(post.mediaUrl,
+                                      fit: BoxFit.cover),
                                 if (isVideoMedia(post.mediaUrl))
                                   const Positioned(
                                     top: 4,
@@ -313,6 +398,63 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+}
+
+/// Care gamification badges the user chose to [profiles.public_care_badge_slugs] (other viewers).
+class _PublicCareBadgeRow extends StatefulWidget {
+  const _PublicCareBadgeRow({required this.userId});
+  final String userId;
+
+  @override
+  State<_PublicCareBadgeRow> createState() => _PublicCareBadgeRowState();
+}
+
+class _PublicCareBadgeRowState extends State<_PublicCareBadgeRow> {
+  late final Future<({List<PetCareBadgeUnlock> u, List<CareBadgeDefinition> d})>
+      _f = () async {
+    final u = await petCareRepository.fetchPublicShowcaseUnlocks(widget.userId);
+    final d = await petCareRepository.fetchBadgeDefinitions();
+    return (u: u, d: d);
+  }();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _f,
+      builder: (context, snap) {
+        if (!snap.hasData) return const SizedBox.shrink();
+        final unlocks = snap.data!.u;
+        if (unlocks.isEmpty) return const SizedBox.shrink();
+        final by = {for (final def in snap.data!.d) def.slug: def};
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Care highlights',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  color: Colors.grey,
+                )),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final s in unlocks)
+                  if (by.containsKey(s.badgeSlug))
+                    Chip(
+                      label: Text(
+                        '${by[s.badgeSlug]!.iconEmoji} ${by[s.badgeSlug]!.title}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+              ],
+            ),
+          ],
         );
       },
     );
@@ -349,7 +491,8 @@ class _StatColumn extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        Text(value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
       ],
     );
@@ -369,11 +512,15 @@ class _FollowButtonsRow extends ConsumerWidget {
         Expanded(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: follows ? Colors.grey.shade200 : Theme.of(context).colorScheme.primary,
+              backgroundColor: follows
+                  ? Colors.grey.shade200
+                  : Theme.of(context).colorScheme.primary,
               foregroundColor: follows ? Colors.black : Colors.white,
             ),
             onPressed: () {
-              ref.read(followControllerProvider.notifier).toggleFollowPet(pet.id);
+              ref
+                  .read(followControllerProvider.notifier)
+                  .toggleFollowPet(pet.id);
             },
             child: Text(follows ? 'Unfollow' : 'Follow'),
           ),
@@ -404,7 +551,9 @@ class _OwnerFollowButton extends ConsumerWidget {
     final follows = followsAsync.value ?? false;
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: follows ? Colors.grey.shade200 : Theme.of(context).colorScheme.primary,
+        backgroundColor: follows
+            ? Colors.grey.shade200
+            : Theme.of(context).colorScheme.primary,
         foregroundColor: follows ? Colors.black : Colors.white,
       ),
       onPressed: () {

@@ -64,7 +64,7 @@ class FollowController extends Notifier<void> {
         await followRepository.unfollowOwner(userId, ownerId);
       } else {
         await followRepository.followOwner(userId, ownerId);
-        
+
         // Notify the owner
         try {
           notificationRepository.sendNotification(
@@ -93,15 +93,14 @@ class FollowController extends Notifier<void> {
     if (userId == null) return;
 
     try {
-      final isFollowing =
-          await followRepository.isFollowingPet(userId, petId);
+      final isFollowing = await followRepository.isFollowingPet(userId, petId);
 
       if (isFollowing) {
         // If following via owner, this is a direct pet unfollow only
         await followRepository.unfollowPet(userId, petId);
       } else {
         await followRepository.followPet(userId, petId);
-        
+
         // Notify the pet's owner
         try {
           final data = await supabase

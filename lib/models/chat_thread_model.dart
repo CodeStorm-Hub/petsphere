@@ -44,8 +44,10 @@ class ChatThreadModel {
     final pet2Id = json['pet_id_2'] as String;
 
     final pets = <PetModel>[
-      if (pet1Json != null) PetModel.fromJson({...pet1Json, 'user_id': pet1Json['user_id'] ?? ''}),
-      if (pet2Json != null) PetModel.fromJson({...pet2Json, 'user_id': pet2Json['user_id'] ?? ''}),
+      if (pet1Json != null)
+        PetModel.fromJson({...pet1Json, 'user_id': pet1Json['user_id'] ?? ''}),
+      if (pet2Json != null)
+        PetModel.fromJson({...pet2Json, 'user_id': pet2Json['user_id'] ?? ''}),
     ];
 
     final lastMsgJson = json['last_message'] as Map<String, dynamic>?;

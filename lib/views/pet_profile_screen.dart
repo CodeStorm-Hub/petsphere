@@ -13,6 +13,7 @@ import '../controllers/follow_controller.dart';
 import '../utils/image_upload_helper.dart';
 import '../utils/media_utils.dart';
 import '../utils/supabase_config.dart';
+import 'components/public_care_badges_row.dart';
 import 'main_layout.dart' show bottomNavSpaceFor;
 
 class PetProfileScreen extends ConsumerStatefulWidget {
@@ -69,12 +70,17 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
     final myUserId = user?.id ?? '';
     final allPetPosts = isOwnerView
         ? feedState.posts.where((post) => post.pet.userId == myUserId).toList()
-        : feedState.posts.where((post) => post.pet.id == selectedPet?.id).toList();
+        : feedState.posts
+            .where((post) => post.pet.id == selectedPet?.id)
+            .toList();
 
     // Apply category filter (based on caption keyword matching)
     final displayedPosts = (_postCategory == null || isOwnerView)
         ? allPetPosts
-        : allPetPosts.where((p) => p.caption.toLowerCase().contains(_postCategory!.toLowerCase())).toList();
+        : allPetPosts
+            .where((p) =>
+                p.caption.toLowerCase().contains(_postCategory!.toLowerCase()))
+            .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -122,9 +128,11 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: const Color(0xFF0F0E0C),
-                                border: Border.all(color: const Color(0xFF2E2B26), width: 2),
+                                border: Border.all(
+                                    color: const Color(0xFF2E2B26), width: 2),
                               ),
-                              child: _buildAvatar(isOwnerView, user, selectedPet),
+                              child:
+                                  _buildAvatar(isOwnerView, user, selectedPet),
                             ),
                             // The + badge
                             Positioned(
@@ -141,7 +149,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                     color: Color(0xFFD4845A),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(Icons.add, size: 18, color: Colors.white),
+                                  child: const Icon(Icons.add,
+                                      size: 18, color: Colors.white),
                                 ),
                               ),
                             ),
@@ -153,25 +162,45 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              _StatColumn(label: 'posts', value: '${displayedPosts.length}'),
+                              _StatColumn(
+                                  label: 'posts',
+                                  value: '${displayedPosts.length}'),
                               if (isOwnerView) ...[
-                                ref.watch(ownerFollowerCountProvider(myUserId)).when(
-                                  data: (c) => _StatColumn(label: 'followers', value: '$c'),
-                                  loading: () => const _StatColumn(label: 'followers', value: '···'),
-                                  error: (_, __) => const _StatColumn(label: 'followers', value: '0'),
-                                ),
-                                ref.watch(followingCountProvider(myUserId)).when(
-                                  data: (c) => _StatColumn(label: 'following', value: '$c'),
-                                  loading: () => const _StatColumn(label: 'following', value: '···'),
-                                  error: (_, __) => const _StatColumn(label: 'following', value: '0'),
-                                ),
+                                ref
+                                    .watch(ownerFollowerCountProvider(myUserId))
+                                    .when(
+                                      data: (c) => _StatColumn(
+                                          label: 'followers', value: '$c'),
+                                      loading: () => const _StatColumn(
+                                          label: 'followers', value: '···'),
+                                      error: (_, __) => const _StatColumn(
+                                          label: 'followers', value: '0'),
+                                    ),
+                                ref
+                                    .watch(followingCountProvider(myUserId))
+                                    .when(
+                                      data: (c) => _StatColumn(
+                                          label: 'following', value: '$c'),
+                                      loading: () => const _StatColumn(
+                                          label: 'following', value: '···'),
+                                      error: (_, __) => const _StatColumn(
+                                          label: 'following', value: '0'),
+                                    ),
                               ] else if (selectedPet != null) ...[
-                                ref.watch(petFollowerCountProvider(selectedPet.id)).when(
-                                  data: (c) => _StatColumn(label: 'followers', value: '$c'),
-                                  loading: () => const _StatColumn(label: 'followers', value: '···'),
-                                  error: (_, __) => const _StatColumn(label: 'followers', value: '0'),
-                                ),
-                                _StatColumn(label: 'pets', value: '${myOwnedPets.length}'),
+                                ref
+                                    .watch(petFollowerCountProvider(
+                                        selectedPet.id))
+                                    .when(
+                                      data: (c) => _StatColumn(
+                                          label: 'followers', value: '$c'),
+                                      loading: () => const _StatColumn(
+                                          label: 'followers', value: '···'),
+                                      error: (_, __) => const _StatColumn(
+                                          label: 'followers', value: '0'),
+                                    ),
+                                _StatColumn(
+                                    label: 'pets',
+                                    value: '${myOwnedPets.length}'),
                               ],
                             ],
                           ),
@@ -195,7 +224,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         if (!isOwnerView && (selectedPet?.isVerified ?? false))
                           const Padding(
                             padding: EdgeInsets.only(left: 4),
-                            child: Icon(Icons.verified, size: 18, color: Color(0xFFD4845A)),
+                            child: Icon(Icons.verified,
+                                size: 18, color: Color(0xFFD4845A)),
                           ),
                       ],
                     ),
@@ -204,21 +234,32 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     if (isOwnerView && user?.email != null)
                       Text(
                         '${user!.email}${user.location?.isNotEmpty == true ? " · ${user.location}" : ""}',
-                        style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
+                        style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500),
                       ),
                     if (!isOwnerView && selectedPet != null)
                       Text(
                         '${selectedPet.breed} · ${selectedPet.animalType}',
-                        style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
+                        style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500),
                       ),
                     const SizedBox(height: 4),
                     Text(
                       isOwnerView
-                          ? (user?.bio?.isNotEmpty == true ? user!.bio! : 'Tap "Edit profile" to add a bio')
-                          : (selectedPet?.bio.isNotEmpty == true ? selectedPet!.bio : 'No bio yet'),
+                          ? (user?.bio?.isNotEmpty == true
+                              ? user!.bio!
+                              : 'Tap "Edit profile" to add a bio')
+                          : (selectedPet?.bio.isNotEmpty == true
+                              ? selectedPet!.bio
+                              : 'No bio yet'),
                       style: TextStyle(
                         color: (isOwnerView && (user?.bio?.isEmpty ?? true)) ||
-                                (!isOwnerView && selectedPet?.bio.isEmpty == true)
+                                (!isOwnerView &&
+                                    selectedPet?.bio.isEmpty == true)
                             ? Colors.grey
                             : Theme.of(context).colorScheme.onSurface,
                         fontSize: 14,
@@ -227,275 +268,322 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                             : null,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                  
-                  // Action buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (isOwnerView) {
-                              _showEditOwnerSheet(context, user);
-                            } else if (selectedPet != null) {
-                              _showEditPetSheet(context, selectedPet);
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).brightness == Brightness.dark 
-                                ? const Color(0xFF2C2C2C) : const Color(0xFFEFEFEF),
-                            foregroundColor: Theme.of(context).colorScheme.onSurface,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: Text(isOwnerView ? 'Edit profile' : 'Edit profile',
-                              style: const TextStyle(fontWeight: FontWeight.w600)),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            final link = isOwnerView
-                                ? 'https://petsphere.app/user/${user?.id ?? ''}'
-                                : 'https://petsphere.app/pet/${selectedPet?.id ?? ''}';
-                            final name = isOwnerView ? userName : (selectedPet?.name ?? '');
-                            _showProfileShareSheet(context, link, name);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).brightness == Brightness.dark 
-                                ? const Color(0xFF2C2C2C) : const Color(0xFFEFEFEF),
-                            foregroundColor: Theme.of(context).colorScheme.onSurface,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: Text(isOwnerView ? 'Share profile' : 'Share profile',
-                              style: const TextStyle(fontWeight: FontWeight.w600)),
-                        ),
-                      ),
+                    if (isOwnerView && myUserId.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      PublicCareBadgesRow(userId: myUserId),
                     ],
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              ),
-            ),
-          ),
-          
-          // ── The "All and Add Pet row" (carousel) ──────────────────
-          SliverToBoxAdapter(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => setState(() => selectedId = 'owner'),
-                    child: _OwnerCarouselAvatar(
-                      user: user,
-                      isSelected: isOwnerView,
-                    ),
-                  ),
-                  for (final pet in myOwnedPets)
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => setState(() => selectedId = pet.id),
-                      child: _PetCarouselAvatar(
-                        pet: pet,
-                        isSelected: pet.id == selectedId,
-                      ),
-                    ),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => context.push('/add_pet'),
-                    child: const _AddPetAvatar(),
-                  ),
-                ],
-              ),
-            ),
-          ),
+                    const SizedBox(height: 16),
 
-          // ── Post category filter chips (tertiary styled) ─────
-          if (!isOwnerView && selectedPet != null)
-            SliverToBoxAdapter(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: Row(
-                  children: [
-                    for (final cat in [null, 'Playtime', 'Nap', 'Outdoor', 'Food'])
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GestureDetector(
-                          onTap: () => setState(() => _postCategory = cat),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: _postCategory == cat
-                                  ? const Color(0xFF506453)
-                                  : const Color(0xFFE5FDE6),
-                              borderRadius: BorderRadius.circular(9999),
+                    // Action buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (isOwnerView) {
+                                _showEditOwnerSheet(context, user);
+                              } else if (selectedPet != null) {
+                                _showEditPetSheet(context, selectedPet);
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? const Color(0xFF2C2C2C)
+                                  : const Color(0xFFEFEFEF),
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.onSurface,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                             child: Text(
-                              cat ?? 'All Posts',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: _postCategory == cat
-                                    ? const Color(0xFFE8FFE8)
-                                    : const Color(0xFF4E6251),
-                              ),
-                            ),
+                                isOwnerView ? 'Edit profile' : 'Edit profile',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600)),
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              final link = isOwnerView
+                                  ? 'https://petsphere.app/user/${user?.id ?? ''}'
+                                  : 'https://petsphere.app/pet/${selectedPet?.id ?? ''}';
+                              final name = isOwnerView
+                                  ? userName
+                                  : (selectedPet?.name ?? '');
+                              _showProfileShareSheet(context, link, name);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? const Color(0xFF2C2C2C)
+                                  : const Color(0xFFEFEFEF),
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.onSurface,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            child: Text(
+                                isOwnerView ? 'Share profile' : 'Share profile',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
             ),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-          // ── Posts grid (bento / standard) ──────────────────
-          if (myOwnedPets.isEmpty && isOwnerView)
+            // ── The "All and Add Pet row" (carousel) ──────────────────
             SliverToBoxAdapter(
-              child: _EmptyPetsCta(
-                onAddPet: () => context.push('/add_pet'),
-              ),
-            )
-          else if (displayedPosts.isEmpty)
-            SliverToBoxAdapter(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 40.0),
-                  child: Column(
-                    children: [
-                      const Icon(Icons.camera_alt_outlined, size: 48, color: Color(0xFFB7B1AA)),
-                      const SizedBox(height: 12),
-                      const Text('No posts yet',
-                          style: TextStyle(color: Color(0xFF625E59), fontWeight: FontWeight.w600, fontSize: 16)),
-                      const SizedBox(height: 4),
-                      Text(
-                        isOwnerView
-                            ? 'Create a post to see it here.'
-                            : 'Create a post as ${selectedPet?.name ?? 'this pet'}.',
-                        style: const TextStyle(color: Color(0xFFB7B1AA), fontSize: 13),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => setState(() => selectedId = 'owner'),
+                      child: _OwnerCarouselAvatar(
+                        user: user,
+                        isSelected: isOwnerView,
                       ),
-                      if (!isOwnerView && selectedPet != null) ...[
-                        const SizedBox(height: 16),
-                        GestureDetector(
-                          onTap: () => context.push('/create_post?petId=${selectedPet!.id}'),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF99472C), Color(0xFF8A3B21)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(9999),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.add_a_photo_outlined, size: 16, color: Colors.white),
-                                SizedBox(width: 8),
-                                Text('Create Post',
-                                    style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 6,
-                  crossAxisSpacing: 6,
-                  childAspectRatio: 1,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final post = displayedPosts[index];
-                    return GestureDetector(
-                      onTap: () => context.push('/post/${post.id}'),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            if (isVideoMedia(post.mediaUrl))
-                              Container(
-                                color: const Color(0xFF211F1B),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.play_circle_fill_rounded,
-                                    color: Color(0xFFD4845A),
-                                    size: 42,
-                                  ),
-                                ),
-                              )
-                            else
-                              Image.network(
-                                post.mediaUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (ctx, _, __) => Container(
-                                  color: const Color(0xFFF3EDE6),
-                                  child: const Icon(Icons.image_outlined, color: Color(0xFFB7B1AA)),
-                                ),
-                              ),
-                            if (isVideoMedia(post.mediaUrl))
-                              const Positioned(
-                                top: 4,
-                                right: 4,
-                                child: Icon(
-                                  Icons.videocam_rounded,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
-                            if (isOwnerView)
-                              Positioned(
-                                bottom: 4,
-                                right: 4,
-                                child: CircleAvatar(
-                                  radius: 11,
-                                  backgroundColor: const Color(0xFFFEF8F3),
-                                  backgroundImage: post.pet.profileImageUrl.isNotEmpty
-                                      ? NetworkImage(post.pet.profileImageUrl)
-                                      : null,
-                                  child: post.pet.profileImageUrl.isEmpty
-                                      ? Text(
-                                          post.pet.name.isNotEmpty ? post.pet.name[0] : '?',
-                                          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF99472C)),
-                                        )
-                                      : null,
-                                ),
-                              ),
-                          ],
+                    ),
+                    for (final pet in myOwnedPets)
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => setState(() => selectedId = pet.id),
+                        child: _PetCarouselAvatar(
+                          pet: pet,
+                          isSelected: pet.id == selectedId,
                         ),
                       ),
-                    );
-                  },
-                  childCount: displayedPosts.length,
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => context.push('/add_pet'),
+                      child: const _AddPetAvatar(),
+                    ),
+                  ],
                 ),
               ),
             ),
 
-          SliverToBoxAdapter(child: SizedBox(height: bottomNavSpaceFor(context))),
-        ],
+            // ── Post category filter chips (tertiary styled) ─────
+            if (!isOwnerView && selectedPet != null)
+              SliverToBoxAdapter(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: Row(
+                    children: [
+                      for (final cat in [
+                        null,
+                        'Playtime',
+                        'Nap',
+                        'Outdoor',
+                        'Food'
+                      ])
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: GestureDetector(
+                            onTap: () => setState(() => _postCategory = cat),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: _postCategory == cat
+                                    ? const Color(0xFF506453)
+                                    : const Color(0xFFE5FDE6),
+                                borderRadius: BorderRadius.circular(9999),
+                              ),
+                              child: Text(
+                                cat ?? 'All Posts',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: _postCategory == cat
+                                      ? const Color(0xFFE8FFE8)
+                                      : const Color(0xFF4E6251),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+            // ── Posts grid (bento / standard) ──────────────────
+            if (myOwnedPets.isEmpty && isOwnerView)
+              SliverToBoxAdapter(
+                child: _EmptyPetsCta(
+                  onAddPet: () => context.push('/add_pet'),
+                ),
+              )
+            else if (displayedPosts.isEmpty)
+              SliverToBoxAdapter(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 40.0),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.camera_alt_outlined,
+                            size: 48, color: Color(0xFFB7B1AA)),
+                        const SizedBox(height: 12),
+                        const Text('No posts yet',
+                            style: TextStyle(
+                                color: Color(0xFF625E59),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16)),
+                        const SizedBox(height: 4),
+                        Text(
+                          isOwnerView
+                              ? 'Create a post to see it here.'
+                              : 'Create a post as ${selectedPet?.name ?? 'this pet'}.',
+                          style: const TextStyle(
+                              color: Color(0xFFB7B1AA), fontSize: 13),
+                        ),
+                        if (!isOwnerView && selectedPet != null) ...[
+                          const SizedBox(height: 16),
+                          GestureDetector(
+                            onTap: () => context
+                                .push('/create_post?petId=${selectedPet!.id}'),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF99472C),
+                                    Color(0xFF8A3B21)
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(9999),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.add_a_photo_outlined,
+                                      size: 16, color: Colors.white),
+                                  SizedBox(width: 8),
+                                  Text('Create Post',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 6,
+                    crossAxisSpacing: 6,
+                    childAspectRatio: 1,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final post = displayedPosts[index];
+                      return GestureDetector(
+                        onTap: () => context.push('/post/${post.id}'),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              if (isVideoMedia(post.mediaUrl))
+                                Container(
+                                  color: const Color(0xFF211F1B),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.play_circle_fill_rounded,
+                                      color: Color(0xFFD4845A),
+                                      size: 42,
+                                    ),
+                                  ),
+                                )
+                              else
+                                Image.network(
+                                  post.mediaUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (ctx, _, __) => Container(
+                                    color: const Color(0xFFF3EDE6),
+                                    child: const Icon(Icons.image_outlined,
+                                        color: Color(0xFFB7B1AA)),
+                                  ),
+                                ),
+                              if (isVideoMedia(post.mediaUrl))
+                                const Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: Icon(
+                                    Icons.videocam_rounded,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                ),
+                              if (isOwnerView)
+                                Positioned(
+                                  bottom: 4,
+                                  right: 4,
+                                  child: CircleAvatar(
+                                    radius: 11,
+                                    backgroundColor: const Color(0xFFFEF8F3),
+                                    backgroundImage: post
+                                            .pet.profileImageUrl.isNotEmpty
+                                        ? NetworkImage(post.pet.profileImageUrl)
+                                        : null,
+                                    child: post.pet.profileImageUrl.isEmpty
+                                        ? Text(
+                                            post.pet.name.isNotEmpty
+                                                ? post.pet.name[0]
+                                                : '?',
+                                            style: const TextStyle(
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF99472C)),
+                                          )
+                                        : null,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                    childCount: displayedPosts.length,
+                  ),
+                ),
+              ),
+
+            SliverToBoxAdapter(
+                child: SizedBox(height: bottomNavSpaceFor(context))),
+          ],
         ),
       ),
       floatingActionButton: !isOwnerView && selectedPet != null
@@ -503,16 +591,19 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               padding: EdgeInsets.only(bottom: bottomNavSpaceFor(context)),
               child: FloatingActionButton(
                 heroTag: 'profile_fab',
-                onPressed: () => context.push('/create_post?petId=${selectedPet!.id}'),
+                onPressed: () =>
+                    context.push('/create_post?petId=${selectedPet!.id}'),
                 backgroundColor: const Color(0xFFFF8A65),
-                child: const Icon(Icons.add_a_photo_outlined, color: Colors.white),
+                child:
+                    const Icon(Icons.add_a_photo_outlined, color: Colors.white),
               ),
             )
           : null,
     );
   }
 
-  void _showProfileShareSheet(BuildContext context, String shareLink, String name) {
+  void _showProfileShareSheet(
+      BuildContext context, String shareLink, String name) {
     final colorScheme = Theme.of(context).colorScheme;
 
     showModalBottomSheet(
@@ -538,7 +629,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               const SizedBox(height: 16),
               Text(
                 'Share $name',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
               const SizedBox(height: 8),
               const Divider(),
@@ -554,7 +646,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                 title: const Text('Copy Profile Link'),
                 subtitle: Text(
                   shareLink,
-                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                      fontSize: 12, color: colorScheme.onSurfaceVariant),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -565,7 +658,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     SnackBar(
                       content: const Row(
                         children: [
-                          Icon(Icons.check_circle, color: Colors.white, size: 16),
+                          Icon(Icons.check_circle,
+                              color: Colors.white, size: 16),
                           SizedBox(width: 8),
                           Text('Link copied to clipboard!'),
                         ],
@@ -587,7 +681,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     shape: BoxShape.circle,
                     color: colorScheme.secondary.withAlpha(26),
                   ),
-                  child: Icon(Icons.chat_bubble_outline, color: colorScheme.secondary),
+                  child: Icon(Icons.chat_bubble_outline,
+                      color: colorScheme.secondary),
                 ),
                 title: const Text('Send in Message'),
                 onTap: () {
@@ -625,7 +720,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           const SizedBox(height: 8),
                           Text(
                             'Scan or copy this profile link',
-                            style: TextStyle(color: colorScheme.onSurfaceVariant),
+                            style:
+                                TextStyle(color: colorScheme.onSurfaceVariant),
                           ),
                           const SizedBox(height: 12),
                           SelectableText(
@@ -665,7 +761,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
     );
   }
 
-  Widget _buildAvatar(bool isOwnerView, UserModel? user, PetModel? selectedPet) {
+  Widget _buildAvatar(
+      bool isOwnerView, UserModel? user, PetModel? selectedPet) {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -673,17 +770,19 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
       ),
       child: CircleAvatar(
         radius: 40,
-        backgroundColor: isOwnerView
-            ? const Color(0xFFFF8A65).withAlpha(26)
-            : Colors.white,
+        backgroundColor:
+            isOwnerView ? const Color(0xFFFF8A65).withAlpha(26) : Colors.white,
         backgroundImage: isOwnerView
-            ? (user?.profileImageUrl != null && user!.profileImageUrl!.isNotEmpty
+            ? (user?.profileImageUrl != null &&
+                    user!.profileImageUrl!.isNotEmpty
                 ? NetworkImage(user.profileImageUrl!)
                 : null)
             : (selectedPet != null && selectedPet.profileImageUrl.isNotEmpty
                 ? NetworkImage(selectedPet.profileImageUrl)
                 : null),
-        child: isOwnerView && (user?.profileImageUrl == null || user!.profileImageUrl!.isEmpty)
+        child: isOwnerView &&
+                (user?.profileImageUrl == null ||
+                    user!.profileImageUrl!.isEmpty)
             ? Text(
                 user?.initials ?? '?',
                 style: const TextStyle(
@@ -692,7 +791,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                   color: Color(0xFFFF8A65),
                 ),
               )
-            : (!isOwnerView && (selectedPet == null || selectedPet.profileImageUrl.isEmpty)
+            : (!isOwnerView &&
+                    (selectedPet == null || selectedPet.profileImageUrl.isEmpty)
                 ? Icon(Icons.pets, size: 32, color: Colors.grey.shade400)
                 : null),
       ),
@@ -770,7 +870,8 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
     super.initState();
     _nameController = TextEditingController(text: widget.user.name ?? '');
     _bioController = TextEditingController(text: widget.user.bio ?? '');
-    _locationController = TextEditingController(text: widget.user.location ?? '');
+    _locationController =
+        TextEditingController(text: widget.user.location ?? '');
   }
 
   @override
@@ -828,7 +929,8 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
                 backgroundColor: Colors.orange.shade700,
                 behavior: SnackBarBehavior.floating,
                 duration: const Duration(seconds: 5),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             );
           }
@@ -841,7 +943,8 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
       }
 
       debugPrint('Updating profile with fields: $fields');
-      final success = await ref.read(authProvider.notifier).updateProfile(fields);
+      final success =
+          await ref.read(authProvider.notifier).updateProfile(fields);
 
       if (mounted) {
         if (success) {
@@ -857,7 +960,8 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
               ),
               backgroundColor: const Color(0xFF81C784),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
           );
         } else {
@@ -867,7 +971,8 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
               content: Text('Update failed: ${authError ?? 'Unknown error'}'),
               backgroundColor: Colors.redAccent,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
           );
         }
@@ -934,7 +1039,9 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
                       backgroundColor: const Color(0xFFFF8A65).withAlpha(26),
                       backgroundImage: _newAvatar != null
                           ? FileImage(_newAvatar!) as ImageProvider
-                          : (hasAvatar ? NetworkImage(currentAvatarUrl) as ImageProvider : null),
+                          : (hasAvatar
+                              ? NetworkImage(currentAvatarUrl) as ImageProvider
+                              : null),
                       child: (_newAvatar == null && !hasAvatar)
                           ? Text(
                               widget.user.initials,
@@ -956,7 +1063,8 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2),
                         ),
-                        child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                        child: const Icon(Icons.camera_alt,
+                            size: 16, color: Colors.white),
                       ),
                     ),
                   ],
@@ -990,12 +1098,14 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
               maxLines: 3,
               maxLength: 300,
               textCapitalization: TextCapitalization.sentences,
-              decoration: _sheetInputDecoration('Tell others about yourself...'),
+              decoration:
+                  _sheetInputDecoration('Tell others about yourself...'),
             ),
             const SizedBox(height: 20),
 
             // Location
-            _SheetFieldLabel(icon: Icons.location_on_outlined, label: 'Location'),
+            _SheetFieldLabel(
+                icon: Icons.location_on_outlined, label: 'Location'),
             const SizedBox(height: 6),
             TextField(
               controller: _locationController,
@@ -1206,7 +1316,8 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
       if (_newAvatar != null) {
         try {
           final ext = _newAvatar!.path.split('.').last;
-          final path = '${widget.pet.id}/${DateTime.now().millisecondsSinceEpoch}.$ext';
+          final path =
+              '${widget.pet.id}/${DateTime.now().millisecondsSinceEpoch}.$ext';
           final avatarUrl = await ImageUploadHelper.upload(
             file: _newAvatar!,
             bucket: kBucketPetImages,
@@ -1225,7 +1336,8 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
                 backgroundColor: Colors.orange.shade700,
                 behavior: SnackBarBehavior.floating,
                 duration: const Duration(seconds: 5),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             );
           }
@@ -1237,7 +1349,8 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
         return;
       }
 
-      final success = await ref.read(petProvider.notifier).updatePet(widget.pet.id, fields);
+      final success =
+          await ref.read(petProvider.notifier).updatePet(widget.pet.id, fields);
 
       if (mounted) {
         if (success) {
@@ -1253,7 +1366,8 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               ),
               backgroundColor: const Color(0xFF81C784),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
           );
         } else {
@@ -1263,7 +1377,8 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               content: Text('Update failed: ${petError ?? 'Unknown error'}'),
               backgroundColor: Colors.redAccent,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
           );
         }
@@ -1314,7 +1429,6 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
-
             Center(
               child: GestureDetector(
                 onTap: _showImageSourceSheet,
@@ -1326,10 +1440,13 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
                       backgroundImage: _newAvatar != null
                           ? FileImage(_newAvatar!) as ImageProvider
                           : (widget.pet.profileImageUrl.isNotEmpty
-                              ? NetworkImage(widget.pet.profileImageUrl) as ImageProvider
+                              ? NetworkImage(widget.pet.profileImageUrl)
+                                  as ImageProvider
                               : null),
-                      child: (_newAvatar == null && widget.pet.profileImageUrl.isEmpty)
-                          ? Icon(Icons.pets, size: 32, color: Colors.grey.shade400)
+                      child: (_newAvatar == null &&
+                              widget.pet.profileImageUrl.isEmpty)
+                          ? Icon(Icons.pets,
+                              size: 32, color: Colors.grey.shade400)
                           : null,
                     ),
                     Positioned(
@@ -1342,7 +1459,8 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2),
                         ),
-                        child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                        child: const Icon(Icons.camera_alt,
+                            size: 16, color: Colors.white),
                       ),
                     ),
                   ],
@@ -1357,8 +1475,8 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               ),
             ),
             const SizedBox(height: 24),
-
-            const Text('Name', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+            const Text('Name',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
             const SizedBox(height: 6),
             TextField(
               controller: _nameController,
@@ -1376,8 +1494,8 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               ),
             ),
             const SizedBox(height: 16),
-
-            const Text('Breed', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+            const Text('Breed',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
             const SizedBox(height: 6),
             TextField(
               controller: _breedController,
@@ -1395,8 +1513,8 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               ),
             ),
             const SizedBox(height: 16),
-
-            const Text('Bio', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+            const Text('Bio',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
             const SizedBox(height: 6),
             TextField(
               controller: _bioController,
@@ -1416,7 +1534,6 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               ),
             ),
             const SizedBox(height: 24),
-
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -1559,7 +1676,8 @@ class _OwnerCarouselAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = user?.profileImageUrl != null && user!.profileImageUrl!.isNotEmpty;
+    final hasImage =
+        user?.profileImageUrl != null && user!.profileImageUrl!.isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.only(right: 12.0, bottom: 8),
@@ -1567,10 +1685,13 @@ class _OwnerCarouselAvatar extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD4845A).withValues(alpha: 0.15) : const Color(0xFF211F1B),
+          color: isSelected
+              ? const Color(0xFFD4845A).withValues(alpha: 0.15)
+              : const Color(0xFF211F1B),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
+            color:
+                isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
             width: 1.5,
           ),
         ),
@@ -1580,11 +1701,15 @@ class _OwnerCarouselAvatar extends StatelessWidget {
             CircleAvatar(
               radius: 14,
               backgroundColor: const Color(0xFFD4845A).withValues(alpha: 0.2),
-              backgroundImage: hasImage ? NetworkImage(user!.profileImageUrl!) : null,
+              backgroundImage:
+                  hasImage ? NetworkImage(user!.profileImageUrl!) : null,
               child: !hasImage
                   ? Text(
                       user?.initials ?? '?',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: Color(0xFFD4845A)),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          color: Color(0xFFD4845A)),
                     )
                   : null,
             ),
@@ -1618,10 +1743,13 @@ class _PetCarouselAvatar extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD4845A).withValues(alpha: 0.15) : const Color(0xFF211F1B),
+          color: isSelected
+              ? const Color(0xFFD4845A).withValues(alpha: 0.15)
+              : const Color(0xFF211F1B),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
+            color:
+                isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
             width: 1.5,
           ),
         ),
@@ -1636,7 +1764,8 @@ class _PetCarouselAvatar extends StatelessWidget {
               backgroundColor: Colors.grey.shade800,
               child: pet.profileImageUrl.isEmpty
                   ? Text(pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10))
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 10))
                   : null,
             ),
             const SizedBox(width: 8),
@@ -1680,7 +1809,8 @@ class _AddPetAvatar extends StatelessWidget {
             CircleAvatar(
               radius: 14,
               backgroundColor: const Color(0xFFD4845A).withValues(alpha: 0.1),
-              child: const Icon(Icons.add_rounded, color: Color(0xFFD4845A), size: 16),
+              child: const Icon(Icons.add_rounded,
+                  color: Color(0xFFD4845A), size: 16),
             ),
             const SizedBox(width: 8),
             const Text(
@@ -1709,7 +1839,8 @@ class _StatColumn extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        Text(value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         Text(
           label,
           style:

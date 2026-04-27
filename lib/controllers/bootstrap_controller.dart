@@ -47,8 +47,7 @@ final bootstrapProvider = Provider<void>((ref) {
         lastHydratedUserId != null && lastHydratedUserId != userId;
     final isSameUserRefresh = lastHydratedUserId == userId;
     lastHydratedUserId = userId;
-    debugPrint(
-        '[bootstrap] hydrating data for user=$userId '
+    debugPrint('[bootstrap] hydrating data for user=$userId '
         '(switch=$isAccountSwitch, sameUser=$isSameUserRefresh)');
 
     ref.read(feedProvider.notifier).refresh();

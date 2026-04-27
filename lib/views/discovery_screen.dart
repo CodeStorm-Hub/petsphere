@@ -77,7 +77,8 @@ class DiscoveryScreen extends ConsumerWidget {
                         const Center(
                             child: Text('You haven\'t listed any pets yet.',
                                 style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold))),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold))),
                         const SizedBox(height: 8),
                         const Center(
                             child: Text(
@@ -161,7 +162,8 @@ class _DiscoverTab extends StatefulWidget {
   State<_DiscoverTab> createState() => _DiscoverTabState();
 }
 
-class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixin {
+class _DiscoverTabState extends State<_DiscoverTab>
+    with TickerProviderStateMixin {
   int _currentIndex = 0;
   String? _filterAnimal; // null = For You
   final Set<String> _dismissedPetIds = {};
@@ -173,9 +175,8 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
   static const _filterValues = [null, 'Dog', 'Cat', 'Nearby'];
 
   List<PetModel> get _filteredPets {
-    final visiblePets = widget.pets
-        .where((pet) => !_dismissedPetIds.contains(pet.id))
-        .toList();
+    final visiblePets =
+        widget.pets.where((pet) => !_dismissedPetIds.contains(pet.id)).toList();
     if (_filterAnimal == null) return visiblePets;
     if (_filterAnimal == 'Nearby') {
       visiblePets.sort(
@@ -230,19 +231,24 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
     _swipeAnimation = Tween<Offset>(
       begin: Offset.zero,
       end: Offset(liked ? 2.0 : -2.0, -0.3),
-    ).animate(CurvedAnimation(parent: _swipeController, curve: Curves.easeInCubic));
+    ).animate(
+        CurvedAnimation(parent: _swipeController, curve: Curves.easeInCubic));
 
     _swipeController.forward(from: 0).then((_) {
       if (!mounted) return;
       setState(() {
         _dismissedPetIds.add(pet.id);
-        _currentIndex = math.min(_currentIndex, math.max(0, _filteredPets.length - 1));
+        _currentIndex =
+            math.min(_currentIndex, math.max(0, _filteredPets.length - 1));
         _isAnimating = false;
       });
       _swipeController.reset();
 
       if (!liked) return;
-      widget.ref.read(matchProvider.notifier).sendLikeRequest(pet.id).then((success) {
+      widget.ref
+          .read(matchProvider.notifier)
+          .sendLikeRequest(pet.id)
+          .then((success) {
         if (!mounted) return;
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -319,7 +325,8 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
             const SizedBox(height: 24),
             Center(
               child: OutlinedButton(
-                onPressed: () => widget.ref.read(matchProvider.notifier).refresh(),
+                onPressed: () =>
+                    widget.ref.read(matchProvider.notifier).refresh(),
                 child: const Text('Try Again'),
               ),
             ),
@@ -347,11 +354,16 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
                   }),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppTheme.primaryAccent.withValues(alpha: 0.15) : AppTheme.cardColor,
+                      color: isSelected
+                          ? AppTheme.primaryAccent.withValues(alpha: 0.15)
+                          : AppTheme.cardColor,
                       border: Border.all(
-                        color: isSelected ? AppTheme.primaryAccent : AppTheme.border,
+                        color: isSelected
+                            ? AppTheme.primaryAccent
+                            : AppTheme.border,
                         width: 1.5,
                       ),
                       borderRadius: BorderRadius.circular(999),
@@ -359,7 +371,9 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
                     child: Text(
                       _filterLabels[i],
                       style: TextStyle(
-                        color: isSelected ? AppTheme.primaryAccent : AppTheme.textSecondary,
+                        color: isSelected
+                            ? AppTheme.primaryAccent
+                            : AppTheme.textSecondary,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -375,7 +389,8 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
         Expanded(
           child: !hasPets
               ? RefreshIndicator(
-                  onRefresh: () => widget.ref.read(matchProvider.notifier).refresh(),
+                  onRefresh: () =>
+                      widget.ref.read(matchProvider.notifier).refresh(),
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
@@ -408,7 +423,10 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
                                 top: 8,
                                 child: Transform.scale(
                                   scale: 0.95,
-                                  child: _PetCard(pet: filteredPets[(_currentIndex + 1) % filteredPets.length], isBackground: true),
+                                  child: _PetCard(
+                                      pet: filteredPets[(_currentIndex + 1) %
+                                          filteredPets.length],
+                                      isBackground: true),
                                 ),
                               ),
                             // Foreground card
@@ -421,22 +439,29 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
                                 final angle = offset.dx * 0.05;
                                 return GestureDetector(
                                   onHorizontalDragEnd: (details) {
-                                    if (details.velocity.pixelsPerSecond.dx > 400) {
+                                    if (details.velocity.pixelsPerSecond.dx >
+                                        400) {
                                       _swipePet(true);
-                                    } else if (details.velocity.pixelsPerSecond.dx < -400) {
+                                    } else if (details
+                                            .velocity.pixelsPerSecond.dx <
+                                        -400) {
                                       _swipePet(false);
                                     }
                                   },
                                   child: Transform.translate(
                                     offset: Offset(
-                                      offset.dx * MediaQuery.of(context).size.width,
+                                      offset.dx *
+                                          MediaQuery.of(context).size.width,
                                       offset.dy * 100,
                                     ),
                                     child: Transform.rotate(
                                       angle: angle,
                                       child: GestureDetector(
-                                        onTap: () => context.push('/pet/${filteredPets[_currentIndex].id}'),
-                                        child: _PetCard(pet: filteredPets[_currentIndex], isBackground: false),
+                                        onTap: () => context.push(
+                                            '/pet/${filteredPets[_currentIndex].id}'),
+                                        child: _PetCard(
+                                            pet: filteredPets[_currentIndex],
+                                            isBackground: false),
                                       ),
                                     ),
                                   ),
@@ -462,10 +487,18 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF1A1814),
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: const Color(0xFF2E2B26), width: 1.5),
-                                  boxShadow: [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 16, offset: const Offset(0, 4))],
+                                  border: Border.all(
+                                      color: const Color(0xFF2E2B26),
+                                      width: 1.5),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black.withAlpha(50),
+                                        blurRadius: 16,
+                                        offset: const Offset(0, 4))
+                                  ],
                                 ),
-                                child: const Icon(Icons.close_rounded, size: 28, color: Color(0xFFB8B0A4)),
+                                child: const Icon(Icons.close_rounded,
+                                    size: 28, color: Color(0xFFB8B0A4)),
                               ),
                             ),
                             const SizedBox(width: 24),
@@ -480,10 +513,18 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF1A1814),
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: const Color(0xFF2E2B26), width: 1.5),
-                                  boxShadow: [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 16, offset: const Offset(0, 4))],
+                                  border: Border.all(
+                                      color: const Color(0xFF2E2B26),
+                                      width: 1.5),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black.withAlpha(50),
+                                        blurRadius: 16,
+                                        offset: const Offset(0, 4))
+                                  ],
                                 ),
-                                child: const Icon(Icons.star_rounded, size: 28, color: Color(0xFF4A7C59)),
+                                child: const Icon(Icons.star_rounded,
+                                    size: 28, color: Color(0xFF4A7C59)),
                               ),
                             ),
                             const SizedBox(width: 24),
@@ -495,16 +536,23 @@ class _DiscoverTabState extends State<_DiscoverTab> with TickerProviderStateMixi
                                 height: 80,
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
-                                    colors: [Color(0xFFD4845A), Color(0xFFB86A44)],
+                                    colors: [
+                                      Color(0xFFD4845A),
+                                      Color(0xFFB86A44)
+                                    ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
                                   shape: BoxShape.circle,
                                   boxShadow: const [
-                                    BoxShadow(color: Color(0x4DD4845A), blurRadius: 24, offset: Offset(0, 8)),
+                                    BoxShadow(
+                                        color: Color(0x4DD4845A),
+                                        blurRadius: 24,
+                                        offset: Offset(0, 8)),
                                   ],
                                 ),
-                                child: const Icon(Icons.favorite, size: 36, color: Colors.white),
+                                child: const Icon(Icons.favorite,
+                                    size: 36, color: Colors.white),
                               ),
                             ),
                           ],
@@ -529,10 +577,12 @@ class _PetCard extends StatelessWidget {
     final v = (pet.name.length + pet.age * 3) % 10;
     return 50 + v * 5;
   }
+
   int _healthScore() {
     final v = (pet.breed.length + pet.age) % 10;
     return 60 + v * 4;
   }
+
   int _socialScore() {
     final v = (pet.animalType.length + pet.name.length) % 10;
     return 55 + v * 4;
@@ -544,12 +594,14 @@ class _PetCard extends StatelessWidget {
     if (e >= 65) return 'Medium';
     return 'Calm';
   }
+
   String _healthLabel() {
     final h = _healthScore();
     if (h >= 88) return 'Perfect';
     if (h >= 70) return 'Good';
     return 'Fair';
   }
+
   String _socialLabel() {
     final s = _socialScore();
     if (s >= 85) return 'Friendly';
@@ -591,19 +643,22 @@ class _PetCard extends StatelessWidget {
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
                           color: const Color(0xFF211F1B),
-                          child: const Icon(Icons.pets, size: 80, color: Color(0xFFD4845A)),
+                          child: const Icon(Icons.pets,
+                              size: 80, color: Color(0xFFD4845A)),
                         ),
                       )
                     : Container(
                         color: const Color(0xFF211F1B),
-                        child: const Icon(Icons.pets, size: 80, color: Color(0xFFD4845A)),
+                        child: const Icon(Icons.pets,
+                            size: 80, color: Color(0xFFD4845A)),
                       ),
                 // Distance badge
                 Positioned(
                   bottom: 20,
                   left: 20,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
                       color: const Color(0xFF1A1814).withValues(alpha: 0.85),
                       borderRadius: BorderRadius.circular(999),
@@ -612,11 +667,15 @@ class _PetCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.location_on, size: 14, color: Color(0xFFD4845A)),
+                        const Icon(Icons.location_on,
+                            size: 14, color: Color(0xFFD4845A)),
                         const SizedBox(width: 4),
                         Text(
                           '$distanceMi miles away',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFF2EDE4)),
+                          style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFF2EDE4)),
                         ),
                       ],
                     ),
@@ -630,8 +689,10 @@ class _PetCard extends StatelessWidget {
                     child: Container(
                       width: 36,
                       height: 36,
-                      decoration: const BoxDecoration(color: Color(0xFF1DA1F2), shape: BoxShape.circle),
-                      child: const Icon(Icons.verified, size: 20, color: Colors.white),
+                      decoration: const BoxDecoration(
+                          color: Color(0xFF1DA1F2), shape: BoxShape.circle),
+                      child: const Icon(Icons.verified,
+                          size: 20, color: Colors.white),
                     ),
                   ),
               ],
@@ -661,17 +722,22 @@ class _PetCard extends StatelessWidget {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4845A).withValues(alpha: 0.15),
+                          color:
+                              const Color(0xFFD4845A).withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.pets, size: 22, color: Color(0xFFD4845A)),
+                        child: const Icon(Icons.pets,
+                            size: 22, color: Color(0xFFD4845A)),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${pet.age} yr${pet.age == 1 ? '' : 's'} • ${pet.breed}',
-                    style: const TextStyle(fontSize: 15, color: Color(0xFFB8B0A4), fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                        fontSize: 15,
+                        color: Color(0xFFB8B0A4),
+                        fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 12),
                   // Traits bento grid
@@ -711,9 +777,17 @@ class _TraitBadge extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(label, style: const TextStyle(fontSize: 11, color: Color(0xFFB8B0A4), fontWeight: FontWeight.w500)),
+            Text(label,
+                style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFFB8B0A4),
+                    fontWeight: FontWeight.w500)),
             const SizedBox(height: 2),
-            Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFFD4845A))),
+            Text(value,
+                style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFD4845A))),
           ],
         ),
       ),
@@ -754,7 +828,8 @@ class _NearbyTab extends StatelessWidget {
         final distanceKm = _distanceKmForPet(pet);
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: ListTile(
             contentPadding: const EdgeInsets.all(12),
             leading: CircleAvatar(
@@ -769,10 +844,12 @@ class _NearbyTab extends StatelessWidget {
             ),
             title: Row(
               children: [
-                Text(pet.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(pet.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 if (pet.isVerified) ...[
                   const SizedBox(width: 4),
-                  const Icon(Icons.verified, size: 14, color: Color(0xFF1DA1F2)),
+                  const Icon(Icons.verified,
+                      size: 14, color: Color(0xFF1DA1F2)),
                 ],
               ],
             ),
@@ -781,10 +858,14 @@ class _NearbyTab extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const Icon(Icons.location_on, size: 14, color: Colors.redAccent),
+                const Icon(Icons.location_on,
+                    size: 14, color: Colors.redAccent),
                 Text(
                   '${distanceKm.toStringAsFixed(1)} km',
-                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -886,13 +967,14 @@ class _ListPetSheetWidgetState extends State<_ListPetSheetWidget> {
                           title: Row(
                             children: [
                               CircleAvatar(
-                                backgroundImage: NetworkImage(pet.profileImageUrl),
+                                backgroundImage:
+                                    NetworkImage(pet.profileImageUrl),
                               ),
                               const SizedBox(width: 12),
                               Text(
                                 pet.name,
-                                style:
-                                    const TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),

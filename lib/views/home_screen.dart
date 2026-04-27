@@ -69,8 +69,8 @@ class HomeScreen extends ConsumerWidget {
           const SizedBox(width: 4),
         ],
       ),
-      body: _buildBody(
-          context, ref, feedState, currentPetId, firstName, myPets),
+      body:
+          _buildBody(context, ref, feedState, currentPetId, firstName, myPets),
     );
   }
 
@@ -174,7 +174,8 @@ class HomeScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.photo_camera_outlined,
-                            size: 56, color: colorScheme.outline.withAlpha(120)),
+                            size: 56,
+                            color: colorScheme.outline.withAlpha(120)),
                         const SizedBox(height: 16),
                         Text(
                           'No posts yet',
@@ -195,8 +196,8 @@ class HomeScreen extends ConsumerWidget {
                         const SizedBox(height: 20),
                         FilledButton.icon(
                           onPressed: () => context.push('/create_post'),
-                          icon: const Icon(Icons.add_a_photo_outlined,
-                              size: 18),
+                          icon:
+                              const Icon(Icons.add_a_photo_outlined, size: 18),
                           label: const Text('Create Post'),
                         ),
                       ],
@@ -247,9 +248,10 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  void _showShareSheet(BuildContext context, WidgetRef ref, PostModel post) async {
+  void _showShareSheet(
+      BuildContext context, WidgetRef ref, PostModel post) async {
     final shareLink = 'https://petsphere.app/post/${post.id}';
-    
+
     final result = await SharePlus.instance.share(
       ShareParams(
         text: 'Check out this pet on PetSphere!\n$shareLink',
@@ -352,12 +354,14 @@ class HomeScreen extends ConsumerWidget {
                               final isCurrent = pet.id == currentPetId;
                               return ListTile(
                                 contentPadding: EdgeInsets.zero,
-                                onTap: () => Navigator.pop(sheetContext, pet.id),
+                                onTap: () =>
+                                    Navigator.pop(sheetContext, pet.id),
                                 leading: CircleAvatar(
                                   backgroundColor: const Color(0xFF211F1B),
-                                  backgroundImage: pet.profileImageUrl.isNotEmpty
-                                      ? NetworkImage(pet.profileImageUrl)
-                                      : null,
+                                  backgroundImage:
+                                      pet.profileImageUrl.isNotEmpty
+                                          ? NetworkImage(pet.profileImageUrl)
+                                          : null,
                                   child: pet.profileImageUrl.isEmpty
                                       ? Text(
                                           pet.name.isNotEmpty
@@ -375,7 +379,8 @@ class HomeScreen extends ConsumerWidget {
                                 ),
                                 subtitle: Text(
                                   pet.breed,
-                                  style: const TextStyle(color: Color(0xFFB8B0A4)),
+                                  style:
+                                      const TextStyle(color: Color(0xFFB8B0A4)),
                                 ),
                                 trailing: isCurrent
                                     ? const Icon(
@@ -513,8 +518,8 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  void _showCommentSheet(
-      BuildContext context, String postId, String currentPetId, String petName) {
+  void _showCommentSheet(BuildContext context, String postId,
+      String currentPetId, String petName) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -669,8 +674,7 @@ class _CommentBottomSheetWidgetState
                       }
 
                       return ListTile(
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 4),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 4),
                         leading: GestureDetector(
                           onTap: openCommenter,
                           child: CircleAvatar(
@@ -785,9 +789,8 @@ class _StoriesRow extends StatelessWidget {
     final primaryMyStoryPet = activePetHasStory
         ? activePet
         : (myStoryPets.isNotEmpty ? myStoryPets.first : null);
-    final additionalMyStoryPets = myStoryPets
-        .where((pet) => pet.id != primaryMyStoryPet?.id)
-        .toList();
+    final additionalMyStoryPets =
+        myStoryPets.where((pet) => pet.id != primaryMyStoryPet?.id).toList();
     final followedStoryPets = externalStoryPetsById.values.toList();
 
     return SingleChildScrollView(
@@ -799,7 +802,9 @@ class _StoriesRow extends StatelessWidget {
           _StoryItem(
             imageUrl: (primaryMyStoryPet ?? activePet).profileImageUrl,
             label: 'Your story',
-            ringStyle: primaryMyStoryPet != null ? _RingStyle.gradient : _RingStyle.none,
+            ringStyle: primaryMyStoryPet != null
+                ? _RingStyle.gradient
+                : _RingStyle.none,
             badge: _StoryBadge.plus,
             onBadgeTap: onCreateStory,
             onTap: () => onYourStoryTap(primaryMyStoryPet?.id),
@@ -833,7 +838,6 @@ class _StoryItem extends StatelessWidget {
   final String label;
   final _RingStyle ringStyle;
   final _StoryBadge badge;
-  final IconData? iconOverride;
   final VoidCallback onTap;
   final VoidCallback? onBadgeTap;
 
@@ -842,7 +846,6 @@ class _StoryItem extends StatelessWidget {
     required this.label,
     required this.ringStyle,
     this.badge = _StoryBadge.none,
-    this.iconOverride,
     required this.onTap,
     this.onBadgeTap,
   });
@@ -855,11 +858,10 @@ class _StoryItem extends StatelessWidget {
     Widget avatar = CircleAvatar(
       radius: innerRadius,
       backgroundColor: colorScheme.surfaceContainerHighest,
-      backgroundImage:
-          imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+      backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
       child: imageUrl.isEmpty
           ? Icon(
-              iconOverride ?? Icons.pets,
+              Icons.pets,
               size: innerRadius * 0.8,
               color: colorScheme.onSurfaceVariant,
             )
@@ -1035,8 +1037,7 @@ class _NotificationIconButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final unread =
-        ref.watch(notificationProvider.select((s) => s.unreadCount));
+    final unread = ref.watch(notificationProvider.select((s) => s.unreadCount));
 
     return IconButton(
       tooltip: unread > 0 ? 'Notifications ($unread unread)' : 'Notifications',
@@ -1058,8 +1059,7 @@ class _NotificationIconButton extends ConsumerWidget {
                     width: 1.5,
                   ),
                 ),
-                constraints:
-                    const BoxConstraints(minWidth: 16, minHeight: 16),
+                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                 child: Text(
                   unread > 99 ? '99+' : '$unread',
                   style: const TextStyle(
@@ -1107,8 +1107,7 @@ class _MessageIconButton extends ConsumerWidget {
                     width: 1.5,
                   ),
                 ),
-                constraints:
-                    const BoxConstraints(minWidth: 16, minHeight: 16),
+                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                 child: Text(
                   unread > 99 ? '99+' : '$unread',
                   style: const TextStyle(
@@ -1126,4 +1125,3 @@ class _MessageIconButton extends ConsumerWidget {
     );
   }
 }
-
