@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -224,7 +225,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
             padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
             child: FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFD4845A),
+                backgroundColor: AppTheme.primaryAccent,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999),
@@ -302,12 +303,12 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                             ),
                             decoration: BoxDecoration(
                               color: selected
-                                  ? const Color(0xFFD4845A).withAlpha(40)
+                                  ? AppTheme.primaryAccent.withAlpha(40)
                                   : const Color(0xFF1C1A1D),
                               borderRadius: BorderRadius.circular(999),
                               border: Border.all(
                                 color: selected
-                                    ? const Color(0xFFD4845A)
+                                    ? AppTheme.primaryAccent
                                     : const Color(0xFF2B292B),
                                 width: 1.4,
                               ),
@@ -377,7 +378,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                                     Icon(
                                       Icons.add_circle_outline_rounded,
                                       size: 58,
-                                      color: Color(0xFFD4845A),
+                                      color: AppTheme.primaryAccent,
                                     ),
                                     SizedBox(height: 12),
                                     Text(
@@ -415,7 +416,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                                       Icon(
                                         Icons.play_circle_fill_rounded,
                                         size: 74,
-                                        color: Color(0xFFD4845A),
+                                        color: AppTheme.primaryAccent,
                                       ),
                                       SizedBox(height: 12),
                                       Text(
@@ -509,10 +510,10 @@ class _MediaPickerTile extends StatelessWidget {
         width: 38,
         height: 38,
         decoration: BoxDecoration(
-          color: const Color(0xFFD4845A).withAlpha(30),
+          color: AppTheme.primaryAccent.withAlpha(30),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(icon, color: const Color(0xFFD4845A)),
+        child: Icon(icon, color: AppTheme.primaryAccent),
       ),
       title: Text(
         title,

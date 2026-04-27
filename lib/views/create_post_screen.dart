@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/pet_model.dart';
@@ -93,19 +94,19 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         child: ListView.separated(
                           itemCount: availablePets.length,
                           separatorBuilder: (_, __) =>
-                              const Divider(height: 1, color: Color(0xFF2E2B26)),
+                              const Divider(height: 1, color: AppTheme.border),
                           itemBuilder: (context, index) {
                             final pet = availablePets[index];
                             final selected = draftTaggedPetIds.contains(pet.id);
                             return CheckboxListTile(
                               value: selected,
-                              activeColor: const Color(0xFFD4845A),
+                              activeColor: AppTheme.primaryAccent,
                               contentPadding: EdgeInsets.zero,
                               secondary: CircleAvatar(
                                 backgroundImage: pet.profileImageUrl.isNotEmpty
                                     ? NetworkImage(pet.profileImageUrl)
                                     : null,
-                                backgroundColor: const Color(0xFF211F1B),
+                                backgroundColor: AppTheme.cardColor,
                                 child: pet.profileImageUrl.isEmpty
                                     ? Text(
                                         pet.name.isNotEmpty
@@ -117,13 +118,13 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                               title: Text(
                                 pet.name,
                                 style: const TextStyle(
-                                  color: Color(0xFFF2EDE4),
+                                  color: AppTheme.textPrimary,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                               subtitle: Text(
                                 pet.breed,
-                                style: const TextStyle(color: Color(0xFFB8B0A4)),
+                                style: const TextStyle(color: AppTheme.textSecondary),
                               ),
                               onChanged: (_) {
                                 setSheetState(() {
@@ -183,9 +184,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         margin: const EdgeInsets.all(12),
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1814),
+          color: AppTheme.surface,
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: const Color(0xFF2E2B26)),
+          border: Border.all(color: AppTheme.border),
           boxShadow: const [
             BoxShadow(
               color: Color(0x99000000),
@@ -213,14 +214,14 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                   Text(
                     'Add Media',
                     style: TextStyle(
-                      color: Color(0xFFF2EDE4),
+                      color: AppTheme.textPrimary,
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.4,
                     ),
                   ),
                   Spacer(),
-                  Icon(Icons.auto_awesome, color: Color(0xFFD4845A)),
+                  Icon(Icons.auto_awesome, color: AppTheme.primaryAccent),
                 ],
               ),
               const SizedBox(height: 6),
@@ -228,7 +229,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Choose a photo or video for your post.',
-                  style: TextStyle(color: Color(0xFFB8B0A4)),
+                  style: TextStyle(color: AppTheme.textSecondary),
                 ),
               ),
               const SizedBox(height: 18),
@@ -244,7 +245,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     icon: Icons.photo_library_rounded,
                     title: 'Gallery',
                     subtitle: 'Photo',
-                    color: const Color(0xFFD4845A),
+                    color: AppTheme.primaryAccent,
                     onTap: () async {
                       Navigator.pop(ctx);
                       final file = await ImageUploadHelper.pickFromGallery();
@@ -390,7 +391,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
-        foregroundColor: const Color(0xFFF2EDE4),
+        foregroundColor: AppTheme.textPrimary,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 12),
@@ -407,7 +408,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             ),
             Text(
               'Share a fresh pet moment',
-              style: TextStyle(fontSize: 12, color: Color(0xFFB8B0A4)),
+              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
             ),
           ],
         ),
@@ -524,9 +525,9 @@ class _CloseComposerButton extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1814).withAlpha(230),
+              color: AppTheme.surface.withAlpha(230),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFF2E2B26)),
+              border: Border.all(color: AppTheme.border),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x66000000),
@@ -537,7 +538,7 @@ class _CloseComposerButton extends StatelessWidget {
             ),
             child: const Icon(
               Icons.close_rounded,
-              color: Color(0xFFF2EDE4),
+              color: AppTheme.textPrimary,
               size: 22,
             ),
           ),
@@ -564,9 +565,9 @@ class _ComposerSheet extends StatelessWidget {
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1814),
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFF2E2B26)),
+        border: Border.all(color: AppTheme.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x99000000),
@@ -595,14 +596,14 @@ class _ComposerSheet extends StatelessWidget {
             Text(
               title,
               style: const TextStyle(
-                color: Color(0xFFF2EDE4),
+                color: AppTheme.textPrimary,
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.4,
               ),
             ),
             const SizedBox(height: 6),
-            Text(subtitle, style: const TextStyle(color: Color(0xFFB8B0A4))),
+            Text(subtitle, style: const TextStyle(color: AppTheme.textSecondary)),
             const SizedBox(height: 18),
             child,
           ],
@@ -634,7 +635,7 @@ class _GradientShareButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 18),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFFD4845A), Color(0xFFB86A44)],
+              colors: [AppTheme.primaryAccent, Color(0xFFB86A44)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -682,18 +683,18 @@ class _ComposerHero extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
         gradient: const LinearGradient(
-          colors: [Color(0xFF211F1B), Color(0xFF171511)],
+          colors: [AppTheme.cardColor, Color(0xFF171511)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: Color(0xFF2E2B26)),
+        border: Border.all(color: AppTheme.border),
       ),
       child: const Row(
         children: [
           CircleAvatar(
             radius: 24,
             backgroundColor: Color(0x33D4845A),
-            child: Icon(Icons.auto_awesome, color: Color(0xFFD4845A)),
+            child: Icon(Icons.auto_awesome, color: AppTheme.primaryAccent),
           ),
           SizedBox(width: 14),
           Expanded(
@@ -703,7 +704,7 @@ class _ComposerHero extends StatelessWidget {
                 Text(
                   'Build a beautiful post',
                   style: TextStyle(
-                    color: Color(0xFFF2EDE4),
+                    color: AppTheme.textPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
@@ -712,7 +713,7 @@ class _ComposerHero extends StatelessWidget {
                 SizedBox(height: 4),
                 Text(
                   'Choose your pet, add media, then tell the story.',
-                  style: TextStyle(color: Color(0xFFB8B0A4), height: 1.25),
+                  style: TextStyle(color: AppTheme.textSecondary, height: 1.25),
                 ),
               ],
             ),
@@ -733,7 +734,7 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       label,
       style: const TextStyle(
-        color: Color(0xFFF2EDE4),
+        color: AppTheme.textPrimary,
         fontSize: 14,
         fontWeight: FontWeight.w800,
         letterSpacing: 0.2,
@@ -763,7 +764,7 @@ class _MediaComposerCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(32),
           gradient: const LinearGradient(
-            colors: [Color(0xFFD4845A), Color(0xFF4A7C59), Color(0xFF2E2B26)],
+            colors: [AppTheme.primaryAccent, Color(0xFF4A7C59), AppTheme.border],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -777,7 +778,7 @@ class _MediaComposerCard extends StatelessWidget {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1A1814),
+                    color: AppTheme.surface,
                     image: hasMedia && mediaType == PostMediaType.image
                         ? DecorationImage(
                             image: FileImage(file!),
@@ -854,7 +855,7 @@ class _EmptyMediaPrompt extends StatelessWidget {
         gradient: RadialGradient(
           center: Alignment.topLeft,
           radius: 1.1,
-          colors: [Color(0x33D4845A), Color(0xFF1A1814)],
+          colors: [Color(0x33D4845A), AppTheme.surface],
         ),
       ),
       child: const Column(
@@ -863,13 +864,13 @@ class _EmptyMediaPrompt extends StatelessWidget {
           Icon(
             Icons.add_photo_alternate_rounded,
             size: 64,
-            color: Color(0xFFD4845A),
+            color: AppTheme.primaryAccent,
           ),
           SizedBox(height: 16),
           Text(
             'Drop in a photo or video',
             style: TextStyle(
-              color: Color(0xFFF2EDE4),
+              color: AppTheme.textPrimary,
               fontSize: 19,
               fontWeight: FontWeight.w800,
             ),
@@ -877,7 +878,7 @@ class _EmptyMediaPrompt extends StatelessWidget {
           SizedBox(height: 6),
           Text(
             'Gallery, camera, or video library',
-            style: TextStyle(color: Color(0xFFB8B0A4)),
+            style: TextStyle(color: AppTheme.textSecondary),
           ),
         ],
       ),
@@ -893,7 +894,7 @@ class _VideoMediaPrompt extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF211F1B), Color(0xFF0F0E0B)],
+          colors: [AppTheme.cardColor, Color(0xFF0F0E0B)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -905,13 +906,13 @@ class _VideoMediaPrompt extends StatelessWidget {
             Icon(
               Icons.play_circle_fill_rounded,
               size: 82,
-              color: Color(0xFFD4845A),
+              color: AppTheme.primaryAccent,
             ),
             SizedBox(height: 12),
             Text(
               'Video ready',
               style: TextStyle(
-                color: Color(0xFFF2EDE4),
+                color: AppTheme.textPrimary,
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
               ),
@@ -971,9 +972,9 @@ class _CaptionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1814),
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFF2E2B26)),
+        border: Border.all(color: AppTheme.border),
       ),
       child: TextField(
         controller: controller,
@@ -982,7 +983,7 @@ class _CaptionCard extends StatelessWidget {
         minLines: 3,
         onChanged: (_) => onChanged(),
         textCapitalization: TextCapitalization.sentences,
-        style: const TextStyle(color: Color(0xFFF2EDE4), fontSize: 16),
+        style: const TextStyle(color: AppTheme.textPrimary, fontSize: 16),
         decoration: const InputDecoration(
           hintText: 'What happened today?',
           hintStyle: TextStyle(color: Color(0xFF756F66)),
@@ -1011,9 +1012,9 @@ class _PostOptionsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1814),
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFF2E2B26)),
+        border: Border.all(color: AppTheme.border),
       ),
       child: Column(
         children: [
@@ -1024,7 +1025,7 @@ class _PostOptionsCard extends StatelessWidget {
             isActive: location.isNotEmpty,
             onTap: onLocationTap,
           ),
-          const Divider(height: 1, color: Color(0xFF2E2B26)),
+          const Divider(height: 1, color: AppTheme.border),
           _ComposerOptionTile(
             icon: Icons.person_add_alt_1_outlined,
             title: 'Tag other pets',
@@ -1063,15 +1064,15 @@ class _ComposerOptionTile extends StatelessWidget {
         width: 42,
         height: 42,
         decoration: BoxDecoration(
-          color: const Color(0xFFD4845A).withAlpha(isActive ? 48 : 28),
+          color: AppTheme.primaryAccent.withAlpha(isActive ? 48 : 28),
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Icon(icon, color: const Color(0xFFD4845A)),
+        child: Icon(icon, color: AppTheme.primaryAccent),
       ),
       title: Text(
         title,
         style: const TextStyle(
-          color: Color(0xFFF2EDE4),
+          color: AppTheme.textPrimary,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -1079,9 +1080,9 @@ class _ComposerOptionTile extends StatelessWidget {
         subtitle,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(color: Color(0xFFB8B0A4), fontSize: 12),
+        style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
       ),
-      trailing: const Icon(Icons.chevron_right, color: Color(0xFFB8B0A4)),
+      trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
     );
   }
 }
@@ -1099,19 +1100,19 @@ class _EmptyPetsState extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1814),
+            color: AppTheme.surface,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: const Color(0xFF2E2B26)),
+            border: Border.all(color: AppTheme.border),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.pets, size: 64, color: Color(0xFFD4845A)),
+              const Icon(Icons.pets, size: 64, color: AppTheme.primaryAccent),
               const SizedBox(height: 16),
               const Text(
                 'Create a pet profile first',
                 style: TextStyle(
-                  color: Color(0xFFF2EDE4),
+                  color: AppTheme.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                 ),
@@ -1120,7 +1121,7 @@ class _EmptyPetsState extends StatelessWidget {
               const Text(
                 'You can only post as one of your pets. Add a pet profile to get started.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Color(0xFFB8B0A4)),
+                style: TextStyle(color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 24),
               FilledButton.icon(
@@ -1159,9 +1160,9 @@ class _MediaSourceTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFF211F1B),
+          color: AppTheme.cardColor,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: const Color(0xFF2E2B26)),
+          border: Border.all(color: AppTheme.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1182,14 +1183,14 @@ class _MediaSourceTile extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: Color(0xFFF2EDE4),
+                    color: AppTheme.textPrimary,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 Text(
                   subtitle,
                   style: const TextStyle(
-                    color: Color(0xFFB8B0A4),
+                    color: AppTheme.textSecondary,
                     fontSize: 12,
                   ),
                 ),
@@ -1216,10 +1217,10 @@ class _AuthorAvatar extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD4845A).withValues(alpha: 0.15) : const Color(0xFF211F1B),
+          color: isSelected ? AppTheme.primaryAccent.withValues(alpha: 0.15) : AppTheme.cardColor,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
+            color: isSelected ? AppTheme.primaryAccent : AppTheme.border,
             width: 1.5,
           ),
         ),
@@ -1248,8 +1249,8 @@ class _AuthorAvatar extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 color: isSelected
-                    ? const Color(0xFFF2EDE4)
-                    : const Color(0xFFB8B0A4),
+                    ? AppTheme.textPrimary
+                    : AppTheme.textSecondary,
               ),
             ),
           ],
@@ -1296,20 +1297,20 @@ class _LocationSheetContentState extends State<_LocationSheetContent> {
             TextField(
               controller: _controller,
               autofocus: true,
-              style: const TextStyle(color: Color(0xFFF2EDE4)),
+              style: const TextStyle(color: AppTheme.textPrimary),
               textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(
                 hintText: 'Park, city, cafe...',
                 hintStyle: TextStyle(color: Color(0xFF756F66)),
                 prefixIcon: Icon(
                   Icons.location_on_outlined,
-                  color: Color(0xFFD4845A),
+                  color: AppTheme.primaryAccent,
                 ),
                 filled: true,
-                fillColor: Color(0xFF211F1B),
+                fillColor: AppTheme.cardColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(18)),
-                  borderSide: BorderSide(color: Color(0xFF2E2B26)),
+                  borderSide: BorderSide(color: AppTheme.border),
                 ),
               ),
             ),

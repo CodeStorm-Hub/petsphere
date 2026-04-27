@@ -9,7 +9,16 @@ import 'theme/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
+  await Supabase.initialize(
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
+    // PKCE is required for OAuth deep-link redirects (Google / Apple sign-in,
+    // password recovery). Safe for email+password too — Supabase falls back
+    // to the standard flow when no code exchange is needed.
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.pkce,
+    ),
+  );
 
   runApp(const ProviderScope(child: PetSphereApp()));
 }

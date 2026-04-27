@@ -200,12 +200,41 @@ class FeedRepository {
   // Upload post media to Storage — returns the public URL
   // -------------------------------------------------------------------------
   Future<String> uploadPostMedia(File file) async {
-    final ext = file.path.split('.').last;
+    final ext = file.path.split('.').last.toLowerCase();
     final path = '${DateTime.now().millisecondsSinceEpoch}.$ext';
+    final contentType = _contentTypeFor(ext);
 
-    await supabase.storage.from(kBucketPostMedia).upload(path, file);
+    await supabase.storage.from(kBucketPostMedia).upload(
+          path,
+          file,
+          fileOptions: FileOptions(contentType: contentType),
+        );
 
     return supabase.storage.from(kBucketPostMedia).getPublicUrl(path);
+  }
+
+  String _contentTypeFor(String ext) {
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'gif':
+        return 'image/gif';
+      case 'webp':
+        return 'image/webp';
+      case 'heic':
+        return 'image/heic';
+      case 'mp4':
+        return 'video/mp4';
+      case 'mov':
+        return 'video/quicktime';
+      case 'webm':
+        return 'video/webm';
+      default:
+        return 'application/octet-stream';
+    }
   }
 
   // -------------------------------------------------------------------------

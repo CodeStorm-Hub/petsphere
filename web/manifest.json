@@ -1,11 +1,11 @@
 {
-    "name": "pet_dating_app",
-    "short_name": "pet_dating_app",
+    "name": "PetSphere",
+    "short_name": "PetSphere",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0F0E0C",
+    "theme_color": "#D4845A",
+    "description": "PetSphere — the social-commerce app for pet owners.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

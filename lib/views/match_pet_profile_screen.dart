@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/pet_model.dart';
 import '../models/user_model.dart';
@@ -280,11 +281,11 @@ class _MatchPetProfileScreenState extends ConsumerState<MatchPetProfileScreen> {
                                   Container(color: Colors.grey.shade200)
                                 else if (isVideoMedia(post.mediaUrl))
                                   Container(
-                                    color: const Color(0xFF211F1B),
+                                    color: AppTheme.cardColor,
                                     child: const Center(
                                       child: Icon(
                                         Icons.play_circle_fill_rounded,
-                                        color: Color(0xFFD4845A),
+                                        color: AppTheme.primaryAccent,
                                         size: 42,
                                       ),
                                     ),

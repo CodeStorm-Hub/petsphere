@@ -191,20 +191,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       children: [
                     // Brand header
                     Center(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.pets, size: 28, color: colorScheme.primary),
-                          const SizedBox(width: 10),
-                          Text(
-                            'The Nurtured Atelier',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFF7A3820),
-                              letterSpacing: -0.5,
+                      child: Semantics(
+                        header: true,
+                        label: 'PetSphere',
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.pets, size: 28, color: colorScheme.primary),
+                            const SizedBox(width: 10),
+                            Text(
+                              'PetSphere',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF7A3820),
+                                letterSpacing: -0.5,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -301,31 +305,45 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       ),
                     ),
                     const SizedBox(height: 16),
-                    GestureDetector(
-                      onTap: authState.isLoading ? null : _login,
-                      child: Container(
-                        height: 56,
-                        decoration: BoxDecoration(
-                          gradient: authState.isLoading
-                              ? null
-                              : const LinearGradient(
-                                  colors: [Color(0xFF99472C), Color(0xFF8A3B21)],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
+                    // Semantic, accessible primary CTA — wraps a FilledButton so
+                    // it is announced as a button by screen readers and gets
+                    // the right keyboard / focus behavior. The gradient and
+                    // shadow live on a separate decoration layer.
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: authState.isLoading
+                            ? null
+                            : const LinearGradient(
+                                colors: [Color(0xFF99472C), Color(0xFF8A3B21)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                        color: authState.isLoading ? const Color(0xFFE8E1DA) : null,
+                        borderRadius: BorderRadius.circular(9999),
+                        boxShadow: authState.isLoading
+                            ? null
+                            : [
+                                BoxShadow(
+                                  color: const Color(0xFF99472C).withAlpha(60),
+                                  blurRadius: 24,
+                                  offset: const Offset(0, 8),
                                 ),
-                          color: authState.isLoading ? const Color(0xFFE8E1DA) : null,
-                          borderRadius: BorderRadius.circular(9999),
-                          boxShadow: authState.isLoading
-                              ? null
-                              : [
-                                  BoxShadow(
-                                    color: const Color(0xFF99472C).withAlpha(60),
-                                    blurRadius: 24,
-                                    offset: const Offset(0, 8),
-                                  ),
-                                ],
-                        ),
-                        child: Center(
+                              ],
+                      ),
+                      child: SizedBox(
+                        height: 56,
+                        child: FilledButton(
+                          onPressed: authState.isLoading ? null : _login,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: const Color(0xFFFFF7F5),
+                            disabledBackgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(9999),
+                            ),
+                          ),
                           child: authState.isLoading
                               ? const SizedBox(
                                   width: 24,

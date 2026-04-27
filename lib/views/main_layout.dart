@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/pet_controller.dart';
@@ -103,6 +104,14 @@ class _GlassNavBar extends StatelessWidget {
     _NavItem(Icons.person_outline, Icons.person),
   ];
 
+  static const _labels = <String>[
+    'Home feed',
+    'Discover pets',
+    'Open pet care',
+    'Marketplace',
+    'My profile',
+  ];
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -118,7 +127,7 @@ class _GlassNavBar extends StatelessWidget {
             color: Colors.black.withValues(alpha: 0.95),
             borderRadius: BorderRadius.circular(30),
             border: Border.all(
-              color: const Color(0xFF2E2B26),
+              color: AppTheme.border,
               width: 1,
             ),
           ),
@@ -128,23 +137,29 @@ class _GlassNavBar extends StatelessWidget {
               final isActive = currentIndex == i;
               final isCenter = i == 2;
               final isProfile = i == 4;
-              final iconColor = isActive ? colorScheme.primary : const Color(0xFFB8B0A4);
+              final iconColor = isActive ? colorScheme.primary : AppTheme.textSecondary;
 
               if (isCenter) {
-                return GestureDetector(
-                  onTap: () => onTap(i),
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [Color(0xFFD4845A), Color(0xFFB86A44)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                return Semantics(
+                  button: true,
+                  label: _labels[i],
+                  selected: isActive,
+                  child: GestureDetector(
+                    onTap: () => onTap(i),
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [AppTheme.primaryAccent, Color(0xFFB86A44)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                       ),
+                      child: const Icon(Icons.add, color: Colors.white, size: 28),
                     ),
-                    child: const Icon(Icons.add, color: Colors.white, size: 28),
                   ),
                 );
               }
@@ -165,10 +180,15 @@ class _GlassNavBar extends StatelessWidget {
               }
 
               return Expanded(
-                child: GestureDetector(
-                  onTap: () => onTap(i),
-                  behavior: HitTestBehavior.opaque,
-                  child: Center(child: child),
+                child: Semantics(
+                  button: true,
+                  label: _labels[i],
+                  selected: isActive,
+                  child: GestureDetector(
+                    onTap: () => onTap(i),
+                    behavior: HitTestBehavior.opaque,
+                    child: Center(child: child),
+                  ),
                 ),
               );
             }),

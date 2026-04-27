@@ -6,22 +6,41 @@ import '../utils/supabase_config.dart';
 class ChatRepository {
   // -------------------------------------------------------------------------
   // Fetch all threads for a pet (with pet joins & last message)
+  //
+  // Prefers the `fetch_chat_threads` RPC (single lateral-join query). Falls
+  // back to the legacy nested-select + N+1 last-message lookup if the RPC is
+  // not yet deployed — keeps existing environments functional during the
+  // migration window.
   // -------------------------------------------------------------------------
   Future<List<ChatThreadModel>> fetchThreads(String myPetId) async {
+    try {
+      final rpcData = await supabase
+          .rpc('fetch_chat_threads', params: {'my_pet_id': myPetId});
+      final rows = (rpcData as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .toList();
+      return rows.map(ChatThreadModel.fromJson).toList();
+    } on PostgrestException catch (e) {
+      // PGRST202 = function not found in schema cache. Fall through to legacy.
+      if (e.code != 'PGRST202' &&
+          !e.message.toLowerCase().contains('fetch_chat_threads')) {
+        rethrow;
+      }
+    }
+
     final data = await supabase
         .from('chat_threads')
         .select(
-            'id, pet_id_1, pet_id_2, created_at, '
+            'id, pet_id_1, pet_id_2, created_at, updated_at, '
             'pet1:pets!pet_id_1(id, name, breed, animal_type, age, bio, profile_image_url, images, is_public_owner, user_id), '
             'pet2:pets!pet_id_2(id, name, breed, animal_type, age, bio, profile_image_url, images, is_public_owner, user_id)')
         .or('pet_id_1.eq.$myPetId,pet_id_2.eq.$myPetId')
-        .order('created_at', ascending: false);
+        .order('updated_at', ascending: false);
 
     final threads = (data as List<dynamic>)
         .map((e) => ChatThreadModel.fromJson(e as Map<String, dynamic>))
         .toList();
 
-    // Attach last message to each thread
     final enriched = <ChatThreadModel>[];
     for (final thread in threads) {
       final lastMsg = await _fetchLastMessage(thread.id);

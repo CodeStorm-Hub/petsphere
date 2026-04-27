@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -122,7 +123,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: const Color(0xFF0F0E0C),
-                                border: Border.all(color: const Color(0xFF2E2B26), width: 2),
+                                border: Border.all(color: AppTheme.border, width: 2),
                               ),
                               child: _buildAvatar(isOwnerView, user, selectedPet),
                             ),
@@ -138,7 +139,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                 padding: const EdgeInsets.all(2),
                                 child: Container(
                                   decoration: const BoxDecoration(
-                                    color: Color(0xFFD4845A),
+                                    color: AppTheme.primaryAccent,
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(Icons.add, size: 18, color: Colors.white),
@@ -195,7 +196,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         if (!isOwnerView && (selectedPet?.isVerified ?? false))
                           const Padding(
                             padding: EdgeInsets.only(left: 4),
-                            child: Icon(Icons.verified, size: 18, color: Color(0xFFD4845A)),
+                            child: Icon(Icons.verified, size: 18, color: AppTheme.primaryAccent),
                           ),
                       ],
                     ),
@@ -438,11 +439,11 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           children: [
                             if (isVideoMedia(post.mediaUrl))
                               Container(
-                                color: const Color(0xFF211F1B),
+                                color: AppTheme.cardColor,
                                 child: const Center(
                                   child: Icon(
                                     Icons.play_circle_fill_rounded,
-                                    color: Color(0xFFD4845A),
+                                    color: AppTheme.primaryAccent,
                                     size: 42,
                                   ),
                                 ),
@@ -1567,10 +1568,10 @@ class _OwnerCarouselAvatar extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD4845A).withValues(alpha: 0.15) : const Color(0xFF211F1B),
+          color: isSelected ? AppTheme.primaryAccent.withValues(alpha: 0.15) : AppTheme.cardColor,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
+            color: isSelected ? AppTheme.primaryAccent : AppTheme.border,
             width: 1.5,
           ),
         ),
@@ -1579,12 +1580,12 @@ class _OwnerCarouselAvatar extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 14,
-              backgroundColor: const Color(0xFFD4845A).withValues(alpha: 0.2),
+              backgroundColor: AppTheme.primaryAccent.withValues(alpha: 0.2),
               backgroundImage: hasImage ? NetworkImage(user!.profileImageUrl!) : null,
               child: !hasImage
                   ? Text(
                       user?.initials ?? '?',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: Color(0xFFD4845A)),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: AppTheme.primaryAccent),
                     )
                   : null,
             ),
@@ -1618,10 +1619,10 @@ class _PetCarouselAvatar extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD4845A).withValues(alpha: 0.15) : const Color(0xFF211F1B),
+          color: isSelected ? AppTheme.primaryAccent.withValues(alpha: 0.15) : AppTheme.cardColor,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
+            color: isSelected ? AppTheme.primaryAccent : AppTheme.border,
             width: 1.5,
           ),
         ),
@@ -1667,10 +1668,10 @@ class _AddPetAvatar extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF211F1B),
+          color: AppTheme.cardColor,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: const Color(0xFFD4845A).withValues(alpha: 0.5),
+            color: AppTheme.primaryAccent.withValues(alpha: 0.5),
             width: 1.5,
           ),
         ),
@@ -1679,15 +1680,15 @@ class _AddPetAvatar extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 14,
-              backgroundColor: const Color(0xFFD4845A).withValues(alpha: 0.1),
-              child: const Icon(Icons.add_rounded, color: Color(0xFFD4845A), size: 16),
+              backgroundColor: AppTheme.primaryAccent.withValues(alpha: 0.1),
+              child: const Icon(Icons.add_rounded, color: AppTheme.primaryAccent, size: 16),
             ),
             const SizedBox(width: 8),
             const Text(
               'Add Pet',
               style: TextStyle(
                 fontSize: 13,
-                color: Color(0xFFD4845A),
+                color: AppTheme.primaryAccent,
                 fontWeight: FontWeight.w600,
               ),
             ),

@@ -7,7 +7,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Pet Dating App</string>
+	<string>PetSphere</string>
+	<key>NSCameraUsageDescription</key>
+	<string>PetSphere needs camera access to take photos of your pets.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>PetSphere needs photo library access to choose pet photos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>PetSphere needs permission to save photos you create in the app.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>PetSphere may use the microphone for video posts and stories.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

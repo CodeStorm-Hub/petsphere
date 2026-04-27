@@ -34,23 +34,40 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: authNotifier,
     redirect: (context, state) {
       final status = authNotifier.value.status;
-      final isGoingToAuth = state.matchedLocation == '/login' || state.matchedLocation == '/register';
-      final isAtSplash = state.matchedLocation == '/splash';
-      
+      final loc = state.matchedLocation;
+      final isGoingToAuth = loc == '/login' || loc == '/register';
+      final isAtSplash = loc == '/splash';
+
       if (status == AuthStatus.initial) {
         return isAtSplash ? null : '/splash';
       }
 
       if (status == AuthStatus.unauthenticated) {
-        return isGoingToAuth ? null : '/login';
+        if (isGoingToAuth) return null;
+        // Preserve the user's destination so we can return after login.
+        if (isAtSplash) return '/login';
+        final from = Uri.encodeComponent(state.uri.toString());
+        return '/login?from=$from';
       }
 
       if (status == AuthStatus.authenticated) {
         if (isGoingToAuth || isAtSplash) {
+          final from = state.uri.queryParameters['from'];
+          if (from != null && from.isNotEmpty) {
+            final decoded = Uri.decodeComponent(from);
+            // Guard against open-redirects: only allow same-app paths.
+            if (decoded.startsWith('/') &&
+                !decoded.startsWith('//') &&
+                !decoded.startsWith('/login') &&
+                !decoded.startsWith('/register') &&
+                !decoded.startsWith('/splash')) {
+              return decoded;
+            }
+          }
           return '/home';
         }
       }
-      
+
       return null;
     },
     routes: [

@@ -90,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'The Nurtured Nest',
+                    'PetSphere',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                       letterSpacing: 1.5,

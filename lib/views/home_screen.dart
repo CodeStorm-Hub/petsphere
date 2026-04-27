@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
@@ -44,7 +45,7 @@ class HomeScreen extends ConsumerWidget {
             const Icon(Icons.pets, size: 22, color: Color(0xFF99472C)),
             const SizedBox(width: 8),
             Text(
-              'Atelier',
+              'PetSphere',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
@@ -307,9 +308,9 @@ class HomeScreen extends ConsumerWidget {
                 margin: const EdgeInsets.all(12),
                 padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1A1814),
+                  color: AppTheme.surface,
                   borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: const Color(0xFF2E2B26)),
+                  border: Border.all(color: AppTheme.border),
                 ),
                 child: SafeArea(
                   top: false,
@@ -333,7 +334,7 @@ class HomeScreen extends ConsumerWidget {
                         const Text(
                           'Post story as',
                           style: TextStyle(
-                            color: Color(0xFFF2EDE4),
+                            color: AppTheme.textPrimary,
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
                           ),
@@ -341,7 +342,7 @@ class HomeScreen extends ConsumerWidget {
                         const SizedBox(height: 6),
                         const Text(
                           'Choose which pet should post this story.',
-                          style: TextStyle(color: Color(0xFFB8B0A4)),
+                          style: TextStyle(color: AppTheme.textSecondary),
                         ),
                         const SizedBox(height: 12),
                         Expanded(
@@ -354,7 +355,7 @@ class HomeScreen extends ConsumerWidget {
                                 contentPadding: EdgeInsets.zero,
                                 onTap: () => Navigator.pop(sheetContext, pet.id),
                                 leading: CircleAvatar(
-                                  backgroundColor: const Color(0xFF211F1B),
+                                  backgroundColor: AppTheme.cardColor,
                                   backgroundImage: pet.profileImageUrl.isNotEmpty
                                       ? NetworkImage(pet.profileImageUrl)
                                       : null,
@@ -369,18 +370,18 @@ class HomeScreen extends ConsumerWidget {
                                 title: Text(
                                   pet.name,
                                   style: const TextStyle(
-                                    color: Color(0xFFF2EDE4),
+                                    color: AppTheme.textPrimary,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
                                 subtitle: Text(
                                   pet.breed,
-                                  style: const TextStyle(color: Color(0xFFB8B0A4)),
+                                  style: const TextStyle(color: AppTheme.textSecondary),
                                 ),
                                 trailing: isCurrent
                                     ? const Icon(
                                         Icons.check_circle,
-                                        color: Color(0xFFD4845A),
+                                        color: AppTheme.primaryAccent,
                                       )
                                     : const Icon(
                                         Icons.chevron_right,
@@ -428,9 +429,9 @@ class HomeScreen extends ConsumerWidget {
           margin: const EdgeInsets.all(12),
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1814),
+            color: AppTheme.surface,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: const Color(0xFF2E2B26)),
+            border: Border.all(color: AppTheme.border),
           ),
           child: SafeArea(
             top: false,
@@ -452,7 +453,7 @@ class HomeScreen extends ConsumerWidget {
                 const Text(
                   'Your story',
                   style: TextStyle(
-                    color: Color(0xFFF2EDE4),
+                    color: AppTheme.textPrimary,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                   ),
@@ -460,19 +461,19 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: 6),
                 const Text(
                   'Choose what you want to do.',
-                  style: TextStyle(color: Color(0xFFB8B0A4)),
+                  style: TextStyle(color: AppTheme.textSecondary),
                 ),
                 const SizedBox(height: 12),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(
                     Icons.visibility_outlined,
-                    color: Color(0xFFD4845A),
+                    color: AppTheme.primaryAccent,
                   ),
                   title: const Text(
                     'View story',
                     style: TextStyle(
-                      color: Color(0xFFF2EDE4),
+                      color: AppTheme.textPrimary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -482,12 +483,12 @@ class HomeScreen extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(
                     Icons.add_circle_outline,
-                    color: Color(0xFFD4845A),
+                    color: AppTheme.primaryAccent,
                   ),
                   title: const Text(
                     'Post story',
                     style: TextStyle(
-                      color: Color(0xFFF2EDE4),
+                      color: AppTheme.textPrimary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -842,7 +843,6 @@ class _StoryItem extends StatelessWidget {
     required this.label,
     required this.ringStyle,
     this.badge = _StoryBadge.none,
-    this.iconOverride,
     required this.onTap,
     this.onBadgeTap,
   });
@@ -874,7 +874,7 @@ class _StoryItem extends StatelessWidget {
             shape: BoxShape.circle,
             gradient: LinearGradient(
               colors: [
-                Color(0xFFD4845A),
+                AppTheme.primaryAccent,
                 Color(0xFFB86A44),
                 Color(0xFF4A7C59),
               ],

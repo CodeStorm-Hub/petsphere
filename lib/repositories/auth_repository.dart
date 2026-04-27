@@ -96,13 +96,13 @@ class AuthRepository {
     };
     final path = 'avatars/${userId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
-    await supabase.storage.from(kBucketPetImages).upload(
+    await supabase.storage.from(kBucketAvatars).upload(
       path,
       imageFile,
       fileOptions: FileOptions(contentType: contentType),
     );
 
-    return supabase.storage.from(kBucketPetImages).getPublicUrl(path);
+    return supabase.storage.from(kBucketAvatars).getPublicUrl(path);
   }
 
   // -------------------------------------------------------------------------

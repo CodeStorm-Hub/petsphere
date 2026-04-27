@@ -119,7 +119,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                       Expanded(
                         child: Center(
                           child: Text(
-                            'The Nurtured Atelier',
+                            'PetSphere',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w800,
                               color: const Color(0xFF7A3820),

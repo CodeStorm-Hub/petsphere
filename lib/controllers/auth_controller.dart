@@ -47,16 +47,21 @@ class AuthState {
 class AuthNotifier extends Notifier<AuthState> {
   // Guard: prevent auth listener from overwriting state during active operations
   bool _isPerformingAuthAction = false;
+  StreamSubscription<dynamic>? _authSub;
 
   @override
   AuthState build() {
+    ref.onDispose(() {
+      _authSub?.cancel();
+      _authSub = null;
+    });
     _init();
     return AuthState();
   }
 
   void _init() {
-    // Listen to Supabase auth state changes continuously
-    authRepository.authStateChanges.listen((event) async {
+    _authSub?.cancel();
+    _authSub = authRepository.authStateChanges.listen((event) async {
       // Skip if we're in the middle of login/register — those set state directly
       if (_isPerformingAuthAction) return;
 

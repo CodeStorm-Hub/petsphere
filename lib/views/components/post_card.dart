@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 import 'package:flutter/gestures.dart';
 import 'package:video_player/video_player.dart';
 import '../../models/post_model.dart';
@@ -164,8 +165,8 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     return Container(
       margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1814),
-        border: Border.all(color: const Color(0xFF2E2B26)),
+        color: AppTheme.surface,
+        border: Border.all(color: AppTheme.border),
         borderRadius: BorderRadius.circular(20),
       ),
       child: ClipRRect(
@@ -414,13 +415,13 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4845A).withAlpha(24),
+                          color: AppTheme.primaryAccent.withAlpha(24),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
                           '@$name',
                           style: const TextStyle(
-                            color: Color(0xFFD4845A),
+                            color: AppTheme.primaryAccent,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
@@ -558,7 +559,7 @@ class _MediaLoadingPlaceholder extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF211F1B), Color(0xFF2E2B26)],
+          colors: [AppTheme.cardColor, AppTheme.border],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -566,7 +567,7 @@ class _MediaLoadingPlaceholder extends StatelessWidget {
       child: const Center(
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          color: Color(0xFFD4845A),
+          color: AppTheme.primaryAccent,
         ),
       ),
     );
@@ -583,7 +584,7 @@ class _MediaErrorPlaceholder extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF211F1B), Color(0xFF2E2B26)],
+          colors: [AppTheme.cardColor, AppTheme.border],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
