@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/chat_controller.dart';
+import '../controllers/notification_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../utils/pet_navigation.dart';
 import 'components/message_bubble.dart';
@@ -24,8 +25,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     // Initialize the per-thread messages notifier with real Supabase data + Realtime
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(threadMessagesProvider.notifier).init(widget.threadId);
-      // Mark thread as read on open
       ref.read(chatProvider.notifier).markThreadAsRead(widget.threadId);
+      ref.read(notificationProvider.notifier).markMessagesAsRead();
+      // If the thread list hasn't included this thread yet (e.g. navigated
+      // directly via the Message button before the list refreshed), force a
+      // refresh so the app bar can resolve the other pet's name and avatar.
+      if (!ref.read(chatProvider).threads.any((t) => t.id == widget.threadId)) {
+        ref.read(chatProvider.notifier).refresh();
+      }
     });
   }
 

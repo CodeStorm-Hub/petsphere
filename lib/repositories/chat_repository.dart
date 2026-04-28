@@ -21,14 +21,17 @@ class ChatRepository {
         .map((e) => ChatThreadModel.fromJson(e as Map<String, dynamic>))
         .toList();
 
-    // Attach last message to each thread
-    final enriched = <ChatThreadModel>[];
-    for (final thread in threads) {
-      final lastMsg = await _fetchLastMessage(thread.id);
-      enriched.add(thread.copyWith(lastMessage: lastMsg));
-    }
+    if (threads.isEmpty) return threads;
 
-    return enriched;
+    // Fetch all last messages in parallel instead of sequentially
+    final lastMsgs = await Future.wait(
+      threads.map((t) => _fetchLastMessage(t.id)),
+    );
+
+    return [
+      for (var i = 0; i < threads.length; i++)
+        threads[i].copyWith(lastMessage: lastMsgs[i]),
+    ];
   }
 
   // -------------------------------------------------------------------------
@@ -69,6 +72,29 @@ class ChatRepository {
   }
 
   // -------------------------------------------------------------------------
+  // Batch-fetch unread message counts for a list of threads
+  // Returns a map of threadId -> unread count (messages not sent by myPetId)
+  // -------------------------------------------------------------------------
+  Future<Map<String, int>> fetchUnreadCountsForThreads(
+      List<String> threadIds, String myPetId) async {
+    if (threadIds.isEmpty) return {};
+
+    final data = await supabase
+        .from('messages')
+        .select('thread_id')
+        .eq('is_read', false)
+        .neq('sender_pet_id', myPetId)
+        .inFilter('thread_id', threadIds);
+
+    final counts = <String, int>{};
+    for (final row in data as List<dynamic>) {
+      final threadId = (row as Map<String, dynamic>)['thread_id'] as String;
+      counts[threadId] = (counts[threadId] ?? 0) + 1;
+    }
+    return counts;
+  }
+
+  // -------------------------------------------------------------------------
   // Subscribe to new messages in a thread via Supabase Realtime
   // -------------------------------------------------------------------------
   RealtimeChannel subscribeToMessages({
@@ -95,19 +121,48 @@ class ChatRepository {
   }
 
   // -------------------------------------------------------------------------
+  // Subscribe to ALL new messages (filtered client-side) for thread list updates
+  // -------------------------------------------------------------------------
+  RealtimeChannel subscribeToAllMessages({
+    required void Function(MessageModel message) onMessage,
+  }) {
+    return supabase
+        .channel('messages-global')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'messages',
+          callback: (payload) {
+            try {
+              final msg = MessageModel.fromJson(payload.newRecord);
+              onMessage(msg);
+            } catch (_) {}
+          },
+        )
+        .subscribe();
+  }
+
+  // -------------------------------------------------------------------------
   // Create a new chat thread between two pets (idempotent via upsert)
   // -------------------------------------------------------------------------
   Future<String> createOrGetThread(String petId1, String petId2) async {
-    // Check if thread already exists in either direction
-    final existing = await supabase
+    // Check both orderings separately — the compound .or() filter is unreliable
+    // in supabase_flutter's PostgREST client with nested AND conditions.
+    final q1 = await supabase
         .from('chat_threads')
         .select('id')
-        .or('and(pet_id_1.eq.$petId1,pet_id_2.eq.$petId2),and(pet_id_1.eq.$petId2,pet_id_2.eq.$petId1)')
+        .eq('pet_id_1', petId1)
+        .eq('pet_id_2', petId2)
         .maybeSingle();
+    if (q1 != null) return q1['id'] as String;
 
-    if (existing != null) {
-      return existing['id'] as String;
-    }
+    final q2 = await supabase
+        .from('chat_threads')
+        .select('id')
+        .eq('pet_id_1', petId2)
+        .eq('pet_id_2', petId1)
+        .maybeSingle();
+    if (q2 != null) return q2['id'] as String;
 
     final data = await supabase
         .from('chat_threads')
