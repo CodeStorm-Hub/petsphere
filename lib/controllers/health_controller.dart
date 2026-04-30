@@ -128,9 +128,12 @@ class HealthNotifier extends Notifier<HealthState> {
       (prev, next) {
         if (next != null && next != prev) _loadAll(next);
       },
-      fireImmediately: true,
     );
-    return const HealthState();
+    final petId = ref.read(activePetProvider)?.id;
+    if (petId != null) {
+      Future.microtask(() => _loadAll(petId));
+    }
+    return HealthState(isLoading: petId != null);
   }
 
   Future<void> _loadAll(String petId) async {

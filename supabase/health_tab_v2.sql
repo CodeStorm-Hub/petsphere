@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.pet_medications (
   frequency     text        NOT NULL DEFAULT 'once_daily'
                               CHECK (frequency IN (
                                 'once_daily','twice_daily','three_times_daily',
-                                'weekly','as_needed','other'
+                                'weekly','monthly','as_needed','other'
                               )),
   times_of_day  text[]      DEFAULT '{}',   -- e.g. ['08:00','20:00']
   start_date    date        NOT NULL DEFAULT CURRENT_DATE,
@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS public.pet_medications (
   status        text        NOT NULL DEFAULT 'active'
                               CHECK (status IN ('active','paused','completed')),
   created_at    timestamptz NOT NULL DEFAULT now(),
-  updated_at    timestamptz NOT NULL DEFAULT now()
+  updated_at    timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT uq_pet_medication_name UNIQUE (pet_id, name)
 );
 
 CREATE INDEX IF NOT EXISTS idx_pet_medications_pet
@@ -67,7 +68,8 @@ CREATE TABLE IF NOT EXISTS public.pet_allergies (
   diagnosed_on  date,
   is_active     boolean     NOT NULL DEFAULT true,
   notes         text,
-  created_at    timestamptz NOT NULL DEFAULT now()
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT uq_pet_allergen UNIQUE (pet_id, allergen)
 );
 
 CREATE INDEX IF NOT EXISTS idx_pet_allergies_pet
@@ -86,7 +88,8 @@ CREATE TABLE IF NOT EXISTS public.pet_parasite_prevention (
   administered_on date        NOT NULL DEFAULT CURRENT_DATE,
   next_due_date   date,
   notes           text,
-  created_at      timestamptz NOT NULL DEFAULT now()
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT uq_pet_parasite_product_date UNIQUE (pet_id, product_name, administered_on)
 );
 
 CREATE INDEX IF NOT EXISTS idx_pet_parasite_pet
@@ -103,7 +106,8 @@ CREATE TABLE IF NOT EXISTS public.pet_dental_logs (
                                 'professional_cleaning','water_additive'
                               )),
   notes         text,
-  created_at    timestamptz NOT NULL DEFAULT now()
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT uq_pet_dental_date_type UNIQUE (pet_id, log_date, cleaning_type)
 );
 
 CREATE INDEX IF NOT EXISTS idx_pet_dental_pet
@@ -154,6 +158,31 @@ CREATE OR REPLACE TRIGGER trg_pet_medications_updated_at
   BEFORE UPDATE ON public.pet_medications
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at_health();
 
+-- Enforce that a dose row's pet_id matches the medication's pet_id to prevent
+-- cross-tenant references (e.g. a user inserting a dose for their pet that
+-- references another user's medication UUID).
+CREATE OR REPLACE FUNCTION public.validate_dose_pet_ownership()
+  RETURNS trigger
+  LANGUAGE plpgsql
+  SECURITY INVOKER
+  SET search_path = ''
+AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM public.pet_medications m
+    WHERE m.id = NEW.medication_id AND m.pet_id = NEW.pet_id
+  ) THEN
+    RAISE EXCEPTION 'medication_id % does not belong to pet_id %',
+      NEW.medication_id, NEW.pet_id;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE TRIGGER trg_validate_dose_pet_ownership
+  BEFORE INSERT OR UPDATE ON public.pet_medication_doses
+  FOR EACH ROW EXECUTE FUNCTION public.validate_dose_pet_ownership();
+
 -- ─────────────────────────────────────────────────────────
 -- SECTION 4: Row Level Security
 -- ─────────────────────────────────────────────────────────
@@ -179,13 +208,21 @@ CREATE POLICY "owner delete medications" ON public.pet_medications FOR DELETE TO
   USING (EXISTS (SELECT 1 FROM public.pets p WHERE p.id = pet_id AND p.user_id = (SELECT auth.uid())));
 
 -- pet_medication_doses
+-- INSERT and UPDATE WITH CHECK also enforces that medication_id references a
+-- medication belonging to the same pet, preventing cross-tenant references.
 CREATE POLICY "owner read med doses"   ON public.pet_medication_doses FOR SELECT TO authenticated
   USING (EXISTS (SELECT 1 FROM public.pets p WHERE p.id = pet_id AND p.user_id = (SELECT auth.uid())));
 CREATE POLICY "owner insert med doses" ON public.pet_medication_doses FOR INSERT TO authenticated
-  WITH CHECK (EXISTS (SELECT 1 FROM public.pets p WHERE p.id = pet_id AND p.user_id = (SELECT auth.uid())));
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.pets p WHERE p.id = pet_id AND p.user_id = (SELECT auth.uid()))
+    AND EXISTS (SELECT 1 FROM public.pet_medications m WHERE m.id = medication_id AND m.pet_id = pet_id)
+  );
 CREATE POLICY "owner update med doses" ON public.pet_medication_doses FOR UPDATE TO authenticated
   USING (EXISTS (SELECT 1 FROM public.pets p WHERE p.id = pet_id AND p.user_id = (SELECT auth.uid())))
-  WITH CHECK (EXISTS (SELECT 1 FROM public.pets p WHERE p.id = pet_id AND p.user_id = (SELECT auth.uid())));
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.pets p WHERE p.id = pet_id AND p.user_id = (SELECT auth.uid()))
+    AND EXISTS (SELECT 1 FROM public.pet_medications m WHERE m.id = medication_id AND m.pet_id = pet_id)
+  );
 CREATE POLICY "owner delete med doses" ON public.pet_medication_doses FOR DELETE TO authenticated
   USING (EXISTS (SELECT 1 FROM public.pets p WHERE p.id = pet_id AND p.user_id = (SELECT auth.uid())));
 
@@ -247,8 +284,14 @@ BEGIN
   VALUES
     (v_pet_id, 'Apoquel', '16mg', 'once_daily', ARRAY['08:00'], CURRENT_DATE - 14,
      'Allergy/itch relief', 'active')
-  ON CONFLICT DO NOTHING
+  ON CONFLICT (pet_id, name) DO NOTHING
   RETURNING id INTO v_med_id;
+
+  IF v_med_id IS NULL THEN
+    -- Row already existed; fetch its id for the dose insert below
+    SELECT id INTO v_med_id FROM public.pet_medications
+    WHERE pet_id = v_pet_id AND name = 'Apoquel';
+  END IF;
 
   IF v_med_id IS NOT NULL THEN
     -- Log today's dose as given
@@ -268,7 +311,7 @@ BEGIN
   VALUES
     (v_pet_id, 'Heartgard Plus', '1 chew', 'monthly', ARRAY[''],
      CURRENT_DATE - 60, 'Heartworm prevention', 'active')
-  ON CONFLICT DO NOTHING;
+  ON CONFLICT (pet_id, name) DO NOTHING;
 
   -- Allergy: Chicken
   INSERT INTO public.pet_allergies
@@ -276,7 +319,7 @@ BEGIN
   VALUES
     (v_pet_id, 'Chicken', 'food', 'moderate',
      'Skin rash and ear infections', CURRENT_DATE - 180, true)
-  ON CONFLICT DO NOTHING;
+  ON CONFLICT (pet_id, allergen) DO NOTHING;
 
   -- Allergy: Grass Pollen
   INSERT INTO public.pet_allergies
@@ -284,7 +327,7 @@ BEGIN
   VALUES
     (v_pet_id, 'Grass Pollen', 'environmental', 'mild',
      'Seasonal itching', true)
-  ON CONFLICT DO NOTHING;
+  ON CONFLICT (pet_id, allergen) DO NOTHING;
 
   -- Parasite: Flea & Tick (overdue)
   INSERT INTO public.pet_parasite_prevention
@@ -292,7 +335,7 @@ BEGIN
   VALUES
     (v_pet_id, 'NexGard', 'flea_tick',
      CURRENT_DATE - 38, CURRENT_DATE - 8)
-  ON CONFLICT DO NOTHING;
+  ON CONFLICT (pet_id, product_name, administered_on) DO NOTHING;
 
   -- Parasite: Heartworm
   INSERT INTO public.pet_parasite_prevention
@@ -300,18 +343,18 @@ BEGIN
   VALUES
     (v_pet_id, 'Heartgard Plus', 'heartworm',
      CURRENT_DATE - 22, CURRENT_DATE + 8)
-  ON CONFLICT DO NOTHING;
+  ON CONFLICT (pet_id, product_name, administered_on) DO NOTHING;
 
   -- Dental: home brushing yesterday
   INSERT INTO public.pet_dental_logs (pet_id, log_date, cleaning_type)
   VALUES (v_pet_id, CURRENT_DATE - 1, 'home_brushing')
-  ON CONFLICT DO NOTHING;
+  ON CONFLICT (pet_id, log_date, cleaning_type) DO NOTHING;
 
   -- Dental: professional cleaning 3 months ago
   INSERT INTO public.pet_dental_logs (pet_id, log_date, cleaning_type, notes)
   VALUES (v_pet_id, CURRENT_DATE - 90, 'professional_cleaning',
           'Stage 1 tartar buildup, no extractions needed')
-  ON CONFLICT DO NOTHING;
+  ON CONFLICT (pet_id, log_date, cleaning_type) DO NOTHING;
 
   -- Update vet appointment with new columns
   UPDATE public.pet_vet_appointments
@@ -321,12 +364,15 @@ BEGIN
   WHERE pet_id = v_pet_id
     AND appointment_type IS NULL;
 
-  -- Update BCS on most recent weight log
+  -- Update BCS on most recent weight log (PostgreSQL does not support
+  -- ORDER BY / LIMIT in UPDATE directly; use a subquery to identify the row).
   UPDATE public.pet_weight_logs
   SET bcs_score = 6, unit = 'lbs'
-  WHERE pet_id = v_pet_id
-    AND bcs_score IS NULL
-  ORDER BY log_date DESC
-  LIMIT 1;
+  WHERE id = (
+    SELECT id FROM public.pet_weight_logs
+    WHERE pet_id = v_pet_id AND bcs_score IS NULL
+    ORDER BY log_date DESC
+    LIMIT 1
+  );
 
 END $$;

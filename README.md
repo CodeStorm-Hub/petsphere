@@ -16,6 +16,8 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-C:\flutter\bin\flutter.bat build apk --debug
+```bash
+flutter build apk --debug
 
-C:\flutter\bin\flutter.bat run -d emulator-5554
+flutter run
+```

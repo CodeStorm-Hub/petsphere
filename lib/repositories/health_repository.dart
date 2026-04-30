@@ -1,13 +1,12 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../models/pet_health_extended_models.dart';
 import '../models/pet_health_models.dart';
+import '../utils/supabase_config.dart';
 
 /// Repository for all extended health data:
 /// medications, doses, allergies, parasite prevention, dental logs.
 /// Vet appointments & vaccinations remain in [PetCareRepository].
 class HealthRepository {
-  final _db = Supabase.instance.client;
+  final _db = supabase;
 
   // ──────────────────────────────────────────────────────────────────────────
   // Medications
@@ -42,9 +41,9 @@ class HealthRepository {
   /// Fetch doses for a given medication on [date].
   Future<List<MedicationDose>> fetchDosesForDate(
       String medicationId, DateTime date) async {
-    final start = DateTime(date.year, date.month, date.day);
-    final end = start.add(const Duration(days: 1));
-    final rows = await _db
+    final start = DateTime(date.year, date.month, date.day).toUtc();
+    final end   = start.add(const Duration(days: 1));
+    final rows  = await _db
         .from('pet_medication_doses')
         .select()
         .eq('medication_id', medicationId)

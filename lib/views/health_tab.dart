@@ -12,8 +12,21 @@ import '../models/pet_health_models.dart';
 import '../theme/app_theme.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Entry point widget
+// Helpers
 // ─────────────────────────────────────────────────────────────────────────────
+
+/// Returns a human-readable relative-time string for [date] (e.g. "38d ago").
+String _relativeTime(DateTime date) {
+  final days = DateTime.now().difference(date).inDays;
+  if (days == 0) return 'today';
+  if (days == 1) return '1d ago';
+  if (days < 30) return '${days}d ago';
+  final months = (days / 30.44).round();
+  if (months < 12) return '${months}mo ago';
+  final years = (days / 365.25).round();
+  return '${years}yr ago';
+}
+
 
 class HealthTab extends ConsumerWidget {
   const HealthTab({super.key});
@@ -385,7 +398,7 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                               delta > 0 ? Colors.red : AppTheme.secondaryAccent,
                         ),
                         Text(
-                          '${delta.abs().toStringAsFixed(1)} lbs vs prior',
+                          '${delta.abs().toStringAsFixed(1)} ${latest!.unit} vs prior',
                           style: const TextStyle(
                               color: AppTheme.textSecondary, fontSize: 12),
                         ),
@@ -623,12 +636,10 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
 
 class _MedicationsSection extends ConsumerWidget {
   final List<PetMedication> medications;
-  final List<MedicationDose> todayDoses;
   final String petId;
 
   const _MedicationsSection({
     required this.medications,
-    required this.todayDoses,
     required this.petId,
   });
 
@@ -1377,7 +1388,7 @@ class _ParasiteSection extends ConsumerWidget {
                             fontWeight: FontWeight.w600,
                             color: AppTheme.textPrimary)),
                     Text(
-                        '${e.productTypeLabel} · ${DateFormat('MMM d').format(e.administeredOn)} ago',
+                        '${e.productTypeLabel} · ${_relativeTime(e.administeredOn)}',
                         style: const TextStyle(
                             fontSize: 12, color: AppTheme.textSecondary)),
                   ],
