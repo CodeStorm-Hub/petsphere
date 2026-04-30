@@ -59,7 +59,8 @@ class PetNotifier extends Notifier<PetState> {
     });
 
     final authState = ref.read(authProvider);
-    if (authState.status == AuthStatus.authenticated && authState.user != null) {
+    if (authState.status == AuthStatus.authenticated &&
+        authState.user != null) {
       _loadMyPets(authState.user!.id);
     }
 
@@ -205,4 +206,5 @@ class ProfilePetNavigation extends Notifier<String?> {
 }
 
 final profilePetNavigationProvider =
-    NotifierProvider<ProfilePetNavigation, String?>(() => ProfilePetNavigation());
+    NotifierProvider<ProfilePetNavigation, String?>(
+        () => ProfilePetNavigation());

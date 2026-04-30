@@ -29,8 +29,7 @@ class CareCache {
     List<PetCareLog> logs,
   ) async {
     final prefs = await SharedPreferences.getInstance();
-    final encoded =
-        jsonEncode(logs.map((l) => l.toUpsertJson()).toList());
+    final encoded = jsonEncode(logs.map((l) => l.toUpsertJson()).toList());
     await prefs.setString(_logsKey(petId), encoded);
   }
 

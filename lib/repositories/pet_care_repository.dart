@@ -1,3 +1,5 @@
+import '../models/care_badge_model.dart';
+import '../models/pet_activity_log_model.dart';
 import '../models/pet_care_log_model.dart';
 import '../models/pet_health_models.dart';
 import '../utils/supabase_config.dart';
@@ -129,7 +131,8 @@ class PetCareRepository {
   // VET APPOINTMENTS
   // ===========================================================================
 
-  Future<List<PetVetAppointment>> fetchUpcomingAppointments(String petId) async {
+  Future<List<PetVetAppointment>> fetchUpcomingAppointments(
+      String petId) async {
     final raw = await supabase
         .from('pet_vet_appointments')
         .select()
@@ -216,6 +219,164 @@ class PetCareRepository {
 
   String _dateOnly(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  // ---------------------------------------------------------------------------
+  // Onboarding (private table — owner only via RLS)
+  // ---------------------------------------------------------------------------
+
+  Future<PetCareOnboarding?> fetchOnboarding(String petId) async {
+    final row = await supabase
+        .from('pet_care_onboarding')
+        .select()
+        .eq('pet_id', petId)
+        .maybeSingle();
+    if (row == null) return null;
+    return PetCareOnboarding.fromRow(row);
+  }
+
+  Future<void> saveOnboarding(
+    String petId,
+    Map<String, dynamic> data, {
+    bool markComplete = false,
+  }) async {
+    final now = DateTime.now().toUtc();
+    final existing = await fetchOnboarding(petId);
+    final completed = markComplete ? now : existing?.completedAt;
+    await supabase.from('pet_care_onboarding').upsert({
+      'pet_id': petId,
+      'data': data,
+      if (completed != null) 'completed_at': completed.toIso8601String(),
+    }, onConflict: 'pet_id');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Gamification & badges
+  // ---------------------------------------------------------------------------
+
+  Future<PetCareGamification?> fetchGamification(String petId) async {
+    final row = await supabase
+        .from('pet_care_gamification')
+        .select()
+        .eq('pet_id', petId)
+        .maybeSingle();
+    if (row == null) return null;
+    return PetCareGamification.fromJson(row);
+  }
+
+  Future<PetCareGamification> upsertGamification(PetCareGamification g) async {
+    final data = await supabase
+        .from('pet_care_gamification')
+        .upsert(
+          g.toUpsertJson(),
+          onConflict: 'pet_id',
+        )
+        .select()
+        .single();
+    return PetCareGamification.fromJson(data);
+  }
+
+  Future<List<CareBadgeDefinition>> fetchBadgeDefinitions() async {
+    final raw = await supabase
+        .from('care_badge_definitions')
+        .select()
+        .order('sort_order', ascending: true);
+    return (raw as List)
+        .map((e) =>
+            CareBadgeDefinition.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
+  }
+
+  Future<List<PetCareBadgeUnlock>> fetchUnlocksForPet(String petId) async {
+    final raw = await supabase
+        .from('pet_care_badge_unlocks')
+        .select('id, pet_id, badge_slug, unlocked_at')
+        .eq('pet_id', petId)
+        .order('unlocked_at', ascending: false);
+    return (raw as List)
+        .map((e) =>
+            PetCareBadgeUnlock.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
+  }
+
+  /// Inserts a row if missing. Ignores duplicate / permission errors.
+  Future<void> insertUnlockIfNew({
+    required String userId,
+    required String petId,
+    required String badgeSlug,
+  }) async {
+    final existing = await supabase
+        .from('pet_care_badge_unlocks')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('pet_id', petId)
+        .eq('badge_slug', badgeSlug)
+        .maybeSingle();
+    if (existing != null) return;
+    await supabase.from('pet_care_badge_unlocks').insert({
+      'user_id': userId,
+      'pet_id': petId,
+      'badge_slug': badgeSlug,
+    });
+  }
+
+  /// Unlocks visible on public profile for [userId] (RLS allows showcase read).
+  Future<List<PetCareBadgeUnlock>> fetchPublicShowcaseUnlocks(
+    String userId,
+  ) async {
+    final p = await supabase
+        .from('profiles')
+        .select('public_care_badge_slugs, show_care_badges_on_profile')
+        .eq('id', userId)
+        .maybeSingle();
+    if (p == null) return const [];
+    if (p['show_care_badges_on_profile'] != true) return const [];
+    final slugs = (p['public_care_badge_slugs'] as List<dynamic>?)
+        ?.map((e) => e as String)
+        .toList();
+    if (slugs == null || slugs.isEmpty) return const [];
+
+    final raw = await supabase
+        .from('pet_care_badge_unlocks')
+        .select('id, pet_id, badge_slug, unlocked_at')
+        .eq('user_id', userId)
+        .inFilter('badge_slug', slugs);
+    return (raw as List)
+        .map((e) =>
+            PetCareBadgeUnlock.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Activity / Exercise Logs
+  // ---------------------------------------------------------------------------
+
+  Future<List<PetActivityLog>> fetchActivityLogs(
+    String petId, {
+    int days = 7,
+  }) async {
+    final today = DateTime.now();
+    final start = DateTime(today.year, today.month, today.day)
+        .subtract(Duration(days: days - 1));
+    final raw = await supabase
+        .from('pet_activity_logs')
+        .select()
+        .eq('pet_id', petId)
+        .gte('log_date', _dateOnly(start))
+        .order('log_date', ascending: false);
+    return (raw as List)
+        .cast<Map<String, dynamic>>()
+        .map(PetActivityLog.fromJson)
+        .toList();
+  }
+
+  Future<PetActivityLog> insertActivityLog(PetActivityLog log) async {
+    final data = await supabase
+        .from('pet_activity_logs')
+        .insert(log.toInsertJson())
+        .select()
+        .single();
+    return PetActivityLog.fromJson(data);
+  }
 }
 
 final petCareRepository = PetCareRepository();

@@ -41,7 +41,8 @@ class _MessagesListScreenState extends ConsumerState<MessagesListScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: const [
                   SizedBox(height: 120),
-                  Center(child: Text('No messages yet. Match with pets to chat!')),
+                  Center(
+                      child: Text('No messages yet. Match with pets to chat!')),
                 ],
               )
             : ListView.separated(
@@ -54,8 +55,10 @@ class _MessagesListScreenState extends ConsumerState<MessagesListScreen> {
                     thread: thread,
                     myPetId: myCurrentPetId,
                     onTap: () {
-                       ref.read(chatProvider.notifier).markThreadAsRead(thread.id);
-                       context.push('/chat/${thread.id}');
+                      ref
+                          .read(chatProvider.notifier)
+                          .markThreadAsRead(thread.id);
+                      context.push('/chat/${thread.id}');
                     },
                   );
                 },

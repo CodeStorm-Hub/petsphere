@@ -94,8 +94,8 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text(
-                          'Post hidden. We\'ll show you fewer like this.'),
+                      content:
+                          Text('Post hidden. We\'ll show you fewer like this.'),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -114,8 +114,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text(
-                          'Thanks — our team will review this post.'),
+                      content: Text('Thanks — our team will review this post.'),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -135,8 +134,18 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     if (diff.inHours < 24) return '${diff.inHours}h';
     if (diff.inDays < 7) return '${diff.inDays}d';
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return '${months[dt.month - 1]} ${dt.day}';
   }
@@ -173,296 +182,297 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          // ── Header ─────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: widget.onPetTap,
-                  child: _StoryRingAvatar(
-                    imageUrl: widget.post.pet.profileImageUrl,
-                    radius: 16,
-                    showRing: true,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: GestureDetector(
+            // ── Header ─────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
+              child: Row(
+                children: [
+                  GestureDetector(
                     onTap: widget.onPetTap,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                widget.post.pet.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 13.5,
-                                  color: colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                            if (widget.post.pet.isVerified) ...[
-                              const SizedBox(width: 4),
-                              const Icon(Icons.verified,
-                                  size: 14, color: Color(0xFF1DA1F2)),
-                            ],
-                          ],
-                        ),
-                        if (widget.post.location.isNotEmpty)
+                    child: _StoryRingAvatar(
+                      imageUrl: widget.post.pet.profileImageUrl,
+                      radius: 16,
+                      showRing: true,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: widget.onPetTap,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                           Row(
                             children: [
-                              Icon(
-                                Icons.location_on,
-                                size: 11,
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: 2),
                               Flexible(
                                 child: Text(
-                                  widget.post.location,
+                                  widget.post.pet.name,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 11.5,
-                                    color: colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13.5,
+                                    color: colorScheme.onSurface,
                                   ),
                                 ),
                               ),
+                              if (widget.post.pet.isVerified) ...[
+                                const SizedBox(width: 4),
+                                const Icon(Icons.verified,
+                                    size: 14, color: Color(0xFF1DA1F2)),
+                              ],
                             ],
-                          )
-                        else if (widget.post.pet.breed.isNotEmpty)
-                          Text(
-                            widget.post.pet.breed,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
                           ),
-                      ],
+                          if (widget.post.location.isNotEmpty)
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on,
+                                  size: 11,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 2),
+                                Flexible(
+                                  child: Text(
+                                    widget.post.location,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          else if (widget.post.pet.breed.isNotEmpty)
+                            Text(
+                              widget.post.pet.breed,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  iconSize: 22,
-                  visualDensity: VisualDensity.compact,
-                  icon: Icon(Icons.more_horiz, color: colorScheme.onSurface),
-                  onPressed: _showSettingsSheet,
-                ),
-              ],
+                  IconButton(
+                    iconSize: 22,
+                    visualDensity: VisualDensity.compact,
+                    icon: Icon(Icons.more_horiz, color: colorScheme.onSurface),
+                    onPressed: _showSettingsSheet,
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          // ── Media (1:1, edge-to-edge) ──────────────────────────────
-          GestureDetector(
-            onDoubleTap: _handleDoubleTap,
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  isVideoMedia(widget.post.mediaUrl)
-                      ? _PostVideoPlayer(
-                          key: ValueKey(widget.post.mediaUrl),
-                          url: widget.post.mediaUrl,
-                        )
-                      : Image.network(
-                          widget.post.mediaUrl,
-                          fit: BoxFit.cover,
-                          loadingBuilder: (context, child, progress) {
-                            if (progress == null) return child;
-                            return const _MediaLoadingPlaceholder();
-                          },
-                          errorBuilder: (ctx, err, stack) =>
-                              _MediaErrorPlaceholder(colorScheme: colorScheme),
-                        ),
-                  IgnorePointer(
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 250),
-                      opacity: _showHeart ? 1.0 : 0.0,
-                      child: Center(
-                        child: AnimatedScale(
-                          scale: _showHeart ? 1.0 : 0.4,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOutBack,
-                          child: const Icon(
-                            Icons.favorite,
-                            size: 96,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                color: Color(0x66000000),
-                                blurRadius: 24,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
+            // ── Media (1:1, edge-to-edge) ──────────────────────────────
+            GestureDetector(
+              onDoubleTap: _handleDoubleTap,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    isVideoMedia(widget.post.mediaUrl)
+                        ? _PostVideoPlayer(
+                            key: ValueKey(widget.post.mediaUrl),
+                            url: widget.post.mediaUrl,
+                          )
+                        : Image.network(
+                            widget.post.mediaUrl,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return const _MediaLoadingPlaceholder();
+                            },
+                            errorBuilder: (ctx, err, stack) =>
+                                _MediaErrorPlaceholder(
+                                    colorScheme: colorScheme),
+                          ),
+                    IgnorePointer(
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 250),
+                        opacity: _showHeart ? 1.0 : 0.0,
+                        child: Center(
+                          child: AnimatedScale(
+                            scale: _showHeart ? 1.0 : 0.4,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOutBack,
+                            child: const Icon(
+                              Icons.favorite,
+                              size: 96,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Color(0x66000000),
+                                  blurRadius: 24,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Action row ─────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(6, 4, 6, 0),
+              child: Row(
+                children: [
+                  _ActionIcon(
+                    onTap: widget.onLikeToggle,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      transitionBuilder: (child, anim) =>
+                          ScaleTransition(scale: anim, child: child),
+                      child: Icon(
+                        isLiked ? Icons.favorite : Icons.favorite_border,
+                        key: ValueKey(isLiked),
+                        size: 26,
+                        color: isLiked
+                            ? const Color(0xFFED4956)
+                            : colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  _ActionIcon(
+                    onTap: widget.onCommentIconTap,
+                    child: Icon(Icons.mode_comment_outlined,
+                        size: 26, color: colorScheme.onSurface),
+                  ),
+                  _ActionIcon(
+                    onTap: widget.onShareIconTap,
+                    child: Transform.rotate(
+                      angle: -0.5,
+                      child: Icon(Icons.send_outlined,
+                          size: 26, color: colorScheme.onSurface),
+                    ),
+                  ),
+                  const Spacer(),
+                  _ActionIcon(
+                    onTap: () {
+                      setState(() => _isSaved = !_isSaved);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content:
+                              Text(_isSaved ? 'Post Saved!' : 'Post Unsaved.'),
+                        ),
+                      );
+                    },
+                    child: Icon(
+                      _isSaved ? Icons.bookmark : Icons.bookmark_border,
+                      size: 26,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
 
-          // ── Action row ─────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(6, 4, 6, 0),
-            child: Row(
-              children: [
-                _ActionIcon(
-                  onTap: widget.onLikeToggle,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    transitionBuilder: (child, anim) =>
-                        ScaleTransition(scale: anim, child: child),
-                    child: Icon(
-                      isLiked ? Icons.favorite : Icons.favorite_border,
-                      key: ValueKey(isLiked),
-                      size: 26,
-                      color: isLiked
-                          ? const Color(0xFFED4956)
-                          : colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-                _ActionIcon(
-                  onTap: widget.onCommentIconTap,
-                  child: Icon(Icons.mode_comment_outlined,
-                      size: 26, color: colorScheme.onSurface),
-                ),
-                _ActionIcon(
-                  onTap: widget.onShareIconTap,
-                  child: Transform.rotate(
-                    angle: -0.5,
-                    child: Icon(Icons.send_outlined,
-                        size: 26, color: colorScheme.onSurface),
-                  ),
-                ),
-                const Spacer(),
-                _ActionIcon(
-                  onTap: () {
-                    setState(() => _isSaved = !_isSaved);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            _isSaved ? 'Post Saved!' : 'Post Unsaved.'),
-                      ),
-                    );
-                  },
-                  child: Icon(
-                    _isSaved ? Icons.bookmark : Icons.bookmark_border,
-                    size: 26,
+            // ── Like count ─────────────────────────────────────────────
+            if (likeCount > 0)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 2, 14, 0),
+                child: Text(
+                  likeCount == 1
+                      ? '1 like'
+                      : '${_formatCount(likeCount)} likes',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.5,
                     color: colorScheme.onSurface,
                   ),
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          // ── Like count ─────────────────────────────────────────────
-          if (likeCount > 0)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 2, 14, 0),
-              child: Text(
-                likeCount == 1
-                    ? '1 like'
-                    : '${_formatCount(likeCount)} likes',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13.5,
-                  color: colorScheme.onSurface,
+            // ── Caption (username + text, expandable) ──────────────────
+            if (caption.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+                child: _ExpandableCaption(
+                  username: widget.post.pet.name,
+                  caption: caption,
+                  expanded: _captionExpanded,
+                  onUsernameTap: widget.onPetTap,
+                  onMoreTap: () => setState(() => _captionExpanded = true),
+                  onSurface: colorScheme.onSurface,
+                  onSurfaceVariant: colorScheme.onSurfaceVariant,
                 ),
               ),
-            ),
 
-          // ── Caption (username + text, expandable) ──────────────────
-          if (caption.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
-              child: _ExpandableCaption(
-                username: widget.post.pet.name,
-                caption: caption,
-                expanded: _captionExpanded,
-                onUsernameTap: widget.onPetTap,
-                onMoreTap: () => setState(() => _captionExpanded = true),
-                onSurface: colorScheme.onSurface,
-                onSurfaceVariant: colorScheme.onSurfaceVariant,
-              ),
-            ),
-
-          if (widget.post.taggedPetNames.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
-              child: Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: widget.post.taggedPetNames
-                    .map(
-                      (name) => Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD4845A).withAlpha(24),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          '@$name',
-                          style: const TextStyle(
-                            color: Color(0xFFD4845A),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
+            if (widget.post.taggedPetNames.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: widget.post.taggedPetNames
+                      .map(
+                        (name) => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD4845A).withAlpha(24),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            '@$name',
+                            style: const TextStyle(
+                              color: Color(0xFFD4845A),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                      ),
-                    )
-                    .toList(),
+                      )
+                      .toList(),
+                ),
               ),
-            ),
 
-          // ── "View all N comments" ──────────────────────────────────
-          if (commentCount > 0)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
-              child: GestureDetector(
-                onTap: widget.onCommentIconTap,
-                child: Text(
-                  commentCount == 1
-                      ? 'View 1 comment'
-                      : 'View all ${_formatCount(commentCount)} comments',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: colorScheme.onSurfaceVariant,
+            // ── "View all N comments" ──────────────────────────────────
+            if (commentCount > 0)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+                child: GestureDetector(
+                  onTap: widget.onCommentIconTap,
+                  child: Text(
+                    commentCount == 1
+                        ? 'View 1 comment'
+                        : 'View all ${_formatCount(commentCount)} comments',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-          // ── Timestamp ──────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 6, 14, 16),
-            child: Text(
-              timeAgo,
-              style: TextStyle(
-                fontSize: 11,
-                color: colorScheme.onSurfaceVariant,
-                letterSpacing: 0.2,
+            // ── Timestamp ──────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 6, 14, 16),
+              child: Text(
+                timeAgo,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: colorScheme.onSurfaceVariant,
+                  letterSpacing: 0.2,
+                ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }

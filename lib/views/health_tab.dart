@@ -33,8 +33,8 @@ class HealthTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activePet   = ref.watch(activePetProvider);
-    final careState   = ref.watch(petCareProvider);
+    final activePet = ref.watch(activePetProvider);
+    final careState = ref.watch(petCareProvider);
     final healthState = ref.watch(healthProvider);
 
     if (activePet == null) {
@@ -52,47 +52,48 @@ class HealthTab extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       children: [
         _HealthOverviewCard(
-          petName:    activePet.name,
-          careState:  careState,
-          healthState:healthState,
+          petName: activePet.name,
+          careState: careState,
+          healthState: healthState,
         ),
         const SizedBox(height: 16),
         _VitalsSection(careState: careState),
         const SizedBox(height: 12),
         _MedicationsSection(
           medications: healthState.activeMedications,
-          petId:       activePet.id,
+          todayDoses: healthState.todayDoses,
+          petId: activePet.id,
         ),
         const SizedBox(height: 12),
         _AppointmentsSection(
           appointments: careState.upcomingAppointments,
-          petId:        activePet.id,
+          petId: activePet.id,
         ),
         const SizedBox(height: 12),
         _VaccinationsSection(
           vaccinations: careState.vaccinations,
-          petId:        activePet.id,
+          petId: activePet.id,
         ),
         const SizedBox(height: 12),
         _ParasiteSection(
           entries: healthState.latestPerType,
-          petId:   activePet.id,
+          petId: activePet.id,
         ),
         const SizedBox(height: 12),
         _DentalSection(
-          logs:  healthState.dentalLogs,
+          logs: healthState.dentalLogs,
           petId: activePet.id,
         ),
         const SizedBox(height: 12),
         _AllergySection(
           allergies: healthState.allergies,
-          petId:     activePet.id,
+          petId: activePet.id,
         ),
         const SizedBox(height: 12),
         _SymptomsSection(
-          active:   careState.activeSymptoms,
+          active: careState.activeSymptoms,
           resolved: careState.resolvedSymptoms,
-          petId:    activePet.id,
+          petId: activePet.id,
         ),
         const SizedBox(height: 32),
       ],
@@ -117,11 +118,11 @@ class _HealthOverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dueMeds     = healthState.todayDoses.where((d) => d.isOverdue).length;
-    final nextAppt    = careState.upcomingAppointments.isNotEmpty
+    final dueMeds = healthState.todayDoses.where((d) => d.isOverdue).length;
+    final nextAppt = careState.upcomingAppointments.isNotEmpty
         ? careState.upcomingAppointments.first
         : null;
-    final overdueP    = healthState.overdueParasite;
+    final overdueP = healthState.overdueParasite;
     final activeSymps = careState.activeSymptoms.length;
 
     final chips = <_AlertChip>[];
@@ -134,7 +135,8 @@ class _HealthOverviewCard extends StatelessWidget {
     if (nextAppt != null) {
       final days = nextAppt.daysUntil;
       chips.add(_AlertChip(
-        label: 'Vet in ${days < 1 ? 'today' : '$days day${days == 1 ? '' : 's'}'}',
+        label:
+            'Vet in ${days < 1 ? 'today' : '$days day${days == 1 ? '' : 's'}'}',
         color: AppTheme.secondaryAccent,
       ));
     }
@@ -224,7 +226,8 @@ class _AlertChip extends StatelessWidget {
         border: Border.all(color: color.withAlpha(80)),
       ),
       child: Text(label,
-          style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500)),
+          style: TextStyle(
+              fontSize: 12, color: color, fontWeight: FontWeight.w500)),
     );
   }
 }
@@ -351,18 +354,17 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
   @override
   Widget build(BuildContext context) {
     final weights = widget.careState.recentWeights;
-    final latest  = weights.isNotEmpty ? weights.last : null;
-    final prior   = weights.length >= 2 ? weights[weights.length - 2] : null;
-    final delta   = (latest != null && prior != null)
+    final latest = weights.isNotEmpty ? weights.last : null;
+    final prior = weights.length >= 2 ? weights[weights.length - 2] : null;
+    final delta = (latest != null && prior != null)
         ? latest.weightLbs - prior.weightLbs
         : null;
-    final maxW    = weights.isEmpty
-        ? 1.0
-        : weights.map((w) => w.weightLbs).reduce(max);
+    final maxW =
+        weights.isEmpty ? 1.0 : weights.map((w) => w.weightLbs).reduce(max);
 
     return _SectionCard(
       title: 'Vitals & Weight',
-      icon:  Icons.monitor_weight_outlined,
+      icon: Icons.monitor_weight_outlined,
       onAdd: () => _showLogWeightSheet(context),
       addTooltip: 'Log weight',
       emptyState: const _EmptyHint(
@@ -392,7 +394,8 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                               ? Icons.arrow_drop_up
                               : Icons.arrow_drop_down,
                           size: 16,
-                          color: delta > 0 ? Colors.red : AppTheme.secondaryAccent,
+                          color:
+                              delta > 0 ? Colors.red : AppTheme.secondaryAccent,
                         ),
                         Text(
                           '${delta.abs().toStringAsFixed(1)} ${latest!.unit} vs prior',
@@ -444,12 +447,10 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                 child: Text('${d}d',
                     style: TextStyle(
                         fontSize: 12,
-                        fontWeight: selected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: selected
-                            ? Colors.white
-                            : AppTheme.textSecondary)),
+                        fontWeight:
+                            selected ? FontWeight.bold : FontWeight.normal,
+                        color:
+                            selected ? Colors.white : AppTheme.textSecondary)),
               ),
             );
           }).toList(),
@@ -489,8 +490,7 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                         Text(
                           DateFormat('E').format(w.logDate),
                           style: const TextStyle(
-                              fontSize: 9,
-                              color: AppTheme.textSecondary),
+                              fontSize: 9, color: AppTheme.textSecondary),
                         ),
                       ],
                     ),
@@ -505,7 +505,7 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
 
   void _showLogWeightSheet(BuildContext context) {
     final weightCtrl = TextEditingController();
-    final notesCtrl  = TextEditingController();
+    final notesCtrl = TextEditingController();
     int? selectedBcs;
 
     showModalBottomSheet(
@@ -518,7 +518,9 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
         return StatefulBuilder(builder: (ctx, setS) {
           return Padding(
             padding: EdgeInsets.only(
-              left: 20, right: 20, top: 20,
+              left: 20,
+              right: 20,
+              top: 20,
               bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
             ),
             child: Column(
@@ -538,8 +540,7 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                   style: const TextStyle(color: AppTheme.textPrimary),
                   decoration: InputDecoration(
                     labelText: 'Weight (lbs)',
-                    labelStyle:
-                        const TextStyle(color: AppTheme.textSecondary),
+                    labelStyle: const TextStyle(color: AppTheme.textSecondary),
                     filled: true,
                     fillColor: AppTheme.cardColor,
                     border: OutlineInputBorder(
@@ -549,14 +550,14 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                 ),
                 const SizedBox(height: 12),
                 const Text('Body Condition Score (optional)',
-                    style: TextStyle(
-                        color: AppTheme.textSecondary, fontSize: 13)),
+                    style:
+                        TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 6,
                   children: List.generate(9, (i) {
                     final score = i + 1;
-                    final sel   = selectedBcs == score;
+                    final sel = selectedBcs == score;
                     return GestureDetector(
                       onTap: () => setS(() => selectedBcs = score),
                       child: Container(
@@ -564,9 +565,8 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                         height: 32,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: sel
-                              ? AppTheme.primaryAccent
-                              : AppTheme.cardColor,
+                          color:
+                              sel ? AppTheme.primaryAccent : AppTheme.cardColor,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                               color: sel
@@ -575,12 +575,10 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                         ),
                         child: Text('$score',
                             style: TextStyle(
-                                color: sel
-                                    ? Colors.white
-                                    : AppTheme.textSecondary,
-                                fontWeight: sel
-                                    ? FontWeight.bold
-                                    : FontWeight.normal)),
+                                color:
+                                    sel ? Colors.white : AppTheme.textSecondary,
+                                fontWeight:
+                                    sel ? FontWeight.bold : FontWeight.normal)),
                       ),
                     );
                   }),
@@ -591,8 +589,7 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                   style: const TextStyle(color: AppTheme.textPrimary),
                   decoration: InputDecoration(
                     labelText: 'Notes (optional)',
-                    labelStyle:
-                        const TextStyle(color: AppTheme.textSecondary),
+                    labelStyle: const TextStyle(color: AppTheme.textSecondary),
                     filled: true,
                     fillColor: AppTheme.cardColor,
                     border: OutlineInputBorder(
@@ -616,9 +613,8 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                       Navigator.pop(ctx);
                       ref.read(petCareProvider.notifier).logWeight(
                             weight: w,
-                            notes: notesCtrl.text.isEmpty
-                                ? null
-                                : notesCtrl.text,
+                            notes:
+                                notesCtrl.text.isEmpty ? null : notesCtrl.text,
                             bcsScore: selectedBcs,
                           );
                     },
@@ -652,17 +648,17 @@ class _MedicationsSection extends ConsumerWidget {
     final healthState = ref.watch(healthProvider);
 
     return _SectionCard(
-      title:      'Medications',
-      icon:       Icons.medication_outlined,
-      onAdd:      () => _showAddMedSheet(context, ref),
+      title: 'Medications',
+      icon: Icons.medication_outlined,
+      onAdd: () => _showAddMedSheet(context, ref),
       addTooltip: 'Add medication',
       emptyState: const _EmptyHint(
           text: 'No active medications', icon: Icons.medication_outlined),
       children: medications.map((med) {
         final dose = healthState.todayDoseFor(med.id);
         return _MedicationRow(
-          med:   med,
-          dose:  dose,
+          med: med,
+          dose: dose,
           onGive: dose != null && !dose.isGiven
               ? () => ref.read(healthProvider.notifier).markDoseGiven(dose)
               : null,
@@ -675,10 +671,10 @@ class _MedicationsSection extends ConsumerWidget {
   }
 
   void _showAddMedSheet(BuildContext context, WidgetRef ref) {
-    final nameCtrl    = TextEditingController();
-    final doseCtrl    = TextEditingController();
+    final nameCtrl = TextEditingController();
+    final doseCtrl = TextEditingController();
     final purposeCtrl = TextEditingController();
-    String freq       = 'once_daily';
+    String freq = 'once_daily';
 
     showModalBottomSheet(
       context: context,
@@ -689,7 +685,9 @@ class _MedicationsSection extends ConsumerWidget {
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
         return Padding(
           padding: EdgeInsets.only(
-            left: 20, right: 20, top: 20,
+            left: 20,
+            right: 20,
+            top: 20,
             bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
           ),
           child: Column(
@@ -714,8 +712,7 @@ class _MedicationsSection extends ConsumerWidget {
                 style: const TextStyle(color: AppTheme.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Frequency',
-                  labelStyle:
-                      const TextStyle(color: AppTheme.textSecondary),
+                  labelStyle: const TextStyle(color: AppTheme.textSecondary),
                   filled: true,
                   fillColor: AppTheme.cardColor,
                   border: OutlineInputBorder(
@@ -728,12 +725,9 @@ class _MedicationsSection extends ConsumerWidget {
                   DropdownMenuItem(
                       value: 'twice_daily', child: Text('Twice daily')),
                   DropdownMenuItem(
-                      value: 'three_times_daily',
-                      child: Text('3× daily')),
-                  DropdownMenuItem(
-                      value: 'weekly', child: Text('Weekly')),
-                  DropdownMenuItem(
-                      value: 'monthly', child: Text('Monthly')),
+                      value: 'three_times_daily', child: Text('3× daily')),
+                  DropdownMenuItem(value: 'weekly', child: Text('Weekly')),
+                  DropdownMenuItem(value: 'monthly', child: Text('Monthly')),
                   DropdownMenuItem(
                       value: 'as_needed', child: Text('As needed')),
                 ],
@@ -754,18 +748,18 @@ class _MedicationsSection extends ConsumerWidget {
                     Navigator.pop(ctx);
                     ref.read(healthProvider.notifier).addMedication(
                           PetMedication(
-                            id:        '',
-                            petId:     petId,
-                            name:      nameCtrl.text.trim(),
-                            dose:      doseCtrl.text.isEmpty
+                            id: '',
+                            petId: petId,
+                            name: nameCtrl.text.trim(),
+                            dose: doseCtrl.text.isEmpty
                                 ? null
                                 : doseCtrl.text.trim(),
                             frequency: freq,
                             startDate: DateTime.now(),
-                            purpose:   purposeCtrl.text.isEmpty
+                            purpose: purposeCtrl.text.isEmpty
                                 ? null
                                 : purposeCtrl.text.trim(),
-                            status:    'active',
+                            status: 'active',
                           ),
                         );
                   },
@@ -828,8 +822,7 @@ class _MedicationRow extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(med.statusLabel,
-                      style:
-                          TextStyle(fontSize: 11, color: med.statusColor)),
+                      style: TextStyle(fontSize: 11, color: med.statusColor)),
                 ),
               ],
             ),
@@ -853,8 +846,7 @@ class _DoseStatusRow extends StatelessWidget {
   final VoidCallback? onGive;
   final VoidCallback? onSkip;
 
-  const _DoseStatusRow(
-      {required this.dose, this.onGive, this.onSkip});
+  const _DoseStatusRow({required this.dose, this.onGive, this.onSkip});
 
   @override
   Widget build(BuildContext context) {
@@ -866,8 +858,8 @@ class _DoseStatusRow extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             'Given ${dose.givenAt != null ? DateFormat('h:mm a').format(dose.givenAt!) : ''}',
-            style: const TextStyle(
-                fontSize: 12, color: AppTheme.secondaryAccent),
+            style:
+                const TextStyle(fontSize: 12, color: AppTheme.secondaryAccent),
           ),
         ],
       );
@@ -878,8 +870,7 @@ class _DoseStatusRow extends StatelessWidget {
           Icon(Icons.cancel, size: 14, color: AppTheme.textSecondary),
           SizedBox(width: 4),
           Text('Skipped',
-              style: TextStyle(
-                  fontSize: 12, color: AppTheme.textSecondary)),
+              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
         ],
       );
     }
@@ -935,31 +926,30 @@ class _AppointmentsSection extends ConsumerWidget {
   final List<PetVetAppointment> appointments;
   final String petId;
 
-  const _AppointmentsSection(
-      {required this.appointments, required this.petId});
+  const _AppointmentsSection({required this.appointments, required this.petId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return _SectionCard(
-      title:      'Vet Appointments',
-      icon:       Icons.calendar_today_outlined,
-      onAdd:      () => _showAddApptSheet(context, ref),
+      title: 'Vet Appointments',
+      icon: Icons.calendar_today_outlined,
+      onAdd: () => _showAddApptSheet(context, ref),
       addTooltip: 'Add appointment',
       emptyState: const _EmptyHint(
-          text: 'No upcoming appointments', icon: Icons.calendar_today_outlined),
-      children: appointments
-          .map((a) => _AppointmentCard(appt: a, ref: ref))
-          .toList(),
+          text: 'No upcoming appointments',
+          icon: Icons.calendar_today_outlined),
+      children:
+          appointments.map((a) => _AppointmentCard(appt: a, ref: ref)).toList(),
     );
   }
 
   void _showAddApptSheet(BuildContext context, WidgetRef ref) {
-    final titleCtrl  = TextEditingController();
+    final titleCtrl = TextEditingController();
     final doctorCtrl = TextEditingController();
-    final locCtrl    = TextEditingController();
-    final notesCtrl  = TextEditingController();
-    DateTime date    = DateTime.now().add(const Duration(days: 7));
-    String type      = 'routine';
+    final locCtrl = TextEditingController();
+    final notesCtrl = TextEditingController();
+    DateTime date = DateTime.now().add(const Duration(days: 7));
+    String type = 'routine';
 
     showModalBottomSheet(
       context: context,
@@ -970,7 +960,9 @@ class _AppointmentsSection extends ConsumerWidget {
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
         return Padding(
           padding: EdgeInsets.only(
-            left: 20, right: 20, top: 20,
+            left: 20,
+            right: 20,
+            top: 20,
             bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
           ),
           child: SingleChildScrollView(
@@ -996,8 +988,7 @@ class _AppointmentsSection extends ConsumerWidget {
                   style: const TextStyle(color: AppTheme.textPrimary),
                   decoration: InputDecoration(
                     labelText: 'Type',
-                    labelStyle:
-                        const TextStyle(color: AppTheme.textSecondary),
+                    labelStyle: const TextStyle(color: AppTheme.textSecondary),
                     filled: true,
                     fillColor: AppTheme.cardColor,
                     border: OutlineInputBorder(
@@ -1005,16 +996,13 @@ class _AppointmentsSection extends ConsumerWidget {
                         borderSide: BorderSide.none),
                   ),
                   items: const [
-                    DropdownMenuItem(
-                        value: 'routine', child: Text('Routine')),
+                    DropdownMenuItem(value: 'routine', child: Text('Routine')),
                     DropdownMenuItem(
                         value: 'emergency', child: Text('Emergency')),
                     DropdownMenuItem(
                         value: 'specialist', child: Text('Specialist')),
-                    DropdownMenuItem(
-                        value: 'dental', child: Text('Dental')),
-                    DropdownMenuItem(
-                        value: 'surgery', child: Text('Surgery')),
+                    DropdownMenuItem(value: 'dental', child: Text('Dental')),
+                    DropdownMenuItem(value: 'surgery', child: Text('Surgery')),
                     DropdownMenuItem(
                         value: 'follow_up', child: Text('Follow-up')),
                   ],
@@ -1055,19 +1043,19 @@ class _AppointmentsSection extends ConsumerWidget {
                       Navigator.pop(ctx);
                       ref.read(healthProvider.notifier).upsertAppointment(
                             PetVetAppointment(
-                              id:              '',
-                              petId:           petId,
-                              title:           titleCtrl.text.trim(),
-                              doctor:          doctorCtrl.text.isEmpty
+                              id: '',
+                              petId: petId,
+                              title: titleCtrl.text.trim(),
+                              doctor: doctorCtrl.text.isEmpty
                                   ? null
                                   : doctorCtrl.text.trim(),
-                              scheduledAt:     date,
-                              notes:           notesCtrl.text.isEmpty
+                              scheduledAt: date,
+                              notes: notesCtrl.text.isEmpty
                                   ? null
                                   : notesCtrl.text.trim(),
-                              status:          'scheduled',
+                              status: 'scheduled',
                               appointmentType: type,
-                              location:        locCtrl.text.isEmpty
+                              location: locCtrl.text.isEmpty
                                   ? null
                                   : locCtrl.text.trim(),
                             ),
@@ -1095,7 +1083,7 @@ class _AppointmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final days    = appt.daysUntil;
+    final days = appt.daysUntil;
     final daysStr = days < 0
         ? 'past'
         : days == 0
@@ -1152,7 +1140,8 @@ class _AppointmentCard extends StatelessWidget {
               const SizedBox(height: 2),
               Row(
                 children: [
-                  const Icon(Icons.person, size: 12, color: AppTheme.textSecondary),
+                  const Icon(Icons.person,
+                      size: 12, color: AppTheme.textSecondary),
                   const SizedBox(width: 4),
                   Text(appt.doctor!,
                       style: const TextStyle(
@@ -1188,21 +1177,20 @@ class _VaccinationsSection extends ConsumerWidget {
   final List<PetVaccination> vaccinations;
   final String petId;
 
-  const _VaccinationsSection(
-      {required this.vaccinations, required this.petId});
+  const _VaccinationsSection({required this.vaccinations, required this.petId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return _SectionCard(
-      title:      'Vaccinations',
-      icon:       Icons.vaccines_outlined,
-      onAdd:      () => _showAddVaxSheet(context, ref),
+      title: 'Vaccinations',
+      icon: Icons.vaccines_outlined,
+      onAdd: () => _showAddVaxSheet(context, ref),
       addTooltip: 'Add vaccination',
       emptyState: const _EmptyHint(
           text: 'No vaccination records', icon: Icons.vaccines_outlined),
       children: vaccinations.map((v) {
         final completed = v.isCompleted;
-        final dueDate   = v.nextDueDate ?? v.scheduledFor;
+        final dueDate = v.nextDueDate ?? v.scheduledFor;
         return Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Row(
@@ -1212,7 +1200,9 @@ class _VaccinationsSection extends ConsumerWidget {
                 size: 14,
                 color: completed
                     ? AppTheme.secondaryAccent
-                    : (v.isDueSoon ? AppTheme.primaryAccent : AppTheme.textSecondary),
+                    : (v.isDueSoon
+                        ? AppTheme.primaryAccent
+                        : AppTheme.textSecondary),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -1245,16 +1235,15 @@ class _VaccinationsSection extends ConsumerWidget {
                     ref.read(petCareProvider.notifier).refresh();
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: AppTheme.secondaryAccent.withAlpha(25),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text('Done',
                         style: TextStyle(
-                            fontSize: 11,
-                            color: AppTheme.secondaryAccent)),
+                            fontSize: 11, color: AppTheme.secondaryAccent)),
                   ),
                 ),
               ],
@@ -1266,7 +1255,7 @@ class _VaccinationsSection extends ConsumerWidget {
   }
 
   void _showAddVaxSheet(BuildContext context, WidgetRef ref) {
-    final nameCtrl  = TextEditingController();
+    final nameCtrl = TextEditingController();
     final notesCtrl = TextEditingController();
     DateTime? dueDate;
 
@@ -1279,7 +1268,9 @@ class _VaccinationsSection extends ConsumerWidget {
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
         return Padding(
           padding: EdgeInsets.only(
-            left: 20, right: 20, top: 20,
+            left: 20,
+            right: 20,
+            top: 20,
             bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
           ),
           child: Column(
@@ -1311,7 +1302,8 @@ class _VaccinationsSection extends ConsumerWidget {
                   final picked = await showDatePicker(
                     context: ctx,
                     initialDate: DateTime.now().add(const Duration(days: 30)),
-                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                    firstDate:
+                        DateTime.now().subtract(const Duration(days: 365)),
                     lastDate: DateTime.now().add(const Duration(days: 1825)),
                   );
                   if (picked != null) setS(() => dueDate = picked);
@@ -1333,13 +1325,13 @@ class _VaccinationsSection extends ConsumerWidget {
                     Navigator.pop(ctx);
                     ref.read(healthProvider.notifier).upsertVaccination(
                           PetVaccination(
-                            id:          '',
-                            petId:       petId,
+                            id: '',
+                            petId: petId,
                             vaccineName: nameCtrl.text.trim(),
-                            status:      'scheduled',
-                            scheduledFor:dueDate,
+                            status: 'scheduled',
+                            scheduledFor: dueDate,
                             nextDueDate: dueDate,
-                            notes:       notesCtrl.text.isEmpty
+                            notes: notesCtrl.text.isEmpty
                                 ? null
                                 : notesCtrl.text.trim(),
                           ),
@@ -1370,15 +1362,15 @@ class _ParasiteSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return _SectionCard(
-      title:      'Parasite Prevention',
-      icon:       Icons.bug_report_outlined,
-      onAdd:      () => _showLogSheet(context, ref),
+      title: 'Parasite Prevention',
+      icon: Icons.bug_report_outlined,
+      onAdd: () => _showLogSheet(context, ref),
       addTooltip: 'Log treatment',
       emptyState: const _EmptyHint(
           text: 'No parasite prevention logs', icon: Icons.bug_report_outlined),
       children: entries.map((e) {
         final daysUntil = e.daysUntilDue;
-        final label     = e.isOverdue
+        final label = e.isOverdue
             ? 'Overdue'
             : daysUntil != null
                 ? 'Due in $daysUntil day${daysUntil == 1 ? '' : 's'}'
@@ -1398,22 +1390,19 @@ class _ParasiteSection extends ConsumerWidget {
                     Text(
                         '${e.productTypeLabel} · ${_relativeTime(e.administeredOn)}',
                         style: const TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.textSecondary)),
+                            fontSize: 12, color: AppTheme.textSecondary)),
                   ],
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: e.urgencyColor.withAlpha(30),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: e.urgencyColor.withAlpha(80)),
                 ),
                 child: Text(label,
-                    style:
-                        TextStyle(fontSize: 11, color: e.urgencyColor)),
+                    style: TextStyle(fontSize: 11, color: e.urgencyColor)),
               ),
             ],
           ),
@@ -1424,8 +1413,8 @@ class _ParasiteSection extends ConsumerWidget {
 
   void _showLogSheet(BuildContext context, WidgetRef ref) {
     final productCtrl = TextEditingController();
-    final notesCtrl   = TextEditingController();
-    String type       = 'flea_tick';
+    final notesCtrl = TextEditingController();
+    String type = 'flea_tick';
     DateTime administered = DateTime.now();
     DateTime? nextDue;
 
@@ -1438,7 +1427,9 @@ class _ParasiteSection extends ConsumerWidget {
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
         return Padding(
           padding: EdgeInsets.only(
-            left: 20, right: 20, top: 20,
+            left: 20,
+            right: 20,
+            top: 20,
             bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
           ),
           child: SingleChildScrollView(
@@ -1514,8 +1505,7 @@ class _ParasiteSection extends ConsumerWidget {
                   onTap: () async {
                     final p = await showDatePicker(
                       context: ctx,
-                      initialDate:
-                          administered.add(const Duration(days: 30)),
+                      initialDate: administered.add(const Duration(days: 30)),
                       firstDate: DateTime.now(),
                       lastDate: DateTime.now().add(const Duration(days: 365)),
                     );
@@ -1538,13 +1528,13 @@ class _ParasiteSection extends ConsumerWidget {
                       Navigator.pop(ctx);
                       ref.read(healthProvider.notifier).logParasiteTreatment(
                             ParasitePrevention(
-                              id:             '',
-                              petId:          petId,
-                              productName:    productCtrl.text.trim(),
-                              productType:    type,
+                              id: '',
+                              petId: petId,
+                              productName: productCtrl.text.trim(),
+                              productType: type,
                               administeredOn: administered,
-                              nextDueDate:    nextDue,
-                              notes:          notesCtrl.text.isEmpty
+                              nextDueDate: nextDue,
+                              notes: notesCtrl.text.isEmpty
                                   ? null
                                   : notesCtrl.text.trim(),
                             ),
@@ -1577,12 +1567,14 @@ class _DentalSection extends ConsumerWidget {
     final lastBrush = logs
         .where((l) => l.cleaningType == 'home_brushing')
         .map((l) => l.logDate)
-        .fold<DateTime?>(null, (best, d) => best == null || d.isAfter(best) ? d : best);
+        .fold<DateTime?>(
+            null, (best, d) => best == null || d.isAfter(best) ? d : best);
 
     final lastProf = logs
         .where((l) => l.cleaningType == 'professional_cleaning')
         .map((l) => l.logDate)
-        .fold<DateTime?>(null, (best, d) => best == null || d.isAfter(best) ? d : best);
+        .fold<DateTime?>(
+            null, (best, d) => best == null || d.isAfter(best) ? d : best);
 
     String ago(DateTime? d) {
       if (d == null) return 'Never';
@@ -1593,9 +1585,9 @@ class _DentalSection extends ConsumerWidget {
     }
 
     return _SectionCard(
-      title:      'Dental Health',
-      icon:       Icons.sentiment_satisfied_alt,
-      onAdd:      () => _showLogSheet(context, ref),
+      title: 'Dental Health',
+      icon: Icons.sentiment_satisfied_alt,
+      onAdd: () => _showLogSheet(context, ref),
       addTooltip: 'Log dental care',
       emptyState: const _EmptyHint(
           text: 'No dental logs yet', icon: Icons.sentiment_satisfied_alt),
@@ -1634,8 +1626,8 @@ class _DentalSection extends ConsumerWidget {
   }
 
   void _showLogSheet(BuildContext context, WidgetRef ref) {
-    String type      = 'home_brushing';
-    final notesCtrl  = TextEditingController();
+    String type = 'home_brushing';
+    final notesCtrl = TextEditingController();
     DateTime logDate = DateTime.now();
 
     showModalBottomSheet(
@@ -1647,7 +1639,9 @@ class _DentalSection extends ConsumerWidget {
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
         return Padding(
           padding: EdgeInsets.only(
-            left: 20, right: 20, top: 20,
+            left: 20,
+            right: 20,
+            top: 20,
             bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
           ),
           child: Column(
@@ -1666,8 +1660,7 @@ class _DentalSection extends ConsumerWidget {
                 style: const TextStyle(color: AppTheme.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Type',
-                  labelStyle:
-                      const TextStyle(color: AppTheme.textSecondary),
+                  labelStyle: const TextStyle(color: AppTheme.textSecondary),
                   filled: true,
                   fillColor: AppTheme.cardColor,
                   border: OutlineInputBorder(
@@ -1676,16 +1669,14 @@ class _DentalSection extends ConsumerWidget {
                 ),
                 items: const [
                   DropdownMenuItem(
-                      value: 'home_brushing',
-                      child: Text('Home Brushing')),
+                      value: 'home_brushing', child: Text('Home Brushing')),
                   DropdownMenuItem(
                       value: 'dental_chew', child: Text('Dental Chew')),
                   DropdownMenuItem(
                       value: 'professional_cleaning',
                       child: Text('Professional Cleaning')),
                   DropdownMenuItem(
-                      value: 'water_additive',
-                      child: Text('Water Additive')),
+                      value: 'water_additive', child: Text('Water Additive')),
                 ],
                 onChanged: (v) => setS(() => type = v ?? type),
               ),
@@ -1705,11 +1696,11 @@ class _DentalSection extends ConsumerWidget {
                     Navigator.pop(ctx);
                     ref.read(healthProvider.notifier).logDental(
                           DentalLog(
-                            id:           '',
-                            petId:        petId,
-                            logDate:      logDate,
+                            id: '',
+                            petId: petId,
+                            logDate: logDate,
                             cleaningType: type,
-                            notes:        notesCtrl.text.isEmpty
+                            notes: notesCtrl.text.isEmpty
                                 ? null
                                 : notesCtrl.text.trim(),
                           ),
@@ -1742,8 +1733,8 @@ class _DentalRow extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: Text(label,
-              style: const TextStyle(
-                  fontSize: 13, color: AppTheme.textSecondary)),
+              style:
+                  const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
         ),
         Text(value,
             style: const TextStyle(
@@ -1770,12 +1761,13 @@ class _AllergySection extends ConsumerWidget {
     final activeAllergies = allergies.where((a) => a.isActive).toList();
 
     return _SectionCard(
-      title:      'Allergies',
-      icon:       Icons.warning_amber_outlined,
-      onAdd:      () => _showAddSheet(context, ref),
+      title: 'Allergies',
+      icon: Icons.warning_amber_outlined,
+      onAdd: () => _showAddSheet(context, ref),
       addTooltip: 'Add allergy',
       emptyState: const _EmptyHint(
-          text: 'No known allergies recorded', icon: Icons.warning_amber_outlined),
+          text: 'No known allergies recorded',
+          icon: Icons.warning_amber_outlined),
       children: [
         if (activeAllergies.isNotEmpty)
           Wrap(
@@ -1785,8 +1777,8 @@ class _AllergySection extends ConsumerWidget {
               return GestureDetector(
                 onLongPress: () => _confirmDelete(context, ref, a),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: a.severityColor.withAlpha(25),
                     borderRadius: BorderRadius.circular(20),
@@ -1799,8 +1791,7 @@ class _AllergySection extends ConsumerWidget {
                       const SizedBox(width: 5),
                       Text(
                         '${a.allergen} · ${a.allergenTypeLabel}',
-                        style: TextStyle(
-                            fontSize: 12, color: a.severityColor),
+                        style: TextStyle(fontSize: 12, color: a.severityColor),
                       ),
                     ],
                   ),
@@ -1812,8 +1803,7 @@ class _AllergySection extends ConsumerWidget {
     );
   }
 
-  void _confirmDelete(
-      BuildContext context, WidgetRef ref, PetAllergy allergy) {
+  void _confirmDelete(BuildContext context, WidgetRef ref, PetAllergy allergy) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -1841,10 +1831,10 @@ class _AllergySection extends ConsumerWidget {
   }
 
   void _showAddSheet(BuildContext context, WidgetRef ref) {
-    final allergenCtrl  = TextEditingController();
-    final reactionCtrl  = TextEditingController();
+    final allergenCtrl = TextEditingController();
+    final reactionCtrl = TextEditingController();
     String allergenType = 'food';
-    String severity     = 'mild';
+    String severity = 'mild';
 
     showModalBottomSheet(
       context: context,
@@ -1855,7 +1845,9 @@ class _AllergySection extends ConsumerWidget {
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
         return Padding(
           padding: EdgeInsets.only(
-            left: 20, right: 20, top: 20,
+            left: 20,
+            right: 20,
+            top: 20,
             bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
           ),
           child: Column(
@@ -1886,8 +1878,7 @@ class _AllergySection extends ConsumerWidget {
                 items: const [
                   DropdownMenuItem(value: 'food', child: Text('Food')),
                   DropdownMenuItem(
-                      value: 'environmental',
-                      child: Text('Environmental')),
+                      value: 'environmental', child: Text('Environmental')),
                   DropdownMenuItem(value: 'drug', child: Text('Drug')),
                   DropdownMenuItem(value: 'insect', child: Text('Insect')),
                   DropdownMenuItem(value: 'other', child: Text('Other')),
@@ -1910,8 +1901,7 @@ class _AllergySection extends ConsumerWidget {
                 ),
                 items: const [
                   DropdownMenuItem(value: 'mild', child: Text('Mild')),
-                  DropdownMenuItem(
-                      value: 'moderate', child: Text('Moderate')),
+                  DropdownMenuItem(value: 'moderate', child: Text('Moderate')),
                   DropdownMenuItem(value: 'severe', child: Text('Severe')),
                   DropdownMenuItem(
                       value: 'life_threatening',
@@ -1936,15 +1926,15 @@ class _AllergySection extends ConsumerWidget {
                     Navigator.pop(ctx);
                     ref.read(healthProvider.notifier).addAllergy(
                           PetAllergy(
-                            id:           '',
-                            petId:        petId,
-                            allergen:     allergenCtrl.text.trim(),
+                            id: '',
+                            petId: petId,
+                            allergen: allergenCtrl.text.trim(),
                             allergenType: allergenType,
-                            severity:     severity,
-                            reaction:     reactionCtrl.text.isEmpty
+                            severity: severity,
+                            reaction: reactionCtrl.text.isEmpty
                                 ? null
                                 : reactionCtrl.text.trim(),
-                            isActive:     true,
+                            isActive: true,
                           ),
                         );
                   },
@@ -1982,26 +1972,34 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
   bool _showResolved = false;
 
   static const _kTypes = [
-    'Lethargy', 'Vomiting', 'Diarrhea', 'Loss of Appetite',
-    'Itching', 'Sneezing', 'Limping', 'Coughing', 'Scratching',
-    'Eye Discharge', 'Ear Scratching', 'Other',
+    'Lethargy',
+    'Vomiting',
+    'Diarrhea',
+    'Loss of Appetite',
+    'Itching',
+    'Sneezing',
+    'Limping',
+    'Coughing',
+    'Scratching',
+    'Eye Discharge',
+    'Ear Scratching',
+    'Other',
   ];
 
   @override
   Widget build(BuildContext context) {
     return _SectionCard(
-      title:      'Symptoms',
-      icon:       Icons.medical_services_outlined,
-      onAdd:      () => _showLogSheet(context),
+      title: 'Symptoms',
+      icon: Icons.medical_services_outlined,
+      onAdd: () => _showLogSheet(context),
       addTooltip: 'Log symptom',
       emptyState: const _EmptyHint(
           text: 'No symptoms logged', icon: Icons.medical_services_outlined),
       children: [
         ...widget.active.map((s) => _SymptomRow(
-              symptom:   s,
-              onResolve: () => ref
-                  .read(petCareProvider.notifier)
-                  .resolveSymptom(s.id),
+              symptom: s,
+              onResolve: () =>
+                  ref.read(petCareProvider.notifier).resolveSymptom(s.id),
             )),
         if (widget.resolved.isNotEmpty) ...[
           GestureDetector(
@@ -2017,9 +2015,7 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
                   ),
                   const SizedBox(width: 4),
                   Icon(
-                    _showResolved
-                        ? Icons.expand_less
-                        : Icons.expand_more,
+                    _showResolved ? Icons.expand_less : Icons.expand_more,
                     size: 16,
                     color: AppTheme.textSecondary,
                   ),
@@ -2029,7 +2025,7 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
           ),
           if (_showResolved)
             ...widget.resolved.map((s) => _SymptomRow(
-                  symptom:   s,
+                  symptom: s,
                   onResolve: null,
                 )),
         ],
@@ -2039,8 +2035,8 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
 
   void _showLogSheet(BuildContext context) {
     String? selectedType;
-    String severity     = 'mild';
-    final notesCtrl     = TextEditingController();
+    String severity = 'mild';
+    final notesCtrl = TextEditingController();
 
     showModalBottomSheet(
       context: context,
@@ -2051,7 +2047,9 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
         return Padding(
           padding: EdgeInsets.only(
-            left: 20, right: 20, top: 20,
+            left: 20,
+            right: 20,
+            top: 20,
             bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
           ),
           child: Column(
@@ -2075,29 +2073,26 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: sel
-                            ? AppTheme.primaryAccent
-                            : AppTheme.cardColor,
+                        color:
+                            sel ? AppTheme.primaryAccent : AppTheme.cardColor,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                            color: sel
-                                ? AppTheme.primaryAccent
-                                : AppTheme.border),
+                            color:
+                                sel ? AppTheme.primaryAccent : AppTheme.border),
                       ),
                       child: Text(t,
                           style: TextStyle(
                               fontSize: 13,
-                              color: sel
-                                  ? Colors.white
-                                  : AppTheme.textSecondary)),
+                              color:
+                                  sel ? Colors.white : AppTheme.textSecondary)),
                     ),
                   );
                 }).toList(),
               ),
               const SizedBox(height: 12),
               const Text('Severity',
-                  style: TextStyle(
-                      color: AppTheme.textSecondary, fontSize: 13)),
+                  style:
+                      TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
               const SizedBox(height: 6),
               Row(
                 children: ['mild', 'moderate', 'severe'].map((s) {
@@ -2109,22 +2104,18 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: sel
-                            ? AppTheme.primaryAccent
-                            : AppTheme.cardColor,
+                        color:
+                            sel ? AppTheme.primaryAccent : AppTheme.cardColor,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                            color: sel
-                                ? AppTheme.primaryAccent
-                                : AppTheme.border),
+                            color:
+                                sel ? AppTheme.primaryAccent : AppTheme.border),
                       ),
-                      child: Text(
-                          s[0].toUpperCase() + s.substring(1),
+                      child: Text(s[0].toUpperCase() + s.substring(1),
                           style: TextStyle(
                               fontSize: 13,
-                              color: sel
-                                  ? Colors.white
-                                  : AppTheme.textSecondary)),
+                              color:
+                                  sel ? Colors.white : AppTheme.textSecondary)),
                     ),
                   );
                 }).toList(),
@@ -2146,8 +2137,8 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
                     Navigator.pop(ctx);
                     ref.read(petCareProvider.notifier).logSymptom(
                           symptomType: selectedType!,
-                          severity:    severity,
-                          notes:       notesCtrl.text.isEmpty
+                          severity: severity,
+                          notes: notesCtrl.text.isEmpty
                               ? null
                               : notesCtrl.text.trim(),
                         );
@@ -2197,9 +2188,8 @@ class _SymptomRow extends StatelessWidget {
                     color: symptom.isResolved
                         ? AppTheme.textSecondary
                         : AppTheme.textPrimary,
-                    decoration: symptom.isResolved
-                        ? TextDecoration.lineThrough
-                        : null,
+                    decoration:
+                        symptom.isResolved ? TextDecoration.lineThrough : null,
                   ),
                 ),
                 Text(
@@ -2214,16 +2204,14 @@ class _SymptomRow extends StatelessWidget {
             GestureDetector(
               onTap: onResolve,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppTheme.secondaryAccent.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text('Resolved',
                     style: TextStyle(
-                        fontSize: 11,
-                        color: AppTheme.secondaryAccent)),
+                        fontSize: 11, color: AppTheme.secondaryAccent)),
               ),
             ),
         ],
@@ -2246,8 +2234,7 @@ Widget _sheetTextField(TextEditingController ctrl, String label) {
       filled: true,
       fillColor: AppTheme.cardColor,
       border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none),
+          borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
     ),
   );
 }

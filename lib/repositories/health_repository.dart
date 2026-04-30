@@ -57,8 +57,8 @@ class HealthRepository {
   Future<List<MedicationDose>> fetchTodayDoses(String petId) async {
     final today = DateTime.now();
     final start = DateTime(today.year, today.month, today.day).toUtc();
-    final end   = start.add(const Duration(days: 1));
-    final rows  = await _db
+    final end = start.add(const Duration(days: 1));
+    final rows = await _db
         .from('pet_medication_doses')
         .select()
         .eq('pet_id', petId)
@@ -80,13 +80,13 @@ class HealthRepository {
   /// Mark a dose as given now. Creates or updates the dose row.
   Future<MedicationDose> markDoseGiven(MedicationDose dose) async {
     final updated = MedicationDose(
-      id:           dose.id,
+      id: dose.id,
       medicationId: dose.medicationId,
-      petId:        dose.petId,
+      petId: dose.petId,
       scheduledFor: dose.scheduledFor,
-      givenAt:      DateTime.now(),
-      skipped:      false,
-      notes:        dose.notes,
+      givenAt: DateTime.now(),
+      skipped: false,
+      notes: dose.notes,
     );
     return logDose(updated);
   }
@@ -94,13 +94,13 @@ class HealthRepository {
   /// Mark a dose as skipped.
   Future<MedicationDose> skipDose(MedicationDose dose) async {
     final updated = MedicationDose(
-      id:           dose.id,
+      id: dose.id,
       medicationId: dose.medicationId,
-      petId:        dose.petId,
+      petId: dose.petId,
       scheduledFor: dose.scheduledFor,
-      givenAt:      null,
-      skipped:      true,
-      notes:        dose.notes,
+      givenAt: null,
+      skipped: true,
+      notes: dose.notes,
     );
     return logDose(updated);
   }
@@ -194,8 +194,7 @@ class HealthRepository {
   // Vet Appointments (CRUD, extended from PetCareRepository read-only methods)
   // ──────────────────────────────────────────────────────────────────────────
 
-  Future<PetVetAppointment> upsertAppointment(
-      PetVetAppointment appt) async {
+  Future<PetVetAppointment> upsertAppointment(PetVetAppointment appt) async {
     final row = await _db
         .from('pet_vet_appointments')
         .upsert(appt.toUpsertJson(), onConflict: 'id')
@@ -207,8 +206,7 @@ class HealthRepository {
   Future<void> cancelAppointment(String id) async {
     await _db
         .from('pet_vet_appointments')
-        .update({'status': 'cancelled'})
-        .eq('id', id);
+        .update({'status': 'cancelled'}).eq('id', id);
   }
 
   Future<void> deleteAppointment(String id) async {
@@ -233,7 +231,7 @@ class HealthRepository {
     final row = await _db
         .from('pet_vaccinations')
         .update({
-          'status':       'completed',
+          'status': 'completed',
           'completed_on': completedOn.toIso8601String().split('T').first,
         })
         .eq('id', id)

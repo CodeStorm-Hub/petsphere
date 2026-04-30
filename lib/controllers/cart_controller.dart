@@ -48,8 +48,9 @@ class CartController extends Notifier<CartState> {
   }
 
   void addProduct(ProductModel product) {
-    final existingIndex = state.items.indexWhere((i) => i.product.id == product.id);
-    
+    final existingIndex =
+        state.items.indexWhere((i) => i.product.id == product.id);
+
     if (existingIndex >= 0) {
       // Product exists, increment quantity
       final newItems = List<CartItemModel>.from(state.items);
@@ -76,14 +77,14 @@ class CartController extends Notifier<CartState> {
       removeCartItem(itemId);
       return;
     }
-    
+
     final newItems = state.items.map((item) {
       if (item.id == itemId) {
         return item.copyWith(quantity: newQuantity);
       }
       return item;
     }).toList();
-    
+
     state = state.copyWith(items: newItems);
   }
 
@@ -98,7 +99,8 @@ class CartController extends Notifier<CartState> {
     final userId = ref.read(authProvider).user?.id;
     if (userId == null || state.items.isEmpty) return false;
 
-    state = state.copyWith(isCheckingOut: true, clearError: true, orderSuccess: false);
+    state = state.copyWith(
+        isCheckingOut: true, clearError: true, orderSuccess: false);
     try {
       await marketplaceRepository.placeOrder(
         userId: userId,

@@ -92,8 +92,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       Expanded(
                         child: ListView.separated(
                           itemCount: availablePets.length,
-                          separatorBuilder: (_, __) =>
-                              const Divider(height: 1, color: Color(0xFF2E2B26)),
+                          separatorBuilder: (_, __) => const Divider(
+                              height: 1, color: Color(0xFF2E2B26)),
                           itemBuilder: (context, index) {
                             final pet = availablePets[index];
                             final selected = draftTaggedPetIds.contains(pet.id);
@@ -123,7 +123,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                               ),
                               subtitle: Text(
                                 pet.breed,
-                                style: const TextStyle(color: Color(0xFFB8B0A4)),
+                                style:
+                                    const TextStyle(color: Color(0xFFB8B0A4)),
                               ),
                               onChanged: (_) {
                                 setSheetState(() {
@@ -150,8 +151,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: FilledButton(
-                              onPressed: () =>
-                                  Navigator.pop(ctx, Set<String>.from(draftTaggedPetIds)),
+                              onPressed: () => Navigator.pop(
+                                  ctx, Set<String>.from(draftTaggedPetIds)),
                               child: const Text('Done'),
                             ),
                           ),
@@ -281,7 +282,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     color: const Color(0xFF4DB6AC),
                     onTap: () async {
                       Navigator.pop(ctx);
-                      final file = await ImageUploadHelper.pickVideoFromCamera();
+                      final file =
+                          await ImageUploadHelper.pickVideoFromCamera();
                       if (file != null) _setSelectedMedia(file);
                     },
                   ),
@@ -320,9 +322,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         path: path,
       );
 
-      await ref
-          .read(feedProvider.notifier)
-          .addPost(
+      await ref.read(feedProvider.notifier).addPost(
             pet,
             mediaUrl,
             _captionController.text.trim(),
@@ -343,8 +343,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             ),
             backgroundColor: const Color(0xFF81C784),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
         context.pop();
@@ -403,7 +403,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           children: [
             Text(
               'Create Post',
-              style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.4),
+              style:
+                  TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.4),
             ),
             Text(
               'Share a fresh pet moment',
@@ -442,62 +443,64 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  const _ComposerHero(),
-                  const SizedBox(height: 20),
-                  const _SectionLabel('Posting as'),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 64,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: myPets.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 10),
-                      itemBuilder: (context, index) {
-                        final pet = myPets[index];
-                        final isSelected = pet.id == selectedPetId;
-                        return GestureDetector(
-                          onTap: () => setState(() {
-                            selectedPetId = pet.id;
-                            _taggedPetIds.remove(pet.id);
-                          }),
-                          child: _AuthorAvatar(
-                            pet: pet,
-                            isSelected: isSelected,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _MediaComposerCard(
-                    file: _selectedFile,
-                    mediaType: _selectedMediaType,
-                    onTap: _showMediaSourceSheet,
-                  ),
-                  if (_selectedFile != null) ...[
-                    const SizedBox(height: 12),
-                    Center(
-                      child: FilledButton.tonalIcon(
-                        onPressed: _showMediaSourceSheet,
-                        icon: const Icon(Icons.swap_horiz_rounded, size: 18),
-                        label: const Text('Change Media'),
+                      const _ComposerHero(),
+                      const SizedBox(height: 20),
+                      const _SectionLabel('Posting as'),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 64,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: myPets.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 10),
+                          itemBuilder: (context, index) {
+                            final pet = myPets[index];
+                            final isSelected = pet.id == selectedPetId;
+                            return GestureDetector(
+                              onTap: () => setState(() {
+                                selectedPetId = pet.id;
+                                _taggedPetIds.remove(pet.id);
+                              }),
+                              child: _AuthorAvatar(
+                                pet: pet,
+                                isSelected: isSelected,
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
-                  const SizedBox(height: 20),
-                  const _SectionLabel('Caption'),
-                  const SizedBox(height: 10),
-                  _CaptionCard(
-                    controller: _captionController,
-                    onChanged: () => setState(() {}),
-                  ),
-                  const SizedBox(height: 16),
-                  _PostOptionsCard(
-                    location: _location,
-                    taggedPets: taggedPets,
-                    onLocationTap: _showLocationSheet,
-                    onTagTap: () => _showTagPetsSheet(myPets),
-                  ),
+                      const SizedBox(height: 20),
+                      _MediaComposerCard(
+                        file: _selectedFile,
+                        mediaType: _selectedMediaType,
+                        onTap: _showMediaSourceSheet,
+                      ),
+                      if (_selectedFile != null) ...[
+                        const SizedBox(height: 12),
+                        Center(
+                          child: FilledButton.tonalIcon(
+                            onPressed: _showMediaSourceSheet,
+                            icon:
+                                const Icon(Icons.swap_horiz_rounded, size: 18),
+                            label: const Text('Change Media'),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 20),
+                      const _SectionLabel('Caption'),
+                      const SizedBox(height: 10),
+                      _CaptionCard(
+                        controller: _captionController,
+                        onChanged: () => setState(() {}),
+                      ),
+                      const SizedBox(height: 16),
+                      _PostOptionsCard(
+                        location: _location,
+                        taggedPets: taggedPets,
+                        onLocationTap: _showLocationSheet,
+                        onTagTap: () => _showTagPetsSheet(myPets),
+                      ),
                     ],
                   ),
                 ),
@@ -1216,10 +1219,13 @@ class _AuthorAvatar extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD4845A).withValues(alpha: 0.15) : const Color(0xFF211F1B),
+          color: isSelected
+              ? const Color(0xFFD4845A).withValues(alpha: 0.15)
+              : const Color(0xFF211F1B),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
+            color:
+                isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
             width: 1.5,
           ),
         ),
@@ -1235,7 +1241,10 @@ class _AuthorAvatar extends StatelessWidget {
               child: pet.profileImageUrl.isEmpty
                   ? Text(
                       pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.white),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          color: Colors.white),
                     )
                   : null,
             ),
@@ -1337,44 +1346,4 @@ class _LocationSheetContentState extends State<_LocationSheetContent> {
       ),
     );
   }
-}
-
-class _DashedRectPainter extends CustomPainter {
-  final Color color;
-  _DashedRectPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-
-    final path = Path();
-    final rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      const Radius.circular(24),
-    );
-
-    path.addRRect(rrect);
-
-    final dashPath = Path();
-    const dashWidth = 8.0;
-    const dashSpace = 6.0;
-    var distance = 0.0;
-    for (var pathMetric in path.computeMetrics()) {
-      while (distance < pathMetric.length) {
-        dashPath.addPath(
-          pathMetric.extractPath(distance, distance + dashWidth),
-          Offset.zero,
-        );
-        distance += dashWidth + dashSpace;
-      }
-      distance = 0.0;
-    }
-    canvas.drawPath(dashPath, paint);
-  }
-
-  @override
-  bool shouldRepaint(_DashedRectPainter old) => old.color != color;
 }

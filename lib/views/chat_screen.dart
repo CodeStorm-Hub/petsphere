@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/chat_controller.dart';
+import '../controllers/notification_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../utils/pet_navigation.dart';
 import 'components/message_bubble.dart';
@@ -24,8 +25,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     // Initialize the per-thread messages notifier with real Supabase data + Realtime
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(threadMessagesProvider.notifier).init(widget.threadId);
-      // Mark thread as read on open
       ref.read(chatProvider.notifier).markThreadAsRead(widget.threadId);
+      ref.read(notificationProvider.notifier).markMessagesAsRead();
+      // If the thread list hasn't included this thread yet (e.g. navigated
+      // directly via the Message button before the list refreshed), force a
+      // refresh so the app bar can resolve the other pet's name and avatar.
+      if (!ref.read(chatProvider).threads.any((t) => t.id == widget.threadId)) {
+        ref.read(chatProvider.notifier).refresh();
+      }
     });
   }
 
@@ -68,8 +75,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     // Find the thread from the list
     final threadList = chatState.threads.where((t) => t.id == widget.threadId);
     if (threadList.isEmpty) {
-      return const Scaffold(
-          body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     final thread = threadList.first;
     final otherPet = thread.participantPets.firstWhere(
@@ -104,7 +110,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     radius: 20,
                     backgroundColor: const Color(0xFFE5FDE6),
                     child: otherPet.profileImageUrl.isEmpty
-                        ? Text(otherPet.name[0], style: const TextStyle(color: Color(0xFF506453)))
+                        ? Text(otherPet.name[0],
+                            style: const TextStyle(color: Color(0xFF506453)))
                         : null,
                   ),
                   Positioned(
@@ -116,7 +123,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       decoration: BoxDecoration(
                         color: const Color(0xFFFAD04B),
                         shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFFFEF8F3), width: 2),
+                        border: Border.all(
+                            color: const Color(0xFFFEF8F3), width: 2),
                       ),
                     ),
                   ),
@@ -178,11 +186,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   color: Color(0xFFE5FDE6),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.chat_bubble_outline, size: 32, color: Color(0xFF506453)),
+                                child: const Icon(Icons.chat_bubble_outline,
+                                    size: 32, color: Color(0xFF506453)),
                               ),
                               const SizedBox(height: 16),
                               const Text('Say hello! 👋',
-                                  style: TextStyle(color: Color(0xFF625E59), fontSize: 16, fontWeight: FontWeight.w500)),
+                                  style: TextStyle(
+                                      color: Color(0xFF625E59),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500)),
                             ],
                           ),
                         ),
@@ -197,12 +209,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         final msg = messages[index];
                         final isMe = msg.senderPetId == myPetId;
                         final showSeparator = index == 0 ||
-                            !_isSameDay(messages[index - 1].createdAt, msg.createdAt);
+                            !_isSameDay(
+                                messages[index - 1].createdAt, msg.createdAt);
 
                         return Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (showSeparator) DateSeparator(date: msg.createdAt),
+                            if (showSeparator)
+                              DateSeparator(date: msg.createdAt),
                             MessageBubble(message: msg, isMe: isMe),
                           ],
                         );
@@ -225,7 +239,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 color: Colors.white.withAlpha(230),
                 borderRadius: BorderRadius.circular(999),
                 boxShadow: const [
-                  BoxShadow(color: Color(0x1F000000), blurRadius: 16, offset: Offset(0, 4)),
+                  BoxShadow(
+                      color: Color(0x1F000000),
+                      blurRadius: 16,
+                      offset: Offset(0, 4)),
                 ],
               ),
               child: Row(
@@ -233,7 +250,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   // Attachment button with tertiary-container bg
                   GestureDetector(
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Attachment support coming soon')),
+                      const SnackBar(
+                          content: Text('Attachment support coming soon')),
                     ),
                     child: Container(
                       width: 44,
@@ -242,7 +260,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         color: Color(0xFFE5FDE6),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.add, color: Color(0xFF506453), size: 22),
+                      child: const Icon(Icons.add,
+                          color: Color(0xFF506453), size: 22),
                     ),
                   ),
                   Expanded(
@@ -251,7 +270,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       decoration: const InputDecoration(
                         hintText: 'Type a message...',
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         filled: false,
                       ),
                       onSubmitted: (_) => _sendMessage(),
@@ -272,7 +292,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         ),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                      child: const Icon(Icons.send_rounded,
+                          color: Colors.white, size: 20),
                     ),
                   ),
                 ],
