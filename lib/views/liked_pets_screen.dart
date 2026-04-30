@@ -53,39 +53,39 @@ class LikedPetsScreen extends ConsumerWidget {
                 itemCount: sentRequests.length,
                 separatorBuilder: (_, __) => const Divider(height: 1),
                 itemBuilder: (context, index) {
-                final req = sentRequests[index];
-                final pet = req.receiverPet;
+                  final req = sentRequests[index];
+                  final pet = req.receiverPet;
 
-                if (pet == null) {
+                  if (pet == null) {
+                    return ListTile(
+                      leading: const CircleAvatar(child: Icon(Icons.pets)),
+                      title: const Text('Unknown pet'),
+                      subtitle: _statusLabel(req.status),
+                    );
+                  }
+
                   return ListTile(
-                    leading: const CircleAvatar(child: Icon(Icons.pets)),
-                    title: const Text('Unknown pet'),
-                    subtitle: _statusLabel(req.status),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    leading:
+                        PetAvatar(imageUrl: pet.profileImageUrl, radius: 24),
+                    title: Text(
+                      pet.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${pet.breed} · ${pet.age} yrs'),
+                        const SizedBox(height: 4),
+                        _statusLabel(req.status),
+                      ],
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/pet/${pet.id}'),
                   );
-                }
-
-                return ListTile(
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  leading: PetAvatar(
-                      imageUrl: pet.profileImageUrl, radius: 24),
-                  title: Text(
-                    pet.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('${pet.breed} · ${pet.age} yrs'),
-                      const SizedBox(height: 4),
-                      _statusLabel(req.status),
-                    ],
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/pet/${pet.id}'),
-                );
-              },
-            ),
+                },
+              ),
       ),
     );
   }

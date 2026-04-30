@@ -48,17 +48,24 @@ class MessageBubble extends StatelessWidget {
               bottomRight: Radius.circular(isMe ? 4 : 18),
             ),
             boxShadow: isMe
-                ? [BoxShadow(color: const Color(0xFF99472C).withAlpha(25), blurRadius: 10, offset: const Offset(0, 4))]
+                ? [
+                    BoxShadow(
+                        color: const Color(0xFF99472C).withAlpha(25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4))
+                  ]
                 : null,
           ),
           child: Column(
-            crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            crossAxisAlignment:
+                isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 message.text,
                 style: TextStyle(
-                  color: isMe ? const Color(0xFFFFF7F5) : const Color(0xFF35322D),
+                  color:
+                      isMe ? const Color(0xFFFFF7F5) : const Color(0xFF35322D),
                   fontSize: 15,
                   height: 1.4,
                 ),
@@ -71,7 +78,9 @@ class MessageBubble extends StatelessWidget {
                     timeStr,
                     style: TextStyle(
                       fontSize: 10,
-                      color: isMe ? Colors.white.withAlpha(180) : const Color(0xFF625E59),
+                      color: isMe
+                          ? Colors.white.withAlpha(180)
+                          : const Color(0xFF625E59),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -80,7 +89,9 @@ class MessageBubble extends StatelessWidget {
                     Icon(
                       message.isRead ? Icons.done_all : Icons.done,
                       size: 13,
-                      color: message.isRead ? const Color(0xFF4FC3F7) : Colors.white.withAlpha(180),
+                      color: message.isRead
+                          ? const Color(0xFF4FC3F7)
+                          : Colors.white.withAlpha(180),
                     ),
                   ],
                 ],

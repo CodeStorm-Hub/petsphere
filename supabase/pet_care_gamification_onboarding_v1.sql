@@ -1,0 +1,5 @@
+-- Pet Care: gamification, onboarding, public badge showcase
+-- Applied to Supabase project via MCP:
+--   1) pet_care_gamification_onboarding_v1
+--   2) pet_care_gamification_point_tracking (adds last_care_point_awarded_on, last_30d_increment_on)
+-- See docs/pet-care-review.md for RLS and table list.

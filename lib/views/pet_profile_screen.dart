@@ -17,6 +17,7 @@ import 'main_layout.dart' show bottomNavSpaceFor;
 import '../repositories/pet_repository.dart';
 import '../controllers/chat_controller.dart';
 import '../controllers/match_controller.dart';
+import 'components/public_care_badges_row.dart';
 
 typedef VisitProfileArgs = ({String? petId, String? userId});
 
@@ -433,6 +434,10 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         },
                       ),
                     ),
+                  ],
+                  if (isOwnerView && statsUserId.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    PublicCareBadgesRow(userId: statsUserId),
                   ],
                   const SizedBox(height: 16),
                 ],

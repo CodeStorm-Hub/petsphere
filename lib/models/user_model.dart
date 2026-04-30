@@ -5,6 +5,8 @@ class UserModel {
   final String? profileImageUrl;
   final String? bio;
   final String? location;
+  final List<String> publicCareBadgeSlugs;
+  final bool showCareBadgesOnProfile;
 
   UserModel({
     required this.id,
@@ -13,6 +15,8 @@ class UserModel {
     this.profileImageUrl,
     this.bio,
     this.location,
+    this.publicCareBadgeSlugs = const [],
+    this.showCareBadgesOnProfile = true,
   });
 
   UserModel copyWith({
@@ -22,15 +26,21 @@ class UserModel {
     String? profileImageUrl,
     String? bio,
     String? location,
+    List<String>? publicCareBadgeSlugs,
+    bool? showCareBadgesOnProfile,
     bool clearProfileImage = false,
   }) {
     return UserModel(
       id: id ?? this.id,
       email: email ?? this.email,
       name: name ?? this.name,
-      profileImageUrl: clearProfileImage ? null : (profileImageUrl ?? this.profileImageUrl),
+      profileImageUrl:
+          clearProfileImage ? null : (profileImageUrl ?? this.profileImageUrl),
       bio: bio ?? this.bio,
       location: location ?? this.location,
+      publicCareBadgeSlugs: publicCareBadgeSlugs ?? this.publicCareBadgeSlugs,
+      showCareBadgesOnProfile:
+          showCareBadgesOnProfile ?? this.showCareBadgesOnProfile,
     );
   }
 
@@ -42,6 +52,12 @@ class UserModel {
       profileImageUrl: json['profile_image_url'] as String?,
       bio: json['bio'] as String?,
       location: json['location'] as String?,
+      publicCareBadgeSlugs: (json['public_care_badge_slugs'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      showCareBadgesOnProfile:
+          json['show_care_badges_on_profile'] as bool? ?? true,
     );
   }
 
@@ -52,6 +68,8 @@ class UserModel {
         'profile_image_url': profileImageUrl,
         'bio': bio,
         'location': location,
+        'public_care_badge_slugs': publicCareBadgeSlugs,
+        'show_care_badges_on_profile': showCareBadgesOnProfile,
       };
 
   /// Returns initials for avatar fallback (e.g. "JD" for "John Doe")
