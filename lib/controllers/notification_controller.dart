@@ -48,7 +48,7 @@ class NotificationController extends Notifier<NotificationState> {
     ref.onDispose(() => _channel?.unsubscribe());
 
     final userId = ref.read(authProvider).user?.id;
-    _rebindTo(userId);
+    Future.microtask(() => _rebindTo(userId));
     return const NotificationState(isLoading: true);
   }
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../controllers/pet_care_controller.dart';
-import '../../theme/app_theme.dart';
 
 /// Renders showcased care badges for a profile [userId] (owner tab / public profile).
 class PublicCareBadgesRow extends ConsumerWidget {
@@ -12,6 +11,7 @@ class PublicCareBadgesRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final async = ref.watch(publicCareBadgeShowcaseProvider(userId));
     return async.when(
       data: (defs) {
@@ -25,7 +25,7 @@ class PublicCareBadgesRow extends ConsumerWidget {
                 'Care badges',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.textSecondary,
+                      color: colorScheme.onSurfaceVariant,
                     ),
               ),
               const SizedBox(height: 8),

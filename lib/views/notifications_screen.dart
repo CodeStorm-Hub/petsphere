@@ -118,6 +118,7 @@ class _NotificationTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     IconData icon;
@@ -139,7 +140,7 @@ class _NotificationTile extends ConsumerWidget {
         break;
       case 'post_like':
         icon = Icons.favorite;
-        bg = Colors.red;
+        bg = colorScheme.error;
         break;
       case 'post_comment':
         icon = Icons.comment;
@@ -147,7 +148,7 @@ class _NotificationTile extends ConsumerWidget {
         break;
       case 'post_share':
         icon = Icons.share;
-        bg = Colors.green;
+        bg = colorScheme.secondary;
         break;
       case 'profile_follow':
       case 'pet_follow':
@@ -235,6 +236,7 @@ class _NotificationTile extends ConsumerWidget {
 class _RequestsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final matchState = ref.watch(matchProvider);
     final myRequests = matchState.myRequests;
 
@@ -325,13 +327,13 @@ class _RequestsTab extends ConsumerWidget {
                         : req.status == 'matched'
                             ? Row(
                                 children: [
-                                  const Icon(Icons.check_circle,
-                                      color: Colors.green, size: 16),
+                                  Icon(Icons.check_circle,
+                                      color: colorScheme.secondary, size: 16),
                                   const SizedBox(width: 6),
-                                  const Text(
+                                  Text(
                                     'You matched!',
                                     style: TextStyle(
-                                      color: Colors.green,
+                                      color: colorScheme.secondary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -355,10 +357,10 @@ class _RequestsTab extends ConsumerWidget {
                                   ),
                                 ],
                               )
-                            : const Text(
+                            : Text(
                                 'Declined',
                                 style: TextStyle(
-                                  color: Colors.red,
+                                  color: colorScheme.error,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

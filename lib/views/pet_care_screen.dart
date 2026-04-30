@@ -8,7 +8,6 @@ import '../controllers/pet_care_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/care_badge_model.dart';
 import '../models/pet_care_log_model.dart';
-import '../theme/app_theme.dart';
 import '../utils/care_gamification_logic.dart';
 import '../utils/care_personalization.dart';
 import 'care_goal_editor_modal.dart';
@@ -20,8 +19,9 @@ class _SetupBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: AppTheme.primaryAccent.withValues(alpha: 0.1),
+      color: colorScheme.primary.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -30,19 +30,19 @@ class _SetupBanner extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
             children: [
-              const Icon(Icons.tune, color: AppTheme.primaryAccent, size: 22),
+              Icon(Icons.tune, color: colorScheme.primary, size: 22),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Finish care setup for species-specific tips, diet hints, and gentler nudges.',
                   style: TextStyle(
-                    color: AppTheme.textPrimary,
+                    color: colorScheme.onSurface,
                     fontSize: 14,
                     height: 1.3,
                   ),
                 ),
               ),
-              const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
+              Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
             ],
           ),
         ),
@@ -64,6 +64,7 @@ class _PointsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final todayWant = wantedDailyCarePoints(todayLog);
     final n = todayLog?.tasks.length ?? 0;
     final done = todayLog?.completedTasks ?? 0;
@@ -92,7 +93,7 @@ class _PointsRow extends StatelessWidget {
           style: Theme.of(context)
               .textTheme
               .labelSmall
-              ?.copyWith(color: AppTheme.textSecondary, height: 1.35),
+              ?.copyWith(color: colorScheme.onSurfaceVariant, height: 1.35),
         ),
       ],
     );
@@ -111,19 +112,20 @@ class _MiniStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Expanded(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
         decoration: BoxDecoration(
-          color: AppTheme.cardColor,
+          color: colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.border),
+          border: Border.all(color: colorScheme.outlineVariant),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 20, color: AppTheme.primaryAccent),
+            Icon(icon, size: 20, color: colorScheme.primary),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
@@ -140,8 +142,8 @@ class _MiniStat extends StatelessWidget {
                   ),
                   Text(
                     label,
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
                       fontSize: 11,
                     ),
                     maxLines: 1,
@@ -163,6 +165,7 @@ class _AchievementsBlock extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final defAsync = ref.watch(careBadgeDefinitionsProvider);
     final care = ref.watch(petCareProvider);
     final unlocks = care.unlocks.where((u) => u.petId == activePetId).toList();
@@ -174,16 +177,25 @@ class _AchievementsBlock extends ConsumerWidget {
             style: Theme.of(context)
                 .textTheme
                 .bodySmall
-                ?.copyWith(color: AppTheme.textSecondary, height: 1.4),
+                ?.copyWith(color: colorScheme.onSurfaceVariant, height: 1.4),
           );
         }
         final bySlug = {for (final d in defs) d.slug: d};
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Achievements',
-              style: Theme.of(context).textTheme.titleMedium,
+            Row(
+              children: [
+                Text(
+                  'Achievements',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () => context.push('/achievements'),
+                  child: const Text('View All'),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -230,6 +242,7 @@ Future<void> _openShowcaseEditor(
     builder: (ctx) {
       return StatefulBuilder(
         builder: (context, setModal) {
+    final colorScheme = Theme.of(context).colorScheme;
           return Padding(
             padding: EdgeInsets.only(
               left: 20,
@@ -249,10 +262,10 @@ Future<void> _openShowcaseEditor(
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   'Only what you select is visible to others. Full unlock list stays private unless showcased.',
                   style: TextStyle(
-                    color: AppTheme.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: 13,
                   ),
                 ),
@@ -329,14 +342,15 @@ class _PetCareScreenState extends ConsumerState<PetCareScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pet Care'),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppTheme.primaryAccent,
-          unselectedLabelColor: AppTheme.textSecondary,
-          indicatorColor: AppTheme.primaryAccent,
+          labelColor: colorScheme.primary,
+          unselectedLabelColor: colorScheme.onSurfaceVariant,
+          indicatorColor: colorScheme.primary,
           tabs: const [
             Tab(text: 'Care Diary'),
             Tab(text: 'Health'),
@@ -370,11 +384,12 @@ class _NoActivePet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
         const SizedBox(height: 80),
-        const Icon(Icons.pets, size: 56, color: AppTheme.textSecondary),
+        Icon(Icons.pets, size: 56, color: colorScheme.onSurfaceVariant),
         const SizedBox(height: 16),
         Text(
           'Add a pet to start tracking care',
@@ -382,10 +397,10 @@ class _NoActivePet extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           'Once you create a pet profile, daily logs, weight history, and vet appointments will live here.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: AppTheme.textSecondary),
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
         ),
       ],
     );
@@ -400,6 +415,7 @@ class _DashboardTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final myPets = ref.watch(petProvider).myPets;
     final activePet = ref.watch(activePetProvider);
@@ -459,9 +475,9 @@ class _DashboardTab extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppTheme.cardColor.withValues(alpha: 0.6),
+            color: colorScheme.surfaceContainer.withValues(alpha: 0.6),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppTheme.border.withValues(alpha: 0.5)),
+            border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.05),
@@ -482,7 +498,7 @@ class _DashboardTab extends ConsumerWidget {
                     icon: const Icon(Icons.edit_calendar, size: 16),
                     label: const Text('Edit Goals'),
                     style: TextButton.styleFrom(
-                      foregroundColor: AppTheme.primaryAccent,
+                      foregroundColor: colorScheme.primary,
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -497,7 +513,7 @@ class _DashboardTab extends ConsumerWidget {
                   _ProgressRing(
                     label: 'Tasks',
                     progress: totalTasks == 0 ? 0 : completedTasks / totalTasks,
-                    color: AppTheme.primaryAccent,
+                    color: colorScheme.primary,
                     centerText: '$completedTasks/$totalTasks',
                   ),
                   _ProgressRing(
@@ -532,8 +548,8 @@ class _DashboardTab extends ConsumerWidget {
             Text('Daily Checklist', style: theme.textTheme.titleLarge),
             Text(
               '${(totalTasks == 0 ? 0 : completedTasks / totalTasks * 100).toInt()}%',
-              style: const TextStyle(
-                color: AppTheme.primaryAccent,
+              style: TextStyle(
+                color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -543,15 +559,15 @@ class _DashboardTab extends ConsumerWidget {
         Text(
           nudge,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: AppTheme.textSecondary,
+            color: colorScheme.onSurfaceVariant,
             height: 1.35,
           ),
         ),
         const SizedBox(height: 8),
         LinearProgressIndicator(
           value: totalTasks == 0 ? 0 : completedTasks / totalTasks,
-          backgroundColor: AppTheme.border,
-          color: AppTheme.primaryAccent,
+          backgroundColor: colorScheme.outlineVariant,
+          color: colorScheme.primary,
           borderRadius: BorderRadius.circular(999),
         ),
         const SizedBox(height: 16),
@@ -593,6 +609,133 @@ class _DashboardTab extends ConsumerWidget {
             ),
           ],
         ),
+        const SizedBox(height: 24),
+        Text('Care Resources', style: theme.textTheme.titleLarge),
+        const SizedBox(height: 12),
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 4,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 12,
+          childAspectRatio: 0.8,
+          children: [
+            _QuickActionItem(
+              label: 'Vet Booking',
+              icon: Icons.calendar_month,
+              color: Colors.blue,
+              onTap: () => context.push('/vet_booking'),
+            ),
+            _QuickActionItem(
+              label: 'Emergency',
+              icon: Icons.emergency,
+              color: Colors.red,
+              onTap: () => context.push('/emergency_care'),
+            ),
+            _QuickActionItem(
+              label: 'Nutrition',
+              icon: Icons.restaurant,
+              color: Colors.orange,
+              onTap: () => context.push('/nutrition_planner'),
+            ),
+            _QuickActionItem(
+              label: 'Expenses',
+              icon: Icons.payments,
+              color: Colors.green,
+              onTap: () => context.push('/expenses'),
+            ),
+            _QuickActionItem(
+              label: 'Growth',
+              icon: Icons.show_chart,
+              color: Colors.purple,
+              onTap: () => context.push('/growth_charts'),
+            ),
+            _QuickActionItem(
+              label: 'Insurance',
+              icon: Icons.security,
+              color: Colors.cyan,
+              onTap: () => context.push('/insurance'),
+            ),
+            _QuickActionItem(
+              label: 'Training',
+              icon: Icons.school,
+              color: Colors.brown,
+              onTap: () => context.push('/training'),
+            ),
+            _QuickActionItem(
+              label: 'Adoption',
+              icon: Icons.favorite,
+              color: Colors.pink,
+              onTap: () => context.push('/adoption_center'),
+            ),
+            _QuickActionItem(
+              label: 'Places',
+              icon: Icons.map,
+              color: Colors.teal,
+              onTap: () => context.push('/pet_friendly_places'),
+            ),
+            _QuickActionItem(
+              label: 'Events',
+              icon: Icons.event,
+              color: Colors.indigo,
+              onTap: () => context.push('/events'),
+            ),
+            _QuickActionItem(
+              label: 'Medical',
+              icon: Icons.folder_shared_rounded,
+              color: Colors.blueGrey,
+              onTap: () => context.push('/medical_records'),
+            ),
+            _QuickActionItem(
+              label: 'Sitters',
+              icon: Icons.person_search,
+              color: Colors.amber,
+              onTap: () => context.push('/sitters'),
+            ),
+            _QuickActionItem(
+              label: 'Timeline',
+              icon: Icons.history,
+              color: Colors.deepPurple,
+              onTap: () => context.push('/pet_timeline'),
+            ),
+            _QuickActionItem(
+              label: 'Identifier',
+              icon: Icons.camera_alt,
+              color: Colors.blue,
+              onTap: () => context.push('/breed_identifier'),
+            ),
+            _QuickActionItem(
+              label: 'Knowledge',
+              icon: Icons.menu_book,
+              color: Colors.lightGreen,
+              onTap: () => context.push('/knowledge_base'),
+            ),
+            _QuickActionItem(
+              label: 'Reviews',
+              icon: Icons.rate_review,
+              color: Colors.orangeAccent,
+              onTap: () => context.push('/gear_reviews'),
+            ),
+            _QuickActionItem(
+              label: 'Groups',
+              icon: Icons.groups,
+              color: Colors.deepOrange,
+              onTap: () => context.push('/community_groups'),
+            ),
+            _QuickActionItem(
+              label: 'Lost/Found',
+              icon: Icons.location_searching,
+              color: Colors.redAccent,
+              onTap: () => context.push('/lost_and_found'),
+            ),
+            _QuickActionItem(
+              label: 'Memorial',
+              icon: Icons.cloud,
+              color: Colors.blueAccent,
+              onTap: () => context.push('/memorial'),
+            ),
+          ],
+        ),
         const SizedBox(height: 80),
       ],
     );
@@ -608,6 +751,7 @@ class _PetSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 72,
       child: ListView.builder(
@@ -624,18 +768,18 @@ class _PetSelector extends ConsumerWidget {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color:
-                      isSelected ? AppTheme.primaryAccent : Colors.transparent,
+                      isSelected ? colorScheme.primary : Colors.transparent,
                   width: 3,
                 ),
               ),
               child: CircleAvatar(
                 radius: 30,
-                backgroundColor: AppTheme.surface,
+                backgroundColor: colorScheme.surface,
                 backgroundImage: pet.profileImageUrl.isNotEmpty
                     ? NetworkImage(pet.profileImageUrl)
                     : null,
                 child: pet.profileImageUrl.isEmpty
-                    ? const Icon(Icons.pets, color: AppTheme.textSecondary)
+                    ? Icon(Icons.pets, color: colorScheme.onSurfaceVariant)
                     : null,
               ),
             ),
@@ -658,14 +802,15 @@ class _WeekMaskRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final start = weekStartMonday ?? _mondayOf(DateTime.now());
     const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
-        color: AppTheme.cardColor,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -673,7 +818,7 @@ class _WeekMaskRow extends StatelessWidget {
           Text(
             'This week (care day complete)',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: AppTheme.textSecondary,
+                  color: colorScheme.onSurfaceVariant,
                 ),
           ),
           const SizedBox(height: 8),
@@ -719,13 +864,14 @@ class _WeekDayCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         Text(
           label,
           style: TextStyle(
             fontSize: 10,
-            color: isToday ? AppTheme.primaryAccent : AppTheme.textSecondary,
+            color: isToday ? colorScheme.primary : colorScheme.onSurfaceVariant,
             fontWeight: isToday ? FontWeight.w600 : FontWeight.w500,
           ),
         ),
@@ -736,15 +882,15 @@ class _WeekDayCell extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             color: done
-                ? AppTheme.primaryAccent.withValues(alpha: 0.2)
-                : AppTheme.surface,
+                ? colorScheme.primary.withValues(alpha: 0.2)
+                : colorScheme.surface,
             border: Border.all(
-              color: done ? AppTheme.primaryAccent : AppTheme.border,
+              color: done ? colorScheme.primary : colorScheme.outlineVariant,
             ),
           ),
           alignment: Alignment.center,
           child: done
-              ? const Icon(Icons.check, size: 16, color: AppTheme.primaryAccent)
+              ? Icon(Icons.check, size: 16, color: colorScheme.primary)
               : const SizedBox.shrink(),
         ),
       ],
@@ -761,13 +907,14 @@ class _StreakBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppTheme.cardColor,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -810,26 +957,27 @@ class _StreakDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: 32,
       height: 32,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: complete
-            ? AppTheme.primaryAccent.withValues(alpha: 0.2)
-            : AppTheme.surface,
+            ? colorScheme.primary.withValues(alpha: 0.2)
+            : colorScheme.surface,
         border: Border.all(
-          color: complete ? AppTheme.primaryAccent : AppTheme.border,
+          color: complete ? colorScheme.primary : colorScheme.outlineVariant,
         ),
       ),
       alignment: Alignment.center,
       child: complete
-          ? const Icon(Icons.check, size: 16, color: AppTheme.primaryAccent)
+          ? Icon(Icons.check, size: 16, color: colorScheme.primary)
           : Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: AppTheme.textSecondary,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
     );
@@ -852,6 +1000,7 @@ class _ProgressRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         SizedBox(
@@ -867,7 +1016,7 @@ class _ProgressRing extends StatelessWidget {
                 builder: (_, value, __) => CircularProgressIndicator(
                   value: value,
                   strokeWidth: 8,
-                  backgroundColor: AppTheme.border,
+                  backgroundColor: colorScheme.outlineVariant,
                   color: color,
                 ),
               ),
@@ -886,8 +1035,8 @@ class _ProgressRing extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(label,
-            style: const TextStyle(
-              color: AppTheme.textSecondary,
+            style: TextStyle(
+              color: colorScheme.onSurfaceVariant,
               fontSize: 13,
             )),
       ],
@@ -904,6 +1053,7 @@ class _TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isDone = task.done;
     return GestureDetector(
       onTap: onToggle,
@@ -913,11 +1063,11 @@ class _TaskCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isDone
-              ? AppTheme.secondaryAccent.withValues(alpha: 0.1)
-              : AppTheme.cardColor,
+              ? colorScheme.secondary.withValues(alpha: 0.1)
+              : colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isDone ? AppTheme.secondaryAccent : AppTheme.border,
+            color: isDone ? colorScheme.secondary : colorScheme.outlineVariant,
           ),
         ),
         child: Row(
@@ -925,15 +1075,15 @@ class _TaskCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: isDone ? AppTheme.secondaryAccent : AppTheme.surface,
+                color: isDone ? colorScheme.secondary : colorScheme.surface,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isDone ? AppTheme.secondaryAccent : AppTheme.border,
+                  color: isDone ? colorScheme.secondary : colorScheme.outlineVariant,
                 ),
               ),
               child: Icon(
                 task.icon,
-                color: isDone ? Colors.white : AppTheme.textSecondary,
+                color: isDone ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
                 size: 20,
               ),
             ),
@@ -949,14 +1099,14 @@ class _TaskCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       decoration: isDone ? TextDecoration.lineThrough : null,
                       color: isDone
-                          ? AppTheme.textSecondary
-                          : AppTheme.textPrimary,
+                          ? colorScheme.onSurfaceVariant
+                          : colorScheme.onSurface,
                     ),
                   ),
                   Text(
                     task.subtitle,
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
                       fontSize: 13,
                     ),
                   ),
@@ -965,7 +1115,7 @@ class _TaskCard extends StatelessWidget {
             ),
             Icon(
               isDone ? Icons.check_circle : Icons.radio_button_unchecked,
-              color: isDone ? AppTheme.secondaryAccent : AppTheme.border,
+              color: isDone ? colorScheme.secondary : colorScheme.outlineVariant,
               size: 28,
             ),
           ],
@@ -989,6 +1139,7 @@ class _MoodButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: () =>
           ref.read(petCareProvider.notifier).setMood(selected ? null : label),
@@ -997,11 +1148,11 @@ class _MoodButton extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: selected
-              ? AppTheme.primaryAccent.withValues(alpha: 0.2)
-              : AppTheme.cardColor,
+              ? colorScheme.primary.withValues(alpha: 0.2)
+              : colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? AppTheme.primaryAccent : AppTheme.border,
+            color: selected ? colorScheme.primary : colorScheme.outlineVariant,
           ),
         ),
         child: Column(
@@ -1014,7 +1165,7 @@ class _MoodButton extends ConsumerWidget {
                 fontSize: 12,
                 fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                 color:
-                    selected ? AppTheme.primaryAccent : AppTheme.textSecondary,
+                    selected ? colorScheme.primary : colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -1037,6 +1188,7 @@ class _FeedingTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final activePet = ref.watch(activePetProvider);
     final todayLog = ref.watch(todayCareLogProvider);
@@ -1059,22 +1211,22 @@ class _FeedingTab extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppTheme.primaryAccent.withValues(alpha: 0.08),
+            color: colorScheme.primary.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: AppTheme.primaryAccent.withValues(alpha: 0.2),
+              color: colorScheme.primary.withValues(alpha: 0.2),
             ),
           ),
           child: Row(
             children: [
-              const Icon(Icons.lightbulb_outline,
-                  color: AppTheme.primaryAccent, size: 20),
+              Icon(Icons.lightbulb_outline,
+                  color: colorScheme.primary, size: 20),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   dietHint,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppTheme.textPrimary,
+                    color: colorScheme.onSurface,
                     height: 1.35,
                   ),
                 ),
@@ -1089,7 +1241,7 @@ class _FeedingTab extends ConsumerWidget {
             icon: const Icon(Icons.tune, size: 18),
             label: const Text('Adjust Nutrition Goals'),
             style: TextButton.styleFrom(
-              foregroundColor: AppTheme.primaryAccent,
+              foregroundColor: colorScheme.primary,
             ),
           ),
         ),
@@ -1111,9 +1263,9 @@ class _FeedingTab extends ConsumerWidget {
                   builder: (_, value, __) => CircularProgressIndicator(
                     value: value,
                     strokeWidth: 12,
-                    backgroundColor: AppTheme.border,
+                    backgroundColor: colorScheme.outlineVariant,
                     color: todayLog.treatsOverBudget
-                        ? Colors.red.shade400
+                        ? colorScheme.error
                         : Colors.orange,
                   ),
                 ),
@@ -1130,8 +1282,8 @@ class _FeedingTab extends ConsumerWidget {
                       ),
                       Text(
                         '/ ${todayLog.dailyCalorieGoal} kcal',
-                        style: const TextStyle(
-                          color: AppTheme.textSecondary,
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                       if (todayLog.treatsKcal > 0)
@@ -1140,8 +1292,8 @@ class _FeedingTab extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 11,
                             color: todayLog.treatsOverBudget
-                                ? Colors.red.shade400
-                                : AppTheme.textSecondary,
+                                ? colorScheme.error
+                                : colorScheme.onSurfaceVariant,
                           ),
                         ),
                     ],
@@ -1169,7 +1321,7 @@ class _FeedingTab extends ConsumerWidget {
                   label: 'Treats',
                   value: '${todayLog.treatsKcal}',
                   color: todayLog.treatsOverBudget
-                      ? Colors.red.shade400
+                      ? colorScheme.error
                       : Colors.amber,
                 ),
               ],
@@ -1217,8 +1369,8 @@ class _FeedingTab extends ConsumerWidget {
               '${todayLog.treatsCount} today · ${todayLog.treatsKcal} kcal',
               style: TextStyle(
                 color: todayLog.treatsOverBudget
-                    ? Colors.red.shade400
-                    : AppTheme.textSecondary,
+                    ? colorScheme.error
+                    : colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
                 fontSize: 13,
               ),
@@ -1231,21 +1383,21 @@ class _FeedingTab extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
-              color: Colors.red.shade50,
+              color: colorScheme.error,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.red.shade200),
+              border: Border.all(color: colorScheme.error),
             ),
             child: Row(
               children: [
                 Icon(Icons.warning_amber,
-                    size: 16, color: Colors.red.shade400),
+                    size: 16, color: colorScheme.error),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Treats exceed 10% of daily calories (${todayLog.maxTreatKcal} kcal max). Consider reducing treats.',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.red.shade700,
+                      color: colorScheme.error,
                     ),
                   ),
                 ),
@@ -1316,16 +1468,16 @@ class _FeedingTab extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: isFilled
                       ? Colors.blue.withValues(alpha: 0.2)
-                      : AppTheme.cardColor,
+                      : colorScheme.surfaceContainer,
                   border: Border.all(
-                    color: isFilled ? Colors.blue : AppTheme.border,
+                    color: isFilled ? Colors.blue : colorScheme.outlineVariant,
                     width: 2,
                   ),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Icon(
                   Icons.water_drop,
-                  color: isFilled ? Colors.blue : AppTheme.border,
+                  color: isFilled ? Colors.blue : colorScheme.outlineVariant,
                   size: 28,
                 ),
               ),
@@ -1378,8 +1530,9 @@ class _TreatButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: AppTheme.cardColor,
+      color: colorScheme.surfaceContainer,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -1388,7 +1541,7 @@ class _TreatButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppTheme.border),
+            border: Border.all(color: colorScheme.outlineVariant),
           ),
           child: Column(
             children: [
@@ -1396,9 +1549,9 @@ class _TreatButton extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 10,
-                  color: AppTheme.textSecondary,
+                  color: colorScheme.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -1429,14 +1582,15 @@ class _MealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppTheme.cardColor,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: fed ? AppTheme.primaryAccent : AppTheme.border,
+          color: fed ? colorScheme.primary : colorScheme.outlineVariant,
         ),
       ),
       child: Column(
@@ -1448,7 +1602,7 @@ class _MealCard extends StatelessWidget {
             trailing: Switch(
               value: fed,
               onChanged: onChanged,
-              activeThumbColor: AppTheme.primaryAccent,
+              activeThumbColor: colorScheme.primary,
             ),
           ),
           if (fed) ...[
@@ -1457,15 +1611,15 @@ class _MealCard extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.restaurant,
-                    color: AppTheme.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
                   const SizedBox(width: 12),
                   Text(
                     food,
-                    style: const TextStyle(color: AppTheme.textSecondary),
+                    style: TextStyle(color: colorScheme.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -1477,3 +1631,44 @@ class _MealCard extends StatelessWidget {
   }
 }
 
+class _QuickActionItem extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _QuickActionItem({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withAlpha(25),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}

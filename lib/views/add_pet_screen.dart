@@ -81,7 +81,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
       builder: (ctx) => Container(
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.onPrimary,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Column(
@@ -92,7 +92,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -104,7 +104,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
             const SizedBox(height: 4),
             Text(
               'Choose a source for your pet\'s photo',
-              style: TextStyle(color: Colors.grey.shade600),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 20),
             ListTile(
@@ -191,7 +191,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -221,10 +221,10 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Row(
+                content: Row(
                   children: [
                     Icon(Icons.warning_amber_rounded,
-                        color: Colors.white, size: 18),
+                        color: Theme.of(context).colorScheme.onPrimary, size: 18),
                     SizedBox(width: 8),
                     Expanded(
                         child: Text(
@@ -256,7 +256,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: Colors.white),
+                  Icon(Icons.check_circle, color: Theme.of(context).colorScheme.onPrimary),
                   const SizedBox(width: 8),
                   Text('${_nameController.text.trim()} added successfully!'),
                 ],
@@ -344,13 +344,13 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade600,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const Spacer(),
               Text(
                 'Step ${_currentStep + 1} of 3',
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -360,7 +360,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
             child: LinearProgressIndicator(
               value: (_currentStep + 1) / 3,
               minHeight: 4,
-              backgroundColor: Colors.grey.shade200,
+              backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
               valueColor:
                   const AlwaysStoppedAnimation<Color>(Color(0xFFFF8A65)),
             ),
@@ -417,7 +417,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
           const SizedBox(height: 8),
           Text(
             'Select the animal type that best describes your pet.',
-            style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 32),
           GridView.builder(
@@ -441,10 +441,10 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                   decoration: BoxDecoration(
                     color: isSelected
                         ? option.color.withAlpha(26)
-                        : Colors.grey.shade50,
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isSelected ? option.color : Colors.grey.shade200,
+                      color: isSelected ? option.color : Theme.of(context).colorScheme.onSurfaceVariant,
                       width: isSelected ? 2.5 : 1,
                     ),
                     boxShadow: isSelected
@@ -463,7 +463,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                       Icon(
                         option.icon,
                         size: 36,
-                        color: isSelected ? option.color : Colors.grey.shade400,
+                        color: isSelected ? option.color : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -473,7 +473,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                           fontWeight:
                               isSelected ? FontWeight.bold : FontWeight.w500,
                           color:
-                              isSelected ? option.color : Colors.grey.shade600,
+                              isSelected ? option.color : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -510,7 +510,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
             const SizedBox(height: 8),
             Text(
               'Fill in some basic info so others can get to know them.',
-              style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 32),
 
@@ -570,7 +570,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
           const SizedBox(height: 8),
           Text(
             'Add a photo and a short bio for your pet.',
-            style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 32),
 
@@ -584,11 +584,11 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                 height: 180,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.grey.shade100,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   border: Border.all(
                     color: _selectedImage != null
                         ? const Color(0xFFFF8A65)
-                        : Colors.grey.shade300,
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                     width: _selectedImage != null ? 3 : 1.5,
                   ),
                   boxShadow: _selectedImage != null
@@ -612,12 +612,12 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.add_a_photo_rounded,
-                              size: 40, color: Colors.grey.shade400),
+                              size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
                           const SizedBox(height: 8),
                           Text(
                             'Add Photo',
                             style: TextStyle(
-                              color: Colors.grey.shade500,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -660,19 +660,19 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
               onPressed: _isSaving ? null : _submitPet,
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFFFF8A65),
-                foregroundColor: Colors.white,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 0,
               ),
               child: _isSaving
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 24,
                       height: 24,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     )
                   : Row(
@@ -720,16 +720,16 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 14),
       filled: true,
-      fillColor: Colors.grey.shade50,
+      fillColor: Theme.of(context).colorScheme.onSurfaceVariant,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),

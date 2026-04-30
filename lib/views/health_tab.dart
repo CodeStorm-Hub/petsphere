@@ -9,7 +9,6 @@ import '../controllers/pet_care_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/pet_health_extended_models.dart';
 import '../models/pet_health_models.dart';
-import '../theme/app_theme.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -33,14 +32,15 @@ class HealthTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final activePet = ref.watch(activePetProvider);
     final careState = ref.watch(petCareProvider);
     final healthState = ref.watch(healthProvider);
 
     if (activePet == null) {
-      return const Center(
+      return Center(
         child: Text('No pet selected.',
-            style: TextStyle(color: AppTheme.textSecondary)),
+            style: TextStyle(color: colorScheme.onSurfaceVariant)),
       );
     }
 
@@ -61,7 +61,6 @@ class HealthTab extends ConsumerWidget {
         const SizedBox(height: 12),
         _MedicationsSection(
           medications: healthState.activeMedications,
-          todayDoses: healthState.todayDoses,
           petId: activePet.id,
         ),
         const SizedBox(height: 12),
@@ -118,6 +117,7 @@ class _HealthOverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final dueMeds = healthState.todayDoses.where((d) => d.isOverdue).length;
     final nextAppt = careState.upcomingAppointments.isNotEmpty
         ? careState.upcomingAppointments.first
@@ -129,7 +129,7 @@ class _HealthOverviewCard extends StatelessWidget {
     if (dueMeds > 0) {
       chips.add(_AlertChip(
         label: '$dueMeds med${dueMeds > 1 ? 's' : ''} due today',
-        color: AppTheme.primaryAccent,
+        color: colorScheme.primary,
       ));
     }
     if (nextAppt != null) {
@@ -137,26 +137,26 @@ class _HealthOverviewCard extends StatelessWidget {
       chips.add(_AlertChip(
         label:
             'Vet in ${days < 1 ? 'today' : '$days day${days == 1 ? '' : 's'}'}',
-        color: AppTheme.secondaryAccent,
+        color: colorScheme.secondary,
       ));
     }
     if (overdueP.isNotEmpty) {
-      chips.add(const _AlertChip(label: 'Parasite overdue', color: Colors.red));
+      chips.add(_AlertChip(label: 'Parasite overdue', color: colorScheme.error));
     }
     if (activeSymps > 0) {
       chips.add(_AlertChip(
         label: '$activeSymps active symptom${activeSymps > 1 ? 's' : ''}',
-        color: AppTheme.primaryAccent,
+        color: colorScheme.primary,
       ));
     }
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.cardColor,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
         border: Border(
-          left: BorderSide(color: AppTheme.primaryAccent, width: 3),
+          left: BorderSide(color: colorScheme.primary, width: 3),
         ),
       ),
       child: Column(
@@ -167,10 +167,10 @@ class _HealthOverviewCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   "$petName's Health",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -179,18 +179,18 @@ class _HealthOverviewCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppTheme.secondaryAccent.withAlpha(30),
+                    color: colorScheme.secondary.withAlpha(30),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.check_circle,
-                          size: 14, color: AppTheme.secondaryAccent),
+                          size: 14, color: colorScheme.secondary),
                       SizedBox(width: 4),
                       Text('All clear',
                           style: TextStyle(
-                              fontSize: 12, color: AppTheme.secondaryAccent)),
+                              fontSize: 12, color: colorScheme.secondary)),
                     ],
                   ),
                 ),
@@ -218,6 +218,7 @@ class _AlertChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+//     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -255,26 +256,27 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.cardColor,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: AppTheme.primaryAccent),
+              Icon(icon, size: 18, color: colorScheme.primary),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(title,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary)),
+                        color: colorScheme.onSurface)),
               ),
               if (onAdd != null)
                 Semantics(
@@ -285,13 +287,13 @@ class _SectionCard extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: AppTheme.primaryAccent.withAlpha(20),
+                        color: colorScheme.primary.withAlpha(20),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: AppTheme.primaryAccent.withAlpha(60)),
+                            color: colorScheme.primary.withAlpha(60)),
                       ),
-                      child: const Icon(Icons.add,
-                          size: 16, color: AppTheme.primaryAccent),
+                      child: Icon(Icons.add,
+                          size: 16, color: colorScheme.primary),
                     ),
                   ),
                 ),
@@ -318,16 +320,17 @@ class _EmptyHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           children: [
-            Icon(icon, color: AppTheme.border, size: 28),
+            Icon(icon, color: colorScheme.outlineVariant, size: 28),
             const SizedBox(height: 6),
             Text(text,
-                style: const TextStyle(
-                    color: AppTheme.textSecondary, fontSize: 13),
+                style: TextStyle(
+                    color: colorScheme.onSurfaceVariant, fontSize: 13),
                 textAlign: TextAlign.center),
           ],
         ),
@@ -353,6 +356,7 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final weights = widget.careState.recentWeights;
     final latest = weights.isNotEmpty ? weights.last : null;
     final prior = weights.length >= 2 ? weights[weights.length - 2] : null;
@@ -381,10 +385,10 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                     latest == null
                         ? '— lbs'
                         : '${latest.weightLbs.toStringAsFixed(1)} ${latest.unit}',
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary),
+                        color: colorScheme.onSurface),
                   ),
                   if (delta != null)
                     Row(
@@ -395,19 +399,19 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                               : Icons.arrow_drop_down,
                           size: 16,
                           color:
-                              delta > 0 ? Colors.red : AppTheme.secondaryAccent,
+                              delta > 0 ? colorScheme.error : colorScheme.secondary,
                         ),
                         Text(
                           '${delta.abs().toStringAsFixed(1)} ${latest!.unit} vs prior',
-                          style: const TextStyle(
-                              color: AppTheme.textSecondary, fontSize: 12),
+                          style: TextStyle(
+                              color: colorScheme.onSurfaceVariant, fontSize: 12),
                         ),
                       ],
                     )
                   else
-                    const Text('Tap + to log first weight',
+                    Text('Tap + to log first weight',
                         style: TextStyle(
-                            color: AppTheme.textSecondary, fontSize: 12)),
+                            color: colorScheme.onSurfaceVariant, fontSize: 12)),
                 ],
               ),
             ),
@@ -440,8 +444,8 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: selected
-                      ? AppTheme.primaryAccent
-                      : AppTheme.primaryAccent.withAlpha(15),
+                      ? colorScheme.primary
+                      : colorScheme.primary.withAlpha(15),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text('${d}d',
@@ -450,7 +454,7 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                         fontWeight:
                             selected ? FontWeight.bold : FontWeight.normal,
                         color:
-                            selected ? Colors.white : AppTheme.textSecondary)),
+                            selected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant)),
               ),
             );
           }).toList(),
@@ -479,8 +483,8 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: w == latest
-                                    ? AppTheme.primaryAccent
-                                    : AppTheme.primaryAccent.withAlpha(100),
+                                    ? colorScheme.primary
+                                    : colorScheme.primary.withAlpha(100),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),
@@ -489,8 +493,8 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                         const SizedBox(height: 4),
                         Text(
                           DateFormat('E').format(w.logDate),
-                          style: const TextStyle(
-                              fontSize: 9, color: AppTheme.textSecondary),
+                          style: TextStyle(
+                              fontSize: 9, color: colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -504,6 +508,7 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
   }
 
   void _showLogWeightSheet(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final weightCtrl = TextEditingController();
     final notesCtrl = TextEditingController();
     int? selectedBcs;
@@ -511,7 +516,7 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) {
@@ -527,31 +532,31 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Log Weight',
+                Text('Log Weight',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary)),
+                        color: colorScheme.onSurface)),
                 const SizedBox(height: 16),
                 TextField(
                   controller: weightCtrl,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
-                  style: const TextStyle(color: AppTheme.textPrimary),
+                  style: TextStyle(color: colorScheme.onSurface),
                   decoration: InputDecoration(
                     labelText: 'Weight (lbs)',
-                    labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                     filled: true,
-                    fillColor: AppTheme.cardColor,
+                    fillColor: colorScheme.surfaceContainer,
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none),
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text('Body Condition Score (optional)',
+                Text('Body Condition Score (optional)',
                     style:
-                        TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                        TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 6,
@@ -566,17 +571,17 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color:
-                              sel ? AppTheme.primaryAccent : AppTheme.cardColor,
+                              sel ? colorScheme.primary : colorScheme.surfaceContainer,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                               color: sel
-                                  ? AppTheme.primaryAccent
-                                  : AppTheme.border),
+                                  ? colorScheme.primary
+                                  : colorScheme.outlineVariant),
                         ),
                         child: Text('$score',
                             style: TextStyle(
                                 color:
-                                    sel ? Colors.white : AppTheme.textSecondary,
+                                    sel ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
                                 fontWeight:
                                     sel ? FontWeight.bold : FontWeight.normal)),
                       ),
@@ -586,12 +591,12 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: notesCtrl,
-                  style: const TextStyle(color: AppTheme.textPrimary),
+                  style: TextStyle(color: colorScheme.onSurface),
                   decoration: InputDecoration(
                     labelText: 'Notes (optional)',
-                    labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                     filled: true,
-                    fillColor: AppTheme.cardColor,
+                    fillColor: colorScheme.surfaceContainer,
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none),
@@ -602,8 +607,8 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryAccent,
-                      foregroundColor: Colors.white,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                     ),
@@ -645,6 +650,7 @@ class _MedicationsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+//     final colorScheme = Theme.of(context).colorScheme;
     final healthState = ref.watch(healthProvider);
 
     return _SectionCard(
@@ -671,6 +677,7 @@ class _MedicationsSection extends ConsumerWidget {
   }
 
   void _showAddMedSheet(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final nameCtrl = TextEditingController();
     final doseCtrl = TextEditingController();
     final purposeCtrl = TextEditingController();
@@ -679,7 +686,7 @@ class _MedicationsSection extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
@@ -694,27 +701,27 @@ class _MedicationsSection extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Add Medication',
+              Text('Add Medication',
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary)),
+                      color: colorScheme.onSurface)),
               const SizedBox(height: 16),
-              _sheetTextField(nameCtrl, 'Medication name'),
+              _sheetTextField(context, nameCtrl, 'Medication name'),
               const SizedBox(height: 10),
-              _sheetTextField(doseCtrl, 'Dose (e.g. 16mg, 1 pill)'),
+              _sheetTextField(context, doseCtrl, 'Dose (e.g. 16mg, 1 pill)'),
               const SizedBox(height: 10),
-              _sheetTextField(purposeCtrl, 'Purpose (optional)'),
+              _sheetTextField(context, purposeCtrl, 'Purpose (optional)'),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
                 initialValue: freq,
-                dropdownColor: AppTheme.cardColor,
-                style: const TextStyle(color: AppTheme.textPrimary),
+                dropdownColor: colorScheme.surfaceContainer,
+                style: TextStyle(color: colorScheme.onSurface),
                 decoration: InputDecoration(
                   labelText: 'Frequency',
-                  labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                  labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                   filled: true,
-                  fillColor: AppTheme.cardColor,
+                  fillColor: colorScheme.surfaceContainer,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none),
@@ -738,8 +745,8 @@ class _MedicationsSection extends ConsumerWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryAccent,
-                    foregroundColor: Colors.white,
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
@@ -789,29 +796,30 @@ class _MedicationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.border),
+          border: Border.all(color: colorScheme.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Icon(Icons.medication,
-                    size: 16, color: AppTheme.textSecondary),
+                Icon(Icons.medication,
+                    size: 16, color: colorScheme.onSurfaceVariant),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     '${med.name}${med.dose != null ? ' · ${med.dose}' : ''}',
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: AppTheme.textPrimary),
+                        color: colorScheme.onSurface),
                   ),
                 ),
                 Container(
@@ -828,8 +836,8 @@ class _MedicationRow extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(med.frequencyLabel,
-                style: const TextStyle(
-                    fontSize: 12, color: AppTheme.textSecondary)),
+                style: TextStyle(
+                    fontSize: 12, color: colorScheme.onSurfaceVariant)),
             if (dose != null) ...[
               const SizedBox(height: 8),
               _DoseStatusRow(dose: dose!, onGive: onGive, onSkip: onSkip),
@@ -850,27 +858,28 @@ class _DoseStatusRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     if (dose.isGiven) {
       return Row(
         children: [
-          const Icon(Icons.check_circle,
-              size: 14, color: AppTheme.secondaryAccent),
+          Icon(Icons.check_circle,
+              size: 14, color: colorScheme.secondary),
           const SizedBox(width: 4),
           Text(
             'Given ${dose.givenAt != null ? DateFormat('h:mm a').format(dose.givenAt!) : ''}',
             style:
-                const TextStyle(fontSize: 12, color: AppTheme.secondaryAccent),
+                TextStyle(fontSize: 12, color: colorScheme.secondary),
           ),
         ],
       );
     }
     if (dose.skipped) {
-      return const Row(
+      return Row(
         children: [
-          Icon(Icons.cancel, size: 14, color: AppTheme.textSecondary),
+          Icon(Icons.cancel, size: 14, color: colorScheme.onSurfaceVariant),
           SizedBox(width: 4),
           Text('Skipped',
-              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+              style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant)),
         ],
       );
     }
@@ -879,23 +888,23 @@ class _DoseStatusRow extends StatelessWidget {
         Icon(dose.isOverdue ? Icons.warning : Icons.schedule,
             size: 14,
             color: dose.isOverdue
-                ? AppTheme.primaryAccent
-                : AppTheme.textSecondary),
+                ? colorScheme.primary
+                : colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),
         Text(
           dose.isOverdue ? 'Overdue' : 'Due today',
           style: TextStyle(
               fontSize: 12,
               color: dose.isOverdue
-                  ? AppTheme.primaryAccent
-                  : AppTheme.textSecondary),
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant),
         ),
         const Spacer(),
         if (onGive != null)
           TextButton(
             onPressed: onGive,
             style: TextButton.styleFrom(
-              foregroundColor: AppTheme.secondaryAccent,
+              foregroundColor: colorScheme.secondary,
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -906,7 +915,7 @@ class _DoseStatusRow extends StatelessWidget {
           TextButton(
             onPressed: onSkip,
             style: TextButton.styleFrom(
-              foregroundColor: AppTheme.textSecondary,
+              foregroundColor: colorScheme.onSurfaceVariant,
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -930,6 +939,7 @@ class _AppointmentsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+//     final colorScheme = Theme.of(context).colorScheme;
     return _SectionCard(
       title: 'Vet Appointments',
       icon: Icons.calendar_today_outlined,
@@ -944,6 +954,7 @@ class _AppointmentsSection extends ConsumerWidget {
   }
 
   void _showAddApptSheet(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final titleCtrl = TextEditingController();
     final doctorCtrl = TextEditingController();
     final locCtrl = TextEditingController();
@@ -954,7 +965,7 @@ class _AppointmentsSection extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
@@ -970,27 +981,27 @@ class _AppointmentsSection extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Add Appointment',
+                Text('Add Appointment',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary)),
+                        color: colorScheme.onSurface)),
                 const SizedBox(height: 16),
-                _sheetTextField(titleCtrl, 'Title (e.g. Annual Checkup)'),
+                _sheetTextField(context, titleCtrl, 'Title (e.g. Annual Checkup)'),
                 const SizedBox(height: 10),
-                _sheetTextField(doctorCtrl, 'Doctor (optional)'),
+                _sheetTextField(context, doctorCtrl, 'Doctor (optional)'),
                 const SizedBox(height: 10),
-                _sheetTextField(locCtrl, 'Location (optional)'),
+                _sheetTextField(context, locCtrl, 'Location (optional)'),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
                   initialValue: type,
-                  dropdownColor: AppTheme.cardColor,
-                  style: const TextStyle(color: AppTheme.textPrimary),
+                  dropdownColor: colorScheme.surfaceContainer,
+                  style: TextStyle(color: colorScheme.onSurface),
                   decoration: InputDecoration(
                     labelText: 'Type',
-                    labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                     filled: true,
-                    fillColor: AppTheme.cardColor,
+                    fillColor: colorScheme.surfaceContainer,
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none),
@@ -1013,10 +1024,10 @@ class _AppointmentsSection extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                   title: Text(
                     'Date: ${DateFormat('MMM d, yyyy').format(date)}',
-                    style: const TextStyle(color: AppTheme.textPrimary),
+                    style: TextStyle(color: colorScheme.onSurface),
                   ),
-                  trailing: const Icon(Icons.edit_calendar,
-                      color: AppTheme.primaryAccent),
+                  trailing: Icon(Icons.edit_calendar,
+                      color: colorScheme.primary),
                   onTap: () async {
                     final picked = await showDatePicker(
                       context: ctx,
@@ -1027,14 +1038,14 @@ class _AppointmentsSection extends ConsumerWidget {
                     if (picked != null) setS(() => date = picked);
                   },
                 ),
-                _sheetTextField(notesCtrl, 'Notes (optional)'),
+                _sheetTextField(context, notesCtrl, 'Notes (optional)'),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryAccent,
-                      foregroundColor: Colors.white,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                     ),
@@ -1083,6 +1094,7 @@ class _AppointmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final days = appt.daysUntil;
     final daysStr = days < 0
         ? 'past'
@@ -1095,9 +1107,9 @@ class _AppointmentCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.border),
+          border: Border.all(color: colorScheme.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1106,33 +1118,33 @@ class _AppointmentCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(appt.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: AppTheme.textPrimary)),
+                          color: colorScheme.onSurface)),
                 ),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppTheme.secondaryAccent.withAlpha(25),
+                    color: colorScheme.secondary.withAlpha(25),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(appt.appointmentTypeLabel,
-                      style: const TextStyle(
-                          fontSize: 11, color: AppTheme.secondaryAccent)),
+                      style: TextStyle(
+                          fontSize: 11, color: colorScheme.secondary)),
                 ),
               ],
             ),
             const SizedBox(height: 4),
             Row(
               children: [
-                const Icon(Icons.calendar_today,
-                    size: 12, color: AppTheme.textSecondary),
+                Icon(Icons.calendar_today,
+                    size: 12, color: colorScheme.onSurfaceVariant),
                 const SizedBox(width: 4),
                 Text(
                   '${DateFormat('MMM d, yyyy').format(appt.scheduledAt)} · $daysStr',
-                  style: const TextStyle(
-                      fontSize: 12, color: AppTheme.textSecondary),
+                  style: TextStyle(
+                      fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -1140,12 +1152,12 @@ class _AppointmentCard extends StatelessWidget {
               const SizedBox(height: 2),
               Row(
                 children: [
-                  const Icon(Icons.person,
-                      size: 12, color: AppTheme.textSecondary),
+                  Icon(Icons.person,
+                      size: 12, color: colorScheme.onSurfaceVariant),
                   const SizedBox(width: 4),
                   Text(appt.doctor!,
-                      style: const TextStyle(
-                          fontSize: 12, color: AppTheme.textSecondary)),
+                      style: TextStyle(
+                          fontSize: 12, color: colorScheme.onSurfaceVariant)),
                 ],
               ),
             ],
@@ -1153,12 +1165,12 @@ class _AppointmentCard extends StatelessWidget {
               const SizedBox(height: 2),
               Row(
                 children: [
-                  const Icon(Icons.location_on,
-                      size: 12, color: AppTheme.textSecondary),
+                  Icon(Icons.location_on,
+                      size: 12, color: colorScheme.onSurfaceVariant),
                   const SizedBox(width: 4),
                   Text(appt.location!,
-                      style: const TextStyle(
-                          fontSize: 12, color: AppTheme.textSecondary)),
+                      style: TextStyle(
+                          fontSize: 12, color: colorScheme.onSurfaceVariant)),
                 ],
               ),
             ],
@@ -1181,6 +1193,7 @@ class _VaccinationsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     return _SectionCard(
       title: 'Vaccinations',
       icon: Icons.vaccines_outlined,
@@ -1199,17 +1212,17 @@ class _VaccinationsSection extends ConsumerWidget {
                 completed ? Icons.check_circle : Icons.circle,
                 size: 14,
                 color: completed
-                    ? AppTheme.secondaryAccent
+                    ? colorScheme.secondary
                     : (v.isDueSoon
-                        ? AppTheme.primaryAccent
-                        : AppTheme.textSecondary),
+                        ? colorScheme.primary
+                        : colorScheme.onSurfaceVariant),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   v.vaccineName,
-                  style: const TextStyle(
-                      color: AppTheme.textPrimary, fontSize: 14),
+                  style: TextStyle(
+                      color: colorScheme.onSurface, fontSize: 14),
                 ),
               ),
               if (dueDate != null)
@@ -1220,10 +1233,10 @@ class _VaccinationsSection extends ConsumerWidget {
                   style: TextStyle(
                       fontSize: 12,
                       color: completed
-                          ? AppTheme.textSecondary
+                          ? colorScheme.onSurfaceVariant
                           : (v.isDueSoon
-                              ? AppTheme.primaryAccent
-                              : AppTheme.textSecondary)),
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant)),
                 ),
               if (!completed) ...[
                 const SizedBox(width: 8),
@@ -1238,12 +1251,12 @@ class _VaccinationsSection extends ConsumerWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppTheme.secondaryAccent.withAlpha(25),
+                      color: colorScheme.secondary.withAlpha(25),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text('Done',
+                    child: Text('Done',
                         style: TextStyle(
-                            fontSize: 11, color: AppTheme.secondaryAccent)),
+                            fontSize: 11, color: colorScheme.secondary)),
                   ),
                 ),
               ],
@@ -1255,6 +1268,7 @@ class _VaccinationsSection extends ConsumerWidget {
   }
 
   void _showAddVaxSheet(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final nameCtrl = TextEditingController();
     final notesCtrl = TextEditingController();
     DateTime? dueDate;
@@ -1262,7 +1276,7 @@ class _VaccinationsSection extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
@@ -1277,13 +1291,13 @@ class _VaccinationsSection extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Add Vaccination',
+              Text('Add Vaccination',
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary)),
+                      color: colorScheme.onSurface)),
               const SizedBox(height: 16),
-              _sheetTextField(nameCtrl, 'Vaccine name'),
+              _sheetTextField(context, nameCtrl, 'Vaccine name'),
               const SizedBox(height: 10),
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -1293,11 +1307,11 @@ class _VaccinationsSection extends ConsumerWidget {
                       : 'Due: ${DateFormat('MMM d, yyyy').format(dueDate!)}',
                   style: TextStyle(
                       color: dueDate == null
-                          ? AppTheme.textSecondary
-                          : AppTheme.textPrimary),
+                          ? colorScheme.onSurfaceVariant
+                          : colorScheme.onSurface),
                 ),
-                trailing: const Icon(Icons.edit_calendar,
-                    color: AppTheme.primaryAccent),
+                trailing: Icon(Icons.edit_calendar,
+                    color: colorScheme.primary),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: ctx,
@@ -1309,14 +1323,14 @@ class _VaccinationsSection extends ConsumerWidget {
                   if (picked != null) setS(() => dueDate = picked);
                 },
               ),
-              _sheetTextField(notesCtrl, 'Notes (optional)'),
+              _sheetTextField(context, notesCtrl, 'Notes (optional)'),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryAccent,
-                    foregroundColor: Colors.white,
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
@@ -1361,6 +1375,7 @@ class _ParasiteSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     return _SectionCard(
       title: 'Parasite Prevention',
       icon: Icons.bug_report_outlined,
@@ -1384,13 +1399,13 @@ class _ParasiteSection extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(e.productName,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary)),
+                            color: colorScheme.onSurface)),
                     Text(
                         '${e.productTypeLabel} · ${_relativeTime(e.administeredOn)}',
-                        style: const TextStyle(
-                            fontSize: 12, color: AppTheme.textSecondary)),
+                        style: TextStyle(
+                            fontSize: 12, color: colorScheme.onSurfaceVariant)),
                   ],
                 ),
               ),
@@ -1412,6 +1427,7 @@ class _ParasiteSection extends ConsumerWidget {
   }
 
   void _showLogSheet(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final productCtrl = TextEditingController();
     final notesCtrl = TextEditingController();
     String type = 'flea_tick';
@@ -1421,7 +1437,7 @@ class _ParasiteSection extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
@@ -1437,23 +1453,23 @@ class _ParasiteSection extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Log Treatment',
+                Text('Log Treatment',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary)),
+                        color: colorScheme.onSurface)),
                 const SizedBox(height: 16),
-                _sheetTextField(productCtrl, 'Product name (e.g. NexGard)'),
+                _sheetTextField(context, productCtrl, 'Product name (e.g. NexGard)'),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
                   initialValue: type,
-                  dropdownColor: AppTheme.cardColor,
-                  style: const TextStyle(color: AppTheme.textPrimary),
+                  dropdownColor: colorScheme.surfaceContainer,
+                  style: TextStyle(color: colorScheme.onSurface),
                   decoration: InputDecoration(
                     labelText: 'Type',
-                    labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                     filled: true,
-                    fillColor: AppTheme.cardColor,
+                    fillColor: colorScheme.surfaceContainer,
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none),
@@ -1476,9 +1492,9 @@ class _ParasiteSection extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                   title: Text(
                       'Administered: ${DateFormat('MMM d, yyyy').format(administered)}',
-                      style: const TextStyle(color: AppTheme.textPrimary)),
-                  trailing: const Icon(Icons.edit_calendar,
-                      color: AppTheme.primaryAccent),
+                      style: TextStyle(color: colorScheme.onSurface)),
+                  trailing: Icon(Icons.edit_calendar,
+                      color: colorScheme.primary),
                   onTap: () async {
                     final p = await showDatePicker(
                       context: ctx,
@@ -1498,10 +1514,10 @@ class _ParasiteSection extends ConsumerWidget {
                           : 'Next due: ${DateFormat('MMM d, yyyy').format(nextDue!)}',
                       style: TextStyle(
                           color: nextDue == null
-                              ? AppTheme.textSecondary
-                              : AppTheme.textPrimary)),
-                  trailing: const Icon(Icons.edit_calendar,
-                      color: AppTheme.primaryAccent),
+                              ? colorScheme.onSurfaceVariant
+                              : colorScheme.onSurface)),
+                  trailing: Icon(Icons.edit_calendar,
+                      color: colorScheme.primary),
                   onTap: () async {
                     final p = await showDatePicker(
                       context: ctx,
@@ -1512,14 +1528,14 @@ class _ParasiteSection extends ConsumerWidget {
                     if (p != null) setS(() => nextDue = p);
                   },
                 ),
-                _sheetTextField(notesCtrl, 'Notes (optional)'),
+                _sheetTextField(context, notesCtrl, 'Notes (optional)'),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryAccent,
-                      foregroundColor: Colors.white,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                     ),
@@ -1564,6 +1580,7 @@ class _DentalSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final lastBrush = logs
         .where((l) => l.cleaningType == 'home_brushing')
         .map((l) => l.logDate)
@@ -1608,15 +1625,15 @@ class _DentalSection extends ConsumerWidget {
                 child: Row(
                   children: [
                     Icon(l.cleaningIcon,
-                        size: 12, color: AppTheme.textSecondary),
+                        size: 12, color: colorScheme.onSurfaceVariant),
                     const SizedBox(width: 6),
                     Text(l.cleaningTypeLabel,
-                        style: const TextStyle(
-                            fontSize: 12, color: AppTheme.textSecondary)),
+                        style: TextStyle(
+                            fontSize: 12, color: colorScheme.onSurfaceVariant)),
                     const Spacer(),
                     Text(DateFormat('MMM d').format(l.logDate),
-                        style: const TextStyle(
-                            fontSize: 12, color: AppTheme.textSecondary)),
+                        style: TextStyle(
+                            fontSize: 12, color: colorScheme.onSurfaceVariant)),
                   ],
                 ),
               )),
@@ -1626,6 +1643,7 @@ class _DentalSection extends ConsumerWidget {
   }
 
   void _showLogSheet(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     String type = 'home_brushing';
     final notesCtrl = TextEditingController();
     DateTime logDate = DateTime.now();
@@ -1633,7 +1651,7 @@ class _DentalSection extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
@@ -1648,21 +1666,21 @@ class _DentalSection extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Log Dental Care',
+              Text('Log Dental Care',
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary)),
+                      color: colorScheme.onSurface)),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: type,
-                dropdownColor: AppTheme.cardColor,
-                style: const TextStyle(color: AppTheme.textPrimary),
+                dropdownColor: colorScheme.surfaceContainer,
+                style: TextStyle(color: colorScheme.onSurface),
                 decoration: InputDecoration(
                   labelText: 'Type',
-                  labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                  labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                   filled: true,
-                  fillColor: AppTheme.cardColor,
+                  fillColor: colorScheme.surfaceContainer,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none),
@@ -1681,14 +1699,14 @@ class _DentalSection extends ConsumerWidget {
                 onChanged: (v) => setS(() => type = v ?? type),
               ),
               const SizedBox(height: 10),
-              _sheetTextField(notesCtrl, 'Notes (optional)'),
+              _sheetTextField(context, notesCtrl, 'Notes (optional)'),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryAccent,
-                    foregroundColor: Colors.white,
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
@@ -1727,20 +1745,21 @@ class _DentalRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(icon, size: 14, color: AppTheme.textSecondary),
+        Icon(icon, size: 14, color: colorScheme.onSurfaceVariant),
         const SizedBox(width: 8),
         Expanded(
           child: Text(label,
               style:
-                  const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+                  TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant)),
         ),
         Text(value,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary)),
+                color: colorScheme.onSurface)),
       ],
     );
   }
@@ -1758,6 +1777,7 @@ class _AllergySection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+//     final colorScheme = Theme.of(context).colorScheme;
     final activeAllergies = allergies.where((a) => a.isActive).toList();
 
     return _SectionCard(
@@ -1807,11 +1827,11 @@ class _AllergySection extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.cardColor,
-        title: const Text('Remove Allergy',
-            style: TextStyle(color: AppTheme.textPrimary)),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        title: Text('Remove Allergy',
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
         content: Text('Remove "${allergy.allergen}" from the allergy list?',
-            style: const TextStyle(color: AppTheme.textSecondary)),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -1822,7 +1842,7 @@ class _AllergySection extends ConsumerWidget {
               Navigator.pop(ctx);
               ref.read(healthProvider.notifier).removeAllergy(allergy.id);
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Remove'),
           ),
         ],
@@ -1831,6 +1851,7 @@ class _AllergySection extends ConsumerWidget {
   }
 
   void _showAddSheet(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final allergenCtrl = TextEditingController();
     final reactionCtrl = TextEditingController();
     String allergenType = 'food';
@@ -1839,7 +1860,7 @@ class _AllergySection extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
@@ -1854,23 +1875,23 @@ class _AllergySection extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Add Allergy',
+              Text('Add Allergy',
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary)),
+                      color: colorScheme.onSurface)),
               const SizedBox(height: 16),
-              _sheetTextField(allergenCtrl, 'Allergen (e.g. Chicken, Grass)'),
+              _sheetTextField(context, allergenCtrl, 'Allergen (e.g. Chicken, Grass)'),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
                 initialValue: allergenType,
-                dropdownColor: AppTheme.cardColor,
-                style: const TextStyle(color: AppTheme.textPrimary),
+                dropdownColor: colorScheme.surfaceContainer,
+                style: TextStyle(color: colorScheme.onSurface),
                 decoration: InputDecoration(
                   labelText: 'Type',
-                  labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                  labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                   filled: true,
-                  fillColor: AppTheme.cardColor,
+                  fillColor: colorScheme.surfaceContainer,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none),
@@ -1888,13 +1909,13 @@ class _AllergySection extends ConsumerWidget {
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
                 initialValue: severity,
-                dropdownColor: AppTheme.cardColor,
-                style: const TextStyle(color: AppTheme.textPrimary),
+                dropdownColor: colorScheme.surfaceContainer,
+                style: TextStyle(color: colorScheme.onSurface),
                 decoration: InputDecoration(
                   labelText: 'Severity',
-                  labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                  labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                   filled: true,
-                  fillColor: AppTheme.cardColor,
+                  fillColor: colorScheme.surfaceContainer,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none),
@@ -1910,14 +1931,14 @@ class _AllergySection extends ConsumerWidget {
                 onChanged: (v) => setS(() => severity = v ?? severity),
               ),
               const SizedBox(height: 10),
-              _sheetTextField(reactionCtrl, 'Reaction notes (optional)'),
+              _sheetTextField(context, reactionCtrl, 'Reaction notes (optional)'),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryAccent,
-                    foregroundColor: Colors.white,
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
@@ -1988,6 +2009,7 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return _SectionCard(
       title: 'Symptoms',
       icon: Icons.medical_services_outlined,
@@ -2010,14 +2032,14 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
                 children: [
                   Text(
                     '${widget.resolved.length} resolved',
-                    style: const TextStyle(
-                        fontSize: 12, color: AppTheme.textSecondary),
+                    style: TextStyle(
+                        fontSize: 12, color: colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(width: 4),
                   Icon(
                     _showResolved ? Icons.expand_less : Icons.expand_more,
                     size: 16,
-                    color: AppTheme.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ],
               ),
@@ -2034,6 +2056,7 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
   }
 
   void _showLogSheet(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     String? selectedType;
     String severity = 'mild';
     final notesCtrl = TextEditingController();
@@ -2041,7 +2064,7 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
@@ -2056,11 +2079,11 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Log Symptom',
+              Text('Log Symptom',
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary)),
+                      color: colorScheme.onSurface)),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 6,
@@ -2074,25 +2097,25 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color:
-                            sel ? AppTheme.primaryAccent : AppTheme.cardColor,
+                            sel ? colorScheme.primary : colorScheme.surfaceContainer,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                             color:
-                                sel ? AppTheme.primaryAccent : AppTheme.border),
+                                sel ? colorScheme.primary : colorScheme.outlineVariant),
                       ),
                       child: Text(t,
                           style: TextStyle(
                               fontSize: 13,
                               color:
-                                  sel ? Colors.white : AppTheme.textSecondary)),
+                                  sel ? colorScheme.onPrimary : colorScheme.onSurfaceVariant)),
                     ),
                   );
                 }).toList(),
               ),
               const SizedBox(height: 12),
-              const Text('Severity',
+              Text('Severity',
                   style:
-                      TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                      TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
               const SizedBox(height: 6),
               Row(
                 children: ['mild', 'moderate', 'severe'].map((s) {
@@ -2105,30 +2128,30 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color:
-                            sel ? AppTheme.primaryAccent : AppTheme.cardColor,
+                            sel ? colorScheme.primary : colorScheme.surfaceContainer,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                             color:
-                                sel ? AppTheme.primaryAccent : AppTheme.border),
+                                sel ? colorScheme.primary : colorScheme.outlineVariant),
                       ),
                       child: Text(s[0].toUpperCase() + s.substring(1),
                           style: TextStyle(
                               fontSize: 13,
                               color:
-                                  sel ? Colors.white : AppTheme.textSecondary)),
+                                  sel ? colorScheme.onPrimary : colorScheme.onSurfaceVariant)),
                     ),
                   );
                 }).toList(),
               ),
               const SizedBox(height: 12),
-              _sheetTextField(notesCtrl, 'Notes (optional)'),
+              _sheetTextField(context, notesCtrl, 'Notes (optional)'),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryAccent,
-                    foregroundColor: Colors.white,
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
@@ -2162,6 +2185,7 @@ class _SymptomRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -2171,7 +2195,7 @@ class _SymptomRow extends StatelessWidget {
             height: 8,
             decoration: BoxDecoration(
               color: symptom.isResolved
-                  ? AppTheme.textSecondary
+                  ? colorScheme.onSurfaceVariant
                   : symptom.severityColor,
               shape: BoxShape.circle,
             ),
@@ -2186,16 +2210,16 @@ class _SymptomRow extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     color: symptom.isResolved
-                        ? AppTheme.textSecondary
-                        : AppTheme.textPrimary,
+                        ? colorScheme.onSurfaceVariant
+                        : colorScheme.onSurface,
                     decoration:
                         symptom.isResolved ? TextDecoration.lineThrough : null,
                   ),
                 ),
                 Text(
                   '${symptom.severityLabel} · ${DateFormat('MMM d').format(symptom.observedAt)}',
-                  style: const TextStyle(
-                      fontSize: 11, color: AppTheme.textSecondary),
+                  style: TextStyle(
+                      fontSize: 11, color: colorScheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -2206,12 +2230,12 @@ class _SymptomRow extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppTheme.secondaryAccent.withAlpha(25),
+                  color: colorScheme.secondary.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text('Resolved',
+                child: Text('Resolved',
                     style: TextStyle(
-                        fontSize: 11, color: AppTheme.secondaryAccent)),
+                        fontSize: 11, color: colorScheme.secondary)),
               ),
             ),
         ],
@@ -2224,15 +2248,15 @@ class _SymptomRow extends StatelessWidget {
 // Shared helper: text field for bottom sheets
 // ─────────────────────────────────────────────────────────────────────────────
 
-Widget _sheetTextField(TextEditingController ctrl, String label) {
+Widget _sheetTextField(BuildContext context, TextEditingController ctrl, String label) {
   return TextField(
     controller: ctrl,
-    style: const TextStyle(color: AppTheme.textPrimary),
+    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
     decoration: InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: AppTheme.textSecondary),
+      labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
       filled: true,
-      fillColor: AppTheme.cardColor,
+      fillColor: Theme.of(context).colorScheme.surfaceContainer,
       border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
     ),

@@ -9,6 +9,7 @@ class LikedPetsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final sentRequests = ref.watch(matchProvider).sentRequests;
 
     return Scaffold(
@@ -27,20 +28,20 @@ class LikedPetsScreen extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.favorite_border,
-                            size: 64, color: Colors.grey.shade400),
+                            size: 64, color: colorScheme.onSurfaceVariant),
                         const SizedBox(height: 16),
                         Text(
                           'No likes yet',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade600,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Pets you like will appear here.',
-                          style: TextStyle(color: Colors.grey.shade500),
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -60,7 +61,7 @@ class LikedPetsScreen extends ConsumerWidget {
                     return ListTile(
                       leading: const CircleAvatar(child: Icon(Icons.pets)),
                       title: const Text('Unknown pet'),
-                      subtitle: _statusLabel(req.status),
+                      subtitle: _statusLabel(context, req.status),
                     );
                   }
 
@@ -78,7 +79,7 @@ class LikedPetsScreen extends ConsumerWidget {
                       children: [
                         Text('${pet.breed} · ${pet.age} yrs'),
                         const SizedBox(height: 4),
-                        _statusLabel(req.status),
+                        _statusLabel(context, req.status),
                       ],
                     ),
                     trailing: const Icon(Icons.chevron_right),
@@ -90,21 +91,22 @@ class LikedPetsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _statusLabel(String status) {
+  Widget _statusLabel(BuildContext context, String status) {
+    final colorScheme = Theme.of(context).colorScheme;
     final Color color;
     final String label;
     switch (status) {
       case 'matched':
-        color = Colors.green;
+        color = colorScheme.secondary;
         label = 'Matched';
       case 'rejected':
-        color = Colors.red;
+        color = colorScheme.error;
         label = 'Declined';
       case 'pending':
         color = Colors.orange;
         label = 'Pending';
       default:
-        color = Colors.grey;
+        color = colorScheme.onSurfaceVariant;
         label = status;
     }
     return Container(

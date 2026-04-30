@@ -84,6 +84,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final feedState = ref.watch(feedProvider);
     final stories = feedState.stories
         .where((story) => story.pet.id == widget.petId)
@@ -103,8 +104,8 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('This story is no longer available.',
-                  style: TextStyle(color: Colors.white)),
+              Text('This story is no longer available.',
+                  style: TextStyle(color: colorScheme.onPrimary)),
               const SizedBox(height: 16),
               OutlinedButton(
                 onPressed: () => ref.read(feedProvider.notifier).refresh(),
@@ -190,8 +191,8 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                           children: [
                             Text(
                               stories[_index].pet.name,
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: colorScheme.onPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -211,13 +212,13 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                               if (stories.length == 1) context.pop();
                             }
                           },
-                          icon: const Icon(Icons.delete_outline,
-                              color: Colors.white),
+                          icon: Icon(Icons.delete_outline,
+                              color: colorScheme.onPrimary),
                         ),
                       IconButton(
                         onPressed: () => context.pop(),
                         icon:
-                            const Icon(Icons.close, color: Colors.white),
+                            Icon(Icons.close, color: colorScheme.onPrimary),
                       ),
                     ],
                   ),
@@ -241,19 +242,20 @@ class _ProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     Widget bar(double value) => Container(
           height: 3,
           margin: const EdgeInsets.symmetric(horizontal: 2),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(99),
-            color: Colors.white.withAlpha(60),
+            color: colorScheme.onPrimary.withAlpha(60),
           ),
           child: FractionallySizedBox(
             alignment: Alignment.centerLeft,
             widthFactor: value.clamp(0.0, 1.0),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.onPrimary,
                 borderRadius: BorderRadius.circular(99),
               ),
             ),
@@ -278,11 +280,12 @@ class _ExpiryBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final remaining = expiresAt.difference(DateTime.now());
     if (remaining.isNegative) {
-      return const Text(
+      return Text(
         'Expired',
-        style: TextStyle(color: Colors.redAccent, fontSize: 11),
+        style: TextStyle(color: colorScheme.error, fontSize: 11),
       );
     }
     final h = remaining.inHours;
@@ -291,7 +294,7 @@ class _ExpiryBadge extends StatelessWidget {
     return Text(
       label,
       style: TextStyle(
-        color: Colors.white.withAlpha(160),
+        color: colorScheme.onPrimary.withAlpha(160),
         fontSize: 11,
       ),
     );
@@ -316,6 +319,7 @@ class _StoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -357,8 +361,8 @@ class _StoryPage extends StatelessWidget {
             child: Text(
               story.caption,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: colorScheme.onPrimary,
                 fontSize: 16,
                 shadows: [Shadow(color: Colors.black87, blurRadius: 8)],
               ),
@@ -386,6 +390,7 @@ class _StoryImageState extends State<_StoryImage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Image.network(
       widget.url,
       fit: BoxFit.contain,
@@ -410,8 +415,8 @@ class _StoryImageState extends State<_StoryImage> {
             (_) => widget.onReady(_kImageDuration),
           );
         }
-        return const Center(
-          child: Icon(Icons.broken_image, color: Colors.white, size: 56),
+        return Center(
+          child: Icon(Icons.broken_image, color: colorScheme.onPrimary, size: 56),
         );
       },
     );

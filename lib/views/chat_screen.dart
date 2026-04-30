@@ -71,6 +71,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chatState = ref.watch(chatProvider);
     final messages = ref.watch(threadMessagesProvider);
     final myPetId = ref.watch(activePetProvider)?.id ?? '';
+    final colorScheme = Theme.of(context).colorScheme;
 
     // Find the thread from the list
     final threadList = chatState.threads.where((t) => t.id == widget.threadId);
@@ -84,9 +85,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFEF8F3),
+      backgroundColor: colorScheme.surfaceContainerLowest,
       appBar: AppBar(
-        backgroundColor: const Color(0xCCFEF8F3),
+        backgroundColor: colorScheme.surfaceContainerLowest.withAlpha(204),
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
@@ -108,10 +109,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         ? NetworkImage(otherPet.profileImageUrl)
                         : null,
                     radius: 20,
-                    backgroundColor: const Color(0xFFE5FDE6),
+                    backgroundColor: colorScheme.tertiaryContainer,
                     child: otherPet.profileImageUrl.isEmpty
                         ? Text(otherPet.name[0],
-                            style: const TextStyle(color: Color(0xFF506453)))
+                            style: TextStyle(color: colorScheme.onTertiary))
                         : null,
                   ),
                   Positioned(
@@ -121,10 +122,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       width: 12,
                       height: 12,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFAD04B),
+                        color: colorScheme.primary,
                         shape: BoxShape.circle,
                         border: Border.all(
-                            color: const Color(0xFFFEF8F3), width: 2),
+                            color: colorScheme.surfaceContainerLowest, width: 2),
                       ),
                     ),
                   ),
@@ -136,19 +137,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 children: [
                   Text(
                     otherPet.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 17,
-                      color: Color(0xFF35322D),
+                      color: colorScheme.onSurface,
                       letterSpacing: -0.3,
                     ),
                   ),
-                  const Text(
+                  Text(
                     'ONLINE',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF506453),
+                      color: colorScheme.onTertiary,
                       letterSpacing: 1.2,
                     ),
                   ),
@@ -159,7 +160,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert, color: Color(0xFF35322D)),
+            icon: Icon(Icons.more_vert, color: colorScheme.onSurface),
             onPressed: () {},
           ),
         ],
@@ -182,17 +183,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               Container(
                                 width: 72,
                                 height: 72,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFE5FDE6),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.tertiaryContainer,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.chat_bubble_outline,
-                                    size: 32, color: Color(0xFF506453)),
+                                child: Icon(Icons.chat_bubble_outline,
+                                    size: 32, color: colorScheme.onTertiary),
                               ),
                               const SizedBox(height: 16),
-                              const Text('Say hello! 👋',
+                              Text('Say hello! 👋',
                                   style: TextStyle(
-                                      color: Color(0xFF625E59),
+                                      color: colorScheme.onSurfaceVariant,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500)),
                             ],
@@ -236,13 +237,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withAlpha(230),
+                color: colorScheme.surfaceContainerLowest.withAlpha(230),
                 borderRadius: BorderRadius.circular(999),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                      color: Color(0x1F000000),
+                      color: Colors.black.withAlpha(31),
                       blurRadius: 16,
-                      offset: Offset(0, 4)),
+                      offset: const Offset(0, 4)),
                 ],
               ),
               child: Row(
@@ -256,12 +257,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     child: Container(
                       width: 44,
                       height: 44,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFE5FDE6),
+                      decoration: BoxDecoration(
+                        color: colorScheme.tertiaryContainer,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.add,
-                          color: Color(0xFF506453), size: 22),
+                      child: Icon(Icons.add,
+                          color: colorScheme.onTertiary, size: 22),
                     ),
                   ),
                   Expanded(
@@ -284,16 +285,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     child: Container(
                       width: 44,
                       height: 44,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Color(0xFF99472C), Color(0xFFFFAD93)],
+                          colors: [colorScheme.primary, colorScheme.secondary],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.send_rounded,
-                          color: Colors.white, size: 20),
+                      child: Icon(Icons.send_rounded,
+                          color: colorScheme.onPrimary, size: 20),
                     ),
                   ),
                 ],

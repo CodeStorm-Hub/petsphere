@@ -70,6 +70,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     if (widget.visitPetId != null || widget.visitUserId != null) {
       return ref
           .watch(_visitProfileDataProvider((
@@ -85,14 +86,15 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
           appBar: AppBar(leading: const BackButton()),
           body: Center(child: Text('Error: $e')),
         ),
-        data: (d) => _buildScaffoldCore(isVisitor: true, visitData: d),
+        data: (d) => _buildScaffoldCore(isVisitor: true, visitData: d, colorScheme: colorScheme),
       );
     }
-    return _buildScaffoldCore(isVisitor: false, visitData: null);
+    return _buildScaffoldCore(isVisitor: false, visitData: null, colorScheme: colorScheme);
   }
 
   Widget _buildScaffoldCore({
     required bool isVisitor,
+    required ColorScheme colorScheme,
     Map<String, dynamic>? visitData,
   }) {
     if (!isVisitor) {
@@ -214,8 +216,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                               padding: const EdgeInsets.all(2),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: const Color(0xFF0F0E0C),
-                                border: Border.all(color: const Color(0xFF2E2B26), width: 2),
+                                color: colorScheme.surface,
+                                border: Border.all(color: colorScheme.outline.withAlpha(80), width: 2),
                               ),
                               child: _buildAvatar(isOwnerView, ownerForHeader, selectedPet),
                             ),
@@ -225,17 +227,17 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                               bottom: 0,
                               right: 0,
                               child: Container(
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF0F0E0C),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surface,
                                   shape: BoxShape.circle,
                                 ),
                                 padding: const EdgeInsets.all(2),
                                 child: Container(
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFD4845A),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primary,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(Icons.add, size: 18, color: Colors.white),
+                                  child: Icon(Icons.add, size: 18, color: colorScheme.onPrimary),
                                 ),
                               ),
                             ),
@@ -287,9 +289,9 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         if (!isOwnerView && (selectedPet?.isVerified ?? false))
-                          const Padding(
-                            padding: EdgeInsets.only(left: 4),
-                            child: Icon(Icons.verified, size: 18, color: Color(0xFFD4845A)),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4),
+                            child: Icon(Icons.verified, size: 18, color: colorScheme.primary),
                           ),
                       ],
                     ),
@@ -298,17 +300,17 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     if (!isVisitor && isOwnerView && accountUser?.email != null)
                       Text(
                         '${accountUser!.email}${accountUser.location?.isNotEmpty == true ? " · ${accountUser.location}" : ""}',
-                        style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13, fontWeight: FontWeight.w500),
                       ),
                     if (isVisitor && isOwnerView && (visitHostUser?.location?.isNotEmpty ?? false))
                       Text(
                         visitHostUser!.location!,
-                        style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13, fontWeight: FontWeight.w500),
                       ),
                     if (!isOwnerView && selectedPet != null)
                       Text(
                         '${selectedPet.breed} · ${selectedPet.animalType}',
-                        style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13, fontWeight: FontWeight.w500),
                       ),
                     const SizedBox(height: 4),
                     Text(
@@ -327,8 +329,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                     ? (visitHostUser?.bio?.isEmpty ?? true)
                                     : (accountUser?.bio?.isEmpty ?? true))) ||
                                 (!isOwnerView && selectedPet?.bio.isEmpty == true)
-                            ? Colors.grey
-                            : Theme.of(context).colorScheme.onSurface,
+                            ? colorScheme.onSurfaceVariant
+                            : colorScheme.onSurface,
                         fontSize: 14,
                         fontStyle: (isOwnerView &&
                                 !isVisitor &&
@@ -373,17 +375,15 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).brightness == Brightness.dark
-                                  ? const Color(0xFF2C2C2C)
-                                  : const Color(0xFFEFEFEF),
-                              foregroundColor: Theme.of(context).colorScheme.onSurface,
+                              backgroundColor: colorScheme.surfaceContainer,
+                              foregroundColor: colorScheme.onSurface,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8)),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
-                            child: const Text('Edit profile',
-                                style: TextStyle(fontWeight: FontWeight.w600)),
+                            child: Text('Edit profile',
+                                style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -398,17 +398,15 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                               _showProfileShareSheet(context, link, name);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).brightness == Brightness.dark
-                                  ? const Color(0xFF2C2C2C)
-                                  : const Color(0xFFEFEFEF),
-                              foregroundColor: Theme.of(context).colorScheme.onSurface,
+                              backgroundColor: colorScheme.surfaceContainer,
+                              foregroundColor: colorScheme.onSurface,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8)),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
-                            child: const Text('Share profile',
-                                style: TextStyle(fontWeight: FontWeight.w600)),
+                            child: Text('Share profile',
+                                style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
                           ),
                         ),
                       ],
@@ -424,7 +422,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           final success = await ref
                               .read(matchProvider.notifier)
                               .sendLikeRequest(selectedPet!.id);
-                          if (context.mounted && success) {
+                          if (!mounted) return;
+                          if (success) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('Request sent to ${selectedPet.name}!'),
@@ -499,8 +498,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                             decoration: BoxDecoration(
                               color: _postCategory == cat
-                                  ? const Color(0xFF506453)
-                                  : const Color(0xFFE5FDE6),
+                                  ? colorScheme.secondary
+                                  : colorScheme.secondaryContainer,
                               borderRadius: BorderRadius.circular(9999),
                             ),
                             child: Text(
@@ -509,8 +508,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: _postCategory == cat
-                                    ? const Color(0xFFE8FFE8)
-                                    : const Color(0xFF4E6251),
+                                    ? colorScheme.onSecondary
+                                    : colorScheme.onSecondaryContainer,
                               ),
                             ),
                           ),
@@ -537,10 +536,10 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                   padding: const EdgeInsets.only(top: 40.0),
                   child: Column(
                     children: [
-                      const Icon(Icons.camera_alt_outlined, size: 48, color: Color(0xFFB7B1AA)),
+                      Icon(Icons.camera_alt_outlined, size: 48, color: colorScheme.onSurfaceVariant),
                       const SizedBox(height: 12),
-                      const Text('No posts yet',
-                          style: TextStyle(color: Color(0xFF625E59), fontWeight: FontWeight.w600, fontSize: 16)),
+                      Text('No posts yet',
+                          style: TextStyle(color: colorScheme.onSurface, fontWeight: FontWeight.w600, fontSize: 16)),
                       const SizedBox(height: 4),
                       Text(
                         isOwnerView
@@ -548,7 +547,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                             : (isVisitor
                                 ? 'No posts from ${selectedPet?.name ?? 'this pet'} yet.'
                                 : 'Create a post as ${selectedPet?.name ?? 'this pet'}.'),
-                        style: const TextStyle(color: Color(0xFFB7B1AA), fontSize: 13),
+                        style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
                       ),
                       if (!isVisitor && !isOwnerView && selectedPet != null) ...[
                         const SizedBox(height: 16),
@@ -557,20 +556,20 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF99472C), Color(0xFF8A3B21)],
+                              gradient: LinearGradient(
+                                colors: [colorScheme.primary, colorScheme.primary.withAlpha(180)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               borderRadius: BorderRadius.circular(9999),
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.add_a_photo_outlined, size: 16, color: Colors.white),
-                                SizedBox(width: 8),
+                                Icon(Icons.add_a_photo_outlined, size: 16, color: colorScheme.onPrimary),
+                                const SizedBox(width: 8),
                                 Text('Create Post',
-                                    style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
+                                    style: TextStyle(fontWeight: FontWeight.w700, color: colorScheme.onPrimary)),
                               ],
                             ),
                           ),
@@ -603,11 +602,11 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           children: [
                             if (isVideoMedia(post.mediaUrl))
                               Container(
-                                color: const Color(0xFF211F1B),
-                                child: const Center(
+                                color: colorScheme.scrim.withAlpha(51),
+                                child: Center(
                                   child: Icon(
                                     Icons.play_circle_fill_rounded,
-                                    color: Color(0xFFD4845A),
+                                    color: colorScheme.primary,
                                     size: 42,
                                   ),
                                 ),
@@ -617,17 +616,17 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                 post.mediaUrl,
                                 fit: BoxFit.cover,
                                 errorBuilder: (ctx, _, __) => Container(
-                                  color: const Color(0xFFF3EDE6),
-                                  child: const Icon(Icons.image_outlined, color: Color(0xFFB7B1AA)),
+                                  color: colorScheme.surfaceContainer,
+                                  child: Icon(Icons.image_outlined, color: colorScheme.onSurfaceVariant),
                                 ),
                               ),
                             if (isVideoMedia(post.mediaUrl))
-                              const Positioned(
+                              Positioned(
                                 top: 4,
                                 right: 4,
                                 child: Icon(
                                   Icons.videocam_rounded,
-                                  color: Colors.white,
+                                  color: colorScheme.onPrimary,
                                   size: 18,
                                 ),
                               ),
@@ -637,14 +636,14 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                 right: 4,
                                 child: CircleAvatar(
                                   radius: 11,
-                                  backgroundColor: const Color(0xFFFEF8F3),
+                                  backgroundColor: colorScheme.surfaceContainerHighest,
                                   backgroundImage: post.pet.profileImageUrl.isNotEmpty
                                       ? NetworkImage(post.pet.profileImageUrl)
                                       : null,
                                   child: post.pet.profileImageUrl.isEmpty
                                       ? Text(
                                           post.pet.name.isNotEmpty ? post.pet.name[0] : '?',
-                                          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF99472C)),
+                                          style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: colorScheme.primary),
                                         )
                                       : null,
                                 ),
@@ -669,8 +668,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               child: FloatingActionButton(
                 heroTag: 'profile_fab',
                 onPressed: () => context.push('/create_post?petId=${selectedPet!.id}'),
-                backgroundColor: const Color(0xFFFF8A65),
-                child: const Icon(Icons.add_a_photo_outlined, color: Colors.white),
+                backgroundColor: colorScheme.primary,
+                child: Icon(Icons.add_a_photo_outlined, color: colorScheme.onPrimary),
               ),
             )
           : null,
@@ -728,11 +727,11 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: const Row(
+                      content: Row(
                         children: [
-                          Icon(Icons.check_circle, color: Colors.white, size: 16),
-                          SizedBox(width: 8),
-                          Text('Link copied to clipboard!'),
+                          Icon(Icons.check_circle, color: colorScheme.onPrimary, size: 16),
+                          const SizedBox(width: 8),
+                          const Text('Link copied to clipboard!'),
                         ],
                       ),
                       behavior: SnackBarBehavior.floating,
@@ -831,16 +830,17 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
   }
 
   Widget _buildAvatar(bool isOwnerView, UserModel? user, PetModel? selectedPet) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.grey.shade300, width: 1),
+        border: Border.all(color: colorScheme.outline.withAlpha(80), width: 1),
       ),
       child: CircleAvatar(
         radius: 40,
         backgroundColor: isOwnerView
-            ? const Color(0xFFFF8A65).withAlpha(26)
-            : Colors.white,
+            ? colorScheme.tertiary.withAlpha(26)
+            : colorScheme.surface,
         backgroundImage: isOwnerView
             ? (user?.profileImageUrl != null && user!.profileImageUrl!.isNotEmpty
                 ? NetworkImage(user.profileImageUrl!)
@@ -851,14 +851,14 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
         child: isOwnerView && (user?.profileImageUrl == null || user!.profileImageUrl!.isEmpty)
             ? Text(
                 user?.initials ?? '?',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFFFF8A65),
+                  color: colorScheme.tertiary,
                 ),
               )
             : (!isOwnerView && (selectedPet == null || selectedPet.profileImageUrl.isEmpty)
-                ? Icon(Icons.pets, size: 32, color: Colors.grey.shade400)
+                ? Icon(Icons.pets, size: 32, color: colorScheme.onSurfaceVariant)
                 : null),
       ),
     );
@@ -884,6 +884,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
   }
 
   void _showLogoutConfirmation(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -901,7 +902,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               ref.read(authProvider.notifier).logout();
             },
             style: FilledButton.styleFrom(
-              backgroundColor: Colors.redAccent,
+              backgroundColor: colorScheme.error,
             ),
             child: const Text('Sign Out'),
           ),
@@ -1037,22 +1038,25 @@ class _ProfileVisitorActionRow extends ConsumerWidget {
         },
         child: const Text('Follow'),
       ),
-      data: (follows) => ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: follows
-              ? Colors.grey.shade200
-              : Theme.of(context).colorScheme.primary,
-          foregroundColor: follows ? Colors.black : Colors.white,
-        ),
-        onPressed: () {
-          ref.read(followControllerProvider.notifier).toggleFollowOwner(ownerId);
-        },
-        child: Text(
-          follows ? 'Unfollow' : 'Follow',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
+      data: (follows) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: follows
+                ? colorScheme.surfaceContainer
+                : colorScheme.primary,
+            foregroundColor: follows ? colorScheme.onSurface : colorScheme.onPrimary,
+          ),
+          onPressed: () {
+            ref.read(followControllerProvider.notifier).toggleFollowOwner(ownerId);
+          },
+          child: Text(
+            follows ? 'Unfollow' : 'Follow',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
+      },
     );
   }
 
@@ -1078,22 +1082,25 @@ class _ProfileVisitorActionRow extends ConsumerWidget {
         },
         child: const Text('Follow'),
       ),
-      data: (follows) => ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: follows
-              ? Colors.grey.shade200
-              : Theme.of(context).colorScheme.primary,
-          foregroundColor: follows ? Colors.black : Colors.white,
-        ),
-        onPressed: () {
-          ref.read(followControllerProvider.notifier).toggleFollowPet(petId);
-        },
-        child: Text(
-          follows ? 'Unfollow' : 'Follow',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
+      data: (follows) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: follows
+                ? colorScheme.surfaceContainer
+                : colorScheme.primary,
+            foregroundColor: follows ? colorScheme.onSurface : colorScheme.onPrimary,
+          ),
+          onPressed: () {
+            ref.read(followControllerProvider.notifier).toggleFollowPet(petId);
+          },
+          child: Text(
+            follows ? 'Unfollow' : 'Follow',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
+      },
     );
   }
 }
@@ -1172,12 +1179,13 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
           debugPrint('Avatar upload failed: $e');
           if (mounted) {
             final reason = e.toString();
+            final colorScheme = Theme.of(context).colorScheme;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
                   'Avatar upload failed: ${reason.length > 100 ? '${reason.substring(0, 100)}…' : reason}',
                 ),
-                backgroundColor: Colors.orange.shade700,
+                backgroundColor: colorScheme.error,
                 behavior: SnackBarBehavior.floating,
                 duration: const Duration(seconds: 5),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1196,18 +1204,19 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
       final success = await ref.read(authProvider.notifier).updateProfile(fields);
 
       if (mounted) {
+        final colorScheme = Theme.of(context).colorScheme;
         if (success) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Row(
+              content: Row(
                 children: [
-                  Icon(Icons.check_circle, color: Colors.white, size: 18),
-                  SizedBox(width: 8),
-                  Text('Profile updated!'),
+                  Icon(Icons.check_circle, color: colorScheme.onPrimary, size: 18),
+                  const SizedBox(width: 8),
+                  const Text('Profile updated!'),
                 ],
               ),
-              backgroundColor: const Color(0xFF81C784),
+              backgroundColor: colorScheme.primary,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -1217,7 +1226,7 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Update failed: ${authError ?? 'Unknown error'}'),
-              backgroundColor: Colors.redAccent,
+              backgroundColor: colorScheme.error,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -1237,13 +1246,14 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final currentAvatarUrl = widget.user.profileImageUrl;
     final hasAvatar = currentAvatarUrl != null && currentAvatarUrl.isNotEmpty;
 
     return Container(
       margin: const EdgeInsets.only(top: 60),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
@@ -1263,7 +1273,7 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1283,17 +1293,17 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
                   children: [
                     CircleAvatar(
                       radius: 50,
-                      backgroundColor: const Color(0xFFFF8A65).withAlpha(26),
+                      backgroundColor: colorScheme.tertiary.withAlpha(26),
                       backgroundImage: _newAvatar != null
                           ? FileImage(_newAvatar!) as ImageProvider
                           : (hasAvatar ? NetworkImage(currentAvatarUrl) as ImageProvider : null),
                       child: (_newAvatar == null && !hasAvatar)
                           ? Text(
                               widget.user.initials,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFFFF8A65),
+                                color: colorScheme.tertiary,
                               ),
                             )
                           : null,
@@ -1304,11 +1314,11 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFF8A65),
+                          color: colorScheme.tertiary,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(color: colorScheme.onTertiary, width: 2),
                         ),
-                        child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                        child: Icon(Icons.camera_alt, size: 16, color: colorScheme.onTertiary),
                       ),
                     ),
                   ],
@@ -1319,40 +1329,40 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
             Center(
               child: Text(
                 'Tap to change photo',
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
               ),
             ),
             const SizedBox(height: 24),
 
             // Name
-            _SheetFieldLabel(icon: Icons.badge_outlined, label: 'Display Name'),
+            _SheetFieldLabel(icon: Icons.badge_outlined, label: 'Display Name', colorScheme: colorScheme),
             const SizedBox(height: 6),
             TextField(
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
-              decoration: _sheetInputDecoration('Your name'),
+              decoration: _sheetInputDecoration('Your name', colorScheme),
             ),
             const SizedBox(height: 20),
 
             // Bio
-            _SheetFieldLabel(icon: Icons.description_outlined, label: 'Bio'),
+            _SheetFieldLabel(icon: Icons.description_outlined, label: 'Bio', colorScheme: colorScheme),
             const SizedBox(height: 6),
             TextField(
               controller: _bioController,
               maxLines: 3,
               maxLength: 300,
               textCapitalization: TextCapitalization.sentences,
-              decoration: _sheetInputDecoration('Tell others about yourself...'),
+              decoration: _sheetInputDecoration('Tell others about yourself...', colorScheme),
             ),
             const SizedBox(height: 20),
 
             // Location
-            _SheetFieldLabel(icon: Icons.location_on_outlined, label: 'Location'),
+            _SheetFieldLabel(icon: Icons.location_on_outlined, label: 'Location', colorScheme: colorScheme),
             const SizedBox(height: 6),
             TextField(
               controller: _locationController,
               textCapitalization: TextCapitalization.words,
-              decoration: _sheetInputDecoration('e.g. New York, NY'),
+              decoration: _sheetInputDecoration('e.g. New York, NY', colorScheme),
             ),
             const SizedBox(height: 28),
 
@@ -1363,18 +1373,18 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
               child: FilledButton(
                 onPressed: _isSaving ? null : _save,
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF8A65),
+                  backgroundColor: colorScheme.tertiary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
                 child: _isSaving
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: colorScheme.onTertiary,
                         ),
                       )
                     : const Text(
@@ -1393,23 +1403,23 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
     );
   }
 
-  InputDecoration _sheetInputDecoration(String hint) {
+  InputDecoration _sheetInputDecoration(String hint, ColorScheme colorScheme) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+      hintStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
       filled: true,
-      fillColor: Colors.grey.shade50,
+      fillColor: colorScheme.surfaceContainerLowest,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: colorScheme.outline),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: colorScheme.outline),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0xFFFF8A65), width: 2),
+        borderSide: BorderSide(color: colorScheme.tertiary, width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
@@ -1466,13 +1476,14 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
   }
 
   void _showImageSourceSheet() {
+    final colorScheme = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Column(
@@ -1483,7 +1494,7 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1495,18 +1506,18 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
             const SizedBox(height: 4),
             Text(
               'Choose a new photo for your pet',
-              style: TextStyle(color: Colors.grey.shade600),
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 20),
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF8A65).withAlpha(26),
+                  color: colorScheme.tertiary.withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.photo_library_rounded,
-                    color: Color(0xFFFF8A65)),
+                child: Icon(Icons.photo_library_rounded,
+                    color: colorScheme.tertiary),
               ),
               title: const Text('Choose from Gallery',
                   style: TextStyle(fontWeight: FontWeight.w600)),
@@ -1520,11 +1531,11 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4FC3F7).withAlpha(26),
+                  color: colorScheme.secondary.withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.camera_alt_rounded,
-                    color: Color(0xFF4FC3F7)),
+                child: Icon(Icons.camera_alt_rounded,
+                    color: colorScheme.secondary),
               ),
               title: const Text('Take a Photo',
                   style: TextStyle(fontWeight: FontWeight.w600)),
@@ -1569,12 +1580,13 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
           debugPrint('Pet avatar upload failed: $e');
           if (mounted) {
             final reason = e.toString();
+            final errorColorScheme = Theme.of(context).colorScheme;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
                   'Photo upload failed: ${reason.length > 100 ? '${reason.substring(0, 100)}…' : reason}',
                 ),
-                backgroundColor: Colors.orange.shade700,
+                backgroundColor: errorColorScheme.error,
                 behavior: SnackBarBehavior.floating,
                 duration: const Duration(seconds: 5),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1594,26 +1606,28 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
       if (mounted) {
         if (success) {
           Navigator.pop(context);
+          final successColorScheme = Theme.of(context).colorScheme;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Row(
+              content: Row(
                 children: [
-                  Icon(Icons.check_circle, color: Colors.white, size: 18),
-                  SizedBox(width: 8),
-                  Text('Profile updated!'),
+                  Icon(Icons.check_circle, color: successColorScheme.onPrimary, size: 18),
+                  const SizedBox(width: 8),
+                  const Text('Profile updated!'),
                 ],
               ),
-              backgroundColor: const Color(0xFF81C784),
+              backgroundColor: successColorScheme.primary,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           );
         } else {
           final petError = ref.read(petProvider).error;
+          final failureColorScheme = Theme.of(context).colorScheme;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Update failed: ${petError ?? 'Unknown error'}'),
-              backgroundColor: Colors.redAccent,
+              backgroundColor: failureColorScheme.error,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -1633,11 +1647,12 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(top: 80),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
         padding: EdgeInsets.only(
@@ -1655,7 +1670,7 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1674,14 +1689,14 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
                   children: [
                     CircleAvatar(
                       radius: 50,
-                      backgroundColor: Colors.grey.shade200,
+                      backgroundColor: colorScheme.surfaceContainerLowest,
                       backgroundImage: _newAvatar != null
                           ? FileImage(_newAvatar!) as ImageProvider
                           : (widget.pet.profileImageUrl.isNotEmpty
                               ? NetworkImage(widget.pet.profileImageUrl) as ImageProvider
                               : null),
                       child: (_newAvatar == null && widget.pet.profileImageUrl.isEmpty)
-                          ? Icon(Icons.pets, size: 32, color: Colors.grey.shade400)
+                          ? Icon(Icons.pets, size: 32, color: colorScheme.onSurfaceVariant)
                           : null,
                     ),
                     Positioned(
@@ -1690,11 +1705,11 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFF8A65),
+                          color: colorScheme.tertiary,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(color: colorScheme.onTertiary, width: 2),
                         ),
-                        child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                        child: Icon(Icons.camera_alt, size: 16, color: colorScheme.onTertiary),
                       ),
                     ),
                   ],
@@ -1705,7 +1720,7 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
             Center(
               child: Text(
                 'Tap to change photo',
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
               ),
             ),
             const SizedBox(height: 24),
@@ -1716,14 +1731,14 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               controller: _nameController,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor: colorScheme.surfaceContainerLowest,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
               ),
             ),
@@ -1735,14 +1750,14 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               controller: _breedController,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor: colorScheme.surfaceContainerLowest,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
               ),
             ),
@@ -1756,14 +1771,14 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               maxLength: 500,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor: colorScheme.surfaceContainerLowest,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
               ),
             ),
@@ -1775,18 +1790,18 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
               child: FilledButton(
                 onPressed: _isSaving ? null : _save,
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF8A65),
+                  backgroundColor: colorScheme.tertiary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
                 child: _isSaving
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: colorScheme.onTertiary,
                         ),
                       )
                     : const Text(
@@ -1812,21 +1827,26 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
 class _SheetFieldLabel extends StatelessWidget {
   final IconData icon;
   final String label;
+  final ColorScheme colorScheme;
 
-  const _SheetFieldLabel({required this.icon, required this.label});
+  const _SheetFieldLabel({
+    required this.icon,
+    required this.label,
+    required this.colorScheme,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: const Color(0xFFFF8A65)),
+        Icon(icon, size: 16, color: colorScheme.tertiary),
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 13,
-            color: Color(0xFF2C3E50),
+            color: colorScheme.onSurface,
           ),
         ),
       ],
@@ -1841,6 +1861,7 @@ class _EmptyPetsCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 40),
       child: Column(
@@ -1852,22 +1873,22 @@ class _EmptyPetsCta extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFFFF8A65).withAlpha(51),
-                  const Color(0xFF4FC3F7).withAlpha(51),
+                  colorScheme.tertiary.withAlpha(51),
+                  colorScheme.secondary.withAlpha(51),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
             ),
-            child: const Icon(Icons.pets, size: 48, color: Color(0xFFFF8A65)),
+            child: Icon(Icons.pets, size: 48, color: colorScheme.tertiary),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'No Pets Yet!',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2C3E50),
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -1876,7 +1897,7 @@ class _EmptyPetsCta extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade600,
+              color: colorScheme.onSurfaceVariant,
               height: 1.5,
             ),
           ),
@@ -1889,8 +1910,8 @@ class _EmptyPetsCta extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFFF8A65),
-              foregroundColor: Colors.white,
+              backgroundColor: colorScheme.tertiary,
+              foregroundColor: colorScheme.onTertiary,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -1912,6 +1933,7 @@ class _OwnerCarouselAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasImage = user?.profileImageUrl != null && user!.profileImageUrl!.isNotEmpty;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(right: 12.0, bottom: 8),
@@ -1919,10 +1941,10 @@ class _OwnerCarouselAvatar extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD4845A).withValues(alpha: 0.15) : const Color(0xFF211F1B),
+          color: isSelected ? colorScheme.primary.withAlpha(38) : colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
+            color: isSelected ? colorScheme.primary : colorScheme.outline,
             width: 1.5,
           ),
         ),
@@ -1931,12 +1953,12 @@ class _OwnerCarouselAvatar extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 14,
-              backgroundColor: const Color(0xFFD4845A).withValues(alpha: 0.2),
+              backgroundColor: colorScheme.primary.withAlpha(51),
               backgroundImage: hasImage ? NetworkImage(user!.profileImageUrl!) : null,
               child: !hasImage
                   ? Text(
                       user?.initials ?? '?',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: Color(0xFFD4845A)),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: colorScheme.primary),
                     )
                   : null,
             ),
@@ -1964,16 +1986,18 @@ class _PetCarouselAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.only(right: 12.0, bottom: 8),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD4845A).withValues(alpha: 0.15) : const Color(0xFF211F1B),
+          color: isSelected ? colorScheme.primary.withAlpha(38) : colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
+            color: isSelected ? colorScheme.primary : colorScheme.outline,
             width: 1.5,
           ),
         ),
@@ -1985,7 +2009,7 @@ class _PetCarouselAvatar extends StatelessWidget {
               backgroundImage: pet.profileImageUrl.isNotEmpty
                   ? NetworkImage(pet.profileImageUrl)
                   : null,
-              backgroundColor: Colors.grey.shade800,
+              backgroundColor: colorScheme.surfaceContainer,
               child: pet.profileImageUrl.isEmpty
                   ? Text(pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10))
@@ -2014,15 +2038,17 @@ class _AddPetAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.only(right: 12.0, bottom: 8),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF211F1B),
+          color: colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: const Color(0xFFD4845A).withValues(alpha: 0.5),
+            color: colorScheme.primary.withAlpha(128),
             width: 1.5,
           ),
         ),
@@ -2031,15 +2057,15 @@ class _AddPetAvatar extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 14,
-              backgroundColor: const Color(0xFFD4845A).withValues(alpha: 0.1),
-              child: const Icon(Icons.add_rounded, color: Color(0xFFD4845A), size: 16),
+              backgroundColor: colorScheme.primary.withAlpha(26),
+              child: Icon(Icons.add_rounded, color: colorScheme.primary, size: 16),
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Add Pet',
               style: TextStyle(
                 fontSize: 13,
-                color: Color(0xFFD4845A),
+                color: colorScheme.primary,
                 fontWeight: FontWeight.w600,
               ),
             ),

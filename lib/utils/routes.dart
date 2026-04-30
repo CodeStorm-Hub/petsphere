@@ -22,6 +22,28 @@ import '../views/splash_screen.dart';
 import '../views/pet_care_screen.dart';
 import '../views/pet_care_onboarding_screen.dart';
 import '../views/story_viewer_screen.dart';
+import '../views/search_screen.dart';
+import '../views/gamification_screen.dart';
+import '../views/vet_booking_screen.dart';
+import '../views/emergency_care_screen.dart';
+import '../views/community_groups_screen.dart';
+import '../views/lost_and_found_screen.dart';
+import '../views/adoption_center_screen.dart';
+import '../views/pet_training_screen.dart';
+import '../views/pet_insurance_hub_screen.dart';
+import '../views/pet_expense_tracker_screen.dart';
+import '../views/pet_growth_chart_screen.dart';
+import '../views/pet_memorial_screen.dart';
+import '../views/pet_friendly_places_screen.dart';
+import '../views/pet_event_discovery_screen.dart';
+import '../views/pet_health_record_export_screen.dart';
+import '../views/pet_health_record_screen.dart';
+import '../views/pet_sitter_dashboard_screen.dart';
+import '../views/pet_nutrition_planner_screen.dart';
+import '../views/pet_social_timeline_screen.dart';
+import '../views/pet_breed_identifier_screen.dart';
+import '../views/pet_knowledge_base_screen.dart';
+import '../views/pet_gear_reviews_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authNotifier = ValueNotifier<AuthState>(ref.read(authProvider));
@@ -171,6 +193,94 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/search',
+        builder: (context, state) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: '/achievements',
+        builder: (context, state) => const GamificationScreen(),
+      ),
+      GoRoute(
+        path: '/vet_booking',
+        builder: (context, state) => const VetBookingScreen(),
+      ),
+      GoRoute(
+        path: '/emergency_care',
+        builder: (context, state) => const EmergencyCareScreen(),
+      ),
+      GoRoute(
+        path: '/community_groups',
+        builder: (context, state) => const CommunityGroupsScreen(),
+      ),
+      GoRoute(
+        path: '/lost_and_found',
+        builder: (context, state) => const LostAndFoundScreen(),
+      ),
+      GoRoute(
+        path: '/adoption_center',
+        builder: (context, state) => const AdoptionCenterScreen(),
+      ),
+      GoRoute(
+        path: '/training',
+        builder: (context, state) => const PetTrainingScreen(),
+      ),
+      GoRoute(
+        path: '/insurance',
+        builder: (context, state) => const PetInsuranceHubScreen(),
+      ),
+      GoRoute(
+        path: '/expenses',
+        builder: (context, state) => const PetExpenseTrackerScreen(),
+      ),
+      GoRoute(
+        path: '/growth_charts',
+        builder: (context, state) => const PetGrowthChartScreen(),
+      ),
+      GoRoute(
+        path: '/memorial',
+        builder: (context, state) => const PetMemorialScreen(),
+      ),
+      GoRoute(
+        path: '/pet_friendly_places',
+        builder: (context, state) => const PetFriendlyPlacesScreen(),
+      ),
+      GoRoute(
+        path: '/events',
+        builder: (context, state) => const PetEventDiscoveryScreen(),
+      ),
+      GoRoute(
+        path: '/medical_records',
+        builder: (context, state) => const PetHealthRecordScreen(),
+      ),
+      GoRoute(
+        path: '/export_records',
+        builder: (context, state) => const PetHealthRecordExportScreen(),
+      ),
+      GoRoute(
+        path: '/sitters',
+        builder: (context, state) => const PetSitterDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/nutrition_planner',
+        builder: (context, state) => const PetNutritionPlannerScreen(),
+      ),
+      GoRoute(
+        path: '/pet_timeline',
+        builder: (context, state) => const PetSocialTimelineScreen(),
+      ),
+      GoRoute(
+        path: '/breed_identifier',
+        builder: (context, state) => const PetBreedIdentifierScreen(),
+      ),
+      GoRoute(
+        path: '/knowledge_base',
+        builder: (context, state) => const PetKnowledgeBaseScreen(),
+      ),
+      GoRoute(
+        path: '/gear_reviews',
+        builder: (context, state) => const PetGearReviewsScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

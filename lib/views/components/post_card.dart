@@ -102,13 +102,13 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                 },
               ),
               ListTile(
-                leading: const Icon(
+                leading: Icon(
                   Icons.report_problem_outlined,
-                  color: Colors.redAccent,
+                  color: colorScheme.error,
                 ),
-                title: const Text(
+                title: Text(
                   'Report',
-                  style: TextStyle(color: Colors.redAccent),
+                  style: TextStyle(color: colorScheme.error),
                 ),
                 onTap: () {
                   Navigator.pop(context);
@@ -173,8 +173,8 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     return Container(
       margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1814),
-        border: Border.all(color: const Color(0xFF2E2B26)),
+        color: colorScheme.surfaceContainer,
+        border: Border.all(color: colorScheme.outline),
         borderRadius: BorderRadius.circular(20),
       ),
       child: ClipRRect(
@@ -303,10 +303,10 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                             scale: _showHeart ? 1.0 : 0.4,
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeOutBack,
-                            child: const Icon(
+                            child: Icon(
                               Icons.favorite,
                               size: 96,
-                              color: Colors.white,
+                              color: colorScheme.onPrimary,
                               shadows: [
                                 Shadow(
                                   color: Color(0x66000000),
@@ -424,13 +424,13 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFD4845A).withAlpha(24),
+                            color: colorScheme.primary.withAlpha(24),
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
                             '@$name',
-                            style: const TextStyle(
-                              color: Color(0xFFD4845A),
+                            style: TextStyle(
+                              color: colorScheme.primary,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
@@ -541,18 +541,18 @@ class _PostVideoPlayerState extends State<_PostVideoPlayer> {
           if (!_controller.value.isPlaying)
             Container(
               color: Colors.black26,
-              child: const Center(
+              child: Center(
                 child: Icon(
                   Icons.play_circle_fill_rounded,
                   size: 72,
-                  color: Colors.white,
+                  color: colorScheme.onPrimary,
                 ),
               ),
             ),
-          const Positioned(
+          Positioned(
             top: 12,
             right: 12,
-            child: Icon(Icons.videocam_rounded, color: Colors.white, size: 22),
+            child: Icon(Icons.videocam_rounded, color: colorScheme.onPrimary, size: 22),
           ),
         ],
       ),
@@ -566,17 +566,17 @@ class _MediaLoadingPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF211F1B), Color(0xFF2E2B26)],
+          colors: [Color(0xFF211F1B), Theme.of(context).colorScheme.outline],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
       ),
-      child: const Center(
+      child: Center(
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          color: Color(0xFFD4845A),
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
     );
@@ -591,9 +591,9 @@ class _MediaErrorPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF211F1B), Color(0xFF2E2B26)],
+          colors: [Color(0xFF211F1B), colorScheme.outline],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

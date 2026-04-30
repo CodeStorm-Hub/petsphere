@@ -18,11 +18,17 @@ class MarketplaceScreen extends ConsumerWidget {
     final firstName = (user?.name ?? '').split(' ').first;
     final greeting =
         firstName.isNotEmpty ? 'Welcome back, $firstName' : 'Pet Marketplace';
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pet Shop'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: 'Search Marketplace',
+            onPressed: () => context.push('/search'),
+          ),
           IconButton(
             icon: const Icon(Icons.receipt_long_outlined),
             tooltip: 'Order History',
@@ -41,14 +47,14 @@ class MarketplaceScreen extends ConsumerWidget {
                   top: 8,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
+                    decoration: BoxDecoration(
+                      color: colorScheme.error,
                       shape: BoxShape.circle,
                     ),
                     child: Text(
                       '${cartState.totalItemCount}',
-                      style: const TextStyle(
-                          color: Colors.white,
+                      style: TextStyle(
+                          color: colorScheme.onError,
                           fontSize: 10,
                           fontWeight: FontWeight.bold),
                     ),
@@ -95,37 +101,37 @@ class MarketplaceScreen extends ConsumerWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFD67657), Color(0xFFFFAD93)],
+                  gradient: LinearGradient(
+                    colors: [colorScheme.primary, colorScheme.secondary],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Icon(Icons.workspace_premium_rounded,
-                        color: Colors.white, size: 28),
-                    SizedBox(width: 12),
+                        color: colorScheme.onPrimary, size: 28),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Member Exclusive',
                               style: TextStyle(
-                                  color: Colors.white70,
+                                  color: colorScheme.onSurfaceVariant,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 0.8)),
                           Text('Summer Grooming Kit — Now 20% Off',
                               style: TextStyle(
-                                  color: Colors.white,
+                                  color: colorScheme.onPrimary,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w800)),
                         ],
                       ),
                     ),
-                    Icon(Icons.chevron_right, color: Colors.white),
+                    Icon(Icons.chevron_right, color: colorScheme.onPrimary),
                   ],
                 ),
               ),
@@ -183,6 +189,7 @@ class MarketplaceScreen extends ConsumerWidget {
   Widget _buildBody(
       BuildContext context, WidgetRef ref, MarketplaceState marketState) {
     final navSpace = bottomNavSpaceFor(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     if (marketState.isLoading && marketState.products.isEmpty) {
       return Padding(
@@ -201,20 +208,20 @@ class MarketplaceScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.error_outline,
-                    size: 64, color: Colors.grey.shade400),
+                    size: 64, color: colorScheme.surfaceContainerHighest),
                 const SizedBox(height: 16),
                 Text(
                   'Failed to load products',
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade600),
+                      color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   marketState.error!,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                  style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
                 ),
                 const SizedBox(height: 24),
                 OutlinedButton.icon(
@@ -238,10 +245,10 @@ class MarketplaceScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.storefront_outlined,
-                  size: 64, color: Colors.grey.shade300),
+                  size: 64, color: colorScheme.surfaceContainerLowest),
               const SizedBox(height: 16),
               Text('No products found',
-                  style: TextStyle(fontSize: 16, color: Colors.grey.shade500)),
+                  style: TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant)),
             ],
           ),
         ),
@@ -271,7 +278,7 @@ class MarketplaceScreen extends ConsumerWidget {
                 SnackBar(
                   content: Row(
                     children: [
-                      const Icon(Icons.check, color: Colors.white, size: 16),
+                      Icon(Icons.check, color: colorScheme.onPrimary, size: 16),
                       const SizedBox(width: 8),
                       Text('${product.name} added to cart'),
                     ],

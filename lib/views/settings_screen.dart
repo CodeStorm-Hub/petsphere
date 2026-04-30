@@ -120,7 +120,7 @@ class SettingsScreen extends ConsumerWidget {
               Navigator.pop(ctx);
               ref.read(authProvider.notifier).logout();
             },
-            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Sign Out'),
           ),
         ],

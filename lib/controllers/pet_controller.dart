@@ -61,10 +61,10 @@ class PetNotifier extends Notifier<PetState> {
     final authState = ref.read(authProvider);
     if (authState.status == AuthStatus.authenticated &&
         authState.user != null) {
-      _loadMyPets(authState.user!.id);
+      Future.microtask(() => _loadMyPets(authState.user!.id));
     }
 
-    return PetState();
+    return PetState(isLoading: true);
   }
 
   Future<void> _loadMyPets(String userId) async {

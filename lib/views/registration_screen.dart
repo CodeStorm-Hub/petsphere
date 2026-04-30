@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../controllers/auth_controller.dart';
 
+
 class RegistrationScreen extends ConsumerStatefulWidget {
   const RegistrationScreen({super.key});
 
@@ -70,38 +71,39 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final authState = ref.watch(authProvider);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+// //     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFEF8F3),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // Dot grid background
-          Positioned.fill(child: CustomPaint(painter: _RegDotGridPainter())),
-          // Ambient orbs
+          // Dark theme background (no light dot grid)
+          Container(color: theme.scaffoldBackgroundColor),
+          // Subtle ambient blur orbs using theme colors
           Positioned(
-            top: -40,
-            left: -40,
+            top: 80,
+            right: -50,
             child: Container(
-              width: 220,
-              height: 220,
+              width: 260,
+              height: 260,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFFAD04B).withAlpha(20),
+                color: colorScheme.primary.withAlpha(13),
               ),
             ),
           ),
           Positioned(
-            bottom: 60,
-            right: -50,
+            bottom: 80,
+            left: -50,
             child: Container(
-              width: 200,
-              height: 200,
+              width: 260,
+              height: 260,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFFFAD93).withAlpha(20),
+                color: colorScheme.secondary.withAlpha(13),
               ),
             ),
           ),
@@ -122,10 +124,10 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                       Expanded(
                         child: Center(
                           child: Text(
-                            'The Nurtured Atelier',
+                            'PetSphere',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF7A3820),
+                              color: colorScheme.onSurface,
                               letterSpacing: -0.3,
                             ),
                           ),
@@ -180,16 +182,16 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                                             child: CircleAvatar(
                                               radius: 14,
                                               backgroundColor: [
-                                                const Color(0xFFFFAD93),
+//                                                 const colorScheme.secondary,
                                                 const Color(0xFFFFE087),
-                                                const Color(0xFFE5FDE6),
+//                                                 const colorScheme.tertiaryContainer,
                                               ][i],
                                               child: Icon(Icons.pets,
                                                   size: 13,
                                                   color: [
-                                                    const Color(0xFF99472C),
+//                                                     const colorScheme.primary,
                                                     const Color(0xFF745C00),
-                                                    const Color(0xFF506453),
+//                                                     const colorScheme.onTertiary,
                                                   ][i]),
                                             ),
                                           )),
@@ -408,63 +410,18 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                               ],
                             ),
                             const SizedBox(height: 28),
-                            GestureDetector(
-                              onTap: authState.isLoading ? null : _register,
-                              child: Container(
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  gradient: authState.isLoading
-                                      ? null
-                                      : const LinearGradient(
-                                          colors: [
-                                            Color(0xFF99472C),
-                                            Color(0xFF8A3B21)
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
-                                  color: authState.isLoading
-                                      ? const Color(0xFFE8E1DA)
-                                      : null,
-                                  borderRadius: BorderRadius.circular(9999),
-                                  boxShadow: authState.isLoading
-                                      ? null
-                                      : [
-                                          BoxShadow(
-                                            color: const Color(0xFF99472C)
-                                                .withAlpha(60),
-                                            blurRadius: 24,
-                                            offset: const Offset(0, 8),
-                                          ),
-                                        ],
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    if (authState.isLoading) ...[
-                                      const SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(
-                                            color: Color(0xFF99472C),
-                                            strokeWidth: 2.5),
+                            ElevatedButton(
+                              onPressed: authState.isLoading ? null : _register,
+                              child: authState.isLoading
+                                  ? SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        color: colorScheme.onPrimary,
+                                        strokeWidth: 2.5,
                                       ),
-                                    ] else ...[
-                                      const Text(
-                                        'Create Account',
-                                        style: TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xFFFFF7F5),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      const Icon(Icons.arrow_forward,
-                                          color: Color(0xFFFFF7F5), size: 20),
-                                    ],
-                                  ],
-                                ),
-                              ),
+                                    )
+                                  : const Text('Create Account'),
                             ),
                             const SizedBox(height: 32),
                             Row(
@@ -498,23 +455,4 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
       ),
     );
   }
-}
-
-class _RegDotGridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    const dotColor = Color(0xFFE8E1DA);
-    const dotRadius = 0.5;
-    const spacing = 24.0;
-    final paint = Paint()..color = dotColor;
-
-    for (double x = spacing; x < size.width; x += spacing) {
-      for (double y = spacing; y < size.height; y += spacing) {
-        canvas.drawCircle(Offset(x, y), dotRadius, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_RegDotGridPainter oldDelegate) => false;
 }

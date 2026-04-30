@@ -42,7 +42,7 @@ class HomeScreen extends ConsumerWidget {
         titleSpacing: 16,
         title: Row(
           children: [
-            const Icon(Icons.pets, size: 22, color: Color(0xFF99472C)),
+            Icon(Icons.pets, size: 22, color: colorScheme.primary),
             const SizedBox(width: 8),
             Text(
               'Atelier',
@@ -56,6 +56,11 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: 'Search',
+            icon: const Icon(Icons.search),
+            onPressed: () => context.push('/search'),
+          ),
           IconButton(
             tooltip: 'New Post',
             icon: const Icon(Icons.add_box_outlined),
@@ -306,14 +311,17 @@ class HomeScreen extends ConsumerWidget {
             alignment: Alignment.bottomCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 560),
-              child: Container(
-                margin: const EdgeInsets.all(12),
-                padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1814),
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: const Color(0xFF2E2B26)),
-                ),
+              child: Builder(
+                builder: (context) {
+                  final colorScheme = Theme.of(context).colorScheme;
+                  return Container(
+                    margin: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(color: colorScheme.outline.withAlpha(80)),
+                    ),
                 child: SafeArea(
                   top: false,
                   child: SizedBox(
@@ -323,28 +331,43 @@ class HomeScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Center(
-                          child: Container(
-                            width: 44,
-                            height: 5,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF625E59),
-                              borderRadius: BorderRadius.circular(99),
-                            ),
+                          child: Builder(
+                            builder: (context) {
+                              final colorScheme = Theme.of(context).colorScheme;
+                              return Container(
+                                width: 44,
+                                height: 5,
+                                decoration: BoxDecoration(
+                                  color: colorScheme.outline.withAlpha(100),
+                                  borderRadius: BorderRadius.circular(99),
+                                ),
+                              );
+                            }
                           ),
                         ),
                         const SizedBox(height: 16),
-                        const Text(
-                          'Post story as',
-                          style: TextStyle(
-                            color: Color(0xFFF2EDE4),
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        Builder(
+                          builder: (context) {
+                            final colorScheme = Theme.of(context).colorScheme;
+                            return Text(
+                              'Post story as',
+                              style: TextStyle(
+                                color: colorScheme.onSurface,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            );
+                          }
                         ),
                         const SizedBox(height: 6),
-                        const Text(
-                          'Choose which pet should post this story.',
-                          style: TextStyle(color: Color(0xFFB8B0A4)),
+                        Builder(
+                          builder: (context) {
+                            final colorScheme = Theme.of(context).colorScheme;
+                            return Text(
+                              'Choose which pet should post this story.',
+                              style: TextStyle(color: colorScheme.onSurfaceVariant),
+                            );
+                          }
                         ),
                         const SizedBox(height: 12),
                         Expanded(
@@ -353,12 +376,13 @@ class HomeScreen extends ConsumerWidget {
                             itemBuilder: (context, index) {
                               final pet = myPets[index];
                               final isCurrent = pet.id == currentPetId;
+                              final colorScheme = Theme.of(context).colorScheme;
                               return ListTile(
                                 contentPadding: EdgeInsets.zero,
                                 onTap: () =>
                                     Navigator.pop(sheetContext, pet.id),
                                 leading: CircleAvatar(
-                                  backgroundColor: const Color(0xFF211F1B),
+                                  backgroundColor: colorScheme.surfaceContainerHighest,
                                   backgroundImage:
                                       pet.profileImageUrl.isNotEmpty
                                           ? NetworkImage(pet.profileImageUrl)
@@ -373,24 +397,24 @@ class HomeScreen extends ConsumerWidget {
                                 ),
                                 title: Text(
                                   pet.name,
-                                  style: const TextStyle(
-                                    color: Color(0xFFF2EDE4),
+                                  style: TextStyle(
+                                    color: colorScheme.onSurface,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
                                 subtitle: Text(
                                   pet.breed,
                                   style:
-                                      const TextStyle(color: Color(0xFFB8B0A4)),
+                                      TextStyle(color: colorScheme.onSurfaceVariant),
                                 ),
                                 trailing: isCurrent
-                                    ? const Icon(
+                                    ? Icon(
                                         Icons.check_circle,
-                                        color: Color(0xFFD4845A),
+                                        color: colorScheme.primary,
                                       )
-                                    : const Icon(
+                                    : Icon(
                                         Icons.chevron_right,
-                                        color: Color(0xFF8D867B),
+                                        color: colorScheme.outline.withAlpha(100),
                                       ),
                               );
                             },
@@ -400,7 +424,9 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-              ),
+              );
+            }
+          ),
             ),
           ),
         );
@@ -430,13 +456,14 @@ class HomeScreen extends ConsumerWidget {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
+        final colorScheme = Theme.of(sheetContext).colorScheme;
         return Container(
           margin: const EdgeInsets.all(12),
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1814),
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: const Color(0xFF2E2B26)),
+            border: Border.all(color: colorScheme.outline.withAlpha(80)),
           ),
           child: SafeArea(
             top: false,
@@ -449,36 +476,36 @@ class HomeScreen extends ConsumerWidget {
                     width: 44,
                     height: 5,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF625E59),
+                      color: colorScheme.outline.withAlpha(100),
                       borderRadius: BorderRadius.circular(99),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Your story',
                   style: TextStyle(
-                    color: Color(0xFFF2EDE4),
+                    color: colorScheme.onSurface,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   'Choose what you want to do.',
-                  style: TextStyle(color: Color(0xFFB8B0A4)),
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 12),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(
+                  leading: Icon(
                     Icons.visibility_outlined,
-                    color: Color(0xFFD4845A),
+                    color: colorScheme.primary,
                   ),
-                  title: const Text(
+                  title: Text(
                     'View story',
                     style: TextStyle(
-                      color: Color(0xFFF2EDE4),
+                      color: colorScheme.onSurface,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -486,14 +513,14 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(
+                  leading: Icon(
                     Icons.add_circle_outline,
-                    color: Color(0xFFD4845A),
+                    color: colorScheme.primary,
                   ),
-                  title: const Text(
+                  title: Text(
                     'Post story',
                     style: TextStyle(
-                      color: Color(0xFFF2EDE4),
+                      color: colorScheme.onSurface,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -656,12 +683,13 @@ class _CommentBottomSheetWidgetState
                     itemCount: post.comments.length,
                     itemBuilder: (context, index) {
                       final comment = post.comments[index];
+                      final commentColorScheme = Theme.of(context).colorScheme;
                       final colors = [
-                        const Color(0xFFE57373),
-                        const Color(0xFF4FC3F7),
-                        const Color(0xFF81C784),
-                        const Color(0xFFFF8A65),
-                        const Color(0xFFBA68C8),
+                        commentColorScheme.primary,
+                        commentColorScheme.secondary,
+                        commentColorScheme.tertiary,
+                        commentColorScheme.primary.withAlpha(200),
+                        commentColorScheme.secondary.withAlpha(200),
                       ];
                       final bg = colors[comment.petName.length % colors.length];
 
@@ -873,13 +901,13 @@ class _StoryItem extends StatelessWidget {
     switch (ringStyle) {
       case _RingStyle.gradient:
         ringed = Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
               colors: [
-                Color(0xFFD4845A),
-                Color(0xFFB86A44),
-                Color(0xFF4A7C59),
+                colorScheme.primary,
+                colorScheme.primary.withAlpha(180),
+                colorScheme.secondary,
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -1063,8 +1091,8 @@ class _NotificationIconButton extends ConsumerWidget {
                 constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                 child: Text(
                   unread > 99 ? '99+' : '$unread',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1110,8 +1138,8 @@ class _MessageIconButton extends ConsumerWidget {
                 constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                 child: Text(
                   unread > 99 ? '99+' : '$unread',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),

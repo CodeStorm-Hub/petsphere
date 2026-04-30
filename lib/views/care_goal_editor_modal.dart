@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../controllers/pet_care_controller.dart';
 import '../models/pet_care_log_model.dart';
-import '../theme/app_theme.dart';
 import '../utils/care_calculator.dart';
 
 class CareGoalEditorModal extends ConsumerStatefulWidget {
@@ -85,6 +84,7 @@ class _CareGoalEditorModalState extends ConsumerState<CareGoalEditorModal> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
@@ -118,7 +118,7 @@ class _CareGoalEditorModalState extends ConsumerState<CareGoalEditorModal> {
           const SizedBox(height: 8),
           Text(
             "Customize your pet's daily targets. Baselines are calculated using veterinary formulas based on their profile.",
-            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
           ),
           const SizedBox(height: 24),
 
@@ -135,7 +135,7 @@ class _CareGoalEditorModalState extends ConsumerState<CareGoalEditorModal> {
               min: 100,
               max: 3000,
               divisions: 290,
-              activeColor: _hasCalorieWarning ? Colors.red.shade400 : AppTheme.primaryAccent,
+              activeColor: _hasCalorieWarning ? colorScheme.error : colorScheme.primary,
               onChanged: (v) => setState(() => _calorieGoal = v),
             ),
           ),
@@ -153,7 +153,7 @@ class _CareGoalEditorModalState extends ConsumerState<CareGoalEditorModal> {
               min: 1,
               max: 20,
               divisions: 19,
-              activeColor: _hasWaterWarning ? Colors.red.shade400 : Colors.blue,
+              activeColor: _hasWaterWarning ? colorScheme.error : Colors.blue,
               onChanged: (v) => setState(() => _waterGoal = v),
             ),
           ),
@@ -171,7 +171,7 @@ class _CareGoalEditorModalState extends ConsumerState<CareGoalEditorModal> {
               min: 0,
               max: 240,
               divisions: 24,
-              activeColor: _hasExerciseWarning ? Colors.orange.shade400 : Colors.green,
+              activeColor: _hasExerciseWarning ? Colors.orange.shade400 : colorScheme.secondary,
               onChanged: (v) => setState(() => _exerciseGoal = v),
             ),
           ),
@@ -181,8 +181,8 @@ class _CareGoalEditorModalState extends ConsumerState<CareGoalEditorModal> {
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               backgroundColor: (_hasCalorieWarning || _hasWaterWarning)
-                  ? Colors.red.shade600
-                  : AppTheme.primaryAccent,
+                  ? colorScheme.error
+                  : colorScheme.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -214,14 +214,15 @@ class _CareGoalEditorModalState extends ConsumerState<CareGoalEditorModal> {
     required String? warning,
     required Widget slider,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.cardColor,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: warning != null ? Colors.red.shade200 : AppTheme.border,
+          color: warning != null ? colorScheme.error : colorScheme.outlineVariant,
           width: warning != null ? 2 : 1,
         ),
       ),
@@ -236,31 +237,31 @@ class _CareGoalEditorModalState extends ConsumerState<CareGoalEditorModal> {
                 value,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: warning != null ? Colors.red.shade600 : AppTheme.textPrimary,
+                  color: warning != null ? colorScheme.error : colorScheme.onSurface,
                   fontSize: 16,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 4),
-          Text(baseline, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+          Text(baseline, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
           slider,
           if (warning != null) ...[
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.red.shade50,
+                color: Theme.of(context).colorScheme.error,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.warning_amber, size: 18, color: Colors.red.shade700),
+                  Icon(Icons.warning_amber, size: 18, color: Theme.of(context).colorScheme.error),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       warning,
-                      style: TextStyle(color: Colors.red.shade800, fontSize: 12, height: 1.3),
+                      style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12, height: 1.3),
                     ),
                   ),
                 ],
