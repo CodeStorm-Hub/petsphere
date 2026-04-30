@@ -193,6 +193,7 @@ final authProvider = NotifierProvider<AuthNotifier, AuthState>(() {
   return AuthNotifier();
 });
 
-final publicUserProvider = FutureProvider.family<UserModel, String>((ref, userId) {
+final publicUserProvider =
+    FutureProvider.family<UserModel, String>((ref, userId) {
   return authRepository.fetchPublicProfile(userId);
 });

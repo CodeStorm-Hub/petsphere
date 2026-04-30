@@ -40,9 +40,13 @@ class ChatThreadTile extends ConsumerWidget {
         },
         child: CircleAvatar(
           radius: 28,
-          backgroundImage: otherPet.profileImageUrl.isNotEmpty ? NetworkImage(otherPet.profileImageUrl) : null,
+          backgroundImage: otherPet.profileImageUrl.isNotEmpty
+              ? NetworkImage(otherPet.profileImageUrl)
+              : null,
           backgroundColor: theme.colorScheme.surfaceContainerHighest,
-          child: otherPet.profileImageUrl.isEmpty ? Icon(Icons.pets, color: theme.colorScheme.onSurfaceVariant) : null,
+          child: otherPet.profileImageUrl.isEmpty
+              ? Icon(Icons.pets, color: theme.colorScheme.onSurfaceVariant)
+              : null,
         ),
       ),
       title: Text(
@@ -60,7 +64,9 @@ class ChatThreadTile extends ConsumerWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: hasUnread ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
+                color: hasUnread
+                    ? theme.colorScheme.onSurface
+                    : theme.colorScheme.onSurfaceVariant,
                 fontWeight: hasUnread ? FontWeight.w600 : FontWeight.normal,
               ),
             ),

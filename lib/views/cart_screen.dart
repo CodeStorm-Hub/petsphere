@@ -26,7 +26,8 @@ class CartScreen extends ConsumerWidget {
             ),
             backgroundColor: const Color(0xFF81C784),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
         context.push('/orders');
@@ -37,7 +38,8 @@ class CartScreen extends ConsumerWidget {
             content: Text(next.error!),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -61,10 +63,14 @@ class CartScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey.shade300),
+                  Icon(Icons.shopping_cart_outlined,
+                      size: 80, color: Colors.grey.shade300),
                   const SizedBox(height: 16),
                   const Text('Your cart is empty',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey)),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey)),
                   const SizedBox(height: 8),
                   Text('Browse the shop to add items',
                       style: TextStyle(color: Colors.grey.shade400)),
@@ -93,7 +99,8 @@ class CartScreen extends ConsumerWidget {
                   itemCount: cartState.totalItemCount,
                   isCheckingOut: cartState.isCheckingOut,
                   currencyFormat: currencyFormat,
-                  onCheckout: () => ref.read(cartProvider.notifier).placeOrder(),
+                  onCheckout: () =>
+                      ref.read(cartProvider.notifier).placeOrder(),
                 ),
               ],
             ),
@@ -153,7 +160,9 @@ class _CheckoutBar extends StatelessWidget {
                   const SizedBox(height: 10),
                   _SummaryRow(
                     label: 'Shipping',
-                    value: isFreeShipping ? 'FREE' : '\$${(25 - total).toStringAsFixed(2)} away',
+                    value: isFreeShipping
+                        ? 'FREE'
+                        : '\$${(25 - total).toStringAsFixed(2)} away',
                     valueColor: const Color(0xFF506453),
                     valueWeight: FontWeight.w700,
                   ),
@@ -220,8 +229,10 @@ class _CheckoutBar extends StatelessWidget {
                   children: [
                     if (isCheckingOut) ...[
                       const SizedBox(
-                        width: 22, height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2.5, color: Color(0xFF99472C)),
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2.5, color: Color(0xFF99472C)),
                       ),
                     ] else ...[
                       const Text(
@@ -233,7 +244,8 @@ class _CheckoutBar extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                      const Icon(Icons.arrow_forward,
+                          color: Colors.white, size: 20),
                     ],
                   ],
                 ),

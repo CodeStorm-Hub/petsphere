@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'auth_controller.dart';
 import 'feed_controller.dart';
+import 'health_controller.dart';
 import 'marketplace_controller.dart';
 import 'notification_controller.dart';
 import 'pet_care_controller.dart';
@@ -46,14 +47,15 @@ final bootstrapProvider = Provider<void>((ref) {
         lastHydratedUserId != null && lastHydratedUserId != userId;
     final isSameUserRefresh = lastHydratedUserId == userId;
     lastHydratedUserId = userId;
-    debugPrint(
-        '[bootstrap] hydrating data for user=$userId '
+    debugPrint('[bootstrap] hydrating data for user=$userId '
         '(switch=$isAccountSwitch, sameUser=$isSameUserRefresh)');
 
     ref.read(feedProvider.notifier).refresh();
     ref.read(marketplaceProvider.notifier).refresh();
     ref.read(petProvider.notifier).reload();
     ref.read(notificationProvider.notifier).refresh();
+    ref.read(petCareProvider.notifier).refresh();
+    ref.read(healthProvider.notifier).refresh();
   }
 
   ref.listen<AuthState>(authProvider, (prev, next) {

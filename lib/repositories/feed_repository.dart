@@ -11,7 +11,8 @@ class FeedRepository {
   Future<List<PostModel>> fetchPosts() async {
     final data = await supabase
         .from('posts')
-        .select('*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
+        .select(
+            '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
         .order('created_at', ascending: false)
         .limit(50);
 
@@ -34,10 +35,8 @@ class FeedRepository {
 
       if (userId.isEmpty) return stories;
 
-      final myPetsData = await supabase
-          .from('pets')
-          .select('id')
-          .eq('user_id', userId);
+      final myPetsData =
+          await supabase.from('pets').select('id').eq('user_id', userId);
       final myPetIds = (myPetsData as List<dynamic>)
           .map((row) => (row as Map<String, dynamic>)['id'] as String)
           .toSet();
@@ -87,7 +86,8 @@ class FeedRepository {
   Future<PostModel?> fetchPostById(String postId) async {
     final data = await supabase
         .from('posts')
-        .select('*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
+        .select(
+            '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
         .eq('id', postId)
         .maybeSingle();
 
@@ -119,7 +119,8 @@ class FeedRepository {
       final data = await supabase
           .from('posts')
           .insert(payload)
-          .select('*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
+          .select(
+              '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
           .single();
 
       return PostModel.fromJson(data);
@@ -132,7 +133,8 @@ class FeedRepository {
             'media_url': mediaUrl,
             'caption': caption,
           })
-          .select('*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
+          .select(
+              '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
           .single();
       return PostModel.fromJson(fallbackData);
     }
@@ -143,6 +145,11 @@ class FeedRepository {
     required String mediaUrl,
     String caption = '',
   }) async {
+    // Explicitly set expires_at to now + 24 h so the expiry window is always
+    // enforced even if the DB default were ever changed.
+    final expiresAt =
+        DateTime.now().toUtc().add(const Duration(hours: 24)).toIso8601String();
+
     try {
       final data = await supabase
           .from('stories')
@@ -150,6 +157,7 @@ class FeedRepository {
             'pet_id': petId,
             'media_url': mediaUrl,
             'caption': caption,
+            'expires_at': expiresAt,
           })
           .select('*, pets!stories_pet_id_fkey(*)')
           .single();
@@ -302,7 +310,8 @@ class FeedRepository {
   // Real-time: subscribe to like changes (insert/delete)
   // -------------------------------------------------------------------------
   RealtimeChannel subscribeToLikes({
-    required void Function(String postId, String petId, bool isInsert) onLikeChange,
+    required void Function(String postId, String petId, bool isInsert)
+        onLikeChange,
   }) {
     return supabase
         .channel('feed-likes-realtime')

@@ -3,11 +3,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/care_badge_model.dart';
 import '../models/pet_care_log_model.dart';
 import '../models/pet_health_models.dart';
 import '../models/pet_model.dart';
 import '../repositories/pet_care_repository.dart';
 import '../utils/care_cache.dart';
+import '../utils/care_gamification_logic.dart';
+import '../utils/care_personalization.dart';
 export '../models/pet_health_models.dart' show PetSymptom;
 import 'pet_controller.dart';
 
@@ -23,6 +26,9 @@ class PetCareState {
   final List<PetVetAppointment> upcomingAppointments;
   final List<PetVaccination> vaccinations;
   final List<PetSymptom> symptoms;
+  final PetCareOnboarding? onboarding;
+  final PetCareGamification? gamification;
+  final List<PetCareBadgeUnlock> unlocks;
   final bool isLoading;
   final String? error;
   final String? activePetId;
@@ -33,6 +39,9 @@ class PetCareState {
     this.upcomingAppointments = const [],
     this.vaccinations = const [],
     this.symptoms = const [],
+    this.onboarding,
+    this.gamification,
+    this.unlocks = const [],
     this.isLoading = false,
     this.error,
     this.activePetId,
@@ -79,6 +88,9 @@ class PetCareState {
     List<PetVetAppointment>? upcomingAppointments,
     List<PetVaccination>? vaccinations,
     List<PetSymptom>? symptoms,
+    PetCareOnboarding? onboarding,
+    PetCareGamification? gamification,
+    List<PetCareBadgeUnlock>? unlocks,
     bool? isLoading,
     String? error,
     bool clearError = false,
@@ -91,10 +103,12 @@ class PetCareState {
       upcomingAppointments: upcomingAppointments ?? this.upcomingAppointments,
       vaccinations: vaccinations ?? this.vaccinations,
       symptoms: symptoms ?? this.symptoms,
+      onboarding: onboarding ?? this.onboarding,
+      gamification: gamification ?? this.gamification,
+      unlocks: unlocks ?? this.unlocks,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
-      activePetId:
-          clearActivePet ? null : (activePetId ?? this.activePetId),
+      activePetId: clearActivePet ? null : (activePetId ?? this.activePetId),
     );
   }
 }
@@ -158,12 +172,9 @@ class PetCareNotifier extends Notifier<PetCareState> {
     if (cachedLogs.isNotEmpty || cachedWeights.isNotEmpty) {
       state = state.copyWith(
         activePetId: pet.id,
-        recentLogs: cachedLogs.isNotEmpty
-            ? cachedLogs
-            : state.recentLogs,
-        recentWeights: cachedWeights.isNotEmpty
-            ? cachedWeights
-            : state.recentWeights,
+        recentLogs: cachedLogs.isNotEmpty ? cachedLogs : state.recentLogs,
+        recentWeights:
+            cachedWeights.isNotEmpty ? cachedWeights : state.recentWeights,
         isLoading: true,
         clearError: true,
       );
@@ -188,12 +199,17 @@ class PetCareNotifier extends Notifier<PetCareState> {
         petCareRepository.fetchUpcomingAppointments(pet.id),
         petCareRepository.fetchVaccinations(pet.id),
         petCareRepository.fetchSymptoms(pet.id),
+        petCareRepository.fetchOnboarding(pet.id),
+        petCareRepository.fetchGamification(pet.id),
+        petCareRepository.fetchUnlocksForPet(pet.id),
       ]);
 
       if (gen != _loadGen) return;
 
-      final freshLogs = results[0] as List<PetCareLog>;
+      var freshLogs = results[0] as List<PetCareLog>;
       final freshWeights = results[1] as List<PetWeightLog>;
+      final onboarding = results[5] as PetCareOnboarding?;
+      freshLogs = applyOnboardingToCareLogs(freshLogs, onboarding);
 
       // ── 3. Write back to cache ───────────────────────────────────────────
       unawaited(CareCache.saveLogs(pet.id, freshLogs));
@@ -205,8 +221,12 @@ class PetCareNotifier extends Notifier<PetCareState> {
         upcomingAppointments: results[2] as List<PetVetAppointment>,
         vaccinations: results[3] as List<PetVaccination>,
         symptoms: results[4] as List<PetSymptom>,
+        onboarding: onboarding,
+        gamification: results[6] as PetCareGamification?,
+        unlocks: results[7] as List<PetCareBadgeUnlock>,
         isLoading: false,
       );
+      unawaited(_syncCareRewards(pet));
     } catch (e, st) {
       if (gen != _loadGen) return;
       debugPrint('[pet_care] load failed: $e\n$st');
@@ -223,6 +243,22 @@ class PetCareNotifier extends Notifier<PetCareState> {
   // -------------------------------------------------------------------------
   // Mutations — apply optimistically then persist with debounce
   // -------------------------------------------------------------------------
+
+  void updateGoals({
+    int? calorieGoal,
+    int? waterGoalCups,
+    int? exerciseGoalMinutes,
+  }) {
+    final today = state.todayLog;
+    if (today == null) return;
+    _replaceToday(today.copyWith(
+      dailyCalorieGoal: calorieGoal,
+      dailyWaterGoalCups: waterGoalCups,
+      dailyExerciseGoalMinutes: exerciseGoalMinutes,
+    ));
+    _scheduleSave();
+  }
+
   void toggleTask(String taskKey) {
     final today = state.todayLog;
     if (today == null) return;
@@ -265,6 +301,33 @@ class PetCareNotifier extends Notifier<PetCareState> {
     _scheduleSave();
   }
 
+  /// Sets whether the optional snack/lunch meal was fed.
+  void setSnackFed(bool fed) {
+    final today = state.todayLog;
+    if (today == null || today.snackFed == fed) return;
+    _replaceToday(today.copyWith(snackFed: fed));
+    _scheduleSave();
+  }
+
+  /// Updates treat count and estimated treat calories.
+  void setTreats({required int count, required int kcal}) {
+    final today = state.todayLog;
+    if (today == null) return;
+    _replaceToday(today.copyWith(treatsCount: count, treatsKcal: kcal));
+    _scheduleSave();
+  }
+
+  /// Increments treat count by 1 and adds estimated kcal per treat.
+  void addTreat({int kcalPerTreat = 30}) {
+    final today = state.todayLog;
+    if (today == null) return;
+    _replaceToday(today.copyWith(
+      treatsCount: today.treatsCount + 1,
+      treatsKcal: today.treatsKcal + kcalPerTreat,
+    ));
+    _scheduleSave();
+  }
+
   /// Saves a new symptom observation.
   Future<void> logSymptom({
     required String symptomType,
@@ -304,14 +367,24 @@ class PetCareNotifier extends Notifier<PetCareState> {
   }
 
   /// Immediately persists today's weight and refreshes the chart series.
-  Future<void> logWeight(double weightLbs) async {
+  Future<void> logWeight({
+    required double weight,
+    String? notes,
+    int? bcsScore,
+  }) async {
     final petId = state.activePetId;
     if (petId == null) return;
     final today = DateTime.now();
 
     try {
       await petCareRepository.upsertWeight(
-        PetWeightLog(petId: petId, logDate: today, weightLbs: weightLbs),
+        PetWeightLog(
+          petId: petId,
+          logDate: today,
+          weightLbs: weight,
+          notes: notes,
+          bcsScore: bcsScore,
+        ),
       );
       final fresh = await petCareRepository.fetchRecentWeights(
         petId,
@@ -351,9 +424,46 @@ class PetCareNotifier extends Notifier<PetCareState> {
           recentLogs: [logs.first.copyWith(id: saved.id), ...logs.skip(1)],
         );
       }
+      final pet = ref.read(activePetProvider);
+      if (pet != null) unawaited(_syncCareRewards(pet));
     } catch (e) {
       debugPrint('[pet_care] save failed: $e');
       state = state.copyWith(error: e.toString());
+    }
+  }
+
+  Future<void> _syncCareRewards(PetModel pet) async {
+    if (state.activePetId != pet.id) return;
+    try {
+      final next = CareGamificationLogic.buildNext(
+        current: state.gamification,
+        recentLogs: state.recentLogs,
+        streakDays: state.streakDays,
+        userId: pet.userId,
+        petId: pet.id,
+      );
+      final saved = await petCareRepository.upsertGamification(next);
+      final toUnlock = CareGamificationLogic.badgeSlugsToUnlock(
+        recentLogs: state.recentLogs,
+        streakDays: state.streakDays,
+        next: saved,
+      );
+      for (final slug in toUnlock) {
+        await petCareRepository.insertUnlockIfNew(
+          userId: pet.userId,
+          petId: pet.id,
+          badgeSlug: slug,
+        );
+      }
+      final fresh = await petCareRepository.fetchUnlocksForPet(pet.id);
+      if (state.activePetId == pet.id) {
+        state = state.copyWith(
+          gamification: saved,
+          unlocks: fresh,
+        );
+      }
+    } catch (e) {
+      debugPrint('[pet_care] _syncCareRewards: $e');
     }
   }
 }
@@ -368,4 +478,24 @@ final petCareProvider =
 /// when no pet is selected).
 final todayCareLogProvider = Provider<PetCareLog?>((ref) {
   return ref.watch(petCareProvider).todayLog;
+});
+
+/// Small catalog; safe to refetch (cached in Riverpod as long as provider lives).
+final careBadgeDefinitionsProvider =
+    FutureProvider<List<CareBadgeDefinition>>((ref) {
+  return petCareRepository.fetchBadgeDefinitions();
+});
+
+/// Badges the user chose to show publicly ([profiles.public_care_badge_slugs]).
+final publicCareBadgeShowcaseProvider =
+    FutureProvider.family<List<CareBadgeDefinition>, String>(
+        (ref, userId) async {
+  final unlocks = await petCareRepository.fetchPublicShowcaseUnlocks(userId);
+  if (unlocks.isEmpty) return const [];
+  final defs = await ref.watch(careBadgeDefinitionsProvider.future);
+  final bySlug = {for (final d in defs) d.slug: d};
+  return [
+    for (final u in unlocks)
+      if (bySlug.containsKey(u.badgeSlug)) bySlug[u.badgeSlug]!,
+  ];
 });

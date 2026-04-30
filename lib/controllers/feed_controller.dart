@@ -123,7 +123,9 @@ class FeedNotifier extends Notifier<FeedState> {
       final userId = ref.read(authProvider).user?.id;
       final results = await Future.wait([
         feedRepository.fetchPosts(),
-        userId == null ? Future.value(<StoryModel>[]) : feedRepository.fetchStories(userId),
+        userId == null
+            ? Future.value(<StoryModel>[])
+            : feedRepository.fetchStories(userId),
       ]);
       state = state.copyWith(
         posts: results[0] as List<PostModel>,
@@ -158,7 +160,7 @@ class FeedNotifier extends Notifier<FeedState> {
     try {
       final updatedLikes =
           await feedRepository.toggleLike(postId, currentPetId);
-      
+
       // Notify the post owner if it's a new like (not an unlike)
       if (updatedLikes.contains(currentPetId)) {
         try {
@@ -274,11 +276,10 @@ class FeedNotifier extends Notifier<FeedState> {
       state = state.copyWith(
         posts: state.posts.map((post) {
           if (post.id != postId) return post;
-          return post.copyWith(
-              comments: [...post.comments, newComment]);
+          return post.copyWith(comments: [...post.comments, newComment]);
         }).toList(),
       );
-      
+
       // Notify the post owner
       try {
         final post = state.posts.firstWhere((p) => p.id == postId);

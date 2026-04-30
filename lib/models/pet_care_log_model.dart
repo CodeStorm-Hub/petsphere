@@ -111,6 +111,15 @@ class PetCareLog {
   final String breakfastFood;
   final String dinnerFood;
 
+  // Snack / lunch (optional third meal — useful for puppies/kittens)
+  final bool snackFed;
+  final int snackKcal;
+  final String snackFood;
+
+  // Treat tracking
+  final int treatsCount;
+  final int treatsKcal;
+
   // Water
   final int waterCups;
 
@@ -121,6 +130,7 @@ class PetCareLog {
   // Goals snapshot
   final int dailyCalorieGoal;
   final int dailyWaterGoalCups;
+  final int dailyExerciseGoalMinutes;
 
   const PetCareLog({
     this.id,
@@ -132,21 +142,43 @@ class PetCareLog {
     this.dinnerKcal = 250,
     this.breakfastFood = 'Dry Kibble - 1 cup',
     this.dinnerFood = 'Wet Food - 1/2 can',
+    this.snackFed = false,
+    this.snackKcal = 0,
+    this.snackFood = '',
+    this.treatsCount = 0,
+    this.treatsKcal = 0,
     this.waterCups = 0,
     this.tasks = const [],
     this.mood,
     this.dailyCalorieGoal = 500,
     this.dailyWaterGoalCups = 8,
+    this.dailyExerciseGoalMinutes = 30,
   });
 
   // -------------------------------------------------------------------------
   // Derived helpers used by the UI
   // -------------------------------------------------------------------------
   int get consumedKcal =>
-      (breakfastFed ? breakfastKcal : 0) + (dinnerFed ? dinnerKcal : 0);
+      (breakfastFed ? breakfastKcal : 0) +
+      (dinnerFed ? dinnerKcal : 0) +
+      (snackFed ? snackKcal : 0) +
+      treatsKcal;
 
-  double get caloriesProgress =>
-      dailyCalorieGoal == 0 ? 0 : (consumedKcal / dailyCalorieGoal).clamp(0.0, 1.0);
+  /// Calories from meals only (excluding treats).
+  int get mealKcal =>
+      (breakfastFed ? breakfastKcal : 0) +
+      (dinnerFed ? dinnerKcal : 0) +
+      (snackFed ? snackKcal : 0);
+
+  /// Maximum treat calories (10% of daily goal).
+  int get maxTreatKcal => (dailyCalorieGoal * 0.1).round();
+
+  /// Whether treat calories exceed the recommended 10% budget.
+  bool get treatsOverBudget => treatsKcal > maxTreatKcal;
+
+  double get caloriesProgress => dailyCalorieGoal == 0
+      ? 0
+      : (consumedKcal / dailyCalorieGoal).clamp(0.0, 1.0);
 
   double get waterProgress => dailyWaterGoalCups == 0
       ? 0
@@ -154,8 +186,7 @@ class PetCareLog {
 
   int get completedTasks => tasks.where((t) => t.done).length;
 
-  double get tasksProgress =>
-      tasks.isEmpty ? 0 : completedTasks / tasks.length;
+  double get tasksProgress => tasks.isEmpty ? 0 : completedTasks / tasks.length;
 
   /// "Counts toward the streak" if every checklist task is done OR the
   /// owner has at least toggled both meals + half the water goal.
@@ -176,12 +207,18 @@ class PetCareLog {
     int? dinnerKcal,
     String? breakfastFood,
     String? dinnerFood,
+    bool? snackFed,
+    int? snackKcal,
+    String? snackFood,
+    int? treatsCount,
+    int? treatsKcal,
     int? waterCups,
     List<DailyTask>? tasks,
     String? mood,
     bool clearMood = false,
     int? dailyCalorieGoal,
     int? dailyWaterGoalCups,
+    int? dailyExerciseGoalMinutes,
   }) {
     return PetCareLog(
       id: id ?? this.id,
@@ -193,11 +230,17 @@ class PetCareLog {
       dinnerKcal: dinnerKcal ?? this.dinnerKcal,
       breakfastFood: breakfastFood ?? this.breakfastFood,
       dinnerFood: dinnerFood ?? this.dinnerFood,
+      snackFed: snackFed ?? this.snackFed,
+      snackKcal: snackKcal ?? this.snackKcal,
+      snackFood: snackFood ?? this.snackFood,
+      treatsCount: treatsCount ?? this.treatsCount,
+      treatsKcal: treatsKcal ?? this.treatsKcal,
       waterCups: waterCups ?? this.waterCups,
       tasks: tasks ?? this.tasks,
       mood: clearMood ? null : (mood ?? this.mood),
       dailyCalorieGoal: dailyCalorieGoal ?? this.dailyCalorieGoal,
       dailyWaterGoalCups: dailyWaterGoalCups ?? this.dailyWaterGoalCups,
+      dailyExerciseGoalMinutes: dailyExerciseGoalMinutes ?? this.dailyExerciseGoalMinutes,
     );
   }
 
@@ -223,12 +266,17 @@ class PetCareLog {
       dinnerKcal: (json['dinner_kcal'] as num?)?.toInt() ?? 250,
       breakfastFood: json['breakfast_food'] as String? ?? 'Dry Kibble - 1 cup',
       dinnerFood: json['dinner_food'] as String? ?? 'Wet Food - 1/2 can',
+      snackFed: json['snack_fed'] as bool? ?? false,
+      snackKcal: (json['snack_kcal'] as num?)?.toInt() ?? 0,
+      snackFood: json['snack_food'] as String? ?? '',
+      treatsCount: (json['treats_count'] as num?)?.toInt() ?? 0,
+      treatsKcal: (json['treats_kcal'] as num?)?.toInt() ?? 0,
       waterCups: (json['water_cups'] as num?)?.toInt() ?? 0,
       tasks: tasks.isEmpty ? List.of(DailyTask.defaults) : tasks,
       mood: json['mood'] as String?,
       dailyCalorieGoal: (json['daily_calorie_goal'] as num?)?.toInt() ?? 500,
-      dailyWaterGoalCups:
-          (json['daily_water_goal_cups'] as num?)?.toInt() ?? 8,
+      dailyWaterGoalCups: (json['daily_water_goal_cups'] as num?)?.toInt() ?? 8,
+      dailyExerciseGoalMinutes: (json['daily_exercise_goal_minutes'] as num?)?.toInt() ?? 30,
     );
   }
 
@@ -244,11 +292,17 @@ class PetCareLog {
         'dinner_kcal': dinnerKcal,
         'breakfast_food': breakfastFood,
         'dinner_food': dinnerFood,
+        'snack_fed': snackFed,
+        'snack_kcal': snackKcal,
+        'snack_food': snackFood,
+        'treats_count': treatsCount,
+        'treats_kcal': treatsKcal,
         'water_cups': waterCups,
         'tasks': tasks.map((t) => t.toJson()).toList(),
         'mood': mood,
         'daily_calorie_goal': dailyCalorieGoal,
         'daily_water_goal_cups': dailyWaterGoalCups,
+        'daily_exercise_goal_minutes': dailyExerciseGoalMinutes,
       };
 
   /// Builds an empty log for the given pet/day, copying the goal snapshot
@@ -258,13 +312,23 @@ class PetCareLog {
     required DateTime logDate,
     int dailyCalorieGoal = 500,
     int dailyWaterGoalCups = 8,
+    int dailyExerciseGoalMinutes = 30,
+    List<DailyTask>? taskTemplate,
+    int breakfastKcal = 250,
+    int dinnerKcal = 250,
   }) {
+    final t = taskTemplate;
     return PetCareLog(
       petId: petId,
       logDate: DateTime(logDate.year, logDate.month, logDate.day),
       dailyCalorieGoal: dailyCalorieGoal,
       dailyWaterGoalCups: dailyWaterGoalCups,
-      tasks: List.of(DailyTask.defaults),
+      dailyExerciseGoalMinutes: dailyExerciseGoalMinutes,
+      breakfastKcal: breakfastKcal,
+      dinnerKcal: dinnerKcal,
+      tasks: t != null && t.isNotEmpty
+          ? [for (final x in t) x]
+          : List.of(DailyTask.defaults),
     );
   }
 }

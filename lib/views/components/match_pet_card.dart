@@ -48,7 +48,8 @@ class MatchPetCard extends StatelessWidget {
                     fit: BoxFit.cover,
                     errorBuilder: (ctx, err, stack) => Container(
                       color: colorScheme.surfaceContainerHighest,
-                      child: Icon(Icons.pets, size: 40, color: colorScheme.onSurfaceVariant),
+                      child: Icon(Icons.pets,
+                          size: 40, color: colorScheme.onSurfaceVariant),
                     ),
                   ),
                   // Verified badge overlay
@@ -61,9 +62,14 @@ class MatchPetCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
-                          boxShadow: [BoxShadow(color: Colors.black.withAlpha(30), blurRadius: 4)],
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withAlpha(30),
+                                blurRadius: 4)
+                          ],
                         ),
-                        child: const Icon(Icons.verified, size: 14, color: Color(0xFF1DA1F2)),
+                        child: const Icon(Icons.verified,
+                            size: 14, color: Color(0xFF1DA1F2)),
                       ),
                     ),
                   // Stat badges at bottom
@@ -73,11 +79,23 @@ class MatchPetCard extends StatelessWidget {
                     right: 6,
                     child: Row(
                       children: [
-                        _StatBadge(icon: Icons.bolt, value: energy, label: 'Energy', color: const Color(0xFFFFB300)),
+                        _StatBadge(
+                            icon: Icons.bolt,
+                            value: energy,
+                            label: 'Energy',
+                            color: const Color(0xFFFFB300)),
                         const SizedBox(width: 4),
-                        _StatBadge(icon: Icons.favorite, value: health, label: 'Health', color: const Color(0xFF81C784)),
+                        _StatBadge(
+                            icon: Icons.favorite,
+                            value: health,
+                            label: 'Health',
+                            color: const Color(0xFF81C784)),
                         const SizedBox(width: 4),
-                        _StatBadge(icon: Icons.group, value: social, label: 'Social', color: const Color(0xFF4FC3F7)),
+                        _StatBadge(
+                            icon: Icons.group,
+                            value: social,
+                            label: 'Social',
+                            color: const Color(0xFF4FC3F7)),
                       ],
                     ),
                   ),
@@ -96,11 +114,13 @@ class MatchPetCard extends StatelessWidget {
                           pet.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13),
                         ),
                       ),
                       if (pet.isVerified)
-                        const Icon(Icons.verified, size: 14, color: Color(0xFF1DA1F2)),
+                        const Icon(Icons.verified,
+                            size: 14, color: Color(0xFF1DA1F2)),
                     ],
                   ),
                   const SizedBox(height: 2),
@@ -108,14 +128,16 @@ class MatchPetCard extends StatelessWidget {
                     pet.breed,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant),
+                    style: TextStyle(
+                        fontSize: 11, color: colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: colorScheme.secondary.withAlpha(36),
                           borderRadius: BorderRadius.circular(4),
@@ -129,7 +151,8 @@ class MatchPetCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Icon(Icons.favorite_border, size: 16, color: colorScheme.onSurfaceVariant),
+                      Icon(Icons.favorite_border,
+                          size: 16, color: colorScheme.onSurfaceVariant),
                     ],
                   ),
                 ],
@@ -148,7 +171,11 @@ class _StatBadge extends StatelessWidget {
   final String label;
   final Color color;
 
-  const _StatBadge({required this.icon, required this.value, required this.label, required this.color});
+  const _StatBadge(
+      {required this.icon,
+      required this.value,
+      required this.label,
+      required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +194,8 @@ class _StatBadge extends StatelessWidget {
             const SizedBox(width: 2),
             Text(
               '★' * value,
-              style: TextStyle(fontSize: 8, color: color, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 8, color: color, fontWeight: FontWeight.bold),
               maxLines: 1,
               overflow: TextOverflow.clip,
             ),

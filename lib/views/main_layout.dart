@@ -83,7 +83,6 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
   }
 }
 
-
 class _GlassNavBar extends StatelessWidget {
   final int currentIndex;
   final String profileImageUrl;
@@ -128,7 +127,8 @@ class _GlassNavBar extends StatelessWidget {
               final isActive = currentIndex == i;
               final isCenter = i == 2;
               final isProfile = i == 4;
-              final iconColor = isActive ? colorScheme.primary : const Color(0xFFB8B0A4);
+              final iconColor =
+                  isActive ? colorScheme.primary : const Color(0xFFB8B0A4);
 
               if (isCenter) {
                 return GestureDetector(
@@ -196,8 +196,7 @@ class _ProfileTabAvatar extends StatelessWidget {
     final avatar = CircleAvatar(
       radius: 12,
       backgroundColor: colorScheme.surfaceContainerHighest,
-      backgroundImage:
-          imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+      backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
       child: imageUrl.isEmpty
           ? Icon(Icons.person, size: 16, color: colorScheme.onSurfaceVariant)
           : null,

@@ -9,9 +9,9 @@ import '../controllers/pet_controller.dart';
 /// - If the pet belongs to the current signed-in user, switch the bottom-tab
 ///   profile screen to that pet via [profilePetNavigationProvider] so the
 ///   user lands on their own owner-managed profile.
-/// - Otherwise (it's a different user's pet), push the standalone
-///   [MatchPetProfileScreen] at `/pet/:id` so the user can view that pet's
-///   public profile, follow, message, etc.
+/// - Otherwise (it's a different user's pet), push [PetProfileScreen] in
+///   visitor mode at `/pet/:id` (same layout as My Account, with follow /
+///   message / share).
 ///
 /// Pass [petUserId] when the caller already knows the owning user's ID
 /// (e.g. from a [PostModel.pet]), to avoid an extra round-trip.

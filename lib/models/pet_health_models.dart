@@ -29,9 +29,9 @@ class PetSymptom {
   Color get severityColor {
     switch (severity) {
       case 'severe':
-        return Colors.redAccent;
+        return Colors.red;
       case 'moderate':
-        return Colors.orange;
+        return AppTheme.primaryAccent;
       default:
         return AppTheme.secondaryAccent;
     }
@@ -79,6 +79,8 @@ class PetWeightLog {
   final DateTime logDate;
   final double weightLbs;
   final String? notes;
+  final int? bcsScore; // 1–9 Body Condition Score
+  final String unit; // lbs | kg
 
   const PetWeightLog({
     this.id,
@@ -86,7 +88,33 @@ class PetWeightLog {
     required this.logDate,
     required this.weightLbs,
     this.notes,
+    this.bcsScore,
+    this.unit = 'lbs',
   });
+
+  String get bcsLabel {
+    switch (bcsScore) {
+      case 1:
+      case 2:
+        return 'Very Thin';
+      case 3:
+        return 'Thin';
+      case 4:
+        return 'Underweight';
+      case 5:
+        return 'Ideal';
+      case 6:
+        return 'Slightly Overweight';
+      case 7:
+        return 'Overweight';
+      case 8:
+        return 'Obese';
+      case 9:
+        return 'Severely Obese';
+      default:
+        return 'Not set';
+    }
+  }
 
   factory PetWeightLog.fromJson(Map<String, dynamic> json) {
     return PetWeightLog(
@@ -95,6 +123,8 @@ class PetWeightLog {
       logDate: DateTime.parse(json['log_date'] as String),
       weightLbs: (json['weight_lbs'] as num).toDouble(),
       notes: json['notes'] as String?,
+      bcsScore: json['bcs_score'] as int?,
+      unit: json['unit'] as String? ?? 'lbs',
     );
   }
 
@@ -104,6 +134,8 @@ class PetWeightLog {
             '${logDate.year.toString().padLeft(4, '0')}-${logDate.month.toString().padLeft(2, '0')}-${logDate.day.toString().padLeft(2, '0')}',
         'weight_lbs': weightLbs,
         if (notes != null) 'notes': notes,
+        if (bcsScore != null) 'bcs_score': bcsScore,
+        'unit': unit,
       };
 }
 
@@ -115,7 +147,11 @@ class PetVetAppointment {
   final String? doctor;
   final DateTime scheduledAt;
   final String? notes;
-  final String status;
+  final String status; // scheduled | completed | cancelled
+  final String
+      appointmentType; // routine | emergency | specialist | dental | surgery | follow_up
+  final String? location;
+  final double? cost;
 
   const PetVetAppointment({
     required this.id,
@@ -125,7 +161,29 @@ class PetVetAppointment {
     required this.scheduledAt,
     this.notes,
     this.status = 'scheduled',
+    this.appointmentType = 'routine',
+    this.location,
+    this.cost,
   });
+
+  int get daysUntil => scheduledAt.difference(DateTime.now()).inDays;
+
+  String get appointmentTypeLabel {
+    switch (appointmentType) {
+      case 'emergency':
+        return 'Emergency';
+      case 'specialist':
+        return 'Specialist';
+      case 'dental':
+        return 'Dental';
+      case 'surgery':
+        return 'Surgery';
+      case 'follow_up':
+        return 'Follow-up';
+      default:
+        return 'Routine';
+    }
+  }
 
   factory PetVetAppointment.fromJson(Map<String, dynamic> json) {
     return PetVetAppointment(
@@ -136,8 +194,24 @@ class PetVetAppointment {
       scheduledAt: DateTime.parse(json['scheduled_at'] as String).toLocal(),
       notes: json['notes'] as String?,
       status: json['status'] as String? ?? 'scheduled',
+      appointmentType: json['appointment_type'] as String? ?? 'routine',
+      location: json['location'] as String?,
+      cost: (json['cost'] as num?)?.toDouble(),
     );
   }
+
+  Map<String, dynamic> toUpsertJson() => {
+        if (id.isNotEmpty) 'id': id,
+        'pet_id': petId,
+        'title': title,
+        if (doctor != null) 'doctor': doctor,
+        'scheduled_at': scheduledAt.toUtc().toIso8601String(),
+        if (notes != null) 'notes': notes,
+        'status': status,
+        'appointment_type': appointmentType,
+        if (location != null) 'location': location,
+        if (cost != null) 'cost': cost,
+      };
 }
 
 @immutable
@@ -148,6 +222,9 @@ class PetVaccination {
   final String status; // scheduled | completed
   final DateTime? scheduledFor;
   final DateTime? completedOn;
+  final DateTime? nextDueDate;
+  final String? administeredBy;
+  final String? batchNumber;
   final String? notes;
 
   const PetVaccination({
@@ -157,10 +234,18 @@ class PetVaccination {
     required this.status,
     this.scheduledFor,
     this.completedOn,
+    this.nextDueDate,
+    this.administeredBy,
+    this.batchNumber,
     this.notes,
   });
 
   bool get isCompleted => status == 'completed';
+
+  bool get isDueSoon {
+    if (nextDueDate == null) return false;
+    return nextDueDate!.difference(DateTime.now()).inDays <= 30;
+  }
 
   factory PetVaccination.fromJson(Map<String, dynamic> json) {
     DateTime? parseDate(dynamic v) =>
@@ -172,7 +257,26 @@ class PetVaccination {
       status: json['status'] as String? ?? 'scheduled',
       scheduledFor: parseDate(json['scheduled_for']),
       completedOn: parseDate(json['completed_on']),
+      nextDueDate: parseDate(json['next_due_date']),
+      administeredBy: json['administered_by'] as String?,
+      batchNumber: json['batch_number'] as String?,
       notes: json['notes'] as String?,
     );
   }
+
+  Map<String, dynamic> toUpsertJson() => {
+        if (id.isNotEmpty) 'id': id,
+        'pet_id': petId,
+        'vaccine_name': vaccineName,
+        'status': status,
+        if (scheduledFor != null)
+          'scheduled_for': scheduledFor!.toIso8601String().split('T').first,
+        if (completedOn != null)
+          'completed_on': completedOn!.toIso8601String().split('T').first,
+        if (nextDueDate != null)
+          'next_due_date': nextDueDate!.toIso8601String().split('T').first,
+        if (administeredBy != null) 'administered_by': administeredBy,
+        if (batchNumber != null) 'batch_number': batchNumber,
+        if (notes != null) 'notes': notes,
+      };
 }

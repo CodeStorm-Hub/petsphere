@@ -15,8 +15,10 @@ class NotificationState {
     this.error,
   });
 
-  int get unreadCount => items.where((n) => !n.isRead && n.type != 'message').length;
-  int get unreadMessageCount => items.where((n) => !n.isRead && n.type == 'message').length;
+  int get unreadCount =>
+      items.where((n) => !n.isRead && n.type != 'message').length;
+  int get unreadMessageCount =>
+      items.where((n) => !n.isRead && n.type == 'message').length;
 
   NotificationState copyWith({
     List<NotificationModel>? items,
@@ -109,6 +111,7 @@ class NotificationController extends Notifier<NotificationState> {
       await notificationRepository.markAllAsRead(id, excludeType: 'message');
     } catch (_) {}
   }
+
   Future<void> markMessagesAsRead() async {
     final id = _userId;
     if (id == null) return;
