@@ -48,7 +48,8 @@ class MatchRepository {
     }
 
     final data = await query.order('created_at', ascending: false);
-    debugPrint('[MatchRepository] Fetched ${(data as List).length} pets from others');
+    debugPrint(
+        '[MatchRepository] Fetched ${(data as List).length} pets from others');
 
     return (data as List<dynamic>)
         .map((e) => PetModel.fromJson(e as Map<String, dynamic>))
@@ -73,8 +74,7 @@ class MatchRepository {
         .maybeSingle();
 
     if (existing != null) {
-      final isReciprocalPending =
-          existing['sender_pet_id'] == receiverPetId &&
+      final isReciprocalPending = existing['sender_pet_id'] == receiverPetId &&
           existing['receiver_pet_id'] == senderPetId &&
           existing['status'] == 'pending';
 
@@ -130,8 +130,7 @@ class MatchRepository {
   Future<void> updateRequestStatus(String requestId, String status) async {
     await supabase
         .from('match_requests')
-        .update({'status': status})
-        .eq('id', requestId);
+        .update({'status': status}).eq('id', requestId);
   }
 
   // -------------------------------------------------------------------------

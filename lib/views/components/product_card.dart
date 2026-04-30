@@ -35,7 +35,8 @@ class ProductCard extends StatelessWidget {
                       fit: BoxFit.cover,
                       errorBuilder: (ctx, err, stack) => Container(
                         color: colorScheme.surface,
-                        child: Icon(Icons.broken_image, color: colorScheme.onSurfaceVariant),
+                        child: Icon(Icons.broken_image,
+                            color: colorScheme.onSurfaceVariant),
                       ),
                     )
                   : Container(
@@ -52,33 +53,37 @@ class ProductCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   Text(
-                     product.name,
-                     maxLines: 2,
-                     overflow: TextOverflow.ellipsis,
-                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                   ),
-                   const SizedBox(height: 4),
-                   Row(
-                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                     children: [
-                       Text(
-                         currencyFormat.format(product.price),
-                         style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
-                       ),
-                       InkWell(
-                         onTap: onAdd,
-                         child: Container(
-                           padding: const EdgeInsets.all(4),
-                           decoration: BoxDecoration(
-                             color: colorScheme.primary,
-                             shape: BoxShape.circle,
-                           ),
-                           child: const Icon(Icons.add, color: Colors.white, size: 16),
-                         ),
-                       )
-                     ],
-                   ),
+                  Text(
+                    product.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        currencyFormat.format(product.price),
+                        style: TextStyle(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      InkWell(
+                        onTap: onAdd,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.add,
+                              color: Colors.white, size: 16),
+                        ),
+                      )
+                    ],
+                  ),
                 ],
               ),
             ),

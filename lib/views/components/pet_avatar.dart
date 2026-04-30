@@ -32,7 +32,8 @@ class PetAvatar extends StatelessWidget {
         backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
         backgroundColor: colorScheme.surface,
         child: imageUrl.isEmpty
-            ? Icon(Icons.pets, size: radius, color: colorScheme.onSurfaceVariant)
+            ? Icon(Icons.pets,
+                size: radius, color: colorScheme.onSurfaceVariant)
             : null,
       ),
     );

@@ -49,7 +49,8 @@ class MatchRequestModel {
       status: json['status'] as String? ?? 'pending',
       createdAt: DateTime.parse(json['created_at'] as String),
       senderPet: senderJson != null ? PetModel.fromJson(senderJson) : null,
-      receiverPet: receiverJson != null ? PetModel.fromJson(receiverJson) : null,
+      receiverPet:
+          receiverJson != null ? PetModel.fromJson(receiverJson) : null,
     );
   }
 

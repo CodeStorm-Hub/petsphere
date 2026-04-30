@@ -1,7 +1,313 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../theme/app_theme.dart';
+import 'package:go_router/go_router.dart';
+
+import '../controllers/auth_controller.dart';
+import '../controllers/health_controller.dart';
+import '../controllers/pet_care_controller.dart';
 import '../controllers/pet_controller.dart';
+import '../models/care_badge_model.dart';
+import '../models/pet_care_log_model.dart';
+import '../theme/app_theme.dart';
+import '../utils/care_gamification_logic.dart';
+import '../utils/care_personalization.dart';
+import 'care_goal_editor_modal.dart';
+import 'health_tab.dart';
+
+class _SetupBanner extends StatelessWidget {
+  const _SetupBanner({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppTheme.primaryAccent.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              const Icon(Icons.tune, color: AppTheme.primaryAccent, size: 22),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'Finish care setup for species-specific tips, diet hints, and gentler nudges.',
+                  style: TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontSize: 14,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PointsRow extends StatelessWidget {
+  const _PointsRow({
+    required this.points,
+    required this.challenge,
+    this.todayLog,
+  });
+
+  final int points;
+  final int challenge;
+  final PetCareLog? todayLog;
+
+  @override
+  Widget build(BuildContext context) {
+    final todayWant = wantedDailyCarePoints(todayLog);
+    final n = todayLog?.tasks.length ?? 0;
+    final done = todayLog?.completedTasks ?? 0;
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _MiniStat(
+              label: 'Care points (lifetime)',
+              value: '$points',
+              icon: Icons.stars,
+            ),
+            _MiniStat(
+              label: '30-day path',
+              value: '$challenge / 30',
+              icon: Icons.flag_outlined,
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          n == 0
+              ? 'Up to 10 care points on a full day; partial days earn 2 per task you check.'
+              : 'Today’s progress toward max 10: $done / $n tasks, target today +$todayWant (no penalty if you uncheck; totals never go down).',
+          style: Theme.of(context)
+              .textTheme
+              .labelSmall
+              ?.copyWith(color: AppTheme.textSecondary, height: 1.35),
+        ),
+      ],
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  const _MiniStat({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+        decoration: BoxDecoration(
+          color: AppTheme.cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.border),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 20, color: AppTheme.primaryAccent),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 11,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AchievementsBlock extends ConsumerWidget {
+  const _AchievementsBlock({required this.activePetId});
+  final String activePetId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final defAsync = ref.watch(careBadgeDefinitionsProvider);
+    final care = ref.watch(petCareProvider);
+    final unlocks = care.unlocks.where((u) => u.petId == activePetId).toList();
+    return defAsync.when(
+      data: (defs) {
+        if (unlocks.isEmpty) {
+          return Text(
+            'Log daily care to earn badges for streaks, weeks, and milestones.',
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: AppTheme.textSecondary, height: 1.4),
+          );
+        }
+        final bySlug = {for (final d in defs) d.slug: d};
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Achievements',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final u in unlocks)
+                  if (bySlug.containsKey(u.badgeSlug))
+                    Chip(
+                      avatar: Text(bySlug[u.badgeSlug]!.iconEmoji),
+                      label: Text(
+                        bySlug[u.badgeSlug]!.title,
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ),
+              ],
+            ),
+            TextButton(
+              onPressed: () => _openShowcaseEditor(context, ref, defs, unlocks),
+              child: const Text('Choose badges to show on your public profile'),
+            ),
+          ],
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+Future<void> _openShowcaseEditor(
+  BuildContext context,
+  WidgetRef ref,
+  List<CareBadgeDefinition> allDefs,
+  List<PetCareBadgeUnlock> unlocks,
+) async {
+  final user = ref.read(authProvider).user;
+  if (user == null) return;
+  final selected = List<String>.from(user.publicCareBadgeSlugs);
+  if (!context.mounted) return;
+  await showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) {
+      return StatefulBuilder(
+        builder: (context, setModal) {
+          return Padding(
+            padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 16,
+              bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Show on profile (max 3)',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Only what you select is visible to others. Full unlock list stays private unless showcased.',
+                  style: TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                for (final u in unlocks)
+                  Builder(
+                    builder: (context) {
+                      CareBadgeDefinition? d;
+                      for (final def in allDefs) {
+                        if (def.slug == u.badgeSlug) {
+                          d = def;
+                          break;
+                        }
+                      }
+                      if (d == null) {
+                        return const SizedBox.shrink();
+                      }
+                      final def = d;
+                      final on = selected.contains(def.slug);
+                      return CheckboxListTile(
+                        value: on,
+                        title: Text('${def.iconEmoji} ${def.title}'),
+                        onChanged: (v) {
+                          setModal(() {
+                            if (v == true) {
+                              if (selected.length < 3) selected.add(def.slug);
+                            } else {
+                              selected.remove(def.slug);
+                            }
+                          });
+                        },
+                      );
+                    },
+                  ),
+                FilledButton(
+                  onPressed: () async {
+                    final ok =
+                        await ref.read(authProvider.notifier).updateProfile(
+                      {
+                        'public_care_badge_slugs': selected,
+                        'show_care_badges_on_profile': selected.isNotEmpty,
+                      },
+                    );
+                    if (ok && ctx.mounted) Navigator.pop(ctx);
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
 
 class PetCareScreen extends ConsumerStatefulWidget {
   const PetCareScreen({super.key});
@@ -10,14 +316,10 @@ class PetCareScreen extends ConsumerStatefulWidget {
   ConsumerState<PetCareScreen> createState() => _PetCareScreenState();
 }
 
-class _PetCareScreenState extends ConsumerState<PetCareScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
+class _PetCareScreenState extends ConsumerState<PetCareScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController =
+      TabController(length: 3, vsync: this);
 
   @override
   void dispose() {
@@ -42,14 +344,50 @@ class _PetCareScreenState extends ConsumerState<PetCareScreen> with SingleTicker
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          _DashboardTab(),
-          _HealthLogTab(),
-          _FeedingTab(),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(petCareProvider.notifier).refresh();
+          await ref.read(healthProvider.notifier).refresh();
+        },
+        child: TabBarView(
+          controller: _tabController,
+          children: const [
+            _DashboardTab(),
+            HealthTab(),
+            _FeedingTab(),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared empty-state for "no active pet"
+// ─────────────────────────────────────────────────────────────────────────────
+class _NoActivePet extends StatelessWidget {
+  const _NoActivePet();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        const SizedBox(height: 80),
+        const Icon(Icons.pets, size: 56, color: AppTheme.textSecondary),
+        const SizedBox(height: 16),
+        Text(
+          'Add a pet to start tracking care',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Once you create a pet profile, daily logs, weight history, and vet appointments will live here.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppTheme.textSecondary),
+        ),
+      ],
     );
   }
 }
@@ -57,177 +395,463 @@ class _PetCareScreenState extends ConsumerState<PetCareScreen> with SingleTicker
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. DASHBOARD (CARE DIARY)
 // ─────────────────────────────────────────────────────────────────────────────
-class _DashboardTab extends ConsumerStatefulWidget {
+class _DashboardTab extends ConsumerWidget {
   const _DashboardTab();
 
   @override
-  ConsumerState<_DashboardTab> createState() => _DashboardTabState();
-}
-
-class _DashboardTabState extends ConsumerState<_DashboardTab> {
-  final Map<int, bool> _tasksCompleted = {
-    0: false,
-    1: true,
-    2: false,
-  };
-  String _selectedMood = '';
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final myPets = ref.watch(petProvider).myPets;
     final activePet = ref.watch(activePetProvider);
-    final completedCount = _tasksCompleted.values.where((v) => v).length;
-    final totalTasks = _tasksCompleted.length;
-    
-    return SingleChildScrollView(
+    final careState = ref.watch(petCareProvider);
+    final todayLog = careState.todayLog;
+
+    if (activePet == null) return const _NoActivePet();
+    if (todayLog == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final completedTasks = todayLog.completedTasks;
+    final totalTasks = todayLog.tasks.length;
+
+    final o = careState.onboarding;
+    final oData = o?.data ?? const <String, dynamic>{};
+    final needsSetup = o == null || !o.isComplete;
+    final nudge = careChecklistNudge(
+      oData,
+      completed: completedTasks,
+      total: totalTasks,
+    );
+
+    return ListView(
       padding: const EdgeInsets.all(16),
+      children: [
+        if (myPets.isNotEmpty) ...[
+          _PetSelector(myPets: myPets, activeId: activePet.id),
+          const SizedBox(height: 16),
+        ],
+        if (needsSetup) ...[
+          _SetupBanner(
+            onTap: () async {
+              await context.push(
+                '/pet_care_onboarding?petId=${activePet.id}',
+              );
+              await ref.read(petCareProvider.notifier).refresh();
+            },
+          ),
+          const SizedBox(height: 16),
+        ],
+        if (careState.gamification != null) ...[
+          _PointsRow(
+            points: careState.gamification!.totalCarePoints,
+            challenge: careState.gamification!.challenge30dProgress,
+            todayLog: todayLog,
+          ),
+          const SizedBox(height: 8),
+          _WeekMaskRow(
+            weekStartMonday: careState.gamification!.weekStartMonday,
+            mask: careState.gamification!.weekCompletedMask,
+          ),
+          const SizedBox(height: 12),
+        ],
+
+        // ────────── PREMIUM BENTO GRID ──────────
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppTheme.cardColor.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppTheme.border.withValues(alpha: 0.5)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Today's Overview", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  TextButton.icon(
+                    onPressed: () => CareGoalEditorModal.show(context, todayLog, oData),
+                    icon: const Icon(Icons.edit_calendar, size: 16),
+                    label: const Text('Edit Goals'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppTheme.primaryAccent,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _ProgressRing(
+                    label: 'Tasks',
+                    progress: totalTasks == 0 ? 0 : completedTasks / totalTasks,
+                    color: AppTheme.primaryAccent,
+                    centerText: '$completedTasks/$totalTasks',
+                  ),
+                  _ProgressRing(
+                    label: 'Calories',
+                    progress: todayLog.caloriesProgress,
+                    color: Colors.orange,
+                    centerText: '${todayLog.consumedKcal}\nkcal',
+                  ),
+                  _ProgressRing(
+                    label: 'Water',
+                    progress: todayLog.waterProgress,
+                    color: Colors.blue,
+                    centerText:
+                        '${todayLog.waterCups}/${todayLog.dailyWaterGoalCups}\ncups',
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        _StreakBanner(
+          streakDays: careState.streakDays,
+          flags: careState.streakFlags,
+        ),
+        const SizedBox(height: 24),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Daily Checklist', style: theme.textTheme.titleLarge),
+            Text(
+              '${(totalTasks == 0 ? 0 : completedTasks / totalTasks * 100).toInt()}%',
+              style: const TextStyle(
+                color: AppTheme.primaryAccent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          nudge,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: AppTheme.textSecondary,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: 8),
+        LinearProgressIndicator(
+          value: totalTasks == 0 ? 0 : completedTasks / totalTasks,
+          backgroundColor: AppTheme.border,
+          color: AppTheme.primaryAccent,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        const SizedBox(height: 16),
+
+        for (final task in todayLog.tasks)
+          _TaskCard(
+            task: task,
+            onToggle: () =>
+                ref.read(petCareProvider.notifier).toggleTask(task.key),
+          ),
+
+        const SizedBox(height: 20),
+        _AchievementsBlock(activePetId: activePet.id),
+        const SizedBox(height: 24),
+        Text('How is your pet feeling?', style: theme.textTheme.titleMedium),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _MoodButton(
+              emoji: '😴',
+              label: 'Sleepy',
+              selected: todayLog.mood == 'Sleepy',
+            ),
+            _MoodButton(
+              emoji: '😊',
+              label: 'Happy',
+              selected: todayLog.mood == 'Happy',
+            ),
+            _MoodButton(
+              emoji: '🤪',
+              label: 'Playful',
+              selected: todayLog.mood == 'Playful',
+            ),
+            _MoodButton(
+              emoji: '🤒',
+              label: 'Sick',
+              selected: todayLog.mood == 'Sick',
+            ),
+          ],
+        ),
+        const SizedBox(height: 80),
+      ],
+    );
+  }
+}
+
+// ───────────── Pet selector ─────────────
+class _PetSelector extends ConsumerWidget {
+  const _PetSelector({required this.myPets, required this.activeId});
+
+  final List myPets;
+  final String activeId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SizedBox(
+      height: 72,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: myPets.length,
+        itemBuilder: (context, i) {
+          final pet = myPets[i];
+          final isSelected = pet.id == activeId;
+          return GestureDetector(
+            onTap: () => ref.read(petProvider.notifier).setActivePet(pet),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 6),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color:
+                      isSelected ? AppTheme.primaryAccent : Colors.transparent,
+                  width: 3,
+                ),
+              ),
+              child: CircleAvatar(
+                radius: 30,
+                backgroundColor: AppTheme.surface,
+                backgroundImage: pet.profileImageUrl.isNotEmpty
+                    ? NetworkImage(pet.profileImageUrl)
+                    : null,
+                child: pet.profileImageUrl.isEmpty
+                    ? const Icon(Icons.pets, color: AppTheme.textSecondary)
+                    : null,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ───────────── Week mask (Mon–Sun, this ISO week) ─────────────
+class _WeekMaskRow extends StatelessWidget {
+  const _WeekMaskRow({
+    required this.weekStartMonday,
+    required this.mask,
+  });
+
+  final DateTime? weekStartMonday;
+  final int mask;
+
+  @override
+  Widget build(BuildContext context) {
+    final start = weekStartMonday ?? _mondayOf(DateTime.now());
+    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.border),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Pet Selector (List of owned pets)
-          if (myPets.isNotEmpty) ...[
-            SizedBox(
-              height: 72,
-              width: double.infinity,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Container(
-                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width - 32),
-                  alignment: Alignment.center,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: myPets.map((pet) {
-                      final isSelected = pet.id == activePet?.id;
-                      return GestureDetector(
-                        onTap: () {
-                          ref.read(petProvider.notifier).setActivePet(pet);
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 6),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isSelected ? AppTheme.primaryAccent : Colors.transparent,
-                              width: 3,
-                            ),
-                          ),
-                          child: CircleAvatar(
-                            radius: 30,
-                            backgroundColor: AppTheme.surface,
-                            backgroundImage: pet.profileImageUrl.isNotEmpty
-                                ? NetworkImage(pet.profileImageUrl)
-                                : null,
-                            child: pet.profileImageUrl.isEmpty
-                                ? const Icon(Icons.pets, color: AppTheme.textSecondary)
-                                : null,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+          Text(
+            'This week (care day complete)',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: AppTheme.textSecondary,
                 ),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
-
-          // Animated Rings (Tasks / Calories / Water)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildProgressRing('Tasks', completedCount / totalTasks, AppTheme.primaryAccent, '$completedCount/$totalTasks'),
-              _buildProgressRing('Calories', 0.65, Colors.orange, '450\nkcal'),
-              _buildProgressRing('Water', 0.4, Colors.blue, '2/5\ncups'),
-            ],
           ),
-          const SizedBox(height: 24),
-          
-          // 5-day streak banner
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppTheme.cardColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.border),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.local_fire_department, color: Colors.orange, size: 20),
-                    const SizedBox(width: 8),
-                    Text('5-Day Streak!', style: theme.textTheme.titleMedium),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(5, (index) {
-                    final isComplete = index < 4;
-                    return Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isComplete ? AppTheme.primaryAccent.withValues(alpha: 0.2) : AppTheme.surface,
-                        border: Border.all(color: isComplete ? AppTheme.primaryAccent : AppTheme.border),
-                      ),
-                      alignment: Alignment.center,
-                      child: isComplete
-                          ? const Icon(Icons.check, size: 16, color: AppTheme.primaryAccent)
-                          : Text('D${index+1}', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                    );
-                  }),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          
-          // Daily Checklist
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Daily Checklist', style: theme.textTheme.titleLarge),
-              Text('${(completedCount / totalTasks * 100).toInt()}%', style: TextStyle(color: AppTheme.primaryAccent, fontWeight: FontWeight.bold)),
+              for (var i = 0; i < 7; i++)
+                _WeekDayCell(
+                  label: labels[i],
+                  done: (mask & (1 << i)) != 0,
+                  isToday: _isSameDate(
+                    start.add(Duration(days: i)),
+                    DateTime.now(),
+                  ),
+                ),
             ],
           ),
-          const SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: completedCount / totalTasks,
-            backgroundColor: AppTheme.border,
-            color: AppTheme.primaryAccent,
-            borderRadius: BorderRadius.circular(999),
-          ),
-          const SizedBox(height: 16),
-          
-          _buildTaskCard(0, 'Morning Walk', '30 minutes', Icons.pets),
-          _buildTaskCard(1, 'Give Medication', 'Heartworm pill', Icons.medical_services),
-          _buildTaskCard(2, 'Brush Coat', 'Keep it shiny', Icons.brush),
-          
-          const SizedBox(height: 24),
-          // Mood Selector
-          Text('How is your pet feeling?', style: theme.textTheme.titleMedium),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildMoodBtn('😴', 'Sleepy'),
-              _buildMoodBtn('😊', 'Happy'),
-              _buildMoodBtn('🤪', 'Playful'),
-              _buildMoodBtn('🤒', 'Sick'),
-            ],
-          ),
-          const SizedBox(height: 80),
         ],
       ),
     );
   }
+}
 
-  Widget _buildProgressRing(String label, double progress, Color color, String centerText) {
+DateTime _mondayOf(DateTime d) {
+  final x = DateTime(d.year, d.month, d.day);
+  return x.subtract(Duration(days: x.weekday - 1));
+}
+
+bool _isSameDate(DateTime a, DateTime b) {
+  return a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
+class _WeekDayCell extends StatelessWidget {
+  const _WeekDayCell({
+    required this.label,
+    required this.done,
+    required this.isToday,
+  });
+
+  final String label;
+  final bool done;
+  final bool isToday;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: isToday ? AppTheme.primaryAccent : AppTheme.textSecondary,
+            fontWeight: isToday ? FontWeight.w600 : FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: done
+                ? AppTheme.primaryAccent.withValues(alpha: 0.2)
+                : AppTheme.surface,
+            border: Border.all(
+              color: done ? AppTheme.primaryAccent : AppTheme.border,
+            ),
+          ),
+          alignment: Alignment.center,
+          child: done
+              ? const Icon(Icons.check, size: 16, color: AppTheme.primaryAccent)
+              : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+}
+
+// ───────────── Streak banner ─────────────
+class _StreakBanner extends StatelessWidget {
+  const _StreakBanner({required this.streakDays, required this.flags});
+
+  final int streakDays;
+  final List<bool> flags;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.local_fire_department,
+                color: Colors.orange,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                streakDays > 0
+                    ? '$streakDays-Day Streak!'
+                    : 'Start today\u2019s streak',
+                style: theme.textTheme.titleMedium,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (var i = 0; i < flags.length; i++)
+                _StreakDot(label: 'D${i + 1}', complete: flags[i]),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StreakDot extends StatelessWidget {
+  const _StreakDot({required this.label, required this.complete});
+
+  final String label;
+  final bool complete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: complete
+            ? AppTheme.primaryAccent.withValues(alpha: 0.2)
+            : AppTheme.surface,
+        border: Border.all(
+          color: complete ? AppTheme.primaryAccent : AppTheme.border,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: complete
+          ? const Icon(Icons.check, size: 16, color: AppTheme.primaryAccent)
+          : Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+    );
+  }
+}
+
+// ───────────── Progress ring ─────────────
+class _ProgressRing extends StatelessWidget {
+  const _ProgressRing({
+    required this.label,
+    required this.progress,
+    required this.color,
+    required this.centerText,
+  });
+
+  final String label;
+  final double progress;
+  final Color color;
+  final String centerText;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         SizedBox(
@@ -236,44 +860,65 @@ class _DashboardTabState extends ConsumerState<_DashboardTab> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              CircularProgressIndicator(
-                value: progress,
-                strokeWidth: 8,
-                backgroundColor: AppTheme.border,
-                color: color,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: progress.clamp(0.0, 1.0)),
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOutCubic,
+                builder: (_, value, __) => CircularProgressIndicator(
+                  value: value,
+                  strokeWidth: 8,
+                  backgroundColor: AppTheme.border,
+                  color: color,
+                ),
               ),
               Center(
                 child: Text(
                   centerText,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 8),
-        Text(label, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+        Text(label,
+            style: const TextStyle(
+              color: AppTheme.textSecondary,
+              fontSize: 13,
+            )),
       ],
     );
   }
+}
 
-  Widget _buildTaskCard(int index, String title, String subtitle, IconData icon) {
-    final isDone = _tasksCompleted[index]!;
+// ───────────── Task card ─────────────
+class _TaskCard extends StatelessWidget {
+  const _TaskCard({required this.task, required this.onToggle});
+
+  final DailyTask task;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDone = task.done;
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _tasksCompleted[index] = !isDone;
-        });
-      },
+      onTap: onToggle,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDone ? AppTheme.secondaryAccent.withValues(alpha: 0.1) : AppTheme.cardColor,
+          color: isDone
+              ? AppTheme.secondaryAccent.withValues(alpha: 0.1)
+              : AppTheme.cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isDone ? AppTheme.secondaryAccent : AppTheme.border),
+          border: Border.all(
+            color: isDone ? AppTheme.secondaryAccent : AppTheme.border,
+          ),
         ),
         child: Row(
           children: [
@@ -282,9 +927,15 @@ class _DashboardTabState extends ConsumerState<_DashboardTab> {
               decoration: BoxDecoration(
                 color: isDone ? AppTheme.secondaryAccent : AppTheme.surface,
                 shape: BoxShape.circle,
-                border: Border.all(color: isDone ? AppTheme.secondaryAccent : AppTheme.border),
+                border: Border.all(
+                  color: isDone ? AppTheme.secondaryAccent : AppTheme.border,
+                ),
               ),
-              child: Icon(icon, color: isDone ? Colors.white : AppTheme.textSecondary, size: 20),
+              child: Icon(
+                task.icon,
+                color: isDone ? Colors.white : AppTheme.textSecondary,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -292,15 +943,23 @@ class _DashboardTabState extends ConsumerState<_DashboardTab> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    task.title,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       decoration: isDone ? TextDecoration.lineThrough : null,
-                      color: isDone ? AppTheme.textSecondary : AppTheme.textPrimary,
+                      color: isDone
+                          ? AppTheme.textSecondary
+                          : AppTheme.textPrimary,
                     ),
                   ),
-                  Text(subtitle, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                  Text(
+                    task.subtitle,
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -314,28 +973,50 @@ class _DashboardTabState extends ConsumerState<_DashboardTab> {
       ),
     );
   }
+}
 
-  Widget _buildMoodBtn(String emoji, String label) {
-    final isSelected = _selectedMood == label;
+// ───────────── Mood button ─────────────
+class _MoodButton extends ConsumerWidget {
+  const _MoodButton({
+    required this.emoji,
+    required this.label,
+    required this.selected,
+  });
+
+  final String emoji;
+  final String label;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () => setState(() => _selectedMood = label),
+      onTap: () =>
+          ref.read(petCareProvider.notifier).setMood(selected ? null : label),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryAccent.withValues(alpha: 0.2) : AppTheme.cardColor,
+          color: selected
+              ? AppTheme.primaryAccent.withValues(alpha: 0.2)
+              : AppTheme.cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isSelected ? AppTheme.primaryAccent : AppTheme.border),
+          border: Border.all(
+            color: selected ? AppTheme.primaryAccent : AppTheme.border,
+          ),
         ),
         child: Column(
           children: [
             Text(emoji, style: const TextStyle(fontSize: 24)),
             const SizedBox(height: 4),
-            Text(label, style: TextStyle(
-              fontSize: 12,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? AppTheme.primaryAccent : AppTheme.textSecondary,
-            )),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                color:
+                    selected ? AppTheme.primaryAccent : AppTheme.textSecondary,
+              ),
+            ),
           ],
         ),
       ),
@@ -344,356 +1025,455 @@ class _DashboardTabState extends ConsumerState<_DashboardTab> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2. HEALTH LOG
+// 2. HEALTH TAB — extracted to lib/views/health_tab.dart
 // ─────────────────────────────────────────────────────────────────────────────
-class _HealthLogTab extends StatelessWidget {
-  const _HealthLogTab();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Live weight chart (mockup)
-          Text('Weight Tracking', style: theme.textTheme.titleLarge),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.cardColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.border),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Current Weight', style: TextStyle(color: AppTheme.textSecondary)),
-                    Row(
-                      children: const [
-                        Icon(Icons.arrow_drop_up, color: Colors.red),
-                        Text('0.2 lbs vs yes.', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('42.5 lbs', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(height: 24),
-                // Mock bar chart
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    _buildBar(0.4, 'M'),
-                    _buildBar(0.5, 'T'),
-                    _buildBar(0.45, 'W'),
-                    _buildBar(0.6, 'T'),
-                    _buildBar(0.55, 'F'),
-                    _buildBar(0.7, 'S'),
-                    _buildBar(0.8, 'S', isToday: true),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Log weight prompt
-          GestureDetector(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryAccent.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.primaryAccent.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primaryAccent,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.monitor_weight, color: Colors.white, size: 20),
-                  ),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                    child: Text('Log weight for today', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                  const Icon(Icons.chevron_right, color: AppTheme.primaryAccent),
-                ],
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-          Text('Upcoming Vet Appointments', style: theme.textTheme.titleLarge),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.cardColor,
-              borderRadius: BorderRadius.circular(16),
-              border: const Border(
-                top: BorderSide(color: AppTheme.border),
-                right: BorderSide(color: AppTheme.border),
-                bottom: BorderSide(color: AppTheme.border),
-                left: BorderSide(color: AppTheme.secondaryAccent, width: 4),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      Text('OCT', style: TextStyle(color: AppTheme.secondaryAccent, fontWeight: FontWeight.bold, fontSize: 12)),
-                      Text('24', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Annual Checkup', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      Text('Dr. Smith • 10:00 AM', style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-          Text('Vaccination Timeline', style: theme.textTheme.titleLarge),
-          const SizedBox(height: 12),
-          _buildVaxItem('Rabies', 'Completed - Oct 2025', true),
-          _buildVaxItem('Bordetella', 'Scheduled - Nov 2026', false),
-          
-          const SizedBox(height: 80),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBar(double heightFactor, String label, {bool isToday = false}) {
-    return Column(
-      children: [
-        Container(
-          width: 24,
-          height: 100 * heightFactor,
-          decoration: BoxDecoration(
-            color: isToday ? AppTheme.primaryAccent : AppTheme.border,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: TextStyle(color: AppTheme.textSecondary, fontWeight: isToday ? FontWeight.bold : FontWeight.normal)),
-      ],
-    );
-  }
-  
-  Widget _buildVaxItem(String name, String dateStr, bool isComplete) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Container(
-            width: 12,
-            height: 12,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isComplete ? AppTheme.secondaryAccent : Colors.orange,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(dateStr, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: isComplete ? AppTheme.secondaryAccent.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              isComplete ? 'Completed' : 'Scheduled',
-              style: TextStyle(
-                color: isComplete ? AppTheme.secondaryAccent : Colors.orange,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// (HealthTab is imported above and used directly in TabBarView)
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. FEEDING LOG
+// 3. FEEDING TAB
 // ─────────────────────────────────────────────────────────────────────────────
-class _FeedingTab extends StatefulWidget {
+class _FeedingTab extends ConsumerWidget {
   const _FeedingTab();
 
   @override
-  State<_FeedingTab> createState() => _FeedingTabState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final activePet = ref.watch(activePetProvider);
+    final todayLog = ref.watch(todayCareLogProvider);
+    final oData = ref.watch(petCareProvider).onboarding?.data;
+    final dietHint = careFeedingHint(oData ?? const {});
+
+    if (activePet == null) return const _NoActivePet();
+    if (todayLog == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final notifier = ref.read(petCareProvider.notifier);
+    final isSnackEnabled =
+        (oData?[PetCareOnboarding.kAgeBand] as String? ?? 'adult') ==
+            'puppy_kitten';
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Personalized diet recommendation banner
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryAccent.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppTheme.primaryAccent.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.lightbulb_outline,
+                  color: AppTheme.primaryAccent, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  dietHint,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppTheme.textPrimary,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: TextButton.icon(
+            onPressed: () => CareGoalEditorModal.show(context, todayLog, oData ?? const {}),
+            icon: const Icon(Icons.tune, size: 18),
+            label: const Text('Adjust Nutrition Goals'),
+            style: TextButton.styleFrom(
+              foregroundColor: AppTheme.primaryAccent,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        // Calorie progress ring with meal vs treat breakdown
+        Center(
+          child: SizedBox(
+            width: 160,
+            height: 160,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Outer ring — total calories
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: todayLog.caloriesProgress),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutCubic,
+                  builder: (_, value, __) => CircularProgressIndicator(
+                    value: value,
+                    strokeWidth: 12,
+                    backgroundColor: AppTheme.border,
+                    color: todayLog.treatsOverBudget
+                        ? Colors.red.shade400
+                        : Colors.orange,
+                  ),
+                ),
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${todayLog.consumedKcal}',
+                        style: const TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '/ ${todayLog.dailyCalorieGoal} kcal',
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      if (todayLog.treatsKcal > 0)
+                        Text(
+                          '🍪 ${todayLog.treatsKcal} kcal treats',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: todayLog.treatsOverBudget
+                                ? Colors.red.shade400
+                                : AppTheme.textSecondary,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        // Calorie breakdown chips
+        if (todayLog.consumedKcal > 0)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _CalorieChip(
+                label: 'Meals',
+                value: '${todayLog.mealKcal}',
+                color: Colors.orange,
+              ),
+              if (todayLog.treatsKcal > 0) ...[
+                const SizedBox(width: 8),
+                _CalorieChip(
+                  label: 'Treats',
+                  value: '${todayLog.treatsKcal}',
+                  color: todayLog.treatsOverBudget
+                      ? Colors.red.shade400
+                      : Colors.amber,
+                ),
+              ],
+            ],
+          ),
+        const SizedBox(height: 24),
+
+        Text('Meals', style: theme.textTheme.titleLarge),
+        const SizedBox(height: 12),
+        _MealCard(
+          name: 'Breakfast',
+          time: '8:00 AM',
+          kcal: todayLog.breakfastKcal,
+          food: todayLog.breakfastFood,
+          fed: todayLog.breakfastFed,
+          onChanged: notifier.setBreakfastFed,
+        ),
+        if (isSnackEnabled)
+          _MealCard(
+            name: 'Lunch / Snack',
+            time: '12:00 PM',
+            kcal: todayLog.snackKcal,
+            food: todayLog.snackFood.isEmpty
+                ? 'Puppy meal — smaller portion'
+                : todayLog.snackFood,
+            fed: todayLog.snackFed,
+            onChanged: notifier.setSnackFed,
+          ),
+        _MealCard(
+          name: 'Dinner',
+          time: '6:00 PM',
+          kcal: todayLog.dinnerKcal,
+          food: todayLog.dinnerFood,
+          fed: todayLog.dinnerFed,
+          onChanged: notifier.setDinnerFed,
+        ),
+
+        // Treat tracker section
+        const SizedBox(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Treats', style: theme.textTheme.titleLarge),
+            Text(
+              '${todayLog.treatsCount} today · ${todayLog.treatsKcal} kcal',
+              style: TextStyle(
+                color: todayLog.treatsOverBudget
+                    ? Colors.red.shade400
+                    : AppTheme.textSecondary,
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (todayLog.treatsOverBudget)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.red.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.warning_amber,
+                    size: 16, color: Colors.red.shade400),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Treats exceed 10% of daily calories (${todayLog.maxTreatKcal} kcal max). Consider reducing treats.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.red.shade700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        Row(
+          children: [
+            Expanded(
+              child: _TreatButton(
+                label: 'Small (15 kcal)',
+                emoji: '🦴',
+                onTap: () => notifier.addTreat(kcalPerTreat: 15),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _TreatButton(
+                label: 'Medium (30 kcal)',
+                emoji: '🍪',
+                onTap: () => notifier.addTreat(kcalPerTreat: 30),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _TreatButton(
+                label: 'Large (50 kcal)',
+                emoji: '🥩',
+                onTap: () => notifier.addTreat(kcalPerTreat: 50),
+              ),
+            ),
+          ],
+        ),
+
+        // Water intake section
+        const SizedBox(height: 32),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Water Intake', style: theme.textTheme.titleLarge),
+            Text(
+              '${todayLog.waterCups} / ${todayLog.dailyWaterGoalCups} cups',
+              style: const TextStyle(
+                color: Colors.blue,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: List.generate(todayLog.dailyWaterGoalCups, (index) {
+            final isFilled = index < todayLog.waterCups;
+            return GestureDetector(
+              onTap: () {
+                if (isFilled && index == todayLog.waterCups - 1) {
+                  notifier.setWaterCups(todayLog.waterCups - 1);
+                } else {
+                  notifier.setWaterCups(index + 1);
+                }
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 48,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: isFilled
+                      ? Colors.blue.withValues(alpha: 0.2)
+                      : AppTheme.cardColor,
+                  border: Border.all(
+                    color: isFilled ? Colors.blue : AppTheme.border,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Icon(
+                  Icons.water_drop,
+                  color: isFilled ? Colors.blue : AppTheme.border,
+                  size: 28,
+                ),
+              ),
+            );
+          }),
+        ),
+        const SizedBox(height: 80),
+      ],
+    );
+  }
 }
 
-class _FeedingTabState extends State<_FeedingTab> {
-  bool _breakfastFed = true;
-  bool _dinnerFed = false;
-  int _waterCups = 3;
+class _CalorieChip extends StatelessWidget {
+  const _CalorieChip({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final totalCals = (_breakfastFed ? 250 : 0) + (_dinnerFed ? 250 : 0);
-    
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Calorie Ring
-          Center(
-            child: SizedBox(
-              width: 160,
-              height: 160,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  CircularProgressIndicator(
-                    value: totalCals / 500,
-                    strokeWidth: 12,
-                    backgroundColor: AppTheme.border,
-                    color: Colors.orange,
-                  ),
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('$totalCals', style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
-                        const Text('/ 500 kcal', style: TextStyle(color: AppTheme.textSecondary)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 32),
-          
-          Text('Meals', style: theme.textTheme.titleLarge),
-          const SizedBox(height: 12),
-          _buildMealCard('Breakfast', '8:00 AM', 250, 'Dry Kibble - 1 cup', _breakfastFed, (val) => setState(() => _breakfastFed = val)),
-          _buildMealCard('Dinner', '6:00 PM', 250, 'Wet Food - 1/2 can', _dinnerFed, (val) => setState(() => _dinnerFed = val)),
-          
-          const SizedBox(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Water Intake', style: theme.textTheme.titleLarge),
-              Text('$_waterCups / 8 cups', style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: List.generate(8, (index) {
-              final isFilled = index < _waterCups;
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (isFilled && index == _waterCups - 1) {
-                      _waterCups--; // untap last
-                    } else {
-                      _waterCups = index + 1; // tap up to
-                    }
-                  });
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 48,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: isFilled ? Colors.blue.withValues(alpha: 0.2) : AppTheme.cardColor,
-                    border: Border.all(color: isFilled ? Colors.blue : AppTheme.border, width: 2),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Icon(
-                    Icons.water_drop,
-                    color: isFilled ? Colors.blue : AppTheme.border,
-                    size: 28,
-                  ),
-                ),
-              );
-            }),
-          ),
-          
-          const SizedBox(height: 80),
-        ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        '$label: $value kcal',
+        style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w500),
       ),
     );
   }
+}
 
-  Widget _buildMealCard(String mealName, String time, int cals, String foodDesc, bool isFed, ValueChanged<bool> onChanged) {
+class _TreatButton extends StatelessWidget {
+  const _TreatButton({
+    required this.label,
+    required this.emoji,
+    required this.onTap,
+  });
+
+  final String label;
+  final String emoji;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppTheme.cardColor,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppTheme.border),
+          ),
+          child: Column(
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 20)),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: AppTheme.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MealCard extends StatelessWidget {
+  const _MealCard({
+    required this.name,
+    required this.time,
+    required this.kcal,
+    required this.food,
+    required this.fed,
+    required this.onChanged,
+  });
+
+  final String name;
+  final String time;
+  final int kcal;
+  final String food;
+  final bool fed;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isFed ? AppTheme.primaryAccent : AppTheme.border),
+        border: Border.all(
+          color: fed ? AppTheme.primaryAccent : AppTheme.border,
+        ),
       ),
       child: Column(
         children: [
           ListTile(
-            title: Text(mealName, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text('$time • $cals kcal'),
+            title:
+                Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Text('$time • $kcal kcal'),
             trailing: Switch(
-              value: isFed,
+              value: fed,
               onChanged: onChanged,
               activeThumbColor: AppTheme.primaryAccent,
             ),
           ),
-          if (isFed) ...[
+          if (fed) ...[
             const Divider(height: 1),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const Icon(Icons.restaurant, color: AppTheme.textSecondary, size: 20),
+                  const Icon(
+                    Icons.restaurant,
+                    color: AppTheme.textSecondary,
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
-                  Text(foodDesc, style: const TextStyle(color: AppTheme.textSecondary)),
+                  Text(
+                    food,
+                    style: const TextStyle(color: AppTheme.textSecondary),
+                  ),
                 ],
               ),
             ),
-          ]
+          ],
         ],
       ),
     );
   }
 }
+

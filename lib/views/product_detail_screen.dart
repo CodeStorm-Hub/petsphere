@@ -66,7 +66,8 @@ class ProductDetailScreen extends ConsumerWidget {
                   const SizedBox(height: 12),
                   Text('Product not found',
                       style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant)),
                 ],
               ),
             ),
@@ -126,7 +127,8 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                     onPressed: () {
                       SharePlus.instance.share(
                         ShareParams(
-                          text: 'Check out ${product.name} on PetSphere — \$${product.price.toStringAsFixed(2)}\nhttps://petsphere.app/product/${product.id}',
+                          text:
+                              'Check out ${product.name} on PetSphere — \$${product.price.toStringAsFixed(2)}\nhttps://petsphere.app/product/${product.id}',
                           subject: 'PetSphere — ${product.name}',
                         ),
                       );
@@ -199,7 +201,8 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
                           color: colorScheme.primary.withAlpha(20),
                           borderRadius: BorderRadius.circular(20),
@@ -216,7 +219,8 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                       if (product.isBestseller) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFFD54F).withAlpha(60),
                             borderRadius: BorderRadius.circular(20),
@@ -224,7 +228,8 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.local_fire_department, size: 13, color: Color(0xFF795548)),
+                              Icon(Icons.local_fire_department,
+                                  size: 13, color: Color(0xFF795548)),
                               SizedBox(width: 3),
                               Text(
                                 'BESTSELLER',
@@ -257,9 +262,11 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('${product.reviewCount} verified reviews'),
+                            content:
+                                Text('${product.reviewCount} verified reviews'),
                             behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                           ),
                         );
                       },
@@ -269,7 +276,11 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                             final filled = i < product.rating.floor();
                             final halfFilled = !filled && i < product.rating;
                             return Icon(
-                              filled ? Icons.star : (halfFilled ? Icons.star_half : Icons.star_outline),
+                              filled
+                                  ? Icons.star
+                                  : (halfFilled
+                                      ? Icons.star_half
+                                      : Icons.star_outline),
                               color: const Color(0xFFFFB300),
                               size: 18,
                             );
@@ -308,7 +319,8 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                       ),
                       const Spacer(),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: product.stock > 0
                               ? const Color(0xFF81C784).withAlpha(30)
@@ -316,9 +328,13 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          product.stock > 0 ? '${product.stock} in stock' : 'Out of stock',
+                          product.stock > 0
+                              ? '${product.stock} in stock'
+                              : 'Out of stock',
                           style: TextStyle(
-                            color: product.stock > 0 ? const Color(0xFF506453) : colorScheme.error,
+                            color: product.stock > 0
+                                ? const Color(0xFF506453)
+                                : colorScheme.error,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -335,7 +351,8 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                       children: product.tags.map((tag) {
                         final icon = _tagIcon(tag);
                         return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
                             color: const Color(0xFFE5FDE6),
                             borderRadius: BorderRadius.circular(20),
@@ -343,7 +360,8 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(icon, size: 14, color: const Color(0xFF506453)),
+                              Icon(icon,
+                                  size: 14, color: const Color(0xFF506453)),
                               const SizedBox(width: 4),
                               Text(
                                 tag,
@@ -388,20 +406,20 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                     ),
                     child: Column(
                       children: [
-                        _featureRow(context,
-                            Icons.local_shipping_outlined, 'Free Shipping',
+                        _featureRow(context, Icons.local_shipping_outlined,
+                            'Free Shipping',
                             subtitle: 'Orders over \$25'),
                         Divider(
                             height: 24,
                             color: colorScheme.outline.withAlpha(40)),
-                        _featureRow(context,
-                            Icons.verified_outlined, 'Quality Assured',
+                        _featureRow(
+                            context, Icons.verified_outlined, 'Quality Assured',
                             subtitle: 'Vet-approved products'),
                         Divider(
                             height: 24,
                             color: colorScheme.outline.withAlpha(40)),
-                        _featureRow(context,
-                            Icons.replay_outlined, '30-Day Returns',
+                        _featureRow(
+                            context, Icons.replay_outlined, '30-Day Returns',
                             subtitle: 'Easy refund policy'),
                       ],
                     ),
@@ -466,7 +484,8 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _ComplementaryProducts(currentProductId: product.id, category: product.category),
+                  _ComplementaryProducts(
+                      currentProductId: product.id, category: product.category),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -518,7 +537,9 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                     onPressed: product.stock > 0
                         ? () {
                             for (int i = 0; i < _quantity; i++) {
-                              ref.read(cartProvider.notifier).addProduct(product);
+                              ref
+                                  .read(cartProvider.notifier)
+                                  .addProduct(product);
                             }
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -563,15 +584,24 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
 
   IconData _tagIcon(String tag) {
     switch (tag.toLowerCase()) {
-      case 'organic': return Icons.eco_outlined;
-      case 'non-gmo': return Icons.spa_outlined;
-      case 'artisanal': return Icons.handshake_outlined;
-      case 'hand-made': return Icons.handyman_outlined;
-      case 'eco-friendly': return Icons.recycling_outlined;
-      case 'natural': return Icons.nature_outlined;
-      case 'premium': return Icons.workspace_premium_outlined;
-      case 'healthy': return Icons.favorite_outline;
-      default: return Icons.label_outline;
+      case 'organic':
+        return Icons.eco_outlined;
+      case 'non-gmo':
+        return Icons.spa_outlined;
+      case 'artisanal':
+        return Icons.handshake_outlined;
+      case 'hand-made':
+        return Icons.handyman_outlined;
+      case 'eco-friendly':
+        return Icons.recycling_outlined;
+      case 'natural':
+        return Icons.nature_outlined;
+      case 'premium':
+        return Icons.workspace_premium_outlined;
+      case 'healthy':
+        return Icons.favorite_outline;
+      default:
+        return Icons.label_outline;
     }
   }
 
@@ -613,7 +643,8 @@ class _ComplementaryProducts extends ConsumerWidget {
   final String currentProductId;
   final String category;
 
-  const _ComplementaryProducts({required this.currentProductId, required this.category});
+  const _ComplementaryProducts(
+      {required this.currentProductId, required this.category});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -654,7 +685,8 @@ class _ComplementaryProducts extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(16)),
                     child: p.images.isNotEmpty
                         ? Image.network(
                             p.images.first,
@@ -664,17 +696,21 @@ class _ComplementaryProducts extends ConsumerWidget {
                             errorBuilder: (_, __, ___) => Container(
                               height: 70,
                               color: colorScheme.surfaceContainerHighest,
-                              child: Icon(Icons.image_not_supported, color: colorScheme.onSurfaceVariant, size: 28),
+                              child: Icon(Icons.image_not_supported,
+                                  color: colorScheme.onSurfaceVariant,
+                                  size: 28),
                             ),
                           )
                         : Container(
                             height: 70,
                             color: colorScheme.surfaceContainerHighest,
-                            child: Icon(Icons.shopping_bag_outlined, color: colorScheme.onSurfaceVariant, size: 28),
+                            child: Icon(Icons.shopping_bag_outlined,
+                                color: colorScheme.onSurfaceVariant, size: 28),
                           ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -682,12 +718,18 @@ class _ComplementaryProducts extends ConsumerWidget {
                           p.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: colorScheme.onSurface),
+                          style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           '\$${p.price.toStringAsFixed(2)}',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: colorScheme.primary),
+                          style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: colorScheme.primary),
                         ),
                       ],
                     ),

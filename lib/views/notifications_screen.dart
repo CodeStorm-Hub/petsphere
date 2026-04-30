@@ -25,7 +25,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    
+
     // Mark notifications as read automatically upon viewing the page
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -81,7 +81,9 @@ class _ActivityTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(notificationProvider);
 
-    final items = state.items.where((n) => n.type != 'message' && n.type != 'match_request').toList();
+    final items = state.items
+        .where((n) => n.type != 'message' && n.type != 'match_request')
+        .toList();
 
     if (state.isLoading && items.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -190,8 +192,7 @@ class _NotificationTile extends ConsumerWidget {
       title: Text(
         notification.title,
         style: TextStyle(
-          fontWeight:
-              notification.isRead ? FontWeight.w500 : FontWeight.w700,
+          fontWeight: notification.isRead ? FontWeight.w500 : FontWeight.w700,
         ),
       ),
       subtitle: notification.body != null
@@ -206,8 +207,7 @@ class _NotificationTile extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(_timeAgo(notification.createdAt),
-              style: TextStyle(
-                  color: colors.onSurfaceVariant, fontSize: 11)),
+              style: TextStyle(color: colors.onSurfaceVariant, fontSize: 11)),
           if (!notification.isRead) ...[
             const SizedBox(height: 4),
             Container(
@@ -260,8 +260,8 @@ class _RequestsTab extends ConsumerWidget {
                 return ListTile(
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  leading:
-                      PetAvatar(imageUrl: senderPet.profileImageUrl, radius: 24),
+                  leading: PetAvatar(
+                      imageUrl: senderPet.profileImageUrl, radius: 24),
                   title: Text.rich(
                     TextSpan(
                       children: [

@@ -26,7 +26,7 @@ class PetSphereApp extends ConsumerWidget {
     // auth listener and auto-hydrate all data sources whenever the user
     // becomes authenticated (cold start with a saved session, or fresh
     // login). Manual refresh on each screen still works as before.
-    ref.watch(bootstrapProvider); 
+    ref.watch(bootstrapProvider);
 
     return MaterialApp.router(
       title: 'PetSphere',
@@ -38,4 +38,3 @@ class PetSphereApp extends ConsumerWidget {
     );
   }
 }
-
