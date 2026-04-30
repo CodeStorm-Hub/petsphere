@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,12 @@ import '../controllers/pet_controller.dart';
 import '../models/story_model.dart';
 import '../utils/media_utils.dart';
 
+/// How long a still-image frame is displayed before auto-advancing.
+const Duration _kImageDuration = Duration(seconds: 7);
+
+/// Maximum allowed display time for a video frame.
+const Duration _kVideoMaxDuration = Duration(seconds: 60);
+
 class StoryViewerScreen extends ConsumerStatefulWidget {
   final String petId;
 
@@ -17,13 +25,47 @@ class StoryViewerScreen extends ConsumerStatefulWidget {
   ConsumerState<StoryViewerScreen> createState() => _StoryViewerScreenState();
 }
 
-class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
+class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
+    with TickerProviderStateMixin {
   final _pageController = PageController();
   int _index = 0;
 
-  void _next(int storyCount) {
-    if (_index >= storyCount - 1) {
-      context.pop();
+  // Per-frame progress animation controller.
+  late AnimationController _progressController;
+
+  // Expose the current list length so callbacks can read it safely.
+  int _storyCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _progressController = AnimationController(vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _progressController.dispose();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  // Called by each _StoryPage once it knows its true duration.
+  void _startProgressFor(Duration duration) {
+    _progressController.stop();
+    _progressController.reset();
+    _progressController.duration = duration;
+    _progressController.forward().whenComplete(() {
+      // Only auto-advance if the widget is still alive and the controller
+      // finished naturally (not stopped/reset by user gesture).
+      if (mounted && _progressController.status == AnimationStatus.completed) {
+        _next();
+      }
+    });
+  }
+
+  void _next() {
+    if (_index >= _storyCount - 1) {
+      if (mounted) context.pop();
       return;
     }
     _pageController.nextPage(
@@ -47,7 +89,10 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
         .where((story) => story.pet.id == widget.petId)
         .toList()
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
-    final myPetIds = ref.watch(petProvider).myPets.map((pet) => pet.id).toSet();
+    _storyCount = stories.length;
+
+    final myPetIds =
+        ref.watch(petProvider).myPets.map((pet) => pet.id).toSet();
     final canDelete = myPetIds.contains(widget.petId);
 
     if (stories.isEmpty) {
@@ -76,42 +121,54 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
       body: SafeArea(
         child: Stack(
           children: [
+            // ── Media pages ────────────────────────────────────────────
             PageView.builder(
               controller: _pageController,
               itemCount: stories.length,
-              onPageChanged: (index) => setState(() => _index = index),
+              onPageChanged: (index) {
+                setState(() => _index = index);
+                // Reset progress; the _StoryPage will call _startProgressFor
+                // once it knows the frame duration.
+                _progressController.stop();
+                _progressController.reset();
+              },
               itemBuilder: (context, index) {
                 final story = stories[index];
                 return _StoryPage(
+                  key: ValueKey(story.id),
                   story: story,
+                  onReady: (duration) {
+                    if (_index == index) _startProgressFor(duration);
+                  },
                   onPrevious: _previous,
-                  onNext: () => _next(stories.length),
+                  onNext: _next,
                 );
               },
             ),
+
+            // ── Overlay: progress bars + header ────────────────────────
             Positioned(
               top: 12,
               left: 12,
               right: 12,
               child: Column(
                 children: [
+                  // Progress bars
                   Row(
-                    children: List.generate(stories.length, (index) {
+                    children: List.generate(stories.length, (i) {
                       return Expanded(
-                        child: Container(
-                          height: 3,
-                          margin: const EdgeInsets.symmetric(horizontal: 2),
-                          decoration: BoxDecoration(
-                            color: index <= _index
-                                ? Colors.white
-                                : Colors.white.withAlpha(80),
-                            borderRadius: BorderRadius.circular(99),
-                          ),
+                        child: _ProgressBar(
+                          progress: i < _index
+                              ? 1.0
+                              : i == _index
+                                  ? _progressController
+                                  : 0.0,
                         ),
                       );
                     }),
                   ),
                   const SizedBox(height: 12),
+                  // Header row
                   Row(
                     children: [
                       CircleAvatar(
@@ -119,7 +176,8 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                                 .pet
                                 .profileImageUrl
                                 .isNotEmpty
-                            ? NetworkImage(stories[_index].pet.profileImageUrl)
+                            ? NetworkImage(
+                                stories[_index].pet.profileImageUrl)
                             : null,
                         child: stories[_index].pet.profileImageUrl.isEmpty
                             ? const Icon(Icons.pets)
@@ -127,12 +185,19 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Text(
-                          stories[_index].pet.name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              stories[_index].pet.name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            _ExpiryBadge(
+                                expiresAt: stories[_index].expiresAt),
+                          ],
                         ),
                       ),
                       if (canDelete)
@@ -151,7 +216,8 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
                         ),
                       IconButton(
                         onPressed: () => context.pop(),
-                        icon: const Icon(Icons.close, color: Colors.white),
+                        icon:
+                            const Icon(Icons.close, color: Colors.white),
                       ),
                     ],
                   ),
@@ -165,13 +231,85 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
   }
 }
 
+// ── Segmented animated progress bar ────────────────────────────────────────
+
+class _ProgressBar extends StatelessWidget {
+  /// Accepts either a double (0–1 static fill) or an [AnimationController].
+  final Object progress;
+
+  const _ProgressBar({required this.progress});
+
+  @override
+  Widget build(BuildContext context) {
+    Widget bar(double value) => Container(
+          height: 3,
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(99),
+            color: Colors.white.withAlpha(60),
+          ),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: value.clamp(0.0, 1.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(99),
+              ),
+            ),
+          ),
+        );
+
+    if (progress is double) return bar(progress as double);
+
+    return AnimatedBuilder(
+      animation: progress as AnimationController,
+      builder: (_, __) => bar((progress as AnimationController).value),
+    );
+  }
+}
+
+// ── 24-hour expiry badge ────────────────────────────────────────────────────
+
+class _ExpiryBadge extends StatelessWidget {
+  final DateTime expiresAt;
+
+  const _ExpiryBadge({required this.expiresAt});
+
+  @override
+  Widget build(BuildContext context) {
+    final remaining = expiresAt.difference(DateTime.now());
+    if (remaining.isNegative) {
+      return const Text(
+        'Expired',
+        style: TextStyle(color: Colors.redAccent, fontSize: 11),
+      );
+    }
+    final h = remaining.inHours;
+    final m = remaining.inMinutes % 60;
+    final label = h > 0 ? '${h}h ${m}m left' : '${m}m left';
+    return Text(
+      label,
+      style: TextStyle(
+        color: Colors.white.withAlpha(160),
+        fontSize: 11,
+      ),
+    );
+  }
+}
+
+// ── Individual story page ───────────────────────────────────────────────────
+
 class _StoryPage extends StatelessWidget {
   final StoryModel story;
+  final ValueChanged<Duration> onReady;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
 
   const _StoryPage({
+    super.key,
     required this.story,
+    required this.onReady,
     required this.onPrevious,
     required this.onNext,
   });
@@ -182,15 +320,17 @@ class _StoryPage extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         if (isVideoMedia(story.mediaUrl))
-          _StoryVideo(url: story.mediaUrl)
+          _StoryVideo(
+            url: story.mediaUrl,
+            onReady: onReady,
+          )
         else
-          Image.network(
-            story.mediaUrl,
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => const Center(
-              child: Icon(Icons.broken_image, color: Colors.white, size: 56),
-            ),
+          _StoryImage(
+            url: story.mediaUrl,
+            onReady: onReady,
           ),
+
+        // Tap zones: left → previous, right → next
         Row(
           children: [
             Expanded(
@@ -207,6 +347,8 @@ class _StoryPage extends StatelessWidget {
             ),
           ],
         ),
+
+        // Caption
         if (story.caption.isNotEmpty)
           Positioned(
             left: 20,
@@ -227,10 +369,62 @@ class _StoryPage extends StatelessWidget {
   }
 }
 
+// ── Still-image frame — 7-second display ───────────────────────────────────
+
+class _StoryImage extends StatefulWidget {
+  final String url;
+  final ValueChanged<Duration> onReady;
+
+  const _StoryImage({required this.url, required this.onReady});
+
+  @override
+  State<_StoryImage> createState() => _StoryImageState();
+}
+
+class _StoryImageState extends State<_StoryImage> {
+  bool _reported = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.network(
+      widget.url,
+      fit: BoxFit.contain,
+      loadingBuilder: (_, child, progress) {
+        if (progress == null) {
+          // Image fully loaded — start the 7-second timer once.
+          if (!_reported) {
+            _reported = true;
+            WidgetsBinding.instance.addPostFrameCallback(
+              (_) => widget.onReady(_kImageDuration),
+            );
+          }
+          return child;
+        }
+        return const Center(child: CircularProgressIndicator());
+      },
+      errorBuilder: (_, __, ___) {
+        // Even on error, start timer so the viewer doesn't get stuck.
+        if (!_reported) {
+          _reported = true;
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => widget.onReady(_kImageDuration),
+          );
+        }
+        return const Center(
+          child: Icon(Icons.broken_image, color: Colors.white, size: 56),
+        );
+      },
+    );
+  }
+}
+
+// ── Video frame — up to 60-second cap ──────────────────────────────────────
+
 class _StoryVideo extends StatefulWidget {
   final String url;
+  final ValueChanged<Duration> onReady;
 
-  const _StoryVideo({required this.url});
+  const _StoryVideo({required this.url, required this.onReady});
 
   @override
   State<_StoryVideo> createState() => _StoryVideoState();
@@ -239,21 +433,42 @@ class _StoryVideo extends StatefulWidget {
 class _StoryVideoState extends State<_StoryVideo> {
   late final VideoPlayerController _controller;
   bool _isReady = false;
+  bool _reported = false;
+  Timer? _capTimer;
 
   @override
   void initState() {
     super.initState();
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
-      ..setLooping(true)
+      ..setLooping(false)
       ..initialize().then((_) {
         if (!mounted) return;
         setState(() => _isReady = true);
         _controller.play();
+
+        // Clamp display duration to 60 seconds.
+        final videoDuration = _controller.value.duration;
+        final displayDuration = videoDuration > _kVideoMaxDuration
+            ? _kVideoMaxDuration
+            : videoDuration;
+
+        if (!_reported) {
+          _reported = true;
+          widget.onReady(displayDuration);
+        }
+
+        // If video is longer than 60 s, forcibly stop it at the cap.
+        if (videoDuration > _kVideoMaxDuration) {
+          _capTimer = Timer(_kVideoMaxDuration, () {
+            if (mounted) _controller.pause();
+          });
+        }
       });
   }
 
   @override
   void dispose() {
+    _capTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }

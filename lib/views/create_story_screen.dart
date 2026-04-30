@@ -102,6 +102,20 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                             'Pick a photo or video to post as a story.',
                             style: TextStyle(color: Color(0xFFB8B2AA)),
                           ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              _DurationBadge(
+                                icon: Icons.image_outlined,
+                                label: '7 s / photo',
+                              ),
+                              const SizedBox(width: 8),
+                              _DurationBadge(
+                                icon: Icons.videocam_outlined,
+                                label: 'max 60 s / video',
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 18),
                           _MediaPickerTile(
                             icon: Icons.photo_library_outlined,
@@ -547,6 +561,40 @@ class _MediaPickerTile extends StatelessWidget {
         ),
       ),
       trailing: const Icon(Icons.chevron_right, color: Color(0xFFB8B2AA)),
+    );
+  }
+}
+
+class _DurationBadge extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _DurationBadge({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFD4845A).withAlpha(28),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFD4845A).withAlpha(60)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: const Color(0xFFD4845A)),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFFD4845A),
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

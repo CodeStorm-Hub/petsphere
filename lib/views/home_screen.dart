@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import '../controllers/chat_controller.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../controllers/auth_controller.dart';
@@ -1084,8 +1085,7 @@ class _MessageIconButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final unread =
-        ref.watch(notificationProvider.select((s) => s.unreadMessageCount));
+    final unread = ref.watch(chatProvider.select((s) => s.totalUnread));
 
     return IconButton(
       tooltip: unread > 0 ? 'Messages ($unread unread)' : 'Messages',

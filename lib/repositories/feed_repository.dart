@@ -145,6 +145,11 @@ class FeedRepository {
     required String mediaUrl,
     String caption = '',
   }) async {
+    // Explicitly set expires_at to now + 24 h so the expiry window is always
+    // enforced even if the DB default were ever changed.
+    final expiresAt =
+        DateTime.now().toUtc().add(const Duration(hours: 24)).toIso8601String();
+
     try {
       final data = await supabase
           .from('stories')
@@ -152,6 +157,7 @@ class FeedRepository {
             'pet_id': petId,
             'media_url': mediaUrl,
             'caption': caption,
+            'expires_at': expiresAt,
           })
           .select('*, pets!stories_pet_id_fkey(*)')
           .single();

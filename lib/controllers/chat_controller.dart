@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/chat_thread_model.dart';
 import '../models/message_model.dart';
 import '../repositories/chat_repository.dart';
+import '../repositories/notification_repository.dart';
 import 'pet_controller.dart';
 
 // ---------------------------------------------------------------------------
@@ -70,6 +71,36 @@ class ThreadMessagesNotifier extends Notifier<List<MessageModel>> {
       // Replace temp message with real one (Realtime will also fire but we
       // deduplicate by ID in the subscription callback above)
       state = state.map((m) => m.id == tempId ? sent : m).toList();
+
+      // Notify the other pet's owner
+      try {
+        final threads = ref.read(chatProvider).threads;
+        ChatThreadModel? thread;
+        for (final t in threads) {
+          if (t.id == threadId) {
+            thread = t;
+            break;
+          }
+        }
+        if (thread != null) {
+          for (final pet in thread.participantPets) {
+            if (pet.id != senderPetId && pet.userId.isNotEmpty) {
+              notificationRepository.sendNotification(
+                targetUserId: pet.userId,
+                title: 'New message',
+                body: text.trim().length > 100
+                    ? '${text.trim().substring(0, 100)}…'
+                    : text.trim(),
+                type: 'message',
+                entityType: 'message',
+                entityId: threadId,
+                actorPetId: senderPetId,
+              );
+              break;
+            }
+          }
+        }
+      } catch (_) {}
     } catch (_) {
       // Rollback optimistic message
       state = state.where((m) => m.id != tempId).toList();
@@ -101,6 +132,8 @@ class ChatState {
     this.error,
   });
 
+  int get totalUnread => threads.fold(0, (sum, t) => sum + t.unreadCount);
+
   ChatState copyWith({
     List<ChatThreadModel>? threads,
     bool? isLoading,
@@ -116,8 +149,11 @@ class ChatState {
 }
 
 class ChatController extends Notifier<ChatState> {
+  RealtimeChannel? _messagesChannel;
+
   @override
   ChatState build() {
+    ref.onDispose(() => _messagesChannel?.unsubscribe());
     final activePet = ref.watch(activePetProvider);
     if (activePet != null) {
       _loadThreads(activePet.id);
@@ -129,10 +165,43 @@ class ChatController extends Notifier<ChatState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final threads = await chatRepository.fetchThreads(myPetId);
-      state = state.copyWith(threads: threads, isLoading: false);
+
+      // Fetch all unread counts in a single batch query
+      final threadIds = threads.map((t) => t.id).toList();
+      final unreadCounts = await chatRepository.fetchUnreadCountsForThreads(
+          threadIds, myPetId);
+      final threadsWithCounts = threads
+          .map((t) => t.copyWith(unreadCount: unreadCounts[t.id] ?? 0))
+          .toList();
+
+      state = state.copyWith(threads: threadsWithCounts, isLoading: false);
+      _subscribeToIncomingMessages(myPetId);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
+  }
+
+  void _subscribeToIncomingMessages(String myPetId) {
+    _messagesChannel?.unsubscribe();
+    final knownThreadIds = state.threads.map((t) => t.id).toSet();
+
+    _messagesChannel = chatRepository.subscribeToAllMessages(
+      onMessage: (msg) {
+        // Ignore own messages (already added optimistically)
+        if (msg.senderPetId == myPetId) return;
+        if (!knownThreadIds.contains(msg.threadId)) return;
+
+        state = state.copyWith(
+          threads: state.threads.map((t) {
+            if (t.id != msg.threadId) return t;
+            return t.copyWith(
+              lastMessage: msg,
+              unreadCount: t.unreadCount + 1,
+            );
+          }).toList(),
+        );
+      },
+    );
   }
 
   Future<void> refresh() async {

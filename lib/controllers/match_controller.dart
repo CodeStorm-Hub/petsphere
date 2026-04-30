@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/match_request_model.dart';
 import '../models/pet_model.dart';
 import '../repositories/match_repository.dart';
+import '../repositories/notification_repository.dart';
 import 'auth_controller.dart';
 import 'chat_controller.dart';
 import 'pet_controller.dart';
@@ -195,6 +196,15 @@ class MatchController extends Notifier<MatchState> {
       return false;
     }
 
+    // Capture receiver pet before removing it from state
+    PetModel? receiverPet;
+    for (final p in state.allDiscoveryPets) {
+      if (p.id == receiverPetId) {
+        receiverPet = p;
+        break;
+      }
+    }
+
     try {
       await matchRepository.sendLikeRequest(
         senderPetId: activePet.id,
@@ -208,6 +218,21 @@ class MatchController extends Notifier<MatchState> {
         discoveryPets: discoveryPets,
         allDiscoveryPets: allDiscoveryPets,
       );
+
+      // Notify the receiver pet's owner
+      if (receiverPet != null && receiverPet.userId.isNotEmpty) {
+        notificationRepository.sendNotification(
+          targetUserId: receiverPet.userId,
+          title: 'New breeding interest',
+          body:
+              '${activePet.name} is interested in breeding with ${receiverPet.name}.',
+          type: 'match_request',
+          entityType: 'match_request',
+          entityId: activePet.id,
+          actorPetId: activePet.id,
+        );
+      }
+
       // Refresh sent requests
       _load(activePet.id);
       return true;
@@ -218,6 +243,15 @@ class MatchController extends Notifier<MatchState> {
   }
 
   Future<void> acceptRequest(String requestId) async {
+    // Capture the request before any state change so we can read senderPet
+    MatchRequestModel? request;
+    for (final r in state.myRequests) {
+      if (r.id == requestId) {
+        request = r;
+        break;
+      }
+    }
+
     try {
       await matchRepository.updateRequestStatus(requestId, 'matched');
       state = state.copyWith(
@@ -226,6 +260,23 @@ class MatchController extends Notifier<MatchState> {
           return req;
         }).toList(),
       );
+
+      // Notify the sender that their request was accepted
+      final senderPet = request?.senderPet;
+      if (senderPet != null && senderPet.userId.isNotEmpty) {
+        final myPet = ref.read(activePetProvider);
+        notificationRepository.sendNotification(
+          targetUserId: senderPet.userId,
+          title: "It's a match!",
+          body:
+              '${myPet?.name ?? 'Your match'} accepted your breeding request.',
+          type: 'match_accepted',
+          entityType: 'match_request',
+          entityId: requestId,
+          actorPetId: myPet?.id,
+        );
+      }
+
       // A DB trigger creates the chat_threads row — refresh thread list so
       // the new thread immediately appears in the inbox.
       await ref.read(chatProvider.notifier).refresh();

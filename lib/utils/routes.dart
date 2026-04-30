@@ -8,7 +8,7 @@ import '../views/create_story_screen.dart';
 import '../views/add_pet_screen.dart';
 import '../views/messages_list_screen.dart';
 import '../views/chat_screen.dart';
-import '../views/match_pet_profile_screen.dart';
+import '../views/pet_profile_screen.dart';
 import '../views/product_detail_screen.dart';
 import '../views/post_detail_screen.dart';
 import '../views/cart_screen.dart';
@@ -118,14 +118,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/pet/:id',
         builder: (context, state) {
           final petId = state.pathParameters['id']!;
-          return MatchPetProfileScreen(petId: petId);
+          return PetProfileScreen(visitPetId: petId);
         },
       ),
       GoRoute(
         path: '/user/:id',
         builder: (context, state) {
           final userId = state.pathParameters['id']!;
-          return MatchPetProfileScreen(userId: userId);
+          return PetProfileScreen(visitUserId: userId);
         },
       ),
       GoRoute(
