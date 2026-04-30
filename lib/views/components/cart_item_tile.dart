@@ -36,7 +36,7 @@ class CartItemTile extends ConsumerWidget {
               ),
               child: item.product.images.isEmpty
                   ? Icon(Icons.inventory_2_outlined,
-                    size: 28, color: colorScheme.onSurfaceVariant)
+                      size: 28, color: colorScheme.onSurfaceVariant)
                   : null,
             ),
             const SizedBox(width: 16),
@@ -46,12 +46,15 @@ class CartItemTile extends ConsumerWidget {
                 children: [
                   Text(
                     item.product.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     currencyFormat.format(item.product.price),
-                    style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -59,17 +62,23 @@ class CartItemTile extends ConsumerWidget {
                       _QuantityButton(
                         icon: Icons.remove,
                         onTap: () {
-                          ref.read(cartProvider.notifier).updateQuantity(item.id, item.quantity - 1);
+                          ref
+                              .read(cartProvider.notifier)
+                              .updateQuantity(item.id, item.quantity - 1);
                         },
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                        child: Text('${item.quantity}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        child: Text('${item.quantity}',
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
                       ),
                       _QuantityButton(
                         icon: Icons.add,
                         onTap: () {
-                          ref.read(cartProvider.notifier).updateQuantity(item.id, item.quantity + 1);
+                          ref
+                              .read(cartProvider.notifier)
+                              .updateQuantity(item.id, item.quantity + 1);
                         },
                       ),
                     ],
@@ -78,7 +87,8 @@ class CartItemTile extends ConsumerWidget {
               ),
             ),
             IconButton(
-              icon: Icon(Icons.delete_outline, color: colorScheme.onSurfaceVariant),
+              icon: Icon(Icons.delete_outline,
+                  color: colorScheme.onSurfaceVariant),
               onPressed: () {
                 ref.read(cartProvider.notifier).removeCartItem(item.id);
               },

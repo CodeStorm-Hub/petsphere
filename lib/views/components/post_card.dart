@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:video_player/video_player.dart';
 import '../../models/post_model.dart';
-import 'pet_avatar.dart';
+import '../../utils/media_utils.dart';
 
+/// Instagram-style edge-to-edge post card.
+///
+/// Layout (top → bottom):
+///   1. Header: 32×32 avatar with story ring · username (bold) + verified ·
+///      pet breed / time-ago subtitle · 3-dot menu
+///   2. 1:1 media (double-tap to like, animated heart overlay)
+///   3. Action row: heart, comment, share · bookmark (right-aligned)
+///   4. "X likes" line
+///   5. RichText caption: bold username + caption text + "more" (on overflow)
+///   6. "View all N comments" link (if any)
+///   7. Time-ago / date
 class PostCard extends StatefulWidget {
   final PostModel post;
   final String currentPetId;
@@ -24,15 +37,14 @@ class PostCard extends StatefulWidget {
   State<PostCard> createState() => _PostCardState();
 }
 
-class _PostCardState extends State<PostCard> {
+class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
   bool _isSaved = false;
   bool _showHeart = false;
+  bool _captionExpanded = false;
 
   void _handleDoubleTap() {
     final isLiked = widget.post.likedByPetIds.contains(widget.currentPetId);
-    if (!isLiked) {
-      widget.onLikeToggle();
-    }
+    if (!isLiked) widget.onLikeToggle();
     setState(() => _showHeart = true);
     Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) setState(() => _showHeart = false);
@@ -66,9 +78,7 @@ class _PostCardState extends State<PostCard> {
                 title: Text(_isSaved ? 'Unsave Post' : 'Save Post'),
                 onTap: () {
                   Navigator.pop(context);
-                  setState(() {
-                    _isSaved = !_isSaved;
-                  });
+                  setState(() => _isSaved = !_isSaved);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(_isSaved ? 'Post Saved!' : 'Post Unsaved.'),
@@ -84,8 +94,8 @@ class _PostCardState extends State<PostCard> {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text(
-                          'Post hidden. We\'ll show you fewer like this.'),
+                      content:
+                          Text('Post hidden. We\'ll show you fewer like this.'),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -104,8 +114,7 @@ class _PostCardState extends State<PostCard> {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text(
-                          'Thanks — our team will review this post.'),
+                      content: Text('Thanks — our team will review this post.'),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -118,238 +127,650 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  // Derives a mood label from the caption text
-  String _moodBadge(String caption) {
-    final lower = caption.toLowerCase();
-    if (lower.contains('play') || lower.contains('fun') || lower.contains('ball')) return 'Playful';
-    if (lower.contains('nap') || lower.contains('sleep') || lower.contains('rest')) return 'Napping';
-    if (lower.contains('park') || lower.contains('walk') || lower.contains('outdoor')) return 'Outdoors';
-    if (lower.contains('eat') || lower.contains('food') || lower.contains('treat')) return 'Mealtime';
-    return 'Happy';
+  String _formatTimeAgo(DateTime dt) {
+    final diff = DateTime.now().difference(dt);
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
+    if (diff.inHours < 24) return '${diff.inHours}h';
+    if (diff.inDays < 7) return '${diff.inDays}d';
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return '${months[dt.month - 1]} ${dt.day}';
+  }
+
+  String _formatCount(int n) {
+    final s = n.toString();
+    final buf = StringBuffer();
+    for (var i = 0; i < s.length; i++) {
+      if (i != 0 && (s.length - i) % 3 == 0) buf.write(',');
+      buf.write(s[i]);
+    }
+    return buf.toString();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isLiked = widget.post.likedByPetIds.contains(widget.currentPetId);
-    final mood = _moodBadge(widget.post.caption);
-    // Alternate slight rotation for editorial feel
-    final rotation = widget.post.id.hashCode.isEven ? -0.012 : 0.012;
+    final likeCount = widget.post.likedByPetIds.length;
+    final commentCount = widget.post.comments.length;
+    final caption = widget.post.caption;
+    final timeAgo = _formatTimeAgo(widget.post.createdAt);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF99472C).withAlpha(15),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        color: const Color(0xFF1A1814),
+        border: Border.all(color: const Color(0xFF2E2B26)),
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Header ───────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 8, 10),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: widget.onPetTap,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      PetAvatar(
-                        imageUrl: widget.post.pet.profileImageUrl,
-                        hasStory: true,
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header ─────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: widget.onPetTap,
+                    child: _StoryRingAvatar(
+                      imageUrl: widget.post.pet.profileImageUrl,
+                      radius: 16,
+                      showRing: true,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: widget.onPetTap,
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            widget.post.pet.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                              color: Color(0xFF35322D),
-                            ),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  widget.post.pet.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13.5,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                              if (widget.post.pet.isVerified) ...[
+                                const SizedBox(width: 4),
+                                const Icon(Icons.verified,
+                                    size: 14, color: Color(0xFF1DA1F2)),
+                              ],
+                            ],
                           ),
-                          Text(
-                            widget.post.pet.breed,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF625E59),
+                          if (widget.post.location.isNotEmpty)
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on,
+                                  size: 11,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 2),
+                                Flexible(
+                                  child: Text(
+                                    widget.post.location,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          else if (widget.post.pet.breed.isNotEmpty)
+                            Text(
+                              widget.post.pet.breed,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
                             ),
-                          ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.more_horiz, color: Color(0xFF625E59)),
-                  onPressed: _showSettingsSheet,
-                ),
-              ],
+                  IconButton(
+                    iconSize: 22,
+                    visualDensity: VisualDensity.compact,
+                    icon: Icon(Icons.more_horiz, color: colorScheme.onSurface),
+                    onPressed: _showSettingsSheet,
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          // ── Image with editorial rotation + mood badge ────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: GestureDetector(
+            // ── Media (1:1, edge-to-edge) ──────────────────────────────
+            GestureDetector(
               onDoubleTap: _handleDoubleTap,
-              child: Transform.rotate(
-                angle: rotation,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Stack(
-                    children: [
-                      AspectRatio(
-                        aspectRatio: 4 / 5,
-                        child: Image.network(
-                          widget.post.mediaUrl,
-                          fit: BoxFit.cover,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              color: const Color(0xFFF3EDE6),
-                              child: const Center(child: CircularProgressIndicator()),
-                            );
-                          },
-                          errorBuilder: (ctx, err, stack) => Container(
-                            color: const Color(0xFFF3EDE6),
-                            child: const Icon(Icons.pets, size: 48, color: Color(0xFF99472C)),
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    isVideoMedia(widget.post.mediaUrl)
+                        ? _PostVideoPlayer(
+                            key: ValueKey(widget.post.mediaUrl),
+                            url: widget.post.mediaUrl,
+                          )
+                        : Image.network(
+                            widget.post.mediaUrl,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return const _MediaLoadingPlaceholder();
+                            },
+                            errorBuilder: (ctx, err, stack) =>
+                                _MediaErrorPlaceholder(
+                                    colorScheme: colorScheme),
                           ),
-                        ),
-                      ),
-                      // Double-tap heart overlay
-                      Positioned.fill(
-                        child: AnimatedOpacity(
-                          duration: const Duration(milliseconds: 300),
-                          opacity: _showHeart ? 1.0 : 0.0,
-                          child: Center(
-                            child: AnimatedScale(
-                              scale: _showHeart ? 1.0 : 0.5,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOutBack,
-                              child: const Icon(Icons.favorite, size: 80, color: Colors.white),
+                    IgnorePointer(
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 250),
+                        opacity: _showHeart ? 1.0 : 0.0,
+                        child: Center(
+                          child: AnimatedScale(
+                            scale: _showHeart ? 1.0 : 0.4,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOutBack,
+                            child: const Icon(
+                              Icons.favorite,
+                              size: 96,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Color(0x66000000),
+                                  blurRadius: 24,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
-                      // Mood badge
-                      Positioned(
-                        bottom: 16,
-                        left: 16,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Action row ─────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(6, 4, 6, 0),
+              child: Row(
+                children: [
+                  _ActionIcon(
+                    onTap: widget.onLikeToggle,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      transitionBuilder: (child, anim) =>
+                          ScaleTransition(scale: anim, child: child),
+                      child: Icon(
+                        isLiked ? Icons.favorite : Icons.favorite_border,
+                        key: ValueKey(isLiked),
+                        size: 26,
+                        color: isLiked
+                            ? const Color(0xFFED4956)
+                            : colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  _ActionIcon(
+                    onTap: widget.onCommentIconTap,
+                    child: Icon(Icons.mode_comment_outlined,
+                        size: 26, color: colorScheme.onSurface),
+                  ),
+                  _ActionIcon(
+                    onTap: widget.onShareIconTap,
+                    child: Transform.rotate(
+                      angle: -0.5,
+                      child: Icon(Icons.send_outlined,
+                          size: 26, color: colorScheme.onSurface),
+                    ),
+                  ),
+                  const Spacer(),
+                  _ActionIcon(
+                    onTap: () {
+                      setState(() => _isSaved = !_isSaved);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content:
+                              Text(_isSaved ? 'Post Saved!' : 'Post Unsaved.'),
+                        ),
+                      );
+                    },
+                    child: Icon(
+                      _isSaved ? Icons.bookmark : Icons.bookmark_border,
+                      size: 26,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Like count ─────────────────────────────────────────────
+            if (likeCount > 0)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 2, 14, 0),
+                child: Text(
+                  likeCount == 1
+                      ? '1 like'
+                      : '${_formatCount(likeCount)} likes',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.5,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ),
+
+            // ── Caption (username + text, expandable) ──────────────────
+            if (caption.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+                child: _ExpandableCaption(
+                  username: widget.post.pet.name,
+                  caption: caption,
+                  expanded: _captionExpanded,
+                  onUsernameTap: widget.onPetTap,
+                  onMoreTap: () => setState(() => _captionExpanded = true),
+                  onSurface: colorScheme.onSurface,
+                  onSurfaceVariant: colorScheme.onSurfaceVariant,
+                ),
+              ),
+
+            if (widget.post.taggedPetNames.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: widget.post.taggedPetNames
+                      .map(
+                        (name) => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(50),
+                            color: const Color(0xFFD4845A).withAlpha(24),
                             borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: Colors.white.withAlpha(76)),
                           ),
                           child: Text(
-                            mood,
+                            '@$name',
                             style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
+                              color: Color(0xFFD4845A),
                               fontSize: 12,
-                              letterSpacing: 0.5,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      )
+                      .toList(),
+                ),
+              ),
+
+            // ── "View all N comments" ──────────────────────────────────
+            if (commentCount > 0)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+                child: GestureDetector(
+                  onTap: widget.onCommentIconTap,
+                  child: Text(
+                    commentCount == 1
+                        ? 'View 1 comment'
+                        : 'View all ${_formatCount(commentCount)} comments',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ),
+
+            // ── Timestamp ──────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 6, 14, 16),
+              child: Text(
+                timeAgo,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: colorScheme.onSurfaceVariant,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PostVideoPlayer extends StatefulWidget {
+  final String url;
+
+  const _PostVideoPlayer({super.key, required this.url});
+
+  @override
+  State<_PostVideoPlayer> createState() => _PostVideoPlayerState();
+}
+
+class _PostVideoPlayerState extends State<_PostVideoPlayer> {
+  late final VideoPlayerController _controller;
+  bool _isReady = false;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
+      ..setLooping(true)
+      ..initialize().then((_) {
+        if (!mounted) return;
+        setState(() => _isReady = true);
+        _controller.play();
+      }).catchError((_) {
+        if (mounted) setState(() => _hasError = true);
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _togglePlayback() {
+    if (!_isReady) return;
+    setState(() {
+      _controller.value.isPlaying ? _controller.pause() : _controller.play();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    if (_hasError) return _MediaErrorPlaceholder(colorScheme: colorScheme);
+    if (!_isReady) return const _MediaLoadingPlaceholder();
+
+    return GestureDetector(
+      onTap: _togglePlayback,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: _controller.value.size.width,
+              height: _controller.value.size.height,
+              child: VideoPlayer(_controller),
             ),
           ),
-
-          // ── Caption ───────────────────────────────────────────────
-          if (widget.post.caption.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
-              child: Text(
-                widget.post.caption,
-                style: const TextStyle(
-                  color: Color(0xFF35322D),
-                  fontSize: 15,
-                  height: 1.5,
-                  fontWeight: FontWeight.w400,
+          if (!_controller.value.isPlaying)
+            Container(
+              color: Colors.black26,
+              child: const Center(
+                child: Icon(
+                  Icons.play_circle_fill_rounded,
+                  size: 72,
+                  color: Colors.white,
                 ),
               ),
             ),
-
-          // ── Actions ───────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
-                    child: Icon(
-                      isLiked ? Icons.favorite : Icons.favorite_border,
-                      key: ValueKey(isLiked),
-                      color: isLiked ? const Color(0xFF99472C) : const Color(0xFF625E59),
-                    ),
-                  ),
-                  onPressed: widget.onLikeToggle,
-                ),
-                if (widget.post.likedByPetIds.isNotEmpty)
-                  Text(
-                    '${widget.post.likedByPetIds.length}',
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: Color(0xFF35322D)),
-                  ),
-                const SizedBox(width: 4),
-                IconButton(
-                  icon: const Icon(Icons.chat_bubble_outline, color: Color(0xFF625E59)),
-                  onPressed: widget.onCommentIconTap,
-                ),
-                if (widget.post.comments.isNotEmpty)
-                  Text(
-                    '${widget.post.comments.length}',
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: Color(0xFF35322D)),
-                  ),
-                const Spacer(),
-                // Share button with secondary-container bg
-                GestureDetector(
-                  onTap: widget.onShareIconTap,
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFE087),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.share, size: 18, color: Color(0xFF644F00)),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                IconButton(
-                  icon: Icon(
-                    _isSaved ? Icons.bookmark : Icons.bookmark_border,
-                    color: const Color(0xFF625E59),
-                  ),
-                  onPressed: () {
-                    setState(() => _isSaved = !_isSaved);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(_isSaved ? 'Post Saved!' : 'Post Unsaved.')),
-                    );
-                  },
-                ),
-              ],
-            ),
+          const Positioned(
+            top: 12,
+            right: 12,
+            child: Icon(Icons.videocam_rounded, color: Colors.white, size: 22),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _MediaLoadingPlaceholder extends StatelessWidget {
+  const _MediaLoadingPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF211F1B), Color(0xFF2E2B26)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Color(0xFFD4845A),
+        ),
+      ),
+    );
+  }
+}
+
+class _MediaErrorPlaceholder extends StatelessWidget {
+  final ColorScheme colorScheme;
+
+  const _MediaErrorPlaceholder({required this.colorScheme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF211F1B), Color(0xFF2E2B26)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Icon(Icons.pets, size: 56, color: colorScheme.onSurfaceVariant),
+    );
+  }
+}
+
+// ── Story-ring avatar (Instagram-style gradient ring) ──────────────────────
+class _StoryRingAvatar extends StatelessWidget {
+  final String imageUrl;
+  final double radius;
+  final bool showRing;
+
+  const _StoryRingAvatar({
+    required this.imageUrl,
+    this.radius = 16,
+    this.showRing = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final inner = CircleAvatar(
+      radius: radius,
+      backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+      backgroundColor: colorScheme.surfaceContainerHighest,
+      child: imageUrl.isEmpty
+          ? Icon(Icons.pets,
+              size: radius * 0.9, color: colorScheme.onSurfaceVariant)
+          : null,
+    );
+
+    if (!showRing) return inner;
+
+    return Container(
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFFFFC837),
+            Color(0xFFFF8008),
+            Color(0xFFFE2D49),
+            Color(0xFFBC2A8D),
+            Color(0xFF4F5BD5),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      padding: const EdgeInsets.all(2),
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+        padding: const EdgeInsets.all(2),
+        child: inner,
+      ),
+    );
+  }
+}
+
+// ── Reusable action icon button (tighter spacing than IconButton) ─────────
+class _ActionIcon extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const _ActionIcon({required this.child, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkResponse(
+      onTap: onTap,
+      radius: 22,
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: child,
+      ),
+    );
+  }
+}
+
+// ── Caption with inline username + "more" expansion ───────────────────────
+class _ExpandableCaption extends StatelessWidget {
+  final String username;
+  final String caption;
+  final bool expanded;
+  final VoidCallback? onUsernameTap;
+  final VoidCallback onMoreTap;
+  final Color onSurface;
+  final Color onSurfaceVariant;
+
+  const _ExpandableCaption({
+    required this.username,
+    required this.caption,
+    required this.expanded,
+    required this.onUsernameTap,
+    required this.onMoreTap,
+    required this.onSurface,
+    required this.onSurfaceVariant,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final usernameSpan = TextSpan(
+      text: username,
+      style: TextStyle(
+        fontWeight: FontWeight.w700,
+        fontSize: 13.5,
+        color: onSurface,
+      ),
+      recognizer: onUsernameTap != null
+          ? (TapGestureRecognizer()..onTap = onUsernameTap)
+          : null,
+    );
+    final captionStyle = TextStyle(
+      fontSize: 13.5,
+      height: 1.35,
+      color: onSurface,
+    );
+
+    if (expanded) {
+      return RichText(
+        text: TextSpan(
+          children: [
+            usernameSpan,
+            const TextSpan(text: '  '),
+            TextSpan(text: caption, style: captionStyle),
+          ],
+        ),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final fullText = TextSpan(
+          children: [
+            usernameSpan,
+            const TextSpan(text: '  '),
+            TextSpan(text: caption, style: captionStyle),
+          ],
+        );
+        final tp = TextPainter(
+          text: fullText,
+          maxLines: 2,
+          textDirection: TextDirection.ltr,
+        )..layout(maxWidth: constraints.maxWidth);
+
+        if (!tp.didExceedMaxLines) {
+          return RichText(text: fullText);
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RichText(
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              text: fullText,
+            ),
+            const SizedBox(height: 2),
+            GestureDetector(
+              onTap: onMoreTap,
+              child: Text(
+                'more',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

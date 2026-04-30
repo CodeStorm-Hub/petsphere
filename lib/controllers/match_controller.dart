@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/match_request_model.dart';
 import '../models/pet_model.dart';
 import '../repositories/match_repository.dart';
+import '../repositories/notification_repository.dart';
 import 'auth_controller.dart';
 import 'chat_controller.dart';
 import 'pet_controller.dart';
@@ -76,14 +77,18 @@ class MatchController extends Notifier<MatchState> {
     if (activePet != null) {
       // Initial load — state already has filterAnimal/filterBreed as null
       _load(activePet.id);
+      return MatchState(isLoading: true);
     }
-    return MatchState(isLoading: true);
+    return MatchState();
   }
 
   Future<void> _load(String myPetId) async {
     final gen = ++_loadGeneration;
     final userId = ref.read(authProvider).user?.id;
-    if (userId == null) return;
+    if (userId == null) {
+      state = state.copyWith(isLoading: false);
+      return;
+    }
 
     state = state.copyWith(isLoading: true, clearError: true);
 
@@ -126,9 +131,11 @@ class MatchController extends Notifier<MatchState> {
 
   void setFilterBreed(String? breed) {
     final activePet = ref.read(activePetProvider);
-    debugPrint('[MatchController] setFilterBreed($breed) — activePet=${activePet?.name}');
+    debugPrint(
+        '[MatchController] setFilterBreed($breed) — activePet=${activePet?.name}');
     if (activePet == null) {
-      debugPrint('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
+      debugPrint(
+          '[MatchController] ⚠️ activePet is NULL — filter change ignored!');
       return;
     }
     if (breed == null || breed.isEmpty) {
@@ -136,15 +143,18 @@ class MatchController extends Notifier<MatchState> {
     } else {
       state = state.copyWith(filterBreed: breed);
     }
-    debugPrint('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
+    debugPrint(
+        '[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
     _load(activePet.id);
   }
 
   void setFilterAnimal(String? animal) {
     final activePet = ref.read(activePetProvider);
-    debugPrint('[MatchController] setFilterAnimal($animal) — activePet=${activePet?.name}');
+    debugPrint(
+        '[MatchController] setFilterAnimal($animal) — activePet=${activePet?.name}');
     if (activePet == null) {
-      debugPrint('[MatchController] ⚠️ activePet is NULL — filter change ignored!');
+      debugPrint(
+          '[MatchController] ⚠️ activePet is NULL — filter change ignored!');
       return;
     }
     if (animal == null || animal.isEmpty) {
@@ -152,7 +162,8 @@ class MatchController extends Notifier<MatchState> {
     } else {
       state = state.copyWith(filterAnimal: animal, clearBreed: true);
     }
-    debugPrint('[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
+    debugPrint(
+        '[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
     _load(activePet.id);
   }
 
@@ -185,15 +196,43 @@ class MatchController extends Notifier<MatchState> {
       return false;
     }
 
+    // Capture receiver pet before removing it from state
+    PetModel? receiverPet;
+    for (final p in state.allDiscoveryPets) {
+      if (p.id == receiverPetId) {
+        receiverPet = p;
+        break;
+      }
+    }
+
     try {
       await matchRepository.sendLikeRequest(
         senderPetId: activePet.id,
         receiverPetId: receiverPetId,
       );
+      final discoveryPets =
+          state.discoveryPets.where((p) => p.id != receiverPetId).toList();
+      final allDiscoveryPets =
+          state.allDiscoveryPets.where((p) => p.id != receiverPetId).toList();
       state = state.copyWith(
-        discoveryPets:
-            state.discoveryPets.where((p) => p.id != receiverPetId).toList(),
+        discoveryPets: discoveryPets,
+        allDiscoveryPets: allDiscoveryPets,
       );
+
+      // Notify the receiver pet's owner
+      if (receiverPet != null && receiverPet.userId.isNotEmpty) {
+        notificationRepository.sendNotification(
+          targetUserId: receiverPet.userId,
+          title: 'New breeding interest',
+          body:
+              '${activePet.name} is interested in breeding with ${receiverPet.name}.',
+          type: 'match_request',
+          entityType: 'match_request',
+          entityId: activePet.id,
+          actorPetId: activePet.id,
+        );
+      }
+
       // Refresh sent requests
       _load(activePet.id);
       return true;
@@ -204,6 +243,15 @@ class MatchController extends Notifier<MatchState> {
   }
 
   Future<void> acceptRequest(String requestId) async {
+    // Capture the request before any state change so we can read senderPet
+    MatchRequestModel? request;
+    for (final r in state.myRequests) {
+      if (r.id == requestId) {
+        request = r;
+        break;
+      }
+    }
+
     try {
       await matchRepository.updateRequestStatus(requestId, 'matched');
       state = state.copyWith(
@@ -212,6 +260,23 @@ class MatchController extends Notifier<MatchState> {
           return req;
         }).toList(),
       );
+
+      // Notify the sender that their request was accepted
+      final senderPet = request?.senderPet;
+      if (senderPet != null && senderPet.userId.isNotEmpty) {
+        final myPet = ref.read(activePetProvider);
+        notificationRepository.sendNotification(
+          targetUserId: senderPet.userId,
+          title: "It's a match!",
+          body:
+              '${myPet?.name ?? 'Your match'} accepted your breeding request.',
+          type: 'match_accepted',
+          entityType: 'match_request',
+          entityId: requestId,
+          actorPetId: myPet?.id,
+        );
+      }
+
       // A DB trigger creates the chat_threads row — refresh thread list so
       // the new thread immediately appears in the inbox.
       await ref.read(chatProvider.notifier).refresh();
@@ -224,9 +289,8 @@ class MatchController extends Notifier<MatchState> {
     try {
       await matchRepository.updateRequestStatus(requestId, 'rejected');
       state = state.copyWith(
-        myRequests: state.myRequests
-            .where((req) => req.id != requestId)
-            .toList(),
+        myRequests:
+            state.myRequests.where((req) => req.id != requestId).toList(),
       );
     } catch (e) {
       state = state.copyWith(error: 'Could not decline request: $e');

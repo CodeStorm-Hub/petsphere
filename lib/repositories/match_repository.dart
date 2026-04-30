@@ -13,7 +13,25 @@ class MatchRepository {
     String? filterAnimal,
     String? filterBreed,
   }) async {
-    debugPrint('[MatchRepository] fetchDiscoveryPets simplified: userId=$userId');
+    debugPrint('[MatchRepository] fetchDiscoveryPets: userId=$userId');
+
+    final requestedRows = await supabase
+        .from('match_requests')
+        .select('sender_pet_id, receiver_pet_id')
+        .or('sender_pet_id.eq.$myPetId,receiver_pet_id.eq.$myPetId');
+
+    final excludedPetIds = <String>{};
+    for (final row in requestedRows as List<dynamic>) {
+      final request = row as Map<String, dynamic>;
+      final senderPetId = request['sender_pet_id'] as String?;
+      final receiverPetId = request['receiver_pet_id'] as String?;
+      if (senderPetId != null && senderPetId != myPetId) {
+        excludedPetIds.add(senderPetId);
+      }
+      if (receiverPetId != null && receiverPetId != myPetId) {
+        excludedPetIds.add(receiverPetId);
+      }
+    }
 
     // Simplify to just listed pets NOT owned by me
     var query = supabase
@@ -30,10 +48,12 @@ class MatchRepository {
     }
 
     final data = await query.order('created_at', ascending: false);
-    debugPrint('[MatchRepository] Fetched ${(data as List).length} pets from others');
+    debugPrint(
+        '[MatchRepository] Fetched ${(data as List).length} pets from others');
 
     return (data as List<dynamic>)
         .map((e) => PetModel.fromJson(e as Map<String, dynamic>))
+        .where((pet) => !excludedPetIds.contains(pet.id))
         .toList();
   }
 
@@ -44,7 +64,29 @@ class MatchRepository {
     required String senderPetId,
     required String receiverPetId,
   }) async {
-    await supabase.from('match_requests').upsert({
+    final existing = await supabase
+        .from('match_requests')
+        .select('id, sender_pet_id, receiver_pet_id, status')
+        .or(
+          'and(sender_pet_id.eq.$senderPetId,receiver_pet_id.eq.$receiverPetId),and(sender_pet_id.eq.$receiverPetId,receiver_pet_id.eq.$senderPetId)',
+        )
+        .limit(1)
+        .maybeSingle();
+
+    if (existing != null) {
+      final isReciprocalPending = existing['sender_pet_id'] == receiverPetId &&
+          existing['receiver_pet_id'] == senderPetId &&
+          existing['status'] == 'pending';
+
+      if (isReciprocalPending) {
+        await supabase
+            .from('match_requests')
+            .update({'status': 'matched'}).eq('id', existing['id'] as String);
+      }
+      return;
+    }
+
+    await supabase.from('match_requests').insert({
       'sender_pet_id': senderPetId,
       'receiver_pet_id': receiverPetId,
       'status': 'pending',
@@ -88,8 +130,7 @@ class MatchRepository {
   Future<void> updateRequestStatus(String requestId, String status) async {
     await supabase
         .from('match_requests')
-        .update({'status': status})
-        .eq('id', requestId);
+        .update({'status': status}).eq('id', requestId);
   }
 
   // -------------------------------------------------------------------------

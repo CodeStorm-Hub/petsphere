@@ -45,7 +45,8 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeInOut);
+    _fadeAnim =
+        CurvedAnimation(parent: _animController, curve: Curves.easeInOut);
     _animController.forward();
   }
 
@@ -215,20 +216,25 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
           );
         } catch (uploadError) {
           // Storage bucket may not exist — continue without image
-          debugPrint('Image upload failed (bucket may not exist): $uploadError');
+          debugPrint(
+              'Image upload failed (bucket may not exist): $uploadError');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: const Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.white, size: 18),
+                    Icon(Icons.warning_amber_rounded,
+                        color: Colors.white, size: 18),
                     SizedBox(width: 8),
-                    Expanded(child: Text('Photo upload failed — saving pet without photo.')),
+                    Expanded(
+                        child: Text(
+                            'Photo upload failed — saving pet without photo.')),
                   ],
                 ),
                 backgroundColor: Colors.orange.shade700,
                 behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             );
           }
@@ -355,7 +361,8 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
               value: (_currentStep + 1) / 3,
               minHeight: 4,
               backgroundColor: Colors.grey.shade200,
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFF8A65)),
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(Color(0xFFFF8A65)),
             ),
           ),
         ],
@@ -465,9 +472,8 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                           fontSize: 15,
                           fontWeight:
                               isSelected ? FontWeight.bold : FontWeight.w500,
-                          color: isSelected
-                              ? option.color
-                              : Colors.grey.shade600,
+                          color:
+                              isSelected ? option.color : Colors.grey.shade600,
                         ),
                       ),
                     ],

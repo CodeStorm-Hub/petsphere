@@ -1,31 +1,38 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import '../models/post_model.dart';
 import '../models/pet_model.dart';
+import '../models/story_model.dart';
 import '../repositories/feed_repository.dart';
+import '../repositories/notification_repository.dart';
+import 'auth_controller.dart';
 
 // ---------------------------------------------------------------------------
 // State wrapper
 // ---------------------------------------------------------------------------
 class FeedState {
   final List<PostModel> posts;
+  final List<StoryModel> stories;
   final bool isLoading;
   final String? error;
 
   FeedState({
     this.posts = const [],
+    this.stories = const [],
     this.isLoading = false,
     this.error,
   });
 
   FeedState copyWith({
     List<PostModel>? posts,
+    List<StoryModel>? stories,
     bool? isLoading,
     String? error,
     bool clearError = false,
   }) {
     return FeedState(
       posts: posts ?? this.posts,
+      stories: stories ?? this.stories,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
     );
@@ -38,12 +45,30 @@ class FeedState {
 class FeedNotifier extends Notifier<FeedState> {
   RealtimeChannel? _likesChannel;
   RealtimeChannel? _commentsChannel;
+  String? _lastFetchedForUserId;
 
   @override
   FeedState build() {
+    // Auto-refetch the feed whenever the auth status flips to authenticated
+    // or the active user changes. This guarantees fresh content on cold
+    // start (saved session) and on fresh login without forcing the user to
+    // pull-to-refresh. Manual refresh via `refresh()` is still available.
+    ref.listen(authProvider, (prev, next) {
+      if (next.status == AuthStatus.authenticated &&
+          next.user != null &&
+          _lastFetchedForUserId != next.user!.id) {
+        _lastFetchedForUserId = next.user!.id;
+        _fetchPosts();
+      } else if (next.status == AuthStatus.unauthenticated) {
+        _lastFetchedForUserId = null;
+      }
+    });
+
     _setupRealtimeSubscriptions();
     ref.onDispose(_disposeChannels);
     _fetchPosts();
+    final authedUser = ref.read(authProvider).user;
+    if (authedUser != null) _lastFetchedForUserId = authedUser.id;
     return FeedState(isLoading: true);
   }
 
@@ -95,8 +120,19 @@ class FeedNotifier extends Notifier<FeedState> {
 
   Future<void> _fetchPosts() async {
     try {
-      final posts = await feedRepository.fetchPosts();
-      state = state.copyWith(posts: posts, isLoading: false, clearError: true);
+      final userId = ref.read(authProvider).user?.id;
+      final results = await Future.wait([
+        feedRepository.fetchPosts(),
+        userId == null
+            ? Future.value(<StoryModel>[])
+            : feedRepository.fetchStories(userId),
+      ]);
+      state = state.copyWith(
+        posts: results[0] as List<PostModel>,
+        stories: results[1] as List<StoryModel>,
+        isLoading: false,
+        clearError: true,
+      );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -124,6 +160,27 @@ class FeedNotifier extends Notifier<FeedState> {
     try {
       final updatedLikes =
           await feedRepository.toggleLike(postId, currentPetId);
+
+      // Notify the post owner if it's a new like (not an unlike)
+      if (updatedLikes.contains(currentPetId)) {
+        try {
+          final post = state.posts.firstWhere((p) => p.id == postId);
+          final authedUser = ref.read(authProvider).user;
+          // Don't notify if liking own post
+          if (authedUser != null && post.pet.userId != authedUser.id) {
+            notificationRepository.sendNotification(
+              targetUserId: post.pet.userId,
+              title: 'New Like',
+              body: 'Someone liked your post!',
+              type: 'post_like',
+              entityType: 'post',
+              entityId: postId,
+              actorPetId: currentPetId,
+            );
+          }
+        } catch (_) {}
+      }
+
       state = state.copyWith(
         posts: state.posts.map((post) {
           if (post.id != postId) return post;
@@ -138,16 +195,54 @@ class FeedNotifier extends Notifier<FeedState> {
   // -------------------------------------------------------------------------
   // Add Post (media URL already uploaded by caller)
   // -------------------------------------------------------------------------
-  Future<void> addPost(PetModel pet, String mediaUrl, String caption) async {
+  Future<void> addPost(
+    PetModel pet,
+    String mediaUrl,
+    String caption, {
+    String location = '',
+    List<String> taggedPetIds = const [],
+    List<String> taggedPetNames = const [],
+  }) async {
     try {
       final newPost = await feedRepository.createPost(
         petId: pet.id,
         mediaUrl: mediaUrl,
         caption: caption,
+        location: location,
+        taggedPetIds: taggedPetIds,
+        taggedPetNames: taggedPetNames,
       );
       state = state.copyWith(posts: [newPost, ...state.posts]);
     } catch (e) {
       state = state.copyWith(error: 'Failed to create post: $e');
+    }
+  }
+
+  Future<bool> addStory(PetModel pet, String mediaUrl, String caption) async {
+    try {
+      final story = await feedRepository.createStory(
+        petId: pet.id,
+        mediaUrl: mediaUrl,
+        caption: caption,
+      );
+      state = state.copyWith(stories: [story, ...state.stories]);
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: 'Failed to create story: $e');
+      return false;
+    }
+  }
+
+  Future<bool> deleteStory(String storyId) async {
+    try {
+      await feedRepository.deleteStory(storyId);
+      state = state.copyWith(
+        stories: state.stories.where((story) => story.id != storyId).toList(),
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: 'Failed to delete story: $e');
+      return false;
     }
   }
 
@@ -181,10 +276,26 @@ class FeedNotifier extends Notifier<FeedState> {
       state = state.copyWith(
         posts: state.posts.map((post) {
           if (post.id != postId) return post;
-          return post.copyWith(
-              comments: [...post.comments, newComment]);
+          return post.copyWith(comments: [...post.comments, newComment]);
         }).toList(),
       );
+
+      // Notify the post owner
+      try {
+        final post = state.posts.firstWhere((p) => p.id == postId);
+        final authedUser = ref.read(authProvider).user;
+        if (authedUser != null && post.pet.userId != authedUser.id) {
+          notificationRepository.sendNotification(
+            targetUserId: post.pet.userId,
+            title: 'New Comment',
+            body: '$petName commented: $text',
+            type: 'post_comment',
+            entityType: 'post',
+            entityId: postId,
+            actorPetId: petId,
+          );
+        }
+      } catch (_) {}
     } catch (e) {
       state = state.copyWith(error: 'Failed to add comment: $e');
     }

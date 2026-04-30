@@ -72,7 +72,9 @@ class ProductModel {
       category: json['category'] as String? ?? '',
       rating: (json['rating'] as num?)?.toDouble() ?? 0,
       reviewCount: (json['review_count'] as num?)?.toInt() ?? 0,
-      tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      tags:
+          (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+              [],
       isBestseller: json['is_bestseller'] as bool? ?? false,
     );
   }

@@ -31,7 +31,8 @@ class AuthRepository {
 
     final user = response.user;
     if (user == null) {
-      throw Exception('Registration failed. Check your email for a confirmation link.');
+      throw Exception(
+          'Registration failed. Check your email for a confirmation link.');
     }
 
     // Upsert the profile row — non-fatal if it fails (RLS may block)
@@ -70,7 +71,8 @@ class AuthRepository {
   // -------------------------------------------------------------------------
   // Update the user's profile fields (name, bio, location, profile_image_url)
   // -------------------------------------------------------------------------
-  Future<UserModel> updateProfile(String userId, Map<String, dynamic> fields) async {
+  Future<UserModel> updateProfile(
+      String userId, Map<String, dynamic> fields) async {
     final email = supabase.auth.currentUser?.email ?? '';
 
     final data = await supabase
@@ -94,13 +96,14 @@ class AuthRepository {
       'webp' => 'image/webp',
       _ => 'image/jpeg',
     };
-    final path = 'avatars/${userId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+    final path =
+        'avatars/${userId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
     await supabase.storage.from(kBucketPetImages).upload(
-      path,
-      imageFile,
-      fileOptions: FileOptions(contentType: contentType),
-    );
+          path,
+          imageFile,
+          fileOptions: FileOptions(contentType: contentType),
+        );
 
     return supabase.storage.from(kBucketPetImages).getPublicUrl(path);
   }
@@ -113,12 +116,20 @@ class AuthRepository {
   // -------------------------------------------------------------------------
   // Private helpers
   // -------------------------------------------------------------------------
+  Future<UserModel> fetchPublicProfile(String userId) async {
+    final data =
+        await supabase.from('profiles').select().eq('id', userId).maybeSingle();
+
+    if (data == null) {
+      return UserModel(id: userId, email: '');
+    }
+
+    return UserModel.fromJson({...data, 'email': ''});
+  }
+
   Future<UserModel> _fetchProfile(String userId, String email) async {
-    final data = await supabase
-        .from('profiles')
-        .select()
-        .eq('id', userId)
-        .maybeSingle();
+    final data =
+        await supabase.from('profiles').select().eq('id', userId).maybeSingle();
 
     if (data == null) {
       return UserModel(id: userId, email: email);

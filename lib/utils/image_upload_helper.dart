@@ -3,7 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'supabase_config.dart';
 
-/// A utility class for picking images and uploading them to Supabase Storage.
+/// A utility class for picking media and uploading it to Supabase Storage.
 class ImageUploadHelper {
   static final _picker = ImagePicker();
 
@@ -29,6 +29,23 @@ class ImageUploadHelper {
     return File(xFile.path);
   }
 
+  /// Pick a video from the gallery. Returns null if the user cancelled.
+  static Future<File?> pickVideoFromGallery() async {
+    final xFile = await _picker.pickVideo(source: ImageSource.gallery);
+    if (xFile == null) return null;
+    return File(xFile.path);
+  }
+
+  /// Record a video with the camera. Returns null if the user cancelled.
+  static Future<File?> pickVideoFromCamera() async {
+    final xFile = await _picker.pickVideo(
+      source: ImageSource.camera,
+      maxDuration: const Duration(minutes: 2),
+    );
+    if (xFile == null) return null;
+    return File(xFile.path);
+  }
+
   /// Upload [file] to the given Supabase [bucket] under [path].
   /// Returns the public URL of the uploaded file.
   static Future<String> upload({
@@ -43,6 +60,12 @@ class ImageUploadHelper {
       'gif' => 'image/gif',
       'webp' => 'image/webp',
       'heic' => 'image/heic',
+      'mp4' => 'video/mp4',
+      'mov' => 'video/quicktime',
+      'm4v' => 'video/x-m4v',
+      'webm' => 'video/webm',
+      'avi' => 'video/x-msvideo',
+      'mkv' => 'video/x-matroska',
       _ => 'image/jpeg',
     };
 

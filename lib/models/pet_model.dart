@@ -12,6 +12,12 @@ class PetModel {
   final bool isBreedingListed;
   final bool isVerified;
 
+  /// Care goals & current vitals — `null` if the owner hasn't set them yet
+  /// (the UI then falls back to sensible defaults).
+  final int? dailyCalorieGoal;
+  final int? dailyWaterGoalCups;
+  final double? weightLbs;
+
   PetModel({
     required this.id,
     required this.userId,
@@ -25,6 +31,9 @@ class PetModel {
     this.isPublicOwner = true,
     this.isBreedingListed = false,
     this.isVerified = false,
+    this.dailyCalorieGoal,
+    this.dailyWaterGoalCups,
+    this.weightLbs,
   });
 
   PetModel copyWith({
@@ -40,6 +49,9 @@ class PetModel {
     bool? isPublicOwner,
     bool? isBreedingListed,
     bool? isVerified,
+    int? dailyCalorieGoal,
+    int? dailyWaterGoalCups,
+    double? weightLbs,
   }) {
     return PetModel(
       id: id ?? this.id,
@@ -54,6 +66,9 @@ class PetModel {
       isPublicOwner: isPublicOwner ?? this.isPublicOwner,
       isBreedingListed: isBreedingListed ?? this.isBreedingListed,
       isVerified: isVerified ?? this.isVerified,
+      dailyCalorieGoal: dailyCalorieGoal ?? this.dailyCalorieGoal,
+      dailyWaterGoalCups: dailyWaterGoalCups ?? this.dailyWaterGoalCups,
+      weightLbs: weightLbs ?? this.weightLbs,
     );
   }
 
@@ -74,6 +89,9 @@ class PetModel {
       isPublicOwner: json['is_public_owner'] as bool? ?? true,
       isBreedingListed: json['is_breeding_listed'] as bool? ?? false,
       isVerified: json['is_verified'] as bool? ?? false,
+      dailyCalorieGoal: (json['daily_calorie_goal'] as num?)?.toInt(),
+      dailyWaterGoalCups: (json['daily_water_goal_cups'] as num?)?.toInt(),
+      weightLbs: (json['weight_lbs'] as num?)?.toDouble(),
     );
   }
 
@@ -89,5 +107,9 @@ class PetModel {
         'is_public_owner': isPublicOwner,
         'is_breeding_listed': isBreedingListed,
         'is_verified': isVerified,
+        if (dailyCalorieGoal != null) 'daily_calorie_goal': dailyCalorieGoal,
+        if (dailyWaterGoalCups != null)
+          'daily_water_goal_cups': dailyWaterGoalCups,
+        if (weightLbs != null) 'weight_lbs': weightLbs,
       };
 }

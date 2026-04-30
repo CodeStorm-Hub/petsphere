@@ -25,11 +25,8 @@ class MarketplaceRepository {
   // Fetch a single product by ID — used for deep-linking into /product/:id
   // -------------------------------------------------------------------------
   Future<ProductModel?> fetchProductById(String id) async {
-    final data = await supabase
-        .from('products')
-        .select()
-        .eq('id', id)
-        .maybeSingle();
+    final data =
+        await supabase.from('products').select().eq('id', id).maybeSingle();
     if (data == null) return null;
     return ProductModel.fromJson(data);
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../repositories/follow_repository.dart';
+import '../repositories/notification_repository.dart';
+import '../utils/supabase_config.dart';
 import 'auth_controller.dart';
 
 // ---------------------------------------------------------------------------
@@ -62,6 +64,18 @@ class FollowController extends Notifier<void> {
         await followRepository.unfollowOwner(userId, ownerId);
       } else {
         await followRepository.followOwner(userId, ownerId);
+
+        // Notify the owner
+        try {
+          notificationRepository.sendNotification(
+            targetUserId: ownerId,
+            title: 'New Follower',
+            body: 'Someone started following your profile!',
+            type: 'profile_follow',
+            entityType: 'profile',
+            entityId: userId,
+          );
+        } catch (_) {}
       }
 
       // Invalidate related providers so the UI refreshes
@@ -79,14 +93,35 @@ class FollowController extends Notifier<void> {
     if (userId == null) return;
 
     try {
-      final isFollowing =
-          await followRepository.isFollowingPet(userId, petId);
+      final isFollowing = await followRepository.isFollowingPet(userId, petId);
 
       if (isFollowing) {
         // If following via owner, this is a direct pet unfollow only
         await followRepository.unfollowPet(userId, petId);
       } else {
         await followRepository.followPet(userId, petId);
+
+        // Notify the pet's owner
+        try {
+          final data = await supabase
+              .from('pets')
+              .select('user_id, name')
+              .eq('id', petId)
+              .single();
+          final targetUserId = data['user_id'] as String;
+          final petName = data['name'] as String;
+
+          if (targetUserId != userId) {
+            notificationRepository.sendNotification(
+              targetUserId: targetUserId,
+              title: 'New Pet Follower',
+              body: 'Someone started following $petName!',
+              type: 'pet_follow',
+              entityType: 'pet',
+              entityId: petId,
+            );
+          }
+        } catch (_) {}
       }
 
       // Invalidate related providers

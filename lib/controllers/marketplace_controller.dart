@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/product_model.dart';
 import '../repositories/marketplace_repository.dart';
+import 'auth_controller.dart';
 
 // ---------------------------------------------------------------------------
 // State
@@ -40,9 +41,27 @@ class MarketplaceState {
 // Notifier
 // ---------------------------------------------------------------------------
 class MarketplaceController extends Notifier<MarketplaceState> {
+  String? _lastFetchedForUserId;
+
   @override
   MarketplaceState build() {
+    // Auto-refetch products whenever the auth status flips to authenticated
+    // or the active user changes (e.g. account switch). Ensures the catalog
+    // is hydrated on cold start / fresh login without manual pull-to-refresh.
+    ref.listen<AuthState>(authProvider, (prev, next) {
+      if (next.status == AuthStatus.authenticated &&
+          next.user != null &&
+          _lastFetchedForUserId != next.user!.id) {
+        _lastFetchedForUserId = next.user!.id;
+        _fetchProducts(category: state.filterCategory);
+      } else if (next.status == AuthStatus.unauthenticated) {
+        _lastFetchedForUserId = null;
+      }
+    });
+
     _fetchProducts();
+    final authedUser = ref.read(authProvider).user;
+    if (authedUser != null) _lastFetchedForUserId = authedUser.id;
     return MarketplaceState(isLoading: true);
   }
 

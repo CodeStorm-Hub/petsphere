@@ -15,7 +15,10 @@ class NotificationState {
     this.error,
   });
 
-  int get unreadCount => items.where((n) => !n.isRead).length;
+  int get unreadCount =>
+      items.where((n) => !n.isRead && n.type != 'message').length;
+  int get unreadMessageCount =>
+      items.where((n) => !n.isRead && n.type == 'message').length;
 
   NotificationState copyWith({
     List<NotificationModel>? items,
@@ -99,10 +102,27 @@ class NotificationController extends Notifier<NotificationState> {
     final id = _userId;
     if (id == null) return;
     state = state.copyWith(
-      items: state.items.map((n) => n.copyWith(isRead: true)).toList(),
+      items: state.items.map((n) {
+        if (n.type == 'message') return n;
+        return n.copyWith(isRead: true);
+      }).toList(),
     );
     try {
-      await notificationRepository.markAllAsRead(id);
+      await notificationRepository.markAllAsRead(id, excludeType: 'message');
+    } catch (_) {}
+  }
+
+  Future<void> markMessagesAsRead() async {
+    final id = _userId;
+    if (id == null) return;
+    state = state.copyWith(
+      items: state.items.map((n) {
+        if (n.type != 'message') return n;
+        return n.copyWith(isRead: true);
+      }).toList(),
+    );
+    try {
+      await notificationRepository.markMessagesAsRead(id);
     } catch (_) {}
   }
 }

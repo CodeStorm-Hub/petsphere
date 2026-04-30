@@ -5,6 +5,7 @@ import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../controllers/auth_controller.dart';
 import '../models/post_model.dart';
+import '../utils/pet_navigation.dart';
 import 'components/post_card.dart';
 
 class PostDetailScreen extends ConsumerWidget {
@@ -29,14 +30,17 @@ class PostDetailScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+                const Icon(Icons.error_outline,
+                    size: 48, color: Colors.redAccent),
                 const SizedBox(height: 12),
-                Text('Could not load post', style: Theme.of(context).textTheme.titleMedium),
+                Text('Could not load post',
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 Text(
                   err.toString(),
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 16),
                 FilledButton.icon(
@@ -99,14 +103,21 @@ class _PostDetailContent extends ConsumerWidget {
                 post: post,
                 currentPetId: currentPetId,
                 onLikeToggle: () {
-                  ref.read(feedProvider.notifier).toggleLike(post.id, currentPetId);
+                  ref
+                      .read(feedProvider.notifier)
+                      .toggleLike(post.id, currentPetId);
                 },
-                onCommentIconTap: () =>
-                    _showCommentSheet(context, post.id, currentPetId, activePet?.name ?? ''),
+                onCommentIconTap: () => _showCommentSheet(
+                    context, post.id, currentPetId, activePet?.name ?? ''),
                 onShareIconTap: () => _sharePost(context, post),
                 onPetTap: () {
-                  ref.read(profilePetNavigationProvider.notifier).navigateTo(post.pet.id);
                   Navigator.pop(context);
+                  openPetProfile(
+                    context,
+                    ref,
+                    petId: post.pet.id,
+                    petUserId: post.pet.userId,
+                  );
                 },
               ),
               Padding(
@@ -146,26 +157,38 @@ class _PostDetailContent extends ConsumerWidget {
                       ...post.comments.map((comment) {
                         final ago = _timeAgo(comment.createdAt);
                         final colors = [
-                          Colors.red, Colors.blue, Colors.green,
-                          Colors.orange, Colors.purple,
+                          Colors.red,
+                          Colors.blue,
+                          Colors.green,
+                          Colors.orange,
+                          Colors.purple,
                         ];
-                        final bg = colors[comment.petName.length % colors.length];
+                        final bg =
+                            colors[comment.petName.length % colors.length];
+                        void openCommenter() => openPetProfile(
+                              context,
+                              ref,
+                              petId: comment.petId,
+                            );
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundColor: bg.withAlpha(38),
-                                child: Text(
-                                  comment.petName.isNotEmpty
-                                      ? comment.petName[0].toUpperCase()
-                                      : '?',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                      color: bg),
+                              GestureDetector(
+                                onTap: openCommenter,
+                                child: CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: bg.withAlpha(38),
+                                  child: Text(
+                                    comment.petName.isNotEmpty
+                                        ? comment.petName[0].toUpperCase()
+                                        : '?',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                        color: bg),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -175,10 +198,13 @@ class _PostDetailContent extends ConsumerWidget {
                                   children: [
                                     Row(
                                       children: [
-                                        Text(comment.petName,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13)),
+                                        GestureDetector(
+                                          onTap: openCommenter,
+                                          child: Text(comment.petName,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13)),
+                                        ),
                                         const SizedBox(width: 8),
                                         Text(ago,
                                             style: TextStyle(
@@ -269,17 +295,17 @@ class _PostDetailContent extends ConsumerWidget {
 
   void _sharePost(BuildContext context, PostModel post) {
     final link = 'https://petsphere.app/post/${post.id}';
-    final caption = post.caption.isNotEmpty
-        ? '"${post.caption}"\n\n'
-        : '';
-    Share.share(
-      'Check out ${post.pet.name} on PetSphere! $caption$link',
-      subject: 'PetSphere — ${post.pet.name}',
+    final caption = post.caption.isNotEmpty ? '"${post.caption}"\n\n' : '';
+    SharePlus.instance.share(
+      ShareParams(
+        text: 'Check out ${post.pet.name} on PetSphere! $caption$link',
+        subject: 'PetSphere — ${post.pet.name}',
+      ),
     );
   }
 
-  void _showCommentSheet(
-      BuildContext context, String postId, String currentPetId, String petName) {
+  void _showCommentSheet(BuildContext context, String postId,
+      String currentPetId, String petName) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

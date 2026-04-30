@@ -3,11 +3,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/pet_controller.dart';
-import '../theme/app_theme.dart';
 import 'home_screen.dart';
 import 'pet_profile_screen.dart';
 import 'discovery_screen.dart';
 import 'marketplace_screen.dart';
+
+// ── Instagram-style bottom nav layout tokens ───────────────────────────────
+// The bar is a flat, opaque surface that sits at the bottom of the screen
+// (like Instagram's app bar). Screens hosted in MainLayout still use
+// extendBody: true so any safe-area inset is rendered behind the bar; they
+// should call [bottomNavSpaceFor] to reserve enough space at the bottom of
+// scrollable content so list items aren't hidden behind it.
+
+/// Visual height of the Instagram-style bottom nav (excluding the system
+/// safe-area inset). 28px icon + 14px top/bottom padding = 56dp tall.
+const double kBottomNavBarHeight = 56.0;
+
+/// Extra breathing room placed between the last piece of in-screen content
+/// and the top edge of the nav bar.
+const double kBottomNavBarGap = 8.0;
+
+/// Total bottom padding screens hosted in [MainLayout] should reserve so
+/// scrollable content is fully visible above the bottom navigation bar on
+/// every device (with or without a home-indicator safe area).
+double bottomNavSpaceFor(BuildContext context) {
+  final inset = MediaQuery.viewPaddingOf(context).bottom;
+  return kBottomNavBarHeight + kBottomNavBarGap + inset;
+}
 
 class MainLayout extends ConsumerStatefulWidget {
   const MainLayout({super.key});
@@ -33,124 +55,163 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
       if (next != null) setState(() => _currentIndex = 4);
     });
 
+    final activePet = ref.watch(activePetProvider);
+
     return Scaffold(
       extendBody: true,
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
       ),
-      bottomNavigationBar: _GlassmorphicNavBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          if (index == 2) {
-            context.push('/create_post');
-            return;
-          }
-          setState(() => _currentIndex = index);
-        },
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: _GlassNavBar(
+            currentIndex: _currentIndex,
+            profileImageUrl: activePet?.profileImageUrl ?? '',
+            onTap: (index) {
+              if (index == 2) {
+                context.push('/pet_care');
+                return;
+              }
+              setState(() => _currentIndex = index);
+            },
+          ),
+        ),
       ),
     );
   }
 }
 
-// ── Glassmorphic bottom nav matching "The Nurtured Atelier" Stitch spec ─────
-class _GlassmorphicNavBar extends StatelessWidget {
+class _GlassNavBar extends StatelessWidget {
   final int currentIndex;
+  final String profileImageUrl;
   final ValueChanged<int> onTap;
 
-  const _GlassmorphicNavBar({
+  const _GlassNavBar({
     required this.currentIndex,
+    required this.profileImageUrl,
     required this.onTap,
   });
 
   static const _items = [
-    _NavItem(Icons.home_outlined, Icons.home_rounded),
-    _NavItem(Icons.explore_outlined, Icons.explore_rounded),
-    _NavItem(Icons.add, Icons.add),
-    _NavItem(Icons.storefront_outlined, Icons.storefront_rounded),
-    _NavItem(Icons.person_outline_rounded, Icons.person_rounded),
+    _NavItem(Icons.home_outlined, Icons.home),
+    _NavItem(Icons.search, Icons.search),
+    _NavItem(Icons.add, Icons.add), // Center FAB
+    _NavItem(Icons.storefront_outlined, Icons.storefront),
+    _NavItem(Icons.person_outline, Icons.person),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(48)),
+      borderRadius: BorderRadius.circular(30),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xCCFEF8F3),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(48)),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x1499472C),
-                blurRadius: 24,
-                offset: Offset(0, -8),
-              ),
-            ],
+          height: 64,
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.95),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: const Color(0xFF2E2B26),
+              width: 1,
+            ),
           ),
-          padding: EdgeInsets.fromLTRB(24, 14, 24, 14 + bottomPadding),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(_items.length, (i) {
               final isActive = currentIndex == i;
-              final isCreate = i == 2;
+              final isCenter = i == 2;
+              final isProfile = i == 4;
+              final iconColor =
+                  isActive ? colorScheme.primary : const Color(0xFFB8B0A4);
 
-              if (isCreate) {
+              if (isCenter) {
                 return GestureDetector(
                   onTap: () => onTap(i),
                   child: Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      gradient: AppTheme.primaryGradientFAB,
+                    width: 48,
+                    height: 48,
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x4D99472C),
-                          blurRadius: 16,
-                          offset: Offset(0, 6),
-                        ),
-                      ],
+                      gradient: LinearGradient(
+                        colors: [Color(0xFFD4845A), Color(0xFFB86A44)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                     ),
                     child: const Icon(Icons.add, color: Colors.white, size: 28),
                   ),
                 );
               }
 
-              return GestureDetector(
-                onTap: () => onTap(i),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOutCubic,
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    gradient: isActive ? AppTheme.primaryGradientFAB : null,
-                    shape: BoxShape.circle,
-                    boxShadow: isActive
-                        ? const [
-                            BoxShadow(
-                              color: Color(0x3399472C),
-                              blurRadius: 12,
-                              offset: Offset(0, 4),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Icon(
-                    isActive ? _items[i].active : _items[i].inactive,
-                    color: isActive ? Colors.white : AppTheme.onSurfaceVariant,
-                    size: 22,
-                  ),
+              final Widget child;
+              if (isProfile) {
+                child = _ProfileTabAvatar(
+                  imageUrl: profileImageUrl,
+                  isActive: isActive,
+                  ringColor: iconColor,
+                );
+              } else {
+                child = Icon(
+                  isActive ? _items[i].active : _items[i].inactive,
+                  color: iconColor,
+                  size: 26,
+                );
+              }
+
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => onTap(i),
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(child: child),
                 ),
               );
             }),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ProfileTabAvatar extends StatelessWidget {
+  final String imageUrl;
+  final bool isActive;
+  final Color ringColor;
+
+  const _ProfileTabAvatar({
+    required this.imageUrl,
+    required this.isActive,
+    required this.ringColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final avatar = CircleAvatar(
+      radius: 12,
+      backgroundColor: colorScheme.surfaceContainerHighest,
+      backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+      child: imageUrl.isEmpty
+          ? Icon(Icons.person, size: 16, color: colorScheme.onSurfaceVariant)
+          : null,
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: isActive ? ringColor : Colors.transparent,
+          width: 1.5,
+        ),
+      ),
+      padding: const EdgeInsets.all(2),
+      child: avatar,
     );
   }
 }

@@ -32,12 +32,48 @@ class NotificationRepository {
         .update({'is_read': true}).eq('id', notificationId);
   }
 
-  Future<void> markAllAsRead(String userId) async {
-    await supabase
+  Future<void> markAllAsRead(String userId, {String? excludeType}) async {
+    var query = supabase
         .from('notifications')
         .update({'is_read': true})
         .eq('user_id', userId)
         .eq('is_read', false);
+
+    if (excludeType != null) {
+      query = query.neq('type', excludeType);
+    }
+    await query;
+  }
+
+  Future<void> markMessagesAsRead(String userId) async {
+    await supabase
+        .from('notifications')
+        .update({'is_read': true})
+        .eq('user_id', userId)
+        .eq('type', 'message')
+        .eq('is_read', false);
+  }
+
+  Future<void> sendNotification({
+    required String targetUserId,
+    required String title,
+    String? body,
+    String? type,
+    String? entityType,
+    String? entityId,
+    String? actorPetId,
+  }) async {
+    try {
+      await supabase.from('notifications').insert({
+        'user_id': targetUserId,
+        'title': title,
+        if (body != null) 'body': body,
+        if (type != null) 'type': type,
+        if (entityType != null) 'entity_type': entityType,
+        if (entityId != null) 'entity_id': entityId,
+        if (actorPetId != null) 'actor_pet_id': actorPetId,
+      });
+    } catch (_) {}
   }
 
   /// Real-time INSERT subscription for a specific user.

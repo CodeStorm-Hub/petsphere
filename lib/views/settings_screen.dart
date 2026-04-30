@@ -11,8 +11,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authProvider).user;
-    final unread =
-        ref.watch(notificationProvider.select((s) => s.unreadCount));
+    final unread = ref.watch(notificationProvider.select((s) => s.unreadCount));
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -66,8 +65,7 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.privacy_tip_outlined),
             title: const Text('Privacy Policy'),
             trailing: const Icon(Icons.open_in_new, size: 18),
-            onTap: () =>
-                launchUrl(Uri.parse('https://petsphere.app/privacy')),
+            onTap: () => launchUrl(Uri.parse('https://petsphere.app/privacy')),
           ),
           ListTile(
             leading: const Icon(Icons.description_outlined),
@@ -79,8 +77,7 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.support_outlined),
             title: const Text('Help & Support'),
             trailing: const Icon(Icons.open_in_new, size: 18),
-            onTap: () =>
-                launchUrl(Uri.parse('mailto:support@petsphere.app')),
+            onTap: () => launchUrl(Uri.parse('mailto:support@petsphere.app')),
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),

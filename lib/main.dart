@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'controllers/bootstrap_controller.dart';
 import 'utils/routes.dart';
 import 'utils/supabase_config.dart';
 import 'theme/app_theme.dart';
@@ -20,6 +21,12 @@ class PetSphereApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch the routerProvider to get the navigation configuration
     final goRouter = ref.watch(routerProvider);
+
+    // Materialise the bootstrap side-effect provider so it can register its
+    // auth listener and auto-hydrate all data sources whenever the user
+    // becomes authenticated (cold start with a saved session, or fresh
+    // login). Manual refresh on each screen still works as before.
+    ref.watch(bootstrapProvider);
 
     return MaterialApp.router(
       title: 'PetSphere',

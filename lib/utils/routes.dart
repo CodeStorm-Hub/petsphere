@@ -4,10 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../controllers/auth_controller.dart';
 import '../views/main_layout.dart';
 import '../views/create_post_screen.dart';
+import '../views/create_story_screen.dart';
 import '../views/add_pet_screen.dart';
 import '../views/messages_list_screen.dart';
 import '../views/chat_screen.dart';
-import '../views/match_pet_profile_screen.dart';
+import '../views/pet_profile_screen.dart';
 import '../views/product_detail_screen.dart';
 import '../views/post_detail_screen.dart';
 import '../views/cart_screen.dart';
@@ -18,6 +19,9 @@ import '../views/login_screen.dart';
 import '../views/registration_screen.dart';
 import '../views/settings_screen.dart';
 import '../views/splash_screen.dart';
+import '../views/pet_care_screen.dart';
+import '../views/pet_care_onboarding_screen.dart';
+import '../views/story_viewer_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authNotifier = ValueNotifier<AuthState>(ref.read(authProvider));
@@ -31,9 +35,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: authNotifier,
     redirect: (context, state) {
       final status = authNotifier.value.status;
-      final isGoingToAuth = state.matchedLocation == '/login' || state.matchedLocation == '/register';
+      final isGoingToAuth = state.matchedLocation == '/login' ||
+          state.matchedLocation == '/register';
       final isAtSplash = state.matchedLocation == '/splash';
-      
+
       if (status == AuthStatus.initial) {
         return isAtSplash ? null : '/splash';
       }
@@ -47,7 +52,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           return '/home';
         }
       }
-      
+
       return null;
     },
     routes: [
@@ -75,8 +80,31 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: '/create_story',
+        builder: (context, state) {
+          final petId = state.uri.queryParameters['petId'];
+          return CreateStoryScreen(initialPetId: petId);
+        },
+      ),
+      GoRoute(
         path: '/add_pet',
         builder: (context, state) => const AddPetScreen(),
+      ),
+      GoRoute(
+        path: '/pet_care',
+        builder: (context, state) => const PetCareScreen(),
+      ),
+      GoRoute(
+        path: '/pet_care_onboarding',
+        builder: (context, state) {
+          final id = state.uri.queryParameters['petId'];
+          if (id == null || id.isEmpty) {
+            return const Scaffold(
+              body: Center(child: Text('Missing pet')),
+            );
+          }
+          return PetCareOnboardingScreen(petId: id);
+        },
       ),
       GoRoute(
         path: '/notifications',
@@ -89,8 +117,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/pet/:id',
         builder: (context, state) {
-           final petId = state.pathParameters['id']!;
-           return MatchPetProfileScreen(petId: petId);
+          final petId = state.pathParameters['id']!;
+          return PetProfileScreen(visitPetId: petId);
+        },
+      ),
+      GoRoute(
+        path: '/user/:id',
+        builder: (context, state) {
+          final userId = state.pathParameters['id']!;
+          return PetProfileScreen(visitUserId: userId);
         },
       ),
       GoRoute(
@@ -100,8 +135,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/chat/:threadId',
         builder: (context, state) {
-           final threadId = state.pathParameters['threadId']!;
-           return ChatScreen(threadId: threadId);
+          final threadId = state.pathParameters['threadId']!;
+          return ChatScreen(threadId: threadId);
         },
       ),
       GoRoute(
@@ -109,6 +144,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final postId = state.pathParameters['id']!;
           return PostDetailScreen(postId: postId);
+        },
+      ),
+      GoRoute(
+        path: '/story/:petId',
+        builder: (context, state) {
+          final petId = state.pathParameters['petId']!;
+          return StoryViewerScreen(petId: petId);
         },
       ),
       GoRoute(
@@ -122,8 +164,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/product/:id',
         builder: (context, state) {
-           final productId = state.pathParameters['id']!;
-           return ProductDetailScreen(productId: productId);
+          final productId = state.pathParameters['id']!;
+          return ProductDetailScreen(productId: productId);
         },
       ),
       GoRoute(
@@ -139,7 +181,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, size: 56, color: Colors.redAccent),
+              const Icon(Icons.error_outline,
+                  size: 56, color: Colors.redAccent),
               const SizedBox(height: 12),
               Text(
                 'We could not find what you were looking for.',
