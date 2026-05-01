@@ -96,10 +96,11 @@ class _CareGoalEditorModalState extends ConsumerState<CareGoalEditorModal> {
         top: 24,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -204,8 +205,9 @@ class _CareGoalEditorModalState extends ConsumerState<CareGoalEditorModal> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildGoalSection({
     required String title,
@@ -250,7 +252,7 @@ class _CareGoalEditorModalState extends ConsumerState<CareGoalEditorModal> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.error,
+                color: Theme.of(context).colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -261,7 +263,7 @@ class _CareGoalEditorModalState extends ConsumerState<CareGoalEditorModal> {
                   Expanded(
                     child: Text(
                       warning,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12, height: 1.3),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer, fontSize: 12, height: 1.3),
                     ),
                   ),
                 ],

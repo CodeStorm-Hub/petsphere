@@ -256,7 +256,7 @@ class AppThemeV2 {
             horizontal: spacingLg,
             vertical: spacingMd,
           ),
-          minimumSize: const Size.fromHeight(minimumTouchTarget),
+          minimumSize: const Size(64, minimumTouchTarget),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radiusMd),
           ),
@@ -276,7 +276,7 @@ class AppThemeV2 {
             horizontal: spacingLg,
             vertical: spacingMd,
           ),
-          minimumSize: const Size.fromHeight(minimumTouchTarget),
+          minimumSize: const Size(64, minimumTouchTarget),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radiusMd),
           ),
@@ -292,7 +292,7 @@ class AppThemeV2 {
             horizontal: spacingLg,
             vertical: spacingMd,
           ),
-          minimumSize: const Size.fromHeight(minimumTouchTarget),
+          minimumSize: const Size(64, minimumTouchTarget),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radiusMd),
           ),
@@ -306,7 +306,7 @@ class AppThemeV2 {
             horizontal: spacingLg,
             vertical: spacingMd,
           ),
-          minimumSize: const Size.fromHeight(minimumTouchTarget),
+          minimumSize: const Size(64, minimumTouchTarget),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radiusMd),
           ),
