@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "skills": {
+    "android-accessibility": {
+      "source": "new-silvermoon/awesome-android-agent-skills",
+      "sourceType": "github",
+      "skillPath": ".github/skills/ui/android-accessibility/SKILL.md",
+      "computedHash": "85468a24bc8850ff20514ef95f4489c8cd9931a739043e0f39ab78f1781b9082"
+    },
+    "android-architecture": {
+      "source": "new-silvermoon/awesome-android-agent-skills",
+      "sourceType": "github",
+      "skillPath": ".github/skills/architecture/android-architecture/SKILL.md",
+      "computedHash": "8b2e30dbd2afd44620ae53ba6026ce01936a021d5428204f08dd0b4ae5db9973"
+    },
+    "android-coroutines": {
+      "source": "new-silvermoon/awesome-android-agent-skills",
+      "sourceType": "github",
+      "skillPath": ".github/skills/concurrency_and_networking/android-coroutines/SKILL.md",
+      "computedHash": "ca2270bbff158cb3500d9021c9c348fba6161f7a936f9195063ed284b34e6cdf"
+    },
+    "android-data-layer": {
+      "source": "new-silvermoon/awesome-android-agent-skills",
+      "sourceType": "github",
+      "skillPath": ".github/skills/architecture/android-data-layer/SKILL.md",
+      "computedHash": "894cea279816082356892d1d5e8e7904b3b1e87f18727d4e0fade487925ba660"
+    },
+    "android-emulator-skill": {
+      "source": "new-silvermoon/awesome-android-agent-skills",
+      "sourceType": "github",
+      "skillPath": ".github/skills/testing_and_automation/android-emulator-skill/SKILL.md",
+      "computedHash": "863f017da204a8391cf6a89a2e0d61bc1a53618b3569614fa7568df2884d73a0"
+    },
+    "android-gradle-logic": {
+      "source": "new-silvermoon/awesome-android-agent-skills",
+      "sourceType": "github",
+      "skillPath": ".github/skills/build_and_tooling/android-gradle-logic/SKILL.md",
+      "computedHash": "edf0d1cf91d57bf991cb71fc12c2e5085d4897b737c322a2ae8c4f0fc0046ff6"
+    },
+    "android-testing": {
+      "source": "new-silvermoon/awesome-android-agent-skills",
+      "sourceType": "github",
+      "skillPath": ".github/skills/testing_and_automation/android-testing/SKILL.md",
+      "computedHash": "bc18f8cea2b7601cef52141845708ef674ba37dc05e7bf4b2d8fd08b11c2ab41"
+    },
+    "android-viewmodel": {
+      "source": "new-silvermoon/awesome-android-agent-skills",
+      "sourceType": "github",
+      "skillPath": ".github/skills/architecture/android-viewmodel/SKILL.md",
+      "computedHash": "e7248e9f8bf8a4e28e157328737caba70e211e7bdca1c6b064b20cf5766a1b67"
+    },
+    "flutter-add-integration-test": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-add-integration-test/SKILL.md",
+      "computedHash": "4246d3ef5f21bdb7945899056b99cf3863e2bff645a132b41634caaded68da6d"
+    },
+    "flutter-add-widget-preview": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-add-widget-preview/SKILL.md",
+      "computedHash": "369ed3ebdc1f81ee337551ad1d1dd9ec6e768ed2bdf65d32ad442117a6ba79b6"
+    },
+    "flutter-add-widget-test": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-add-widget-test/SKILL.md",
+      "computedHash": "f4ea905ae155d1bca76f5431bf6ed31f31e3d40146493e7ae4285eac39ba4ffd"
+    },
+    "flutter-apply-architecture-best-practices": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-apply-architecture-best-practices/SKILL.md",
+      "computedHash": "baeb208b1cab90c559677626dbd101b96ba93f803cbed85122abdadeb3283a8b"
+    },
+    "flutter-build-responsive-layout": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-build-responsive-layout/SKILL.md",
+      "computedHash": "6d74a9504c4e355c4c62f6fcb6c6dc0df67b56dd6616bea199e4e58f75b7729b"
+    },
+    "flutter-fix-layout-issues": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-fix-layout-issues/SKILL.md",
+      "computedHash": "b2f9789451224e6df8d1d7ac63854c2f1beb30fa35d13ea06fbae9ba2b1b0a7f"
+    },
+    "flutter-implement-json-serialization": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-implement-json-serialization/SKILL.md",
+      "computedHash": "c2cf46854472a452dafa11f862f2bca3d9fe7286a5bb45d85b1efbcebc74b74e"
+    },
+    "flutter-setup-declarative-routing": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-setup-declarative-routing/SKILL.md",
+      "computedHash": "4c2ed2fd729230be581b15d84741688e206632fb2b38af320060cd3518b91179"
+    },
+    "flutter-setup-localization": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-setup-localization/SKILL.md",
+      "computedHash": "fc0811b1b775c52c1b8f7df600f5c52b83029aea0586b8cc55169812affd408f"
+    },
+    "flutter-use-http-package": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-use-http-package/SKILL.md",
+      "computedHash": "a77bb31bb92de79cd731982dc8c066b73e7758f5c9552de9bd3ecfdc18ded5fd"
+    },
+    "gradle-build-performance": {
+      "source": "new-silvermoon/awesome-android-agent-skills",
+      "sourceType": "github",
+      "skillPath": ".github/skills/performance/gradle-build-performance/SKILL.md",
+      "computedHash": "f440cdbcefbb85d9c09833542f94b4b3a5067289782ddb24ec18a451f78c9375"
+    },
+    "kotlin-concurrency-expert": {
+      "source": "new-silvermoon/awesome-android-agent-skills",
+      "sourceType": "github",
+      "skillPath": ".github/skills/concurrency_and_networking/kotlin-concurrency-expert/SKILL.md",
+      "computedHash": "e153a2fd9c4ebb5d019d73f89d5f6a479775239aa88f84548bc8ce184da64398"
+    }
+  }
+}
