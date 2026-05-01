@@ -53,6 +53,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
         final mediaQuery = MediaQuery.of(sheetContext);
+        final colorScheme = Theme.of(sheetContext).colorScheme;
         final maxSheetHeight = mediaQuery.size.height * 0.85;
 
         return Padding(
@@ -65,9 +66,9 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                 margin: const EdgeInsets.all(12),
                 padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF171617),
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: const Color(0xFF2B292B)),
+                  border: Border.all(color: colorScheme.outlineVariant),
                 ),
                 child: SafeArea(
                   top: false,
@@ -83,24 +84,24 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                               width: 44,
                               height: 5,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF5F5A5F),
+                                color: colorScheme.outline,
                                 borderRadius: BorderRadius.circular(99),
                               ),
                             ),
                           ),
                           const SizedBox(height: 18),
-                          const Text(
+                          Text(
                             'Choose Story Media',
                             style: TextStyle(
-                              color: Color(0xFFF5F1EE),
+                              color: colorScheme.onSurface,
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
                           const SizedBox(height: 6),
-                          const Text(
+                          Text(
                             'Pick a photo or video to post as a story.',
-                            style: TextStyle(color: Color(0xFFB8B2AA)),
+                            style: TextStyle(color: colorScheme.onSurfaceVariant),
                           ),
                           const SizedBox(height: 4),
                           Row(
@@ -211,13 +212,14 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+      SnackBar(content: Text(message), backgroundColor: Theme.of(context).colorScheme.error),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final pets = ref.watch(petProvider).myPets;
+    final colorScheme = Theme.of(context).colorScheme;
     if (_selectedPetId == null && pets.isNotEmpty) {
       _selectedPetId = pets.first.id;
     }
@@ -226,15 +228,15 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
         _selectedPetId != null && _selectedFile != null && !_isUploading;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0E10),
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         titleSpacing: 8,
-        title: const Text(
+        title: Text(
           'Create Story',
           style: TextStyle(
-            color: Color(0xFFF5F1EE),
+            color: colorScheme.onSurface,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.3,
           ),
@@ -244,8 +246,8 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
             padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
             child: FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFD4845A),
-                foregroundColor: Colors.white,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999),
                 ),
@@ -253,12 +255,12 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
               ),
               onPressed: canPublish ? () => _publish(pets) : null,
               child: _isUploading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.2,
-                        color: Colors.white,
+                        color: colorScheme.onPrimary,
                       ),
                     )
                   : const Text('Share'),
@@ -267,18 +269,18 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
         ],
       ),
       body: pets.isEmpty
-          ? const Center(
+          ? Center(
               child: Text(
                 'Add a pet before posting a story.',
-                style: TextStyle(color: Color(0xFFB8B2AA)),
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
               ),
             )
           : DecoratedBox(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: RadialGradient(
-                  center: Alignment(0, -0.85),
+                  center: const Alignment(0, -0.85),
                   radius: 1.3,
-                  colors: [Color(0x332A1B16), Color(0x000F0E10)],
+                  colors: [colorScheme.primary.withAlpha(50), colorScheme.surface.withAlpha(0)],
                 ),
               ),
               child: LayoutBuilder(
@@ -295,10 +297,10 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                         padding:
                             EdgeInsets.fromLTRB(16, 8, 16, 18 + keyboardInset),
                         children: [
-                          const Text(
+                          Text(
                             'Post As',
                             style: TextStyle(
-                              color: Color(0xFFB8B2AA),
+                              color: colorScheme.onSurfaceVariant,
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -326,14 +328,14 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: selected
-                                          ? const Color(0xFFD4845A)
+                                          ? colorScheme.primary
                                               .withAlpha(40)
-                                          : const Color(0xFF1C1A1D),
+                                          : colorScheme.surfaceContainer,
                                       borderRadius: BorderRadius.circular(999),
                                       border: Border.all(
                                         color: selected
-                                            ? const Color(0xFFD4845A)
-                                            : const Color(0xFF2B292B),
+                                            ? colorScheme.primary
+                                            : colorScheme.outlineVariant,
                                         width: 1.4,
                                       ),
                                     ),
@@ -348,7 +350,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                                                       pet.profileImageUrl)
                                                   : null,
                                           backgroundColor:
-                                              const Color(0xFF2A272A),
+                                              colorScheme.surfaceContainerHighest,
                                           child: pet.profileImageUrl.isEmpty
                                               ? const Icon(Icons.pets, size: 14)
                                               : null,
@@ -358,8 +360,8 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                                           pet.name,
                                           style: TextStyle(
                                             color: selected
-                                                ? const Color(0xFFF5F1EE)
-                                                : const Color(0xFFCAC4BD),
+                                                ? colorScheme.onSurface
+                                                : colorScheme.onSurfaceVariant,
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
@@ -377,14 +379,14 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                               height: mediaCardHeight,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(30),
-                                color: const Color(0xFF1B191C),
+                                color: colorScheme.surfaceContainer,
                                 border:
-                                    Border.all(color: const Color(0xFF2B292B)),
-                                boxShadow: const [
+                                    Border.all(color: colorScheme.outlineVariant),
+                                boxShadow: [
                                   BoxShadow(
-                                    color: Color(0x80000000),
+                                    color: colorScheme.shadow.withAlpha(128),
                                     blurRadius: 28,
-                                    offset: Offset(0, 18),
+                                    offset: const Offset(0, 18),
                                   ),
                                 ],
                                 image: _selectedFile != null &&
@@ -400,29 +402,29 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                                 child: Stack(
                                   children: [
                                     if (_selectedFile == null)
-                                      const Center(
+                                      Center(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Icon(
                                               Icons.add_circle_outline_rounded,
                                               size: 58,
-                                              color: Color(0xFFD4845A),
+                                              color: colorScheme.primary,
                                             ),
-                                            SizedBox(height: 12),
+                                            const SizedBox(height: 12),
                                             Text(
                                               'Tap to add photo or video',
                                               style: TextStyle(
-                                                color: Color(0xFFF5F1EE),
+                                                color: colorScheme.onSurface,
                                                 fontSize: 17,
                                                 fontWeight: FontWeight.w700,
                                               ),
                                             ),
-                                            SizedBox(height: 6),
+                                            const SizedBox(height: 6),
                                             Text(
                                               'Gallery, camera, or video library',
                                               style: TextStyle(
-                                                  color: Color(0xFFAEA79F)),
+                                                  color: colorScheme.onSurfaceVariant),
                                             ),
                                           ],
                                         ),
@@ -439,20 +441,20 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                                             ],
                                           ),
                                         ),
-                                        child: const Center(
+                                        child: Center(
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Icon(
                                                 Icons.play_circle_fill_rounded,
                                                 size: 74,
-                                                color: Color(0xFFD4845A),
+                                                color: colorScheme.primary,
                                               ),
-                                              SizedBox(height: 12),
+                                              const SizedBox(height: 12),
                                               Text(
                                                 'Video selected',
                                                 style: TextStyle(
-                                                  color: Color(0xFFF5F1EE),
+                                                  color: colorScheme.onSurface,
                                                   fontSize: 17,
                                                   fontWeight: FontWeight.w700,
                                                 ),
@@ -469,7 +471,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                                           backgroundColor:
                                               Colors.black.withAlpha(120),
                                           foregroundColor:
-                                              const Color(0xFFF5F1EE),
+                                              colorScheme.onSurface,
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 12,
                                             vertical: 8,
@@ -498,21 +500,21 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                           Container(
                             padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1B191C),
+                              color: colorScheme.surfaceContainer,
                               borderRadius: BorderRadius.circular(22),
                               border:
-                                  Border.all(color: const Color(0xFF2B292B)),
+                                  Border.all(color: colorScheme.outlineVariant),
                             ),
                             child: TextField(
                               controller: _captionController,
                               maxLength: 280,
                               maxLines: 3,
-                              style: const TextStyle(color: Color(0xFFF5F1EE)),
-                              decoration: const InputDecoration(
+                              style: TextStyle(color: colorScheme.onSurface),
+                              decoration: InputDecoration(
                                 counterStyle:
-                                    TextStyle(color: Color(0xFF9A948C)),
+                                    TextStyle(color: colorScheme.onSurfaceVariant),
                                 hintText: 'Write a caption...',
-                                hintStyle: TextStyle(color: Color(0xFF88827B)),
+                                hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                                 border: InputBorder.none,
                               ),
                             ),
@@ -541,6 +543,7 @@ class _MediaPickerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return ListTile(
       contentPadding: EdgeInsets.zero,
       onTap: onTap,
@@ -548,19 +551,19 @@ class _MediaPickerTile extends StatelessWidget {
         width: 38,
         height: 38,
         decoration: BoxDecoration(
-          color: const Color(0xFFD4845A).withAlpha(30),
+          color: colorScheme.primary.withAlpha(30),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(icon, color: const Color(0xFFD4845A)),
+        child: Icon(icon, color: colorScheme.primary),
       ),
       title: Text(
         title,
-        style: const TextStyle(
-          color: Color(0xFFF5F1EE),
+        style: TextStyle(
+          color: colorScheme.onSurface,
           fontWeight: FontWeight.w700,
         ),
       ),
-      trailing: const Icon(Icons.chevron_right, color: Color(0xFFB8B2AA)),
+      trailing: Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
     );
   }
 }
@@ -573,22 +576,23 @@ class _DurationBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFD4845A).withAlpha(28),
+        color: colorScheme.primary.withAlpha(28),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFD4845A).withAlpha(60)),
+        border: Border.all(color: colorScheme.primary.withAlpha(60)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: const Color(0xFFD4845A)),
+          Icon(icon, size: 13, color: colorScheme.primary),
           const SizedBox(width: 4),
           Text(
             label,
-            style: const TextStyle(
-              color: Color(0xFFD4845A),
+            style: TextStyle(
+              color: colorScheme.primary,
               fontSize: 11,
               fontWeight: FontWeight.w700,
             ),

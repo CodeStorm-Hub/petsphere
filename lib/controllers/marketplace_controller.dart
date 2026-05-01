@@ -45,9 +45,6 @@ class MarketplaceController extends Notifier<MarketplaceState> {
 
   @override
   MarketplaceState build() {
-    // Auto-refetch products whenever the auth status flips to authenticated
-    // or the active user changes (e.g. account switch). Ensures the catalog
-    // is hydrated on cold start / fresh login without manual pull-to-refresh.
     ref.listen<AuthState>(authProvider, (prev, next) {
       if (next.status == AuthStatus.authenticated &&
           next.user != null &&
@@ -59,7 +56,7 @@ class MarketplaceController extends Notifier<MarketplaceState> {
       }
     });
 
-    _fetchProducts();
+    Future.microtask(() => _fetchProducts());
     final authedUser = ref.read(authProvider).user;
     if (authedUser != null) _lastFetchedForUserId = authedUser.id;
     return MarketplaceState(isLoading: true);

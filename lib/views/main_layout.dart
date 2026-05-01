@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/pet_controller.dart';
+
 import 'home_screen.dart';
 import 'pet_profile_screen.dart';
 import 'discovery_screen.dart';
@@ -114,10 +115,10 @@ class _GlassNavBar extends StatelessWidget {
         child: Container(
           height: 64,
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.95),
+            color: theme.colorScheme.surface.withAlpha(240),
             borderRadius: BorderRadius.circular(30),
             border: Border.all(
-              color: const Color(0xFF2E2B26),
+              color: colorScheme.outline.withAlpha(80),
               width: 1,
             ),
           ),
@@ -128,7 +129,7 @@ class _GlassNavBar extends StatelessWidget {
               final isCenter = i == 2;
               final isProfile = i == 4;
               final iconColor =
-                  isActive ? colorScheme.primary : const Color(0xFFB8B0A4);
+                  isActive ? colorScheme.primary : colorScheme.onSurfaceVariant;
 
               if (isCenter) {
                 return GestureDetector(
@@ -136,15 +137,18 @@ class _GlassNavBar extends StatelessWidget {
                   child: Container(
                     width: 48,
                     height: 48,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
-                        colors: [Color(0xFFD4845A), Color(0xFFB86A44)],
+                        colors: [
+                          colorScheme.primary,
+                          colorScheme.primary.withAlpha(180),
+                        ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                     ),
-                    child: const Icon(Icons.add, color: Colors.white, size: 28),
+                    child: Icon(Icons.add, color: colorScheme.onPrimary, size: 28),
                   ),
                 );
               }

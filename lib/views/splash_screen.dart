@@ -71,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ],
                 ),
-                child: const Icon(Icons.pets, size: 56, color: Colors.white),
+                child: Icon(Icons.pets, size: 56, color: colorScheme.onPrimary),
               ),
             ),
             const SizedBox(height: 28),

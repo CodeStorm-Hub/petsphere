@@ -28,8 +28,8 @@ class ProductDetailScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline,
-                    size: 48, color: Colors.redAccent),
+                Icon(Icons.error_outline,
+                    size: 48, color: Theme.of(context).colorScheme.error),
                 const SizedBox(height: 12),
                 Text('Could not load product',
                     style: Theme.of(context).textTheme.titleMedium),
@@ -333,7 +333,7 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                               : 'Out of stock',
                           style: TextStyle(
                             color: product.stock > 0
-                                ? const Color(0xFF506453)
+                                ? colorScheme.onTertiary
                                 : colorScheme.error,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -354,21 +354,21 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE5FDE6),
+                            color: colorScheme.tertiaryContainer,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(icon,
-                                  size: 14, color: const Color(0xFF506453)),
+                                  size: 14, color: colorScheme.onTertiary),
                               const SizedBox(width: 4),
                               Text(
                                 tag,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF506453),
+                                  color: colorScheme.onTertiary,
                                 ),
                               ),
                             ],
@@ -545,8 +545,8 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                               SnackBar(
                                 content: Row(
                                   children: [
-                                    const Icon(Icons.check_circle,
-                                        color: Colors.white, size: 18),
+                                    Icon(Icons.check_circle,
+                                        color: colorScheme.onPrimary, size: 18),
                                     const SizedBox(width: 8),
                                     Text(
                                         'Added $_quantity × ${product.name} to cart'),

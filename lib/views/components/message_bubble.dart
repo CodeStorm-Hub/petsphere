@@ -14,6 +14,7 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final timeStr = DateFormat('h:mm a').format(message.createdAt.toLocal());
 
     return Align(
@@ -33,8 +34,8 @@ class MessageBubble extends StatelessWidget {
           decoration: BoxDecoration(
             // Sent: gradient from primary to primary-dim (Stitch spec)
             gradient: isMe
-                ? const LinearGradient(
-                    colors: [Color(0xFF99472C), Color(0xFF8A3B21)],
+                ? LinearGradient(
+                    colors: [colorScheme.primary, Color(0xFF8A3B21)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   )
@@ -50,7 +51,7 @@ class MessageBubble extends StatelessWidget {
             boxShadow: isMe
                 ? [
                     BoxShadow(
-                        color: const Color(0xFF99472C).withAlpha(25),
+                        color: colorScheme.primary.withAlpha(25),
                         blurRadius: 10,
                         offset: const Offset(0, 4))
                   ]
@@ -79,8 +80,8 @@ class MessageBubble extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       color: isMe
-                          ? Colors.white.withAlpha(180)
-                          : const Color(0xFF625E59),
+                          ? colorScheme.onPrimary.withAlpha(180)
+                          : colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -91,7 +92,7 @@ class MessageBubble extends StatelessWidget {
                       size: 13,
                       color: message.isRead
                           ? const Color(0xFF4FC3F7)
-                          : Colors.white.withAlpha(180),
+                          : colorScheme.onPrimary.withAlpha(180),
                     ),
                   ],
                 ],
@@ -111,6 +112,7 @@ class DateSeparator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final msgDay = DateTime(date.year, date.month, date.day);
@@ -131,10 +133,10 @@ class DateSeparator extends StatelessWidget {
           ),
           child: Text(
             label.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF625E59),
+              color: colorScheme.onSurfaceVariant,
               letterSpacing: 1.5,
             ),
           ),

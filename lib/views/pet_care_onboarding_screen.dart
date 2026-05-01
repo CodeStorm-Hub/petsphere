@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../controllers/pet_controller.dart';
 import '../models/care_badge_model.dart';
 import '../repositories/pet_care_repository.dart';
-import '../theme/app_theme.dart';
 import '../utils/care_personalization.dart';
 
 class PetCareOnboardingScreen extends ConsumerStatefulWidget {
@@ -196,6 +195,7 @@ class _PetCareOnboardingScreenState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final stepTitles = [
       'About Your Pet',
@@ -224,7 +224,7 @@ class _PetCareOnboardingScreenState
                     margin: EdgeInsets.only(right: i < _totalSteps - 1 ? 4 : 0),
                     height: 4,
                     decoration: BoxDecoration(
-                      color: isActive ? AppTheme.primaryAccent : AppTheme.border,
+                      color: isActive ? colorScheme.primary : colorScheme.outlineVariant,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -234,7 +234,7 @@ class _PetCareOnboardingScreenState
           ),
           Text(
             'Step ${_step + 1} of $_totalSteps',
-            style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary),
+            style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Expanded(
@@ -466,16 +466,16 @@ class _PetCareOnboardingScreenState
       Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppTheme.primaryAccent.withValues(alpha: 0.08),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.primaryAccent.withValues(alpha: 0.2)),
+          border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.auto_awesome, color: AppTheme.primaryAccent, size: 18),
+                Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.primary, size: 18),
                 SizedBox(width: 8),
                 Text('Your Personalized Plan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
               ],
@@ -558,7 +558,7 @@ class _StepDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         text,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
       );
 }
 
@@ -568,7 +568,7 @@ class _Labeled extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: 6),
-        child: Text(t, style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+        child: Text(t, style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
       );
 }
 
@@ -583,7 +583,7 @@ class _CustomTaskRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 24,
-            child: Text('$index.', style: const TextStyle(color: AppTheme.textSecondary, fontWeight: FontWeight.w600)),
+            child: Text('$index.', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600)),
           ),
           Expanded(
             child: Column(children: [

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../controllers/match_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/pet_model.dart';
-import '../theme/app_theme.dart';
+
 import 'main_layout.dart' show bottomNavSpaceFor;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -19,6 +19,7 @@ class DiscoveryScreen extends ConsumerWidget {
     final myPets = petState.myPets;
     final listedPets = myPets.where((p) => p.isBreedingListed).toList();
     final navSpace = bottomNavSpaceFor(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return DefaultTabController(
       length: 3,
@@ -31,9 +32,9 @@ class DiscoveryScreen extends ConsumerWidget {
               Tab(text: 'Nearby'),
               Tab(text: 'My Listings'),
             ],
-            labelColor: AppTheme.primaryAccent,
-            unselectedLabelColor: AppTheme.textSecondary,
-            indicatorColor: AppTheme.primaryAccent,
+            labelColor: colorScheme.primary,
+            unselectedLabelColor: colorScheme.onSurfaceVariant,
+            indicatorColor: colorScheme.primary,
             dividerColor: Colors.transparent,
           ),
           actions: [
@@ -74,6 +75,7 @@ class _MyListingsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     return RefreshIndicator(
       onRefresh: () => ref.read(petProvider.notifier).reload(),
       child: listedPets.isEmpty
@@ -82,7 +84,7 @@ class _MyListingsTab extends ConsumerWidget {
               padding: EdgeInsets.only(bottom: navSpace),
               children: [
                 const SizedBox(height: 100),
-                const Icon(Icons.favorite_border, size: 64, color: Colors.grey),
+                Icon(Icons.favorite_border, size: 64, color: colorScheme.outline.withAlpha(100)),
                 const SizedBox(height: 16),
                 const Center(
                   child: Text(
@@ -91,10 +93,10 @@ class _MyListingsTab extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Center(
+                Center(
                   child: Text(
                     'Tap "New Listing" to add your pet to discovery.',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: colorScheme.onSurfaceVariant),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -120,13 +122,13 @@ class _MyListingsTab extends ConsumerWidget {
                     contentPadding: const EdgeInsets.all(12),
                     leading: CircleAvatar(
                       radius: 28,
-                      backgroundColor: AppTheme.cardColor,
+                      backgroundColor: colorScheme.surfaceContainerHighest,
                       backgroundImage: pet.profileImageUrl.isNotEmpty
                           ? NetworkImage(pet.profileImageUrl)
                           : null,
                       child: pet.profileImageUrl.isEmpty
-                          ? const Icon(Icons.pets,
-                              color: AppTheme.primaryAccent)
+                          ? Icon(Icons.pets,
+                              color: colorScheme.primary)
                           : null,
                     ),
                     title: Text(pet.name,
@@ -134,8 +136,8 @@ class _MyListingsTab extends ConsumerWidget {
                             const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text('${pet.breed} • ${pet.animalType}'),
                     trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline,
-                          color: Colors.red),
+                      icon: Icon(Icons.delete_outline,
+                          color: colorScheme.error),
                       onPressed: () async {
                         final success = await ref
                             .read(petProvider.notifier)
@@ -266,7 +268,7 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error ?? 'Could not send like. Please try again.'),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -379,18 +381,22 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
     final filteredPets = _applyFilter(matchState.discoveryPets);
     final hasPets = filteredPets.isNotEmpty;
     final navSpace = bottomNavSpaceFor(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     if (widget.isPetLoading || matchState.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (!widget.hasActivePet) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
-        children: [
-          const Icon(Icons.pets_outlined, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
+      return Builder(
+        builder: (context) {
+          final colorScheme = Theme.of(context).colorScheme;
+          return ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
+            children: [
+              Icon(Icons.pets_outlined, size: 64, color: colorScheme.outline.withAlpha(100)),
+              const SizedBox(height: 16),
           const Center(
             child: Text(
               'Add a pet to start discovering breeding matches.',
@@ -408,32 +414,39 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
           ),
         ],
       );
+        },
+      );
     }
 
     if (matchState.error != null && !hasPets) {
       return RefreshIndicator(
         onRefresh: () => ref.read(matchProvider.notifier).refresh(),
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
-          children: [
-            const Icon(Icons.error_outline,
-                size: 64, color: Colors.redAccent),
-            const SizedBox(height: 16),
-            Text(
-              matchState.error!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.redAccent),
-            ),
-            const SizedBox(height: 24),
-            Center(
-              child: OutlinedButton(
-                onPressed: () =>
-                    ref.read(matchProvider.notifier).refresh(),
-                child: const Text('Try Again'),
-              ),
-            ),
-          ],
+        child: Builder(
+          builder: (context) {
+            final colorScheme = Theme.of(context).colorScheme;
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
+              children: [
+                Icon(Icons.error_outline,
+                    size: 64, color: colorScheme.error),
+                const SizedBox(height: 16),
+                Text(
+                  matchState.error!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: colorScheme.error),
+                ),
+                const SizedBox(height: 24),
+                Center(
+                  child: OutlinedButton(
+                    onPressed: () =>
+                        ref.read(matchProvider.notifier).refresh(),
+                    child: const Text('Try Again'),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       );
     }
@@ -464,12 +477,12 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
                         horizontal: 20, vertical: 10),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppTheme.primaryAccent.withValues(alpha: 0.15)
-                          : AppTheme.cardColor,
+                          ? colorScheme.primary.withAlpha(38)
+                          : colorScheme.surfaceContainerHighest,
                       border: Border.all(
                         color: isSelected
-                            ? AppTheme.primaryAccent
-                            : AppTheme.border,
+                            ? colorScheme.primary
+                            : colorScheme.outline.withAlpha(80),
                         width: 1.5,
                       ),
                       borderRadius: BorderRadius.circular(999),
@@ -478,8 +491,8 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
                       _filterLabels[i],
                       style: TextStyle(
                         color: isSelected
-                            ? AppTheme.primaryAccent
-                            : AppTheme.textSecondary,
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -501,14 +514,15 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding:
                         EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
-                    children: const [
+                    children: [
                       Icon(Icons.favorite_border,
-                          size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
+                          size: 64, color: colorScheme.outline.withAlpha(100)),
+                      const SizedBox(height: 16),
                       Center(
                         child: Text(
                           'No more pets available. Check back soon!',
                           textAlign: TextAlign.center,
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
                         ),
                       ),
                     ],
@@ -578,11 +592,11 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
                             // Skip
                             _ActionButton(
                               size: 64,
-                              color: const Color(0xFF1A1814),
-                              borderColor: const Color(0xFF2E2B26),
-                              child: const Icon(Icons.close_rounded,
+                              color: colorScheme.surfaceContainerHighest,
+                              borderColor: colorScheme.outline.withAlpha(80),
+                              child: Icon(Icons.close_rounded,
                                   size: 28,
-                                  color: Color(0xFFB8B0A4)),
+                                  color: colorScheme.onSurfaceVariant),
                               onTap: () =>
                                   _commitSwipe(false, screenWidth),
                             ),
@@ -590,11 +604,11 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
                             // Profile details
                             _ActionButton(
                               size: 56,
-                              color: const Color(0xFF1A1814),
-                              borderColor: const Color(0xFF2E2B26),
-                              child: const Icon(Icons.star_rounded,
+                              color: colorScheme.surfaceContainerHighest,
+                              borderColor: colorScheme.outline.withAlpha(80),
+                              child: Icon(Icons.star_rounded,
                                   size: 26,
-                                  color: Color(0xFF4A7C59)),
+                                  color: colorScheme.secondary),
                               onTap: () => context.push(
                                   '/pet/${filteredPets[_currentIndex].id}'),
                             ),
@@ -602,18 +616,18 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
                             // Like
                             _ActionButton(
                               size: 80,
-                              gradient: const LinearGradient(
+                              gradient: LinearGradient(
                                 colors: [
-                                  Color(0xFFD4845A),
-                                  Color(0xFFB86A44)
+                                  colorScheme.primary,
+                                  colorScheme.primary.withAlpha(180)
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               shadowColor:
-                                  const Color(0x4DD4845A),
-                              child: const Icon(Icons.favorite,
-                                  size: 36, color: Colors.white),
+                                  colorScheme.primary.withAlpha(77),
+                              child: Icon(Icons.favorite,
+                                  size: 36, color: colorScheme.onPrimary),
                               onTap: () =>
                                   _commitSwipe(true, screenWidth),
                             ),
@@ -678,24 +692,25 @@ class _PetCard extends StatelessWidget {
     final nopeOpacity = isBackground
         ? 0.0
         : (-dragX / 120).clamp(0.0, 1.0).toDouble();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTap: isBackground ? null : onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF211F1B),
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(32),
           boxShadow: isBackground
               ? []
               : [
                   BoxShadow(
-                    color: Colors.black.withAlpha(60),
+                    color: colorScheme.shadow.withAlpha(60),
                     blurRadius: 48,
                     offset: const Offset(0, 24),
                   ),
                 ],
           border:
-              Border.all(color: const Color(0xFF2E2B26), width: 1.5),
+              Border.all(color: colorScheme.outline.withAlpha(80), width: 1.5),
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
@@ -711,18 +726,18 @@ class _PetCard extends StatelessWidget {
                       ? Image.network(
                           pet.profileImageUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _imageFallback(),
+                          errorBuilder: (_, __, ___) => _imageFallback(colorScheme),
                         )
-                      : _imageFallback(),
+                      : _imageFallback(colorScheme),
 
-                  // Like overlay (green, right swipe)
+                  // Like overlay (secondary, right swipe)
                   if (!isBackground)
                     Positioned.fill(
                       child: Opacity(
                         opacity: likeOpacity,
                         child: Container(
                           color:
-                              const Color(0xFF4A7C59).withValues(alpha: 0.4),
+                              colorScheme.secondary.withAlpha(102),
                           alignment: Alignment.topLeft,
                           padding: const EdgeInsets.all(24),
                           child: Container(
@@ -730,14 +745,14 @@ class _PetCard extends StatelessWidget {
                                 horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
                               border: Border.all(
-                                  color: const Color(0xFF4A7C59),
+                                  color: colorScheme.secondary,
                                   width: 3),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
+                            child: Text(
                               'LIKE',
                               style: TextStyle(
-                                color: Color(0xFF4A7C59),
+                                color: colorScheme.secondary,
                                 fontSize: 32,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 3,
@@ -748,13 +763,13 @@ class _PetCard extends StatelessWidget {
                       ),
                     ),
 
-                  // Nope overlay (red, left swipe)
+                  // Nope overlay (error, left swipe)
                   if (!isBackground)
                     Positioned.fill(
                       child: Opacity(
                         opacity: nopeOpacity,
                         child: Container(
-                          color: Colors.red.withValues(alpha: 0.4),
+                          color: colorScheme.error.withAlpha(102),
                           alignment: Alignment.topRight,
                           padding: const EdgeInsets.all(24),
                           child: Container(
@@ -762,13 +777,13 @@ class _PetCard extends StatelessWidget {
                                 horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
                               border: Border.all(
-                                  color: Colors.red, width: 3),
+                                  color: colorScheme.error, width: 3),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
+                            child: Text(
                               'NOPE',
                               style: TextStyle(
-                                color: Colors.red,
+                                color: colorScheme.error,
                                 fontSize: 32,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 3,
@@ -787,25 +802,25 @@ class _PetCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1A1814)
+                        color: colorScheme.surfaceContainerHighest
                             .withValues(alpha: 0.85),
                         borderRadius: BorderRadius.circular(999),
-                        border:
-                            Border.all(color: const Color(0xFF2E2B26)),
+                        border: Border.all(
+                            color: colorScheme.outline.withAlpha(80)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.location_on,
+                          Icon(Icons.location_on,
                               size: 14,
-                              color: Color(0xFFD4845A)),
+                              color: colorScheme.primary),
                           const SizedBox(width: 4),
                           Text(
                             '$distanceMi mi away',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFFF2EDE4),
+                              color: colorScheme.onSurface,
                             ),
                           ),
                         ],
@@ -821,12 +836,12 @@ class _PetCard extends StatelessWidget {
                       child: Container(
                         width: 36,
                         height: 36,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF1DA1F2),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.verified,
-                            size: 20, color: Colors.white),
+                        child: Icon(Icons.verified,
+                            size: 20, color: colorScheme.onPrimary),
                       ),
                     ),
                 ],
@@ -846,10 +861,10 @@ class _PetCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             pet.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 26,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFFF2EDE4),
+                              color: colorScheme.onSurface,
                               letterSpacing: -0.5,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -859,21 +874,20 @@ class _PetCard extends StatelessWidget {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFD4845A)
-                                .withValues(alpha: 0.15),
+                            color: colorScheme.primary.withAlpha(38),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.pets,
-                              size: 22, color: Color(0xFFD4845A)),
+                          child: Icon(Icons.pets,
+                              size: 22, color: colorScheme.primary),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '${pet.age} yr${pet.age == 1 ? '' : 's'} • ${pet.breed}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
-                        color: Color(0xFFB8B0A4),
+                        color: colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -903,10 +917,10 @@ class _PetCard extends StatelessWidget {
     );
   }
 
-  Widget _imageFallback() => Container(
-        color: const Color(0xFF211F1B),
-        child: const Center(
-          child: Icon(Icons.pets, size: 80, color: Color(0xFFD4845A)),
+  Widget _imageFallback(ColorScheme colorScheme) => Container(
+        color: colorScheme.surface,
+        child: Center(
+          child: Icon(Icons.pets, size: 80, color: colorScheme.primary),
         ),
       );
 }
@@ -973,8 +987,8 @@ class _NearbyTab extends ConsumerWidget {
                                 fontWeight: FontWeight.bold)),
                         if (pet.isVerified) ...[
                           const SizedBox(width: 4),
-                          const Icon(Icons.verified,
-                              size: 14, color: Color(0xFF1DA1F2)),
+                          Icon(Icons.verified,
+                              size: 14, color: colorScheme.primary),
                         ],
                       ],
                     ),
@@ -983,8 +997,8 @@ class _NearbyTab extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        const Icon(Icons.location_on,
-                            size: 14, color: Color(0xFFD4845A)),
+                        Icon(Icons.location_on,
+                            size: 14, color: colorScheme.primary),
                         Text(
                           '$dist mi',
                           style: TextStyle(
@@ -1016,27 +1030,28 @@ class _TraitBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1814),
-          border: Border.all(color: const Color(0xFF2E2B26)),
+          color: colorScheme.surfaceContainerHighest,
+          border: Border.all(color: colorScheme.outline.withAlpha(80)),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           children: [
             Text(label,
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 11,
-                    color: Color(0xFFB8B0A4),
+                    color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500)),
             const SizedBox(height: 2),
             Text(value,
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFFD4845A))),
+                    color: colorScheme.primary)),
           ],
         ),
       ),
@@ -1065,6 +1080,7 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1087,7 +1103,7 @@ class _ActionButton extends StatelessWidget {
                 ]
               : [
                   BoxShadow(
-                    color: Colors.black.withAlpha(50),
+                    color: colorScheme.shadow.withAlpha(50),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   )
@@ -1104,10 +1120,11 @@ class _ActionButton extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 void _showListPetSheet(BuildContext context, WidgetRef ref) {
   final myOwnedPets = ref.read(petProvider).myPets;
+  final colorScheme = Theme.of(context).colorScheme;
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppTheme.surface,
+    backgroundColor: colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
     ),
@@ -1131,6 +1148,7 @@ class _ListPetSheetState extends State<_ListPetSheet> {
   Widget build(BuildContext context) {
     final availablePets =
         widget.myOwnedPets.where((p) => !p.isBreedingListed).toList();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Consumer(
       builder: (context, ref, _) {
@@ -1150,7 +1168,7 @@ class _ListPetSheetState extends State<_ListPetSheet> {
                     width: 44,
                     height: 5,
                     decoration: BoxDecoration(
-                      color: AppTheme.border,
+                      color: colorScheme.outline.withAlpha(80),
                       borderRadius: BorderRadius.circular(99),
                     ),
                   ),
@@ -1161,24 +1179,26 @@ class _ListPetSheetState extends State<_ListPetSheet> {
                         fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
+                  Text(
                     'Select which of your pets to add to the discovery pool.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: AppTheme.textSecondary),
+                    style: TextStyle(color: colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 16),
                   if (availablePets.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(32),
+                    Padding(
+                      padding: const EdgeInsets.all(32),
                       child: Column(
                         children: [
                           Icon(Icons.info_outline,
-                              color: Colors.grey, size: 48),
-                          SizedBox(height: 16),
+                              color: colorScheme.outline.withAlpha(100),
+                              size: 48),
+                          const SizedBox(height: 16),
                           Text(
                             'All your pets are already listed, or you haven\'t added any pets yet.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey),
+                            style:
+                                TextStyle(color: colorScheme.outline.withAlpha(100)),
                           ),
                         ],
                       ),
@@ -1206,16 +1226,17 @@ class _ListPetSheetState extends State<_ListPetSheet> {
                                 children: [
                                   CircleAvatar(
                                     radius: 18,
-                                    backgroundColor: AppTheme.cardColor,
+                                    backgroundColor:
+                                        colorScheme.surfaceContainerHighest,
                                     backgroundImage:
                                         pet.profileImageUrl.isNotEmpty
                                             ? NetworkImage(
                                                 pet.profileImageUrl)
                                             : null,
                                     child: pet.profileImageUrl.isEmpty
-                                        ? const Icon(Icons.pets,
+                                        ? Icon(Icons.pets,
                                             size: 18,
-                                            color: AppTheme.primaryAccent)
+                                            color: colorScheme.primary)
                                         : null,
                                   ),
                                   const SizedBox(width: 12),
@@ -1263,12 +1284,15 @@ class _ListPetSheetState extends State<_ListPetSheet> {
                                   } else {
                                     final error =
                                         ref.read(petProvider).error;
+                                    final errorColor = Theme.of(context)
+                                        .colorScheme
+                                        .error;
                                     ScaffoldMessenger.of(context)
                                         .showSnackBar(
                                       SnackBar(
                                         content: Text(error ??
                                             'Failed to list pet for breeding.'),
-                                        backgroundColor: Colors.red,
+                                        backgroundColor: errorColor,
                                         behavior: SnackBarBehavior.floating,
                                       ),
                                     );
@@ -1282,12 +1306,12 @@ class _ListPetSheetState extends State<_ListPetSheet> {
                         ),
                       ),
                       child: _isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white),
+                                  color: colorScheme.onPrimary),
                             )
                           : const Text(
                               'Confirm Listing',

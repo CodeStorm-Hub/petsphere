@@ -15,6 +15,7 @@ class PostDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final async = ref.watch(postByIdProvider(postId));
 
     return async.when(
@@ -30,8 +31,8 @@ class PostDetailScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline,
-                    size: 48, color: Colors.redAccent),
+                Icon(Icons.error_outline,
+                    size: 48, color: colorScheme.error),
                 const SizedBox(height: 12),
                 Text('Could not load post',
                     style: Theme.of(context).textTheme.titleMedium),
@@ -73,6 +74,7 @@ class _PostDetailContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final activePet = ref.watch(activePetProvider);
     final currentPetId = activePet?.id ?? '';
     final userId = ref.watch(authProvider).user?.id ?? '';
@@ -84,7 +86,7 @@ class _PostDetailContent extends ConsumerWidget {
         actions: [
           if (isOwnPost)
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              icon: Icon(Icons.delete_outline, color: colorScheme.error),
               tooltip: 'Delete Post',
               onPressed: () => _confirmDelete(context, ref, post),
             ),
@@ -135,7 +137,7 @@ class _PostDetailContent extends ConsumerWidget {
                         Text(
                           '${post.comments.length}',
                           style: TextStyle(
-                            color: Colors.grey.shade500,
+                            color: colorScheme.onSurfaceVariant,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -149,7 +151,7 @@ class _PostDetailContent extends ConsumerWidget {
                         child: Center(
                           child: Text(
                             'No comments yet. Start the conversation!',
-                            style: TextStyle(color: Colors.grey.shade400),
+                            style: TextStyle(color: colorScheme.onSurfaceVariant),
                           ),
                         ),
                       )
@@ -157,9 +159,9 @@ class _PostDetailContent extends ConsumerWidget {
                       ...post.comments.map((comment) {
                         final ago = _timeAgo(comment.createdAt);
                         final colors = [
-                          Colors.red,
+                          colorScheme.error,
                           Colors.blue,
-                          Colors.green,
+                          colorScheme.secondary,
                           Colors.orange,
                           Colors.purple,
                         ];
@@ -208,7 +210,7 @@ class _PostDetailContent extends ConsumerWidget {
                                         const SizedBox(width: 8),
                                         Text(ago,
                                             style: TextStyle(
-                                                color: Colors.grey.shade500,
+                                                color: colorScheme.onSurfaceVariant,
                                                 fontSize: 11)),
                                       ],
                                     ),
@@ -276,7 +278,7 @@ class _PostDetailContent extends ConsumerWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: const Text('Failed to delete post'),
-                      backgroundColor: Colors.redAccent,
+                      backgroundColor: Theme.of(context).colorScheme.error,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -285,7 +287,7 @@ class _PostDetailContent extends ConsumerWidget {
                 }
               }
             },
-            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Delete'),
           ),
         ],
@@ -306,10 +308,11 @@ class _PostDetailContent extends ConsumerWidget {
 
   void _showCommentSheet(BuildContext context, String postId,
       String currentPetId, String petName) {
+    final colorScheme = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.onPrimary,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

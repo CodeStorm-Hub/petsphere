@@ -78,8 +78,8 @@ class ProductCard extends StatelessWidget {
                             color: colorScheme.primary,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.add,
-                              color: Colors.white, size: 16),
+                          child: Icon(Icons.add,
+                              color: colorScheme.onPrimary, size: 16),
                         ),
                       )
                     ],

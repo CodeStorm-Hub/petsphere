@@ -10,6 +10,7 @@ class CartScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final cartState = ref.watch(cartProvider);
     final currencyFormat = NumberFormat.currency(symbol: '\$');
 
@@ -17,9 +18,9 @@ class CartScreen extends ConsumerWidget {
       if (next.orderSuccess && !(prev?.orderSuccess ?? false)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.white, size: 18),
+                Icon(Icons.check_circle, color: colorScheme.onPrimary, size: 18),
                 SizedBox(width: 8),
                 Text('Order placed successfully!'),
               ],
@@ -36,7 +37,7 @@ class CartScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.error!),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: colorScheme.error,
             behavior: SnackBarBehavior.floating,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -54,7 +55,7 @@ class CartScreen extends ConsumerWidget {
               onPressed: cartState.isCheckingOut
                   ? null
                   : () => ref.read(cartProvider.notifier).clearCart(),
-              child: const Text('Clear', style: TextStyle(color: Colors.red)),
+              child: Text('Clear', style: TextStyle(color: colorScheme.error)),
             ),
         ],
       ),
@@ -64,16 +65,16 @@ class CartScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.shopping_cart_outlined,
-                      size: 80, color: Colors.grey.shade300),
+                      size: 80, color: colorScheme.onSurfaceVariant),
                   const SizedBox(height: 16),
-                  const Text('Your cart is empty',
+                  Text('Your cart is empty',
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey)),
+                          color: colorScheme.onSurfaceVariant)),
                   const SizedBox(height: 8),
                   Text('Browse the shop to add items',
-                      style: TextStyle(color: Colors.grey.shade400)),
+                      style: TextStyle(color: colorScheme.onSurfaceVariant)),
                   const SizedBox(height: 24),
                   OutlinedButton.icon(
                     onPressed: () => context.pop(),
@@ -125,6 +126,7 @@ class _CheckoutBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isFreeShipping = total >= 25;
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -163,7 +165,7 @@ class _CheckoutBar extends StatelessWidget {
                     value: isFreeShipping
                         ? 'FREE'
                         : '\$${(25 - total).toStringAsFixed(2)} away',
-                    valueColor: const Color(0xFF506453),
+                    valueColor: colorScheme.onTertiary,
                     valueWeight: FontWeight.w700,
                   ),
                   Padding(
@@ -186,10 +188,10 @@ class _CheckoutBar extends StatelessWidget {
                       ),
                       Text(
                         currencyFormat.format(total),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF99472C),
+                          color: colorScheme.primary,
                         ),
                       ),
                     ],
@@ -207,8 +209,8 @@ class _CheckoutBar extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: isCheckingOut
                       ? null
-                      : const LinearGradient(
-                          colors: [Color(0xFF99472C), Color(0xFFFFAD93)],
+                      : LinearGradient(
+                          colors: [colorScheme.primary, colorScheme.secondary],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ),
@@ -228,24 +230,24 @@ class _CheckoutBar extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (isCheckingOut) ...[
-                      const SizedBox(
+                      SizedBox(
                         width: 22,
                         height: 22,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2.5, color: Color(0xFF99472C)),
+                            strokeWidth: 2.5, color: colorScheme.primary),
                       ),
                     ] else ...[
-                      const Text(
+                      Text(
                         'Proceed to Checkout',
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: colorScheme.onPrimary,
                         ),
                       ),
                       const SizedBox(width: 10),
-                      const Icon(Icons.arrow_forward,
-                          color: Colors.white, size: 20),
+                      Icon(Icons.arrow_forward,
+                          color: colorScheme.onPrimary, size: 20),
                     ],
                   ],
                 ),
@@ -274,15 +276,16 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF625E59),
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
         Text(

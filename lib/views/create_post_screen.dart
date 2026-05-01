@@ -63,6 +63,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   }
 
   Future<void> _showTagPetsSheet(List<PetModel> myPets) async {
+    final colorScheme = Theme.of(context).colorScheme;
     final availablePets =
         myPets.where((pet) => pet.id != selectedPetId).toList();
     if (availablePets.isEmpty) {
@@ -92,20 +93,20 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       Expanded(
                         child: ListView.separated(
                           itemCount: availablePets.length,
-                          separatorBuilder: (_, __) => const Divider(
-                              height: 1, color: Color(0xFF2E2B26)),
+                          separatorBuilder: (_, __) => Divider(
+                              height: 1, color: colorScheme.outline),
                           itemBuilder: (context, index) {
                             final pet = availablePets[index];
                             final selected = draftTaggedPetIds.contains(pet.id);
                             return CheckboxListTile(
                               value: selected,
-                              activeColor: const Color(0xFFD4845A),
+                              activeColor: colorScheme.primary,
                               contentPadding: EdgeInsets.zero,
                               secondary: CircleAvatar(
                                 backgroundImage: pet.profileImageUrl.isNotEmpty
                                     ? NetworkImage(pet.profileImageUrl)
                                     : null,
-                                backgroundColor: const Color(0xFF211F1B),
+                                backgroundColor: colorScheme.surfaceContainer,
                                 child: pet.profileImageUrl.isEmpty
                                     ? Text(
                                         pet.name.isNotEmpty
@@ -116,15 +117,15 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                               ),
                               title: Text(
                                 pet.name,
-                                style: const TextStyle(
-                                  color: Color(0xFFF2EDE4),
+                                style: TextStyle(
+                                  color: colorScheme.onSurface,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                               subtitle: Text(
                                 pet.breed,
                                 style:
-                                    const TextStyle(color: Color(0xFFB8B0A4)),
+                                    TextStyle(color: colorScheme.onSurfaceVariant),
                               ),
                               onChanged: (_) {
                                 setSheetState(() {
@@ -177,6 +178,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   }
 
   void _showMediaSourceSheet() {
+    final colorScheme = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -184,12 +186,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         margin: const EdgeInsets.all(12),
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1814),
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: const Color(0xFF2E2B26)),
-          boxShadow: const [
+          border: Border.all(color: colorScheme.outline),
+          boxShadow: [
             BoxShadow(
-              color: Color(0x99000000),
+              color: colorScheme.scrim.withAlpha(153),
               blurRadius: 32,
               offset: Offset(0, 16),
             ),
@@ -204,32 +206,32 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 width: 44,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF625E59),
+                  color: colorScheme.onSurfaceVariant,
                   borderRadius: BorderRadius.circular(99),
                 ),
               ),
               const SizedBox(height: 18),
-              const Row(
+              Row(
                 children: [
                   Text(
                     'Add Media',
                     style: TextStyle(
-                      color: Color(0xFFF2EDE4),
+                      color: colorScheme.onSurface,
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.4,
                     ),
                   ),
                   Spacer(),
-                  Icon(Icons.auto_awesome, color: Color(0xFFD4845A)),
+                  Icon(Icons.auto_awesome, color: colorScheme.primary),
                 ],
               ),
               const SizedBox(height: 6),
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Choose a photo or video for your post.',
-                  style: TextStyle(color: Color(0xFFB8B0A4)),
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
               ),
               const SizedBox(height: 18),
@@ -245,7 +247,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     icon: Icons.photo_library_rounded,
                     title: 'Gallery',
                     subtitle: 'Photo',
-                    color: const Color(0xFFD4845A),
+                    color: colorScheme.primary,
                     onTap: () async {
                       Navigator.pop(ctx);
                       final file = await ImageUploadHelper.pickFromGallery();
@@ -256,7 +258,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     icon: Icons.camera_alt_rounded,
                     title: 'Camera',
                     subtitle: 'Photo',
-                    color: const Color(0xFF4FC3F7),
+                    color: colorScheme.primary,
                     onTap: () async {
                       Navigator.pop(ctx);
                       final file = await ImageUploadHelper.pickFromCamera();
@@ -267,7 +269,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     icon: Icons.video_library_rounded,
                     title: 'Library',
                     subtitle: 'Video',
-                    color: const Color(0xFF9575CD),
+                    color: colorScheme.primary,
                     onTap: () async {
                       Navigator.pop(ctx);
                       final file =
@@ -279,7 +281,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     icon: Icons.videocam_rounded,
                     title: 'Record',
                     subtitle: 'Video',
-                    color: const Color(0xFF4DB6AC),
+                    color: colorScheme.secondary,
                     onTap: () async {
                       Navigator.pop(ctx);
                       final file =
@@ -297,6 +299,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   }
 
   Future<void> _sharePost(List<PetModel> myPets) async {
+    final colorScheme = Theme.of(context).colorScheme;
     if (selectedPetId == null) {
       _showError('Please select a pet to post as');
       return;
@@ -336,12 +339,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.check_circle, color: Colors.white, size: 18),
+                Icon(Icons.check_circle, color: colorScheme.onPrimary, size: 18),
                 const SizedBox(width: 8),
                 Text('Posted as ${pet.name}!'),
               ],
             ),
-            backgroundColor: const Color(0xFF81C784),
+            backgroundColor: colorScheme.secondary,
             behavior: SnackBarBehavior.floating,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -359,10 +362,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   }
 
   void _showError(String message) {
+    final colorScheme = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: colorScheme.error,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -371,6 +375,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final petState = ref.watch(petProvider);
     final myPets = petState.myPets;
 
@@ -385,12 +390,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         _captionController.text.trim().isNotEmpty;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0E0B),
+      backgroundColor: colorScheme.surface,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
-        foregroundColor: const Color(0xFFF2EDE4),
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 12),
@@ -398,7 +403,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             onPressed: () => context.pop(),
           ),
         ),
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -408,7 +413,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             ),
             Text(
               'Share a fresh pet moment',
-              style: TextStyle(fontSize: 12, color: Color(0xFFB8B0A4)),
+              style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -517,6 +522,7 @@ class _CloseComposerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Material(
         color: Colors.transparent,
@@ -527,20 +533,20 @@ class _CloseComposerButton extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1814).withAlpha(230),
+              color: colorScheme.surface.withAlpha(230),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFF2E2B26)),
-              boxShadow: const [
+              border: Border.all(color: colorScheme.outline),
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x66000000),
+                  color: colorScheme.scrim.withAlpha(102),
                   blurRadius: 16,
                   offset: Offset(0, 8),
                 ),
               ],
             ),
-            child: const Icon(
+            child: Icon(
               Icons.close_rounded,
-              color: Color(0xFFF2EDE4),
+              color: colorScheme.onSurface,
               size: 22,
             ),
           ),
@@ -563,16 +569,17 @@ class _ComposerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1814),
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFF2E2B26)),
-        boxShadow: const [
+        border: Border.all(color: colorScheme.outline),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x99000000),
+            color: colorScheme.scrim.withAlpha(153),
             blurRadius: 32,
             offset: Offset(0, 16),
           ),
@@ -589,7 +596,7 @@ class _ComposerSheet extends StatelessWidget {
                 width: 44,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF625E59),
+                  color: colorScheme.onSurfaceVariant,
                   borderRadius: BorderRadius.circular(99),
                 ),
               ),
@@ -597,15 +604,15 @@ class _ComposerSheet extends StatelessWidget {
             const SizedBox(height: 18),
             Text(
               title,
-              style: const TextStyle(
-                color: Color(0xFFF2EDE4),
+              style: TextStyle(
+                color: colorScheme.onSurface,
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.4,
               ),
             ),
             const SizedBox(height: 6),
-            Text(subtitle, style: const TextStyle(color: Color(0xFFB8B0A4))),
+            Text(subtitle, style: TextStyle(color: colorScheme.onSurfaceVariant)),
             const SizedBox(height: 18),
             child,
           ],
@@ -628,6 +635,7 @@ class _GradientShareButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Opacity(
       opacity: enabled ? 1 : 0.45,
       child: GestureDetector(
@@ -636,15 +644,15 @@ class _GradientShareButton extends StatelessWidget {
           height: 42,
           padding: const EdgeInsets.symmetric(horizontal: 18),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFD4845A), Color(0xFFB86A44)],
+            gradient: LinearGradient(
+              colors: [colorScheme.primary, colorScheme.primary],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(999),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Color(0x33D4845A),
+                color: colorScheme.primary.withAlpha(51),
                 blurRadius: 18,
                 offset: Offset(0, 8),
               ),
@@ -652,18 +660,18 @@ class _GradientShareButton extends StatelessWidget {
           ),
           child: Center(
             child: isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: colorScheme.onPrimary,
                     ),
                   )
-                : const Text(
+                : Text(
                     'Share',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: colorScheme.onPrimary,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -679,24 +687,25 @@ class _ComposerHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF211F1B), Color(0xFF171511)],
+        gradient: LinearGradient(
+          colors: [colorScheme.surfaceContainer, colorScheme.surface],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: Color(0xFF2E2B26)),
+        border: Border.all(color: colorScheme.outline),
       ),
-      child: const Row(
+      child: Row(
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: Color(0x33D4845A),
-            child: Icon(Icons.auto_awesome, color: Color(0xFFD4845A)),
+            backgroundColor: colorScheme.primary.withAlpha(51),
+            child: Icon(Icons.auto_awesome, color: colorScheme.primary),
           ),
           SizedBox(width: 14),
           Expanded(
@@ -706,7 +715,7 @@ class _ComposerHero extends StatelessWidget {
                 Text(
                   'Build a beautiful post',
                   style: TextStyle(
-                    color: Color(0xFFF2EDE4),
+                    color: colorScheme.onSurface,
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
@@ -715,7 +724,7 @@ class _ComposerHero extends StatelessWidget {
                 SizedBox(height: 4),
                 Text(
                   'Choose your pet, add media, then tell the story.',
-                  style: TextStyle(color: Color(0xFFB8B0A4), height: 1.25),
+                  style: TextStyle(color: colorScheme.onSurfaceVariant, height: 1.25),
                 ),
               ],
             ),
@@ -733,10 +742,11 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Text(
       label,
-      style: const TextStyle(
-        color: Color(0xFFF2EDE4),
+      style: TextStyle(
+        color: colorScheme.onSurface,
         fontSize: 14,
         fontWeight: FontWeight.w800,
         letterSpacing: 0.2,
@@ -758,6 +768,7 @@ class _MediaComposerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final hasMedia = file != null;
     return GestureDetector(
       onTap: onTap,
@@ -765,8 +776,8 @@ class _MediaComposerCard extends StatelessWidget {
         padding: const EdgeInsets.all(1.5),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(32),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFD4845A), Color(0xFF4A7C59), Color(0xFF2E2B26)],
+          gradient: LinearGradient(
+            colors: [colorScheme.primary, colorScheme.secondary, colorScheme.outline],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -780,7 +791,7 @@ class _MediaComposerCard extends StatelessWidget {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1A1814),
+                    color: colorScheme.surface,
                     image: hasMedia && mediaType == PostMediaType.image
                         ? DecorationImage(
                             image: FileImage(file!),
@@ -816,20 +827,20 @@ class _MediaComposerCard extends StatelessWidget {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withAlpha(160),
+                      color: colorScheme.scrim.withAlpha(160),
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: Colors.white24),
+                      border: Border.all(color: colorScheme.onPrimary.withAlpha(61)),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.touch_app_rounded,
-                            color: Colors.white, size: 16),
+                            color: colorScheme.onPrimary, size: 16),
                         SizedBox(width: 6),
                         Text(
                           'Tap to edit',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: colorScheme.onPrimary,
                             fontWeight: FontWeight.w700,
                             fontSize: 12,
                           ),
@@ -852,27 +863,28 @@ class _EmptyMediaPrompt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: RadialGradient(
           center: Alignment.topLeft,
           radius: 1.1,
-          colors: [Color(0x33D4845A), Color(0xFF1A1814)],
+          colors: [colorScheme.primary.withAlpha(51), colorScheme.surface],
         ),
       ),
-      child: const Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.add_photo_alternate_rounded,
             size: 64,
-            color: Color(0xFFD4845A),
+            color: colorScheme.primary,
           ),
           SizedBox(height: 16),
           Text(
             'Drop in a photo or video',
             style: TextStyle(
-              color: Color(0xFFF2EDE4),
+              color: colorScheme.onSurface,
               fontSize: 19,
               fontWeight: FontWeight.w800,
             ),
@@ -880,7 +892,7 @@ class _EmptyMediaPrompt extends StatelessWidget {
           SizedBox(height: 6),
           Text(
             'Gallery, camera, or video library',
-            style: TextStyle(color: Color(0xFFB8B0A4)),
+            style: TextStyle(color: colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -893,28 +905,29 @@ class _VideoMediaPrompt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF211F1B), Color(0xFF0F0E0B)],
+          colors: [colorScheme.surfaceContainer, colorScheme.surface],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
       ),
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.play_circle_fill_rounded,
               size: 82,
-              color: Color(0xFFD4845A),
+              color: colorScheme.primary,
             ),
             SizedBox(height: 12),
             Text(
               'Video ready',
               style: TextStyle(
-                color: Color(0xFFF2EDE4),
+                color: colorScheme.onSurface,
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
               ),
@@ -934,22 +947,23 @@ class _PillBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.black.withAlpha(160),
+        color: colorScheme.scrim.withAlpha(160),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white24),
+        border: Border.all(color: colorScheme.onPrimary.withAlpha(61)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white, size: 16),
+          Icon(icon, color: colorScheme.onPrimary, size: 16),
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: colorScheme.onPrimary,
               fontWeight: FontWeight.w800,
               fontSize: 12,
             ),
@@ -971,12 +985,13 @@ class _CaptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1814),
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFF2E2B26)),
+        border: Border.all(color: colorScheme.outline),
       ),
       child: TextField(
         controller: controller,
@@ -985,12 +1000,12 @@ class _CaptionCard extends StatelessWidget {
         minLines: 3,
         onChanged: (_) => onChanged(),
         textCapitalization: TextCapitalization.sentences,
-        style: const TextStyle(color: Color(0xFFF2EDE4), fontSize: 16),
-        decoration: const InputDecoration(
+        style: TextStyle(color: colorScheme.onSurface, fontSize: 16),
+        decoration: InputDecoration(
           hintText: 'What happened today?',
-          hintStyle: TextStyle(color: Color(0xFF756F66)),
+          hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
           border: InputBorder.none,
-          counterStyle: TextStyle(color: Color(0xFF756F66)),
+          counterStyle: TextStyle(color: colorScheme.onSurfaceVariant),
         ),
       ),
     );
@@ -1012,11 +1027,12 @@ class _PostOptionsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1814),
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFF2E2B26)),
+        border: Border.all(color: colorScheme.outline),
       ),
       child: Column(
         children: [
@@ -1027,7 +1043,7 @@ class _PostOptionsCard extends StatelessWidget {
             isActive: location.isNotEmpty,
             onTap: onLocationTap,
           ),
-          const Divider(height: 1, color: Color(0xFF2E2B26)),
+          Divider(height: 1, color: colorScheme.outline),
           _ComposerOptionTile(
             icon: Icons.person_add_alt_1_outlined,
             title: 'Tag other pets',
@@ -1060,21 +1076,22 @@ class _ComposerOptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return ListTile(
       onTap: onTap,
       leading: Container(
         width: 42,
         height: 42,
         decoration: BoxDecoration(
-          color: const Color(0xFFD4845A).withAlpha(isActive ? 48 : 28),
+          color: colorScheme.primary.withAlpha(isActive ? 48 : 28),
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Icon(icon, color: const Color(0xFFD4845A)),
+        child: Icon(icon, color: colorScheme.primary),
       ),
       title: Text(
         title,
-        style: const TextStyle(
-          color: Color(0xFFF2EDE4),
+        style: TextStyle(
+          color: colorScheme.onSurface,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -1082,9 +1099,9 @@ class _ComposerOptionTile extends StatelessWidget {
         subtitle,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(color: Color(0xFFB8B0A4), fontSize: 12),
+        style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
       ),
-      trailing: const Icon(Icons.chevron_right, color: Color(0xFFB8B0A4)),
+      trailing: Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
     );
   }
 }
@@ -1096,34 +1113,35 @@ class _EmptyPetsState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1814),
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: const Color(0xFF2E2B26)),
+            border: Border.all(color: colorScheme.outline),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.pets, size: 64, color: Color(0xFFD4845A)),
+              Icon(Icons.pets, size: 64, color: colorScheme.primary),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Create a pet profile first',
                 style: TextStyle(
-                  color: Color(0xFFF2EDE4),
+                  color: colorScheme.onSurface,
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'You can only post as one of your pets. Add a pet profile to get started.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Color(0xFFB8B0A4)),
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 24),
               FilledButton.icon(
@@ -1156,15 +1174,16 @@ class _MediaSourceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(22),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFF211F1B),
+          color: colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: const Color(0xFF2E2B26)),
+          border: Border.all(color: colorScheme.outline),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1184,15 +1203,15 @@ class _MediaSourceTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Color(0xFFF2EDE4),
+                  style: TextStyle(
+                    color: colorScheme.onSurface,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    color: Color(0xFFB8B0A4),
+                  style: TextStyle(
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: 12,
                   ),
                 ),
@@ -1213,6 +1232,7 @@ class _AuthorAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(right: 12.0),
       child: AnimatedContainer(
@@ -1220,12 +1240,12 @@ class _AuthorAvatar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFD4845A).withValues(alpha: 0.15)
-              : const Color(0xFF211F1B),
+              ? colorScheme.primary.withValues(alpha: 0.15)
+              : colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
             color:
-                isSelected ? const Color(0xFFD4845A) : const Color(0xFF2E2B26),
+                isSelected ? colorScheme.primary : colorScheme.outline,
             width: 1.5,
           ),
         ),
@@ -1234,17 +1254,17 @@ class _AuthorAvatar extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 14,
-              backgroundColor: Colors.grey.shade800,
+              backgroundColor: colorScheme.surfaceContainerHighest,
               backgroundImage: pet.profileImageUrl.isNotEmpty
                   ? NetworkImage(pet.profileImageUrl)
                   : null,
               child: pet.profileImageUrl.isEmpty
                   ? Text(
                       pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 10,
-                          color: Colors.white),
+                          color: colorScheme.onPrimary),
                     )
                   : null,
             ),
@@ -1257,8 +1277,8 @@ class _AuthorAvatar extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 color: isSelected
-                    ? const Color(0xFFF2EDE4)
-                    : const Color(0xFFB8B0A4),
+                    ? colorScheme.onSurface
+                    : colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -1293,6 +1313,7 @@ class _LocationSheetContentState extends State<_LocationSheetContent> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
@@ -1305,20 +1326,20 @@ class _LocationSheetContentState extends State<_LocationSheetContent> {
             TextField(
               controller: _controller,
               autofocus: true,
-              style: const TextStyle(color: Color(0xFFF2EDE4)),
+              style: TextStyle(color: colorScheme.onSurface),
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Park, city, cafe...',
-                hintStyle: TextStyle(color: Color(0xFF756F66)),
+                hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                 prefixIcon: Icon(
                   Icons.location_on_outlined,
-                  color: Color(0xFFD4845A),
+                  color: colorScheme.primary,
                 ),
                 filled: true,
-                fillColor: Color(0xFF211F1B),
+                fillColor: colorScheme.surfaceContainer,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(18)),
-                  borderSide: BorderSide(color: Color(0xFF2E2B26)),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
               ),
             ),

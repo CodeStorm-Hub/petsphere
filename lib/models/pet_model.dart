@@ -17,6 +17,7 @@ class PetModel {
   final int? dailyCalorieGoal;
   final int? dailyWaterGoalCups;
   final double? weightLbs;
+  final double monthlyBudget;
 
   PetModel({
     required this.id,
@@ -34,6 +35,7 @@ class PetModel {
     this.dailyCalorieGoal,
     this.dailyWaterGoalCups,
     this.weightLbs,
+    this.monthlyBudget = 1000.0,
   });
 
   PetModel copyWith({
@@ -52,6 +54,7 @@ class PetModel {
     int? dailyCalorieGoal,
     int? dailyWaterGoalCups,
     double? weightLbs,
+    double? monthlyBudget,
   }) {
     return PetModel(
       id: id ?? this.id,
@@ -69,6 +72,7 @@ class PetModel {
       dailyCalorieGoal: dailyCalorieGoal ?? this.dailyCalorieGoal,
       dailyWaterGoalCups: dailyWaterGoalCups ?? this.dailyWaterGoalCups,
       weightLbs: weightLbs ?? this.weightLbs,
+      monthlyBudget: monthlyBudget ?? this.monthlyBudget,
     );
   }
 
@@ -92,6 +96,7 @@ class PetModel {
       dailyCalorieGoal: (json['daily_calorie_goal'] as num?)?.toInt(),
       dailyWaterGoalCups: (json['daily_water_goal_cups'] as num?)?.toInt(),
       weightLbs: (json['weight_lbs'] as num?)?.toDouble(),
+      monthlyBudget: (json['monthly_budget'] as num?)?.toDouble() ?? 1000.0,
     );
   }
 
@@ -111,5 +116,6 @@ class PetModel {
         if (dailyWaterGoalCups != null)
           'daily_water_goal_cups': dailyWaterGoalCups,
         if (weightLbs != null) 'weight_lbs': weightLbs,
+        'monthly_budget': monthlyBudget,
       };
 }

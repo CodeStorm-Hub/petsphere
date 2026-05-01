@@ -257,6 +257,19 @@ class PetCareNotifier extends Notifier<PetCareState> {
       dailyExerciseGoalMinutes: exerciseGoalMinutes,
     ));
     _scheduleSave();
+
+    // Also update the pet profile so goals persist for future days
+    final activePet = ref.read(activePetProvider);
+    if (activePet != null) {
+      final fields = <String, dynamic>{};
+      if (calorieGoal != null) fields['daily_calorie_goal'] = calorieGoal;
+      if (waterGoalCups != null) {
+        fields['daily_water_goal_cups'] = waterGoalCups;
+      }
+      if (fields.isNotEmpty) {
+        ref.read(petProvider.notifier).updatePet(activePet.id, fields);
+      }
+    }
   }
 
   void toggleTask(String taskKey) {
