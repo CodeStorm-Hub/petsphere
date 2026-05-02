@@ -133,6 +133,7 @@ class _GlassNavBar extends StatelessWidget {
 
               if (isCenter) {
                 return GestureDetector(
+                  key: const ValueKey('bottom_nav_add'),
                   onTap: () => onTap(i),
                   child: Container(
                     width: 48,
