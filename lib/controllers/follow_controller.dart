@@ -136,3 +136,9 @@ class FollowController extends Notifier<void> {
 
 final followControllerProvider =
     NotifierProvider<FollowController, void>(() => FollowController());
+
+/// Follower list (user profiles) for a specific pet.
+final petFollowersListProvider = FutureProvider.family<
+    List<Map<String, dynamic>>, String>((ref, petId) async {
+  return followRepository.fetchPetFollowersList(petId);
+});

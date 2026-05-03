@@ -145,6 +145,7 @@ class _HealthStatusHeader extends StatelessWidget {
 class _VitalsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -152,11 +153,11 @@ class _VitalsGrid extends StatelessWidget {
       mainAxisSpacing: 16,
       crossAxisSpacing: 16,
       childAspectRatio: 1.4,
-      children: const [
-        _VitalCard(label: 'Weight', value: '12.4 kg', icon: Icons.monitor_weight_outlined, trend: '-0.2', color: Colors.blue),
-        _VitalCard(label: 'Heart Rate', value: '82 bpm', icon: Icons.favorite_outline_rounded, trend: 'Normal', color: Colors.red),
-        _VitalCard(label: 'Temperature', value: '38.5 °C', icon: Icons.thermostat_rounded, trend: 'Stable', color: Colors.orange),
-        _VitalCard(label: 'Activity', value: '8.4k steps', icon: Icons.directions_run_rounded, trend: '+12%', color: Colors.green),
+      children: [
+        _VitalCard(label: 'Weight', value: '12.4 kg', icon: Icons.monitor_weight_outlined, trend: '-0.2', color: colorScheme.primary),
+        _VitalCard(label: 'Heart Rate', value: '82 bpm', icon: Icons.favorite_outline_rounded, trend: 'Normal', color: colorScheme.error),
+        _VitalCard(label: 'Temperature', value: '38.5 °C', icon: Icons.thermostat_rounded, trend: 'Stable', color: colorScheme.secondary),
+        _VitalCard(label: 'Activity', value: '8.4k steps', icon: Icons.directions_run_rounded, trend: '+12%', color: colorScheme.tertiary),
       ],
     );
   }
@@ -322,10 +323,10 @@ class _VaccineCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isDueSoon ? Colors.orange.withAlpha(30) : Colors.green.withAlpha(30),
+              color: isDueSoon ? colorScheme.secondary.withAlpha(30) : colorScheme.tertiary.withAlpha(30),
               shape: BoxShape.circle,
             ),
-            child: Icon(isDueSoon ? Icons.priority_high_rounded : Icons.verified_user_rounded, color: isDueSoon ? Colors.orange : Colors.green),
+            child: Icon(isDueSoon ? Icons.priority_high_rounded : Icons.verified_user_rounded, color: isDueSoon ? colorScheme.secondary : colorScheme.tertiary),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -342,7 +343,7 @@ class _VaccineCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text('Next Due', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold)),
-              Text(nextDue, style: TextStyle(color: isDueSoon ? Colors.orange : colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 12)),
+              Text(nextDue, style: TextStyle(color: isDueSoon ? colorScheme.secondary : colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 12)),
             ],
           ),
         ],

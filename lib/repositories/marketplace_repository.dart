@@ -14,7 +14,8 @@ class MarketplaceRepository {
       query = query.eq('category', category);
     }
 
-    final data = await query.order('created_at', ascending: false);
+    final data =
+        await query.order('created_at', ascending: false).limit(200);
 
     return (data as List<dynamic>)
         .map((e) => ProductModel.fromJson(e as Map<String, dynamic>))
@@ -67,7 +68,8 @@ class MarketplaceRepository {
         .from('orders')
         .select()
         .eq('user_id', userId)
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .limit(100);
 
     return (data as List<dynamic>)
         .map((e) => OrderModel.fromJson(e as Map<String, dynamic>))

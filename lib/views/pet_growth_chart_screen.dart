@@ -56,7 +56,7 @@ class _PetGrowthChartScreenState extends ConsumerState<PetGrowthChartScreen> {
                     unit: 'lbs',
                     chart: _WeightChart(timeRange: _timeRange),
                     trend: '+1.2 lbs this month',
-                    trendColor: Colors.green,
+                    trendColor: colorScheme.tertiary,
                   ),
                   const SizedBox(height: 24),
                   _ChartContainer(
@@ -110,21 +110,21 @@ class _MilestoneSliverList extends StatelessWidget {
         'title': 'Target Weight Reached',
         'date': 'Today',
         'icon': Icons.stars_rounded,
-        'color': Colors.orange,
+        'color': Theme.of(context).colorScheme.tertiary,
         'desc': 'Achieved optimal weight for breed standard.'
       },
       {
         'title': 'Ideal Height Achieved',
         'date': '2 weeks ago',
         'icon': Icons.straighten_rounded,
-        'color': Colors.blue,
+        'color': Theme.of(context).colorScheme.primary,
         'desc': 'Reached adult height milestone.'
       },
       {
         'title': 'Grown 5lbs since Jan',
         'date': '3 months ago',
         'icon': Icons.trending_up_rounded,
-        'color': Colors.green,
+        'color': Theme.of(context).colorScheme.secondary,
         'desc': 'Consistent healthy growth pattern observed.'
       },
     ];

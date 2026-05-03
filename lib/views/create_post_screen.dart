@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/pet_model.dart';
+import '../widgets/brand_logo.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../utils/image_upload_helper.dart';
@@ -15,10 +17,10 @@ class CreatePostScreen extends ConsumerStatefulWidget {
   const CreatePostScreen({super.key, this.initialPetId});
 
   @override
-  ConsumerState<CreatePostScreen> createState() => _CreatePostScreenState();
+  ConsumerState<CreatePostScreen> createState() => CreatePostScreenState();
 }
 
-class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
+class CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   String? selectedPetId;
   File? _selectedFile;
   PostMediaType _selectedMediaType = PostMediaType.image;
@@ -55,7 +57,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _LocationSheetContent(initialLocation: _location),
+      builder: (_) => LocationSheetContent(initialLocation: _location),
     );
 
     if (!mounted || result == null) return;
@@ -83,7 +85,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           builder: (_, setSheetState) {
             return Padding(
               padding: EdgeInsets.only(bottom: bottomInset),
-              child: _ComposerSheet(
+              child: ComposerSheet(
                 title: 'Tag Other Pets',
                 subtitle: 'Mention pets who are part of this post.',
                 child: SizedBox(
@@ -104,7 +106,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                               contentPadding: EdgeInsets.zero,
                               secondary: CircleAvatar(
                                 backgroundImage: pet.profileImageUrl.isNotEmpty
-                                    ? NetworkImage(pet.profileImageUrl)
+                                    ? CachedNetworkImageProvider(pet.profileImageUrl)
                                     : null,
                                 backgroundColor: colorScheme.surfaceContainer,
                                 child: pet.profileImageUrl.isEmpty
@@ -556,12 +558,12 @@ class _CloseComposerButton extends StatelessWidget {
   }
 }
 
-class _ComposerSheet extends StatelessWidget {
+class ComposerSheet extends StatelessWidget {
   final String title;
   final String subtitle;
   final Widget child;
 
-  const _ComposerSheet({
+  const ComposerSheet({super.key, 
     required this.title,
     required this.subtitle,
     required this.child,
@@ -1127,7 +1129,7 @@ class _EmptyPetsState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.pets, size: 64, color: colorScheme.primary),
+              const BrandLogo(customSize: 64),
               const SizedBox(height: 16),
               Text(
                 'Create a pet profile first',
@@ -1256,16 +1258,10 @@ class _AuthorAvatar extends StatelessWidget {
               radius: 14,
               backgroundColor: colorScheme.surfaceContainerHighest,
               backgroundImage: pet.profileImageUrl.isNotEmpty
-                  ? NetworkImage(pet.profileImageUrl)
+                  ? CachedNetworkImageProvider(pet.profileImageUrl)
                   : null,
               child: pet.profileImageUrl.isEmpty
-                  ? Text(
-                      pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                          color: colorScheme.onPrimary),
-                    )
+                  ? const BrandLogo(customSize: 14)
                   : null,
             ),
             const SizedBox(width: 8),
@@ -1288,15 +1284,15 @@ class _AuthorAvatar extends StatelessWidget {
   }
 }
 
-class _LocationSheetContent extends StatefulWidget {
+class LocationSheetContent extends StatefulWidget {
   final String initialLocation;
-  const _LocationSheetContent({required this.initialLocation});
+  const LocationSheetContent({super.key, required this.initialLocation});
 
   @override
-  State<_LocationSheetContent> createState() => _LocationSheetContentState();
+  State<LocationSheetContent> createState() => LocationSheetContentState();
 }
 
-class _LocationSheetContentState extends State<_LocationSheetContent> {
+class LocationSheetContentState extends State<LocationSheetContent> {
   late final TextEditingController _controller;
 
   @override
@@ -1317,7 +1313,7 @@ class _LocationSheetContentState extends State<_LocationSheetContent> {
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
-      child: _ComposerSheet(
+      child: ComposerSheet(
         title: 'Add Location',
         subtitle: 'Add where this moment happened.',
         child: Column(

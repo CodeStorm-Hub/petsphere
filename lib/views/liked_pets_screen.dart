@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/match_controller.dart';
+import '../widgets/brand_logo.dart';
 import 'components/pet_avatar.dart';
 
 class LikedPetsScreen extends ConsumerWidget {
@@ -59,7 +60,7 @@ class LikedPetsScreen extends ConsumerWidget {
 
                   if (pet == null) {
                     return ListTile(
-                      leading: const CircleAvatar(child: Icon(Icons.pets)),
+                      leading: const CircleAvatar(child: BrandLogo(size: BrandLogoSize.small)),
                       title: const Text('Unknown pet'),
                       subtitle: _statusLabel(context, req.status),
                     );
@@ -103,7 +104,7 @@ class LikedPetsScreen extends ConsumerWidget {
         color = colorScheme.error;
         label = 'Declined';
       case 'pending':
-        color = Colors.orange;
+        color = colorScheme.tertiary;
         label = 'Pending';
       default:
         color = colorScheme.onSurfaceVariant;

@@ -1,4 +1,4 @@
-`<#
+<#
 .SYNOPSIS
 Android Emulator Testing Environment Health Check
 
@@ -109,7 +109,7 @@ if (Get-Command adb -ErrorAction SilentlyContinue) {
     if (-not [string]::IsNullOrWhiteSpace($env:ANDROID_HOME)) {
         $platformToolsPath = Join-Path $env:ANDROID_HOME 'platform-tools'
         if ((Test-Path (Join-Path $platformToolsPath 'adb.exe')) -or (Test-Path (Join-Path $platformToolsPath 'adb'))) {
-            $env:PATH += ";$platformToolsPath"
+            $env:PATH = $env:PATH + ';' + $platformToolsPath
             Check-Warning "ADB found in SDK but not in PATH. Adding it temporarily."
             Check-Passed "ADB is installed"
         } else {
@@ -138,7 +138,7 @@ if (Get-Command emulator -ErrorAction SilentlyContinue) {
     if (-not [string]::IsNullOrWhiteSpace($env:ANDROID_HOME)) {
         $emulatorPath = Join-Path $env:ANDROID_HOME 'emulator'
         if ((Test-Path (Join-Path $emulatorPath 'emulator.exe')) -or (Test-Path (Join-Path $emulatorPath 'emulator'))) {
-            $env:PATH += ";$emulatorPath"
+            $env:PATH = $env:PATH + ';' + $emulatorPath
             Check-Warning "Emulator found in SDK but not in PATH. Adding it temporarily."
             Check-Passed "Emulator is installed"
         } else {

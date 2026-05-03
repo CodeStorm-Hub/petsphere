@@ -44,6 +44,7 @@ import '../views/pet_social_timeline_screen.dart';
 import '../views/pet_breed_identifier_screen.dart';
 import '../views/pet_knowledge_base_screen.dart';
 import '../views/pet_gear_reviews_screen.dart';
+import '../views/pet_followers_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authNotifier = ValueNotifier<AuthState>(ref.read(authProvider));
@@ -199,6 +200,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SearchScreen(),
       ),
       GoRoute(
+        path: '/pet/:id/followers',
+        builder: (context, state) {
+          final petId = state.pathParameters['id']!;
+          return PetFollowersScreen(petId: petId);
+        },
+      ),
+      GoRoute(
         path: '/achievements',
         builder: (context, state) => const GamificationScreen(),
       ),
@@ -291,8 +299,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline,
-                  size: 56, color: Colors.redAccent),
+              Icon(Icons.error_outline,
+                  size: 56, color: Theme.of(context).colorScheme.error),
               const SizedBox(height: 12),
               Text(
                 'We could not find what you were looking for.',

@@ -641,10 +641,10 @@ class _TransactionCard extends ConsumerWidget {
               ),
             ),
             Text('-\$${tx.amount.toStringAsFixed(2)}',
-                style: const TextStyle(
+                style: TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 16,
-                    color: Colors.redAccent)),
+                    color: colorScheme.error)),
           ],
         ),
       ),

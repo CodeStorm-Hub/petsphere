@@ -36,27 +36,33 @@ class MarketplaceScreen extends ConsumerWidget {
           ),
           Stack(
             alignment: Alignment.center,
+            clipBehavior: Clip.none,
             children: [
               IconButton(
                 icon: const Icon(Icons.shopping_cart_outlined),
+                tooltip: cartState.totalItemCount > 0
+                    ? 'Shopping cart, ${cartState.totalItemCount} items'
+                    : 'Shopping cart',
                 onPressed: () => context.push('/cart'),
               ),
               if (cartState.totalItemCount > 0)
                 Positioned(
                   right: 8,
                   top: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: colorScheme.error,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      '${cartState.totalItemCount}',
-                      style: TextStyle(
-                          color: colorScheme.onError,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold),
+                  child: ExcludeSemantics(
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: colorScheme.error,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '${cartState.totalItemCount}',
+                        style: TextStyle(
+                            color: colorScheme.onError,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
                 ),
@@ -94,45 +100,51 @@ class MarketplaceScreen extends ConsumerWidget {
           // Member Exclusive promo banner
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: GestureDetector(
-              onTap: () =>
-                  ref.read(marketplaceProvider.notifier).setFilter('Grooming'),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [colorScheme.primary, colorScheme.secondary],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.workspace_premium_rounded,
-                        color: colorScheme.onPrimary, size: 28),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Member Exclusive',
-                              style: TextStyle(
-                                  color: colorScheme.onSurfaceVariant,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.8)),
-                          Text('Summer Grooming Kit — Now 20% Off',
-                              style: TextStyle(
-                                  color: colorScheme.onPrimary,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800)),
-                        ],
-                      ),
+            child: Semantics(
+              button: true,
+              label: 'Member Exclusive: Summer Grooming Kit — Now 20% Off. Tap to browse Grooming.',
+              child: GestureDetector(
+                onTap: () =>
+                    ref.read(marketplaceProvider.notifier).setFilter('Grooming'),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [colorScheme.primary, colorScheme.secondary],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
                     ),
-                    Icon(Icons.chevron_right, color: colorScheme.onPrimary),
-                  ],
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ExcludeSemantics(
+                    child: Row(
+                      children: [
+                        Icon(Icons.workspace_premium_rounded,
+                            color: colorScheme.onPrimary, size: 28),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Member Exclusive',
+                                  style: TextStyle(
+                                      color: colorScheme.onSurfaceVariant,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.8)),
+                              Text('Summer Grooming Kit — Now 20% Off',
+                                  style: TextStyle(
+                                      color: colorScheme.onPrimary,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800)),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.chevron_right, color: colorScheme.onPrimary),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),

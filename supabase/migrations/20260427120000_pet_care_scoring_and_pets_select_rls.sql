@@ -10,6 +10,26 @@ COMMENT ON COLUMN public.pet_care_gamification.daily_point_award_date IS
 COMMENT ON COLUMN public.pet_care_gamification.daily_point_award_accrued IS
   'Points already applied toward total for that day (idempotent cap; no clawback on uncheck).';
 
+-- Avoid RLS recursion: policies on pets must not subquery public.pets directly.
+CREATE OR REPLACE FUNCTION public.pet_is_owned_by_auth_user(pet_uuid uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+SET row_security = off
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.pets p
+    WHERE p.id = pet_uuid
+      AND p.user_id = (SELECT auth.uid())
+  );
+$$;
+
+REVOKE ALL ON FUNCTION public.pet_is_owned_by_auth_user(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.pet_is_owned_by_auth_user(uuid) TO authenticated;
+
 DROP POLICY IF EXISTS "Anyone can view pets" ON public.pets;
 
 CREATE POLICY "pets_select_authenticated"
@@ -22,8 +42,8 @@ USING (
     SELECT 1 FROM public.chat_threads t
     WHERE (t.pet_id_1 = pets.id OR t.pet_id_2 = pets.id)
     AND (
-      EXISTS (SELECT 1 FROM public.pets p WHERE p.id = t.pet_id_1 AND p.user_id = auth.uid())
-      OR EXISTS (SELECT 1 FROM public.pets p WHERE p.id = t.pet_id_2 AND p.user_id = auth.uid())
+      public.pet_is_owned_by_auth_user(t.pet_id_1)
+      OR public.pet_is_owned_by_auth_user(t.pet_id_2)
     )
   )
   OR EXISTS (SELECT 1 FROM public.posts po WHERE po.pet_id = pets.id)
@@ -35,8 +55,8 @@ USING (
     SELECT 1 FROM public.match_requests mr
     WHERE (mr.sender_pet_id = pets.id OR mr.receiver_pet_id = pets.id)
     AND (
-      EXISTS (SELECT 1 FROM public.pets p WHERE p.id = mr.sender_pet_id AND p.user_id = auth.uid())
-      OR EXISTS (SELECT 1 FROM public.pets p WHERE p.id = mr.receiver_pet_id AND p.user_id = auth.uid())
+      public.pet_is_owned_by_auth_user(mr.sender_pet_id)
+      OR public.pet_is_owned_by_auth_user(mr.receiver_pet_id)
     )
   )
   OR EXISTS (SELECT 1 FROM public.follows f WHERE f.followed_pet_id = pets.id AND f.follower_user_id = auth.uid())

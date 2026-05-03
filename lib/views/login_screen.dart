@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/auth_controller.dart';
-import '../utils/supabase_config.dart';
-
+import '../repositories/auth_repository.dart';
+import '../widgets/brand_logo.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -94,7 +94,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 final email = resetEmailController.text.trim();
                 if (email.isEmpty) return;
                 try {
-                  await supabase.auth.resetPasswordForEmail(email);
+                  await authRepository.requestPasswordReset(email);
                   if (ctx.mounted) Navigator.pop(ctx);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -102,7 +102,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         content: Row(
                           children: [
                             Icon(Icons.check_circle,
-                                color: Theme.of(context).colorScheme.onPrimary, size: 18),
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                size: 18),
                             SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -114,7 +115,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        backgroundColor: const Color(0xFF81C784),
+                        backgroundColor: Theme.of(context).colorScheme.tertiary,
                       ),
                     );
                   }
@@ -194,21 +195,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       children: [
                         // Brand header
                         Center(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.pets,
-                                  size: 28, color: colorScheme.primary),
-                              const SizedBox(width: 10),
-                              Text(
-                                'PetSphere',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  color: colorScheme.onSurface,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                            ],
+                          child: BrandLogo(
+                            size: BrandLogoSize.small,
+                            withText: true,
                           ),
                         ),
                         const SizedBox(height: 40),
@@ -258,7 +247,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           ),
                           const SizedBox(height: 24),
                         ],
-                        TextFormField(
+                        Semantics(
+                          textField: true,
+                          label: 'Email address',
+                          child: TextFormField(
+                          key: const Key('login_email_field'),
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
@@ -277,8 +270,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             return null;
                           },
                         ),
+                        ),
                         const SizedBox(height: 16),
-                        TextFormField(
+                        Semantics(
+                          textField: true,
+                          obscured: true,
+                          label: 'Password',
+                          child: TextFormField(
+                          key: const Key('login_password_field'),
                           controller: _passwordController,
                           obscureText: _obscurePassword,
                           textInputAction: TextInputAction.done,
@@ -304,6 +303,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               value == null || value.length < 6
                                   ? 'Password must be at least 6 characters'
                                   : null,
+                        ),
                         ),
                         Align(
                           alignment: Alignment.centerRight,
@@ -435,4 +435,3 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     );
   }
 }
-

@@ -8,6 +8,7 @@ import '../controllers/match_controller.dart';
 import '../controllers/notification_controller.dart';
 import '../models/notification_model.dart';
 import 'components/pet_avatar.dart';
+import '../widgets/brand_logo.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -43,7 +44,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   @override
   Widget build(BuildContext context) {
     final notifState = ref.watch(notificationProvider);
-    final matchState = ref.watch(matchProvider);
+    final allRequestsAsync = ref.watch(allMatchRequestsProvider);
+    final requestCount = allRequestsAsync.maybeWhen(
+      data: (list) => list.length,
+      orElse: () => 0,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -57,13 +62,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                   : 'Activity',
             ),
             Tab(
-              text: matchState.myRequests.isNotEmpty
-                  ? 'Requests (${matchState.myRequests.length})'
+              text: requestCount > 0
+                  ? 'Requests ($requestCount)'
                   : 'Requests',
             ),
           ],
         ),
-        actions: [],
       ),
       body: TabBarView(
         controller: _tabController,
@@ -92,13 +96,18 @@ class _ActivityTab extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () => ref.read(notificationProvider.notifier).refresh(),
       child: items.isEmpty
-          ? ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: const [
-                SizedBox(height: 120),
-                Center(child: Text('No activity yet.')),
-              ],
-            )
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  const SizedBox(height: 120),
+                  BrandLogo(
+                    customSize: 64,
+                    color: Theme.of(context).colorScheme.outline.withAlpha(100),
+                  ),
+                  const SizedBox(height: 16),
+                  const Center(child: Text('No activity yet.')),
+                ],
+              )
           : ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: items.length,
@@ -153,7 +162,7 @@ class _NotificationTile extends ConsumerWidget {
       case 'profile_follow':
       case 'pet_follow':
         icon = Icons.person_add;
-        bg = Colors.blue;
+        bg = colors.primary;
         break;
       default:
         icon = Icons.notifications;
@@ -237,25 +246,27 @@ class _RequestsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    final matchState = ref.watch(matchProvider);
-    final myRequests = matchState.myRequests;
+    final allRequestsAsync = ref.watch(allMatchRequestsProvider);
 
-    return RefreshIndicator(
-      onRefresh: () => ref.read(matchProvider.notifier).refresh(),
-      child: myRequests.isEmpty
-          ? ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: const [
-                SizedBox(height: 120),
-                Center(child: Text('No new requests.')),
-              ],
-            )
-          : ListView.separated(
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: myRequests.length,
-              separatorBuilder: (_, _) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final req = myRequests[index];
+    return allRequestsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error loading requests: $e')),
+      data: (myRequests) => RefreshIndicator(
+        onRefresh: () async => ref.invalidate(allMatchRequestsProvider),
+        child: myRequests.isEmpty
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(height: 120),
+                  Center(child: Text('No new requests.')),
+                ],
+              )
+            : ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: myRequests.length,
+                separatorBuilder: (_, _) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final req = myRequests[index];
                 final senderPet = req.senderPet;
                 if (senderPet == null) return const SizedBox.shrink();
 
@@ -292,6 +303,7 @@ class _RequestsTab extends ConsumerWidget {
                                   await ref
                                       .read(matchProvider.notifier)
                                       .acceptRequest(req.id);
+                                  ref.invalidate(allMatchRequestsProvider);
                                   if (!context.mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
@@ -314,6 +326,7 @@ class _RequestsTab extends ConsumerWidget {
                                   ref
                                       .read(matchProvider.notifier)
                                       .declineRequest(req.id);
+                                  ref.invalidate(allMatchRequestsProvider);
                                 },
                                 style: OutlinedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(
@@ -369,6 +382,7 @@ class _RequestsTab extends ConsumerWidget {
                 );
               },
             ),
+      ),
     );
   }
 }

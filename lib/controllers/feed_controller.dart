@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import '../models/post_model.dart';
@@ -115,7 +117,14 @@ class FeedNotifier extends Notifier<FeedState> {
           return post.copyWith(comments: [...post.comments, comment]);
         }).toList(),
       );
-    } catch (_) {}
+    } catch (e, st) {
+      developer.log(
+        'Realtime comment fetch failed',
+        name: 'FeedNotifier',
+        error: e,
+        stackTrace: st,
+      );
+    }
   }
 
   Future<void> _fetchPosts() async {
@@ -242,6 +251,28 @@ class FeedNotifier extends Notifier<FeedState> {
       return true;
     } catch (e) {
       state = state.copyWith(error: 'Failed to delete story: $e');
+      return false;
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Update Post
+  // -------------------------------------------------------------------------
+  Future<bool> updatePost({
+    required String postId,
+    required String caption,
+  }) async {
+    try {
+      final updatedPost = await feedRepository.updatePost(
+        postId: postId,
+        caption: caption,
+      );
+      state = state.copyWith(
+        posts: state.posts.map((p) => p.id == postId ? updatedPost : p).toList(),
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: 'Failed to update post: $e');
       return false;
     }
   }

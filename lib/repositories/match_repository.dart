@@ -125,6 +125,24 @@ class MatchRepository {
   }
 
   // -------------------------------------------------------------------------
+  // Fetch ALL match requests received by any of the user's pets
+  // Used by the Notifications screen to show requests across all pets.
+  // -------------------------------------------------------------------------
+  Future<List<MatchRequestModel>> fetchAllMyRequests(List<String> myPetIds) async {
+    if (myPetIds.isEmpty) return [];
+    final data = await supabase
+        .from('match_requests')
+        .select('*, sender_pets:pets!sender_pet_id(*)')
+        .inFilter('receiver_pet_id', myPetIds)
+        .eq('status', 'pending')
+        .order('created_at', ascending: false);
+
+    return (data as List<dynamic>)
+        .map((e) => MatchRequestModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  // -------------------------------------------------------------------------
   // Accept or decline a match request
   // -------------------------------------------------------------------------
   Future<void> updateRequestStatus(String requestId, String status) async {

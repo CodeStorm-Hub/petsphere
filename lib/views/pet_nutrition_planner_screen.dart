@@ -186,9 +186,9 @@ class _HydrationTracker extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       decoration: BoxDecoration(
-        color: Colors.blue.withAlpha(15),
+        color: colorScheme.secondary.withAlpha(15),
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: Colors.blue.withAlpha(30)),
+        border: Border.all(color: colorScheme.secondary.withAlpha(30)),
       ),
       child: Row(
         children: [
@@ -205,12 +205,12 @@ class _HydrationTracker extends StatelessWidget {
                   child: CircularProgressIndicator(
                     value: value,
                     strokeWidth: 8,
-                    color: Colors.blue,
-                    backgroundColor: Colors.blue.withAlpha(30),
+                    color: colorScheme.secondary,
+                    backgroundColor: colorScheme.secondary.withAlpha(30),
                     strokeCap: StrokeCap.round,
                   ),
                 ),
-                const Icon(Icons.water_drop_rounded, color: Colors.blue, size: 28),
+                Icon(Icons.water_drop_rounded, color: colorScheme.secondary, size: 28),
               ],
             ),
           ),
@@ -226,14 +226,14 @@ class _HydrationTracker extends StatelessWidget {
             ),
           ),
           Material(
-            color: Colors.blue.withAlpha(30),
+            color: colorScheme.secondary.withAlpha(30),
             borderRadius: BorderRadius.circular(16),
             child: InkWell(
               onTap: onAdd,
               borderRadius: BorderRadius.circular(16),
-              child: const Padding(
-                padding: EdgeInsets.all(12),
-                child: Icon(Icons.add_rounded, color: Colors.blue),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Icon(Icons.add_rounded, color: colorScheme.secondary),
               ),
             ),
           ),
@@ -344,9 +344,9 @@ class _DietaryProfile extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _Tag(label: 'Grain-Free', color: Colors.brown),
-              _Tag(label: 'Low Sodium', color: Colors.blue),
-              _Tag(label: 'Sensitive Stomach', color: Colors.orange),
+              _Tag(label: 'Grain-Free', color: colorScheme.error),
+              _Tag(label: 'Low Sodium', color: colorScheme.secondary),
+              _Tag(label: 'Sensitive Stomach', color: colorScheme.tertiary),
             ],
           ),
           const SizedBox(height: 16),

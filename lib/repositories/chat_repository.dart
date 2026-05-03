@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/chat_thread_model.dart';
 import '../models/message_model.dart';
@@ -31,6 +33,30 @@ class ChatRepository {
       for (var i = 0; i < threads.length; i++)
         threads[i].copyWith(lastMessage: lastMsgs[i]),
     ];
+  }
+
+  /// Single thread row for deep links / chat screen when the list cache is stale.
+  /// Enforces that [myPetId] participates in the thread (RLS should also enforce).
+  Future<ChatThreadModel?> fetchThreadById(
+    String threadId,
+    String myPetId,
+  ) async {
+    final data = await supabase
+        .from('chat_threads')
+        .select(
+          'id, pet_id_1, pet_id_2, created_at, '
+          'pet1:pets!pet_id_1(id, name, breed, animal_type, age, bio, profile_image_url, images, is_public_owner, user_id), '
+          'pet2:pets!pet_id_2(id, name, breed, animal_type, age, bio, profile_image_url, images, is_public_owner, user_id)',
+        )
+        .eq('id', threadId)
+        .or('pet_id_1.eq.$myPetId,pet_id_2.eq.$myPetId')
+        .maybeSingle();
+
+    if (data == null) return null;
+
+    final thread = ChatThreadModel.fromJson(data);
+    final last = await _fetchLastMessage(threadId);
+    return thread.copyWith(lastMessage: last);
   }
 
   // -------------------------------------------------------------------------
@@ -120,7 +146,9 @@ class ChatRepository {
   }
 
   // -------------------------------------------------------------------------
-  // Subscribe to ALL new messages (filtered client-side) for thread list updates
+  // Subscribe to ALL new message INSERT events for thread-list previews.
+  // Payloads must be filtered by Supabase Realtime RLS to rows the user may read.
+  // Client-side we ignore threads not in the known set (see [ChatController]).
   // -------------------------------------------------------------------------
   RealtimeChannel subscribeToAllMessages({
     required void Function(MessageModel message) onMessage,
@@ -135,7 +163,14 @@ class ChatRepository {
             try {
               final msg = MessageModel.fromJson(payload.newRecord);
               onMessage(msg);
-            } catch (_) {}
+            } catch (e, st) {
+              developer.log(
+                'Realtime message parse failed',
+                name: 'ChatRepository',
+                error: e,
+                stackTrace: st,
+              );
+            }
           },
         )
         .subscribe();

@@ -208,8 +208,12 @@ class FeedRepository {
   // Upload post media to Storage — returns the public URL
   // -------------------------------------------------------------------------
   Future<String> uploadPostMedia(File file) async {
+    final uid = supabase.auth.currentUser?.id;
+    if (uid == null || uid.isEmpty) {
+      throw StateError('Must be signed in to upload post media');
+    }
     final ext = file.path.split('.').last;
-    final path = '${DateTime.now().millisecondsSinceEpoch}.$ext';
+    final path = '$uid/${DateTime.now().millisecondsSinceEpoch}.$ext';
 
     await supabase.storage.from(kBucketPostMedia).upload(path, file);
 
@@ -251,6 +255,34 @@ class FeedRepository {
     return (likes as List<dynamic>)
         .map((l) => (l as Map<String, dynamic>)['pet_id'] as String)
         .toList();
+  }
+
+  // -------------------------------------------------------------------------
+  // Update a post
+  // -------------------------------------------------------------------------
+  Future<PostModel> updatePost({
+    required String postId,
+    required String caption,
+    String? location,
+    List<String>? taggedPetIds,
+    List<String>? taggedPetNames,
+  }) async {
+    final payload = {
+      'caption': caption,
+      'location': ?location,
+      'tagged_pet_ids': ?taggedPetIds,
+      'tagged_pet_names': ?taggedPetNames,
+    };
+
+    final data = await supabase
+        .from('posts')
+        .update(payload)
+        .eq('id', postId)
+        .select(
+            '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
+        .single();
+
+    return PostModel.fromJson(data);
   }
 
   // -------------------------------------------------------------------------

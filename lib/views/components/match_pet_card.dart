@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/pet_model.dart';
+import '../../widgets/brand_logo.dart';
 
 class MatchPetCard extends StatelessWidget {
   final PetModel pet;
@@ -48,8 +49,7 @@ class MatchPetCard extends StatelessWidget {
                     fit: BoxFit.cover,
                     errorBuilder: (ctx, err, stack) => Container(
                       color: colorScheme.surfaceContainerHighest,
-                      child: Icon(Icons.pets,
-                          size: 40, color: colorScheme.onSurfaceVariant),
+                      child: const BrandLogo(customSize: 40),
                     ),
                   ),
                   // Verified badge overlay
@@ -68,8 +68,8 @@ class MatchPetCard extends StatelessWidget {
                                 blurRadius: 4)
                           ],
                         ),
-                        child: const Icon(Icons.verified,
-                            size: 14, color: Color(0xFF1DA1F2)),
+                        child: Icon(Icons.verified,
+                            size: 14, color: colorScheme.primary),
                       ),
                     ),
                   // Stat badges at bottom
@@ -83,19 +83,19 @@ class MatchPetCard extends StatelessWidget {
                             icon: Icons.bolt,
                             value: energy,
                             label: 'Energy',
-                            color: const Color(0xFFFFB300)),
+                            color: colorScheme.secondary),
                         const SizedBox(width: 4),
                         _StatBadge(
                             icon: Icons.favorite,
                             value: health,
                             label: 'Health',
-                            color: const Color(0xFF81C784)),
+                            color: colorScheme.tertiary),
                         const SizedBox(width: 4),
                         _StatBadge(
                             icon: Icons.group,
                             value: social,
                             label: 'Social',
-                            color: const Color(0xFF4FC3F7)),
+                            color: colorScheme.primary),
                       ],
                     ),
                   ),
@@ -119,8 +119,8 @@ class MatchPetCard extends StatelessWidget {
                         ),
                       ),
                       if (pet.isVerified)
-                        const Icon(Icons.verified,
-                            size: 14, color: Color(0xFF1DA1F2)),
+                        Icon(Icons.verified,
+                            size: 14, color: colorScheme.primary),
                     ],
                   ),
                   const SizedBox(height: 2),

@@ -216,7 +216,7 @@ class _PlaceCard extends StatelessWidget {
                   decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(12)),
                   child: Row(
                     children: [
-                      const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
+                      Icon(Icons.star_rounded, color: colorScheme.tertiary, size: 14),
                       const SizedBox(width: 4),
                       Text('$rating', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                     ],
@@ -241,9 +241,9 @@ class _PlaceCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(Icons.access_time_rounded, size: 14, color: Colors.green[700]),
+                    Icon(Icons.access_time_rounded, size: 14, color: colorScheme.tertiary),
                     const SizedBox(width: 4),
-                    Text(status, style: TextStyle(color: Colors.green[700], fontSize: 13, fontWeight: FontWeight.w600)),
+                    Text(status, style: TextStyle(color: colorScheme.tertiary, fontSize: 13, fontWeight: FontWeight.w600)),
                     const Spacer(),
                     IconButton.filledTonal(
                       onPressed: () {},
@@ -310,7 +310,7 @@ class _ListPlaceItem extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
+                    Icon(Icons.star_rounded, color: colorScheme.tertiary, size: 14),
                     const SizedBox(width: 4),
                     const Text('4.9 (120+ reviews)', style: TextStyle(fontSize: 12, color: Colors.grey)),
                   ],
@@ -318,8 +318,8 @@ class _ListPlaceItem extends StatelessWidget {
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.green.withAlpha(20), borderRadius: BorderRadius.circular(8)),
-                  child: Text('Open until 8:00 PM', style: TextStyle(color: Colors.green[800], fontSize: 11, fontWeight: FontWeight.bold)),
+                  decoration: BoxDecoration(color: colorScheme.tertiary.withAlpha(20), borderRadius: BorderRadius.circular(8)),
+                  child: Text('Open until 8:00 PM', style: TextStyle(color: colorScheme.tertiary, fontSize: 11, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),

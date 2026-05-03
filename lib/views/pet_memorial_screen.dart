@@ -187,6 +187,7 @@ class _MemorialQuote extends StatelessWidget {
 class _MemorialGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final images = [
       'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&q=80&w=400',
       'https://images.unsplash.com/photo-1544568100-847a948585b9?auto=format&fit=crop&q=80&w=400',
@@ -197,11 +198,11 @@ class _MemorialGallery extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(Icons.auto_awesome_rounded, color: Colors.amber, size: 20),
-            SizedBox(width: 12),
-            Text(
+            Icon(Icons.auto_awesome_rounded, color: colorScheme.tertiary, size: 20),
+            const SizedBox(width: 12),
+            const Text(
               'Treasured Moments',
               style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
             ),

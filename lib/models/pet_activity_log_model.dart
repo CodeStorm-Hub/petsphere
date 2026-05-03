@@ -43,15 +43,15 @@ class PetActivityLog {
         'training' => Icons.school,
         'grooming' => Icons.content_cut,
         'social' => Icons.people,
-        'free_roam' => Icons.pets,
+        'free_roam' => Icons.holiday_village_outlined,
         _ => Icons.fitness_center,
       };
 
   /// Color for the intensity level.
   Color get intensityColor => switch (intensity) {
-        'low' => Colors.green,
-        'high' => Colors.orange,
-        _ => Colors.blue,
+        'low' => const Color(0xFF5BA3F5), // tertiary
+        'high' => const Color(0xFFFFA726), // secondary
+        _ => const Color(0xFF2979FF), // primary
       };
 
   factory PetActivityLog.fromJson(Map<String, dynamic> json) {

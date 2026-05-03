@@ -12,6 +12,7 @@ import '../utils/care_gamification_logic.dart';
 import '../utils/care_personalization.dart';
 import 'care_goal_editor_modal.dart';
 import 'health_tab.dart';
+import '../widgets/brand_logo.dart';
 
 class _SetupBanner extends StatelessWidget {
   const _SetupBanner({required this.onTap});
@@ -343,19 +344,99 @@ class _PetCareScreenState extends ConsumerState<PetCareScreen>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final myPets = ref.watch(petProvider).myPets;
+    final activePet = ref.watch(activePetProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pet Care'),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: colorScheme.primary,
-          unselectedLabelColor: colorScheme.onSurfaceVariant,
-          indicatorColor: colorScheme.primary,
-          tabs: const [
-            Tab(text: 'Care Diary'),
-            Tab(text: 'Health'),
-            Tab(text: 'Feeding'),
-          ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(
+            (myPets.length > 1 ? 80.0 : 0.0) + kTextTabBarHeight,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Per-pet selector row (shown when user has multiple pets)
+              if (myPets.length > 1)
+                SizedBox(
+                  height: 80,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 8),
+                    itemCount: myPets.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                    itemBuilder: (context, i) {
+                      final pet = myPets[i];
+                      final isSelected = pet.id == activePet?.id;
+                      return GestureDetector(
+                        onTap: () =>
+                            ref.read(petProvider.notifier).setActivePet(pet),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? colorScheme.primary.withAlpha(28)
+                                : colorScheme.surfaceContainerHighest,
+                            border: Border.all(
+                              color: isSelected
+                                  ? colorScheme.primary
+                                  : colorScheme.outline.withAlpha(70),
+                              width: isSelected ? 2 : 1,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircleAvatar(
+                                radius: 18,
+                                backgroundColor:
+                                    colorScheme.surfaceContainerHighest,
+                                backgroundImage:
+                                    pet.profileImageUrl.isNotEmpty
+                                        ? NetworkImage(pet.profileImageUrl)
+                                        : null,
+                                child: pet.profileImageUrl.isEmpty
+                                    ? const BrandLogo(customSize: 16)
+                                    : null,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                pet.name,
+                                style: TextStyle(
+                                  fontWeight: isSelected
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  fontSize: 13,
+                                  color: isSelected
+                                      ? colorScheme.primary
+                                      : colorScheme.onSurface,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              TabBar(
+                controller: _tabController,
+                labelColor: colorScheme.primary,
+                unselectedLabelColor: colorScheme.onSurfaceVariant,
+                indicatorColor: colorScheme.primary,
+                tabs: const [
+                  Tab(text: 'Care Diary'),
+                  Tab(text: 'Health'),
+                  Tab(text: 'Feeding'),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       body: RefreshIndicator(
@@ -389,7 +470,7 @@ class _NoActivePet extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       children: [
         const SizedBox(height: 80),
-        Icon(Icons.pets, size: 56, color: colorScheme.onSurfaceVariant),
+        const BrandLogo(customSize: 56),
         const SizedBox(height: 16),
         Text(
           'Add a pet to start tracking care',
@@ -417,7 +498,6 @@ class _DashboardTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
-    final myPets = ref.watch(petProvider).myPets;
     final activePet = ref.watch(activePetProvider);
     final careState = ref.watch(petCareProvider);
     final todayLog = careState.todayLog;
@@ -429,6 +509,9 @@ class _DashboardTab extends ConsumerWidget {
 
     final completedTasks = todayLog.completedTasks;
     final totalTasks = todayLog.tasks.length;
+    final checklistProgress =
+        totalTasks == 0 ? 0.0 : completedTasks / totalTasks;
+    final checklistPct = (checklistProgress * 100).round();
 
     final o = careState.onboarding;
     final oData = o?.data ?? const <String, dynamic>{};
@@ -442,10 +525,6 @@ class _DashboardTab extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        if (myPets.isNotEmpty) ...[
-          _PetSelector(myPets: myPets, activeId: activePet.id),
-          const SizedBox(height: 16),
-        ],
         if (needsSetup) ...[
           _SetupBanner(
             onTap: () async {
@@ -519,13 +598,13 @@ class _DashboardTab extends ConsumerWidget {
                   _ProgressRing(
                     label: 'Calories',
                     progress: todayLog.caloriesProgress,
-                    color: Colors.orange,
+                    color: colorScheme.secondary,
                     centerText: '${todayLog.consumedKcal}\nkcal',
                   ),
                   _ProgressRing(
                     label: 'Water',
                     progress: todayLog.waterProgress,
-                    color: Colors.blue,
+                    color: colorScheme.primary,
                     centerText:
                         '${todayLog.waterCups}/${todayLog.dailyWaterGoalCups}\ncups',
                   ),
@@ -542,18 +621,24 @@ class _DashboardTab extends ConsumerWidget {
         ),
         const SizedBox(height: 24),
 
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Daily Checklist', style: theme.textTheme.titleLarge),
-            Text(
-              '${(totalTasks == 0 ? 0 : completedTasks / totalTasks * 100).toInt()}%',
-              style: TextStyle(
-                color: colorScheme.primary,
-                fontWeight: FontWeight.bold,
+        Semantics(
+          header: true,
+          label:
+              'Daily checklist, $checklistPct percent complete, $completedTasks of $totalTasks tasks done',
+          excludeSemantics: true,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Daily Checklist', style: theme.textTheme.titleLarge),
+              Text(
+                '$checklistPct%',
+                style: TextStyle(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 4),
         Text(
@@ -564,11 +649,16 @@ class _DashboardTab extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 8),
-        LinearProgressIndicator(
-          value: totalTasks == 0 ? 0 : completedTasks / totalTasks,
-          backgroundColor: colorScheme.outlineVariant,
-          color: colorScheme.primary,
-          borderRadius: BorderRadius.circular(999),
+        Semantics(
+          label: 'Checklist progress, $completedTasks of $totalTasks tasks',
+          value: '$checklistPct percent',
+          excludeSemantics: true,
+          child: LinearProgressIndicator(
+            value: checklistProgress,
+            backgroundColor: colorScheme.outlineVariant,
+            color: colorScheme.primary,
+            borderRadius: BorderRadius.circular(999),
+          ),
         ),
         const SizedBox(height: 16),
 
@@ -623,169 +713,121 @@ class _DashboardTab extends ConsumerWidget {
             _QuickActionItem(
               label: 'Vet Booking',
               icon: Icons.calendar_month,
-              color: Colors.blue,
+              color: colorScheme.primary,
               onTap: () => context.push('/vet_booking'),
             ),
             _QuickActionItem(
               label: 'Emergency',
               icon: Icons.emergency,
-              color: Colors.red,
+              color: colorScheme.error,
               onTap: () => context.push('/emergency_care'),
             ),
             _QuickActionItem(
               label: 'Nutrition',
               icon: Icons.restaurant,
-              color: Colors.orange,
+              color: colorScheme.secondary,
               onTap: () => context.push('/nutrition_planner'),
             ),
             _QuickActionItem(
               label: 'Expenses',
               icon: Icons.payments,
-              color: Colors.green,
+              color: colorScheme.tertiary,
               onTap: () => context.push('/expenses'),
             ),
             _QuickActionItem(
               label: 'Growth',
               icon: Icons.show_chart,
-              color: Colors.purple,
+              color: colorScheme.primary,
               onTap: () => context.push('/growth_charts'),
             ),
             _QuickActionItem(
               label: 'Insurance',
               icon: Icons.security,
-              color: Colors.cyan,
+              color: colorScheme.secondary,
               onTap: () => context.push('/insurance'),
             ),
             _QuickActionItem(
               label: 'Training',
               icon: Icons.school,
-              color: Colors.brown,
+              color: colorScheme.onSurfaceVariant,
               onTap: () => context.push('/training'),
             ),
             _QuickActionItem(
               label: 'Adoption',
               icon: Icons.favorite,
-              color: Colors.pink,
+              color: colorScheme.error,
               onTap: () => context.push('/adoption_center'),
             ),
             _QuickActionItem(
               label: 'Places',
               icon: Icons.map,
-              color: Colors.teal,
+              color: colorScheme.secondary,
               onTap: () => context.push('/pet_friendly_places'),
             ),
             _QuickActionItem(
               label: 'Events',
               icon: Icons.event,
-              color: Colors.indigo,
+              color: colorScheme.primary,
               onTap: () => context.push('/events'),
             ),
             _QuickActionItem(
               label: 'Medical',
               icon: Icons.folder_shared_rounded,
-              color: Colors.blueGrey,
+              color: colorScheme.tertiary,
               onTap: () => context.push('/medical_records'),
             ),
             _QuickActionItem(
               label: 'Sitters',
               icon: Icons.person_search,
-              color: Colors.amber,
+              color: colorScheme.tertiary,
               onTap: () => context.push('/sitters'),
             ),
             _QuickActionItem(
               label: 'Timeline',
               icon: Icons.history,
-              color: Colors.deepPurple,
+              color: colorScheme.secondary,
               onTap: () => context.push('/pet_timeline'),
             ),
             _QuickActionItem(
               label: 'Identifier',
               icon: Icons.camera_alt,
-              color: Colors.blue,
+              color: colorScheme.primary,
               onTap: () => context.push('/breed_identifier'),
             ),
             _QuickActionItem(
               label: 'Knowledge',
               icon: Icons.menu_book,
-              color: Colors.lightGreen,
+              color: colorScheme.secondary,
               onTap: () => context.push('/knowledge_base'),
             ),
             _QuickActionItem(
               label: 'Reviews',
               icon: Icons.rate_review,
-              color: Colors.orangeAccent,
+              color: colorScheme.secondary,
               onTap: () => context.push('/gear_reviews'),
             ),
             _QuickActionItem(
               label: 'Groups',
               icon: Icons.groups,
-              color: Colors.deepOrange,
+              color: colorScheme.error,
               onTap: () => context.push('/community_groups'),
             ),
             _QuickActionItem(
               label: 'Lost/Found',
               icon: Icons.location_searching,
-              color: Colors.redAccent,
+              color: colorScheme.error,
               onTap: () => context.push('/lost_and_found'),
             ),
             _QuickActionItem(
               label: 'Memorial',
               icon: Icons.cloud,
-              color: Colors.blueAccent,
+              color: colorScheme.primary,
               onTap: () => context.push('/memorial'),
             ),
           ],
         ),
         const SizedBox(height: 80),
       ],
-    );
-  }
-}
-
-// ───────────── Pet selector ─────────────
-class _PetSelector extends ConsumerWidget {
-  const _PetSelector({required this.myPets, required this.activeId});
-
-  final List myPets;
-  final String activeId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      height: 72,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: myPets.length,
-        itemBuilder: (context, i) {
-          final pet = myPets[i];
-          final isSelected = pet.id == activeId;
-          return GestureDetector(
-            onTap: () => ref.read(petProvider.notifier).setActivePet(pet),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 6),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color:
-                      isSelected ? colorScheme.primary : Colors.transparent,
-                  width: 3,
-                ),
-              ),
-              child: CircleAvatar(
-                radius: 30,
-                backgroundColor: colorScheme.surface,
-                backgroundImage: pet.profileImageUrl.isNotEmpty
-                    ? NetworkImage(pet.profileImageUrl)
-                    : null,
-                child: pet.profileImageUrl.isEmpty
-                    ? Icon(Icons.pets, color: colorScheme.onSurfaceVariant)
-                    : null,
-              ),
-            ),
-          );
-        },
-      ),
     );
   }
 }
@@ -921,9 +963,9 @@ class _StreakBanner extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.local_fire_department,
-                color: Colors.orange,
+                color: colorScheme.secondary,
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -1001,45 +1043,51 @@ class _ProgressRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      children: [
-        SizedBox(
-          width: 72,
-          height: 72,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: progress.clamp(0.0, 1.0)),
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeOutCubic,
-                builder: (_, value, _) => CircularProgressIndicator(
-                  value: value,
-                  strokeWidth: 8,
-                  backgroundColor: colorScheme.outlineVariant,
-                  color: color,
-                ),
-              ),
-              Center(
-                child: Text(
-                  centerText,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
+    final valueDescription = centerText.replaceAll('\n', ' ');
+    final pctRounded = (progress.clamp(0.0, 1.0) * 100).round();
+    return Semantics(
+      label: '$label, $valueDescription, $pctRounded percent',
+      excludeSemantics: true,
+      child: Column(
+        children: [
+          SizedBox(
+            width: 72,
+            height: 72,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: progress.clamp(0.0, 1.0)),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutCubic,
+                  builder: (_, value, _) => CircularProgressIndicator(
+                    value: value,
+                    strokeWidth: 8,
+                    backgroundColor: colorScheme.outlineVariant,
+                    color: color,
                   ),
                 ),
-              ),
-            ],
+                Center(
+                  child: Text(
+                    centerText,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(label,
-            style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 13,
-            )),
-      ],
+          const SizedBox(height: 8),
+          Text(label,
+              style: TextStyle(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 13,
+              )),
+        ],
+      ),
     );
   }
 }
@@ -1264,9 +1312,9 @@ class _FeedingTab extends ConsumerWidget {
                     value: value,
                     strokeWidth: 12,
                     backgroundColor: colorScheme.outlineVariant,
-                    color: todayLog.treatsOverBudget
+                    color: todayLog.consumedKcal > todayLog.dailyCalorieGoal
                         ? colorScheme.error
-                        : Colors.orange,
+                        : colorScheme.secondary,
                   ),
                 ),
                 Center(
@@ -1313,7 +1361,7 @@ class _FeedingTab extends ConsumerWidget {
               _CalorieChip(
                 label: 'Meals',
                 value: '${todayLog.mealKcal}',
-                color: Colors.orange,
+                color: colorScheme.secondary,
               ),
               if (todayLog.treatsKcal > 0) ...[
                 const SizedBox(width: 8),
@@ -1322,7 +1370,7 @@ class _FeedingTab extends ConsumerWidget {
                   value: '${todayLog.treatsKcal}',
                   color: todayLog.treatsOverBudget
                       ? colorScheme.error
-                      : Colors.amber,
+                      : colorScheme.tertiary,
                 ),
               ],
             ],
@@ -1440,8 +1488,8 @@ class _FeedingTab extends ConsumerWidget {
             Text('Water Intake', style: theme.textTheme.titleLarge),
             Text(
               '${todayLog.waterCups} / ${todayLog.dailyWaterGoalCups} cups',
-              style: const TextStyle(
-                color: Colors.blue,
+              style: TextStyle(
+                color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -1467,17 +1515,17 @@ class _FeedingTab extends ConsumerWidget {
                 height: 64,
                 decoration: BoxDecoration(
                   color: isFilled
-                      ? Colors.blue.withValues(alpha: 0.2)
+                      ? colorScheme.primary.withValues(alpha: 0.2)
                       : colorScheme.surfaceContainer,
                   border: Border.all(
-                    color: isFilled ? Colors.blue : colorScheme.outlineVariant,
+                    color: isFilled ? colorScheme.primary : colorScheme.outlineVariant,
                     width: 2,
                   ),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Icon(
                   Icons.water_drop,
-                  color: isFilled ? Colors.blue : colorScheme.outlineVariant,
+                  color: isFilled ? colorScheme.primary : colorScheme.outlineVariant,
                   size: 28,
                 ),
               ),

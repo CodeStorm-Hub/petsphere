@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/pet_model.dart';
+import '../widgets/brand_logo.dart';
 import '../utils/image_upload_helper.dart';
 import '../utils/media_utils.dart';
 import '../utils/supabase_config.dart';
@@ -352,7 +353,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                                           backgroundColor:
                                               colorScheme.surfaceContainerHighest,
                                           child: pet.profileImageUrl.isEmpty
-                                              ? const Icon(Icons.pets, size: 14)
+                                              ? const BrandLogo(customSize: 14)
                                               : null,
                                         ),
                                         const SizedBox(width: 8),

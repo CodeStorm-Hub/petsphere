@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pet_dating_app/main.dart';
 import 'package:pet_dating_app/models/pet_model.dart';
 import 'package:pet_dating_app/models/pet_expense_model.dart';
 import 'package:pet_dating_app/models/user_model.dart';
@@ -62,34 +61,6 @@ void main() {
       when(() => mockRepo.fetchExpenses('pet-123')).thenAnswer((_) async => []);
       when(() => mockRepo.createExpense(any())).thenAnswer((_) async => newExpense);
 
-      // 3. Launch App with Overrides
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            authProvider.overrideWith(() => _MockAuthNotifier(dummyUser)),
-            activePetProvider.overrideWithValue(dummyPet),
-            petExpenseRepositoryProvider.overrideWithValue(mockRepo),
-          ],
-          child: const PetSphereApp(),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // 4. Navigate to Expenses Screen
-      // Assuming we can go directly to the route for testing
-      // final BuildContext context = tester.element(find.byType(MaterialApp));
-      // In a real test, you might tap the UI to navigate, but direct navigation is faster for deep logic tests
-      // However, for "integration" we should ideally tap.
-      
-      // Let's try to find the "Expenses" card or button in Pet Care
-      // Or just push the route
-      // We'll use the router to go to /expenses
-      // (This requires access to the router, which is provided by routerProvider)
-      
-      // For now, let's assume we are on a screen that has the expense tracker
-      // Or we just test the PetExpenseTrackerScreen in isolation but with full provider context
-      
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -104,15 +75,17 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 5. Verify Empty State
-      expect(find.text('No expenses recorded yet'), findsOneWidget);
+      // 3. Verify empty state
+      expect(find.text('No expenses logged yet'), findsOneWidget);
 
-      // 6. Add Expense
+      // 4. Add expense
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.widgetWithText(TextField, 'Title (e.g. Pet Food)'), 'Premium Kibble');
-      await tester.enterText(find.widgetWithText(TextField, 'Amount'), '45.99');
+      final textFields = find.byType(TextFormField);
+      expect(textFields, findsNWidgets(2));
+      await tester.enterText(textFields.at(0), 'Premium Kibble');
+      await tester.enterText(textFields.at(1), '45.99');
       
       // Tap Save
       await tester.tap(find.text('Save Expense'));
@@ -122,7 +95,7 @@ void main() {
       
       await tester.pumpAndSettle();
 
-      // 7. Verify Expense in List
+      // 5. Verify expense in list
       expect(find.text('Premium Kibble'), findsOneWidget);
       expect(find.text('\$45.99'), findsWidgets); // Might be in list and summary
     });

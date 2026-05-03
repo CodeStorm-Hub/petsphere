@@ -54,7 +54,7 @@ class _SitterStatusCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Icon(Icons.house_siding, size: 48, color: Colors.blueAccent),
+          Icon(Icons.house_siding, size: 48, color: colorScheme.primary),
           const SizedBox(height: 16),
           const Text(
             'Need a Sitter?',
@@ -108,7 +108,7 @@ class _SitterCard extends StatelessWidget {
         title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Row(
           children: [
-            const Icon(Icons.star, color: Colors.amber, size: 14),
+            Icon(Icons.star, color: colorScheme.tertiary, size: 14),
             const SizedBox(width: 4),
             Text('$rating ($jobs jobs)', style: const TextStyle(fontSize: 12)),
           ],
@@ -149,7 +149,7 @@ class _BookingItem extends StatelessWidget {
           Container(
             width: 4,
             height: 40,
-            decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(color: colorScheme.secondary, borderRadius: BorderRadius.circular(2)),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -163,8 +163,8 @@ class _BookingItem extends StatelessWidget {
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: Colors.blue.withAlpha(30), borderRadius: BorderRadius.circular(8)),
-            child: const Text('Upcoming', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 10)),
+            decoration: BoxDecoration(color: colorScheme.secondary.withAlpha(30), borderRadius: BorderRadius.circular(8)),
+            child: Text('Upcoming', style: TextStyle(color: colorScheme.secondary, fontWeight: FontWeight.bold, fontSize: 10)),
           ),
         ],
       ),

@@ -1,11 +1,29 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../controllers/match_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/pet_model.dart';
+import '../theme/app_theme.dart';
+import '../widgets/brand_logo.dart';
 
 import 'main_layout.dart' show bottomNavSpaceFor;
+
+// Tracks which of the user's pets is selected for the discovery tab.
+// Scoped to the discovery tab — does NOT override the global activePetProvider.
+class DiscoveryPetIdNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void select(String? petId) => state = petId;
+}
+
+final discoveryActivePetIdProvider =
+    NotifierProvider<DiscoveryPetIdNotifier, String?>(
+  DiscoveryPetIdNotifier.new,
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Discovery Screen (tab host)
@@ -17,6 +35,7 @@ class DiscoveryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final petState = ref.watch(petProvider);
     final myPets = petState.myPets;
+    final activePetId = ref.watch(activePetProvider.select((p) => p?.id));
     final listedPets = myPets.where((p) => p.isBreedingListed).toList();
     final navSpace = bottomNavSpaceFor(context);
     final colorScheme = Theme.of(context).colorScheme;
@@ -46,18 +65,18 @@ class DiscoveryScreen extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.add_circle_outline),
               tooltip: 'New Listing',
-              onPressed: () => _showListPetSheet(context, ref),
+              onPressed: () => showListPetSheet(context, ref),
             ),
           ],
         ),
         body: TabBarView(
           children: [
-            _DiscoverTab(
-              hasActivePet: petState.activePet != null,
+            DiscoveryTab(
+              hasActivePet: activePetId != null,
               isPetLoading: petState.isLoading,
             ),
-            const _NearbyTab(),
-            _MyListingsTab(listedPets: listedPets, navSpace: navSpace),
+            const NearbyTab(),
+            MyListingsTab(listedPets: listedPets, navSpace: navSpace),
           ],
         ),
       ),
@@ -68,10 +87,10 @@ class DiscoveryScreen extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // My Listings Tab
 // ─────────────────────────────────────────────────────────────────────────────
-class _MyListingsTab extends ConsumerWidget {
+class MyListingsTab extends ConsumerWidget {
   final List<PetModel> listedPets;
   final double navSpace;
-  const _MyListingsTab({required this.listedPets, required this.navSpace});
+  const MyListingsTab({super.key, required this.listedPets, required this.navSpace});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -84,7 +103,7 @@ class _MyListingsTab extends ConsumerWidget {
               padding: EdgeInsets.only(bottom: navSpace),
               children: [
                 const SizedBox(height: 100),
-                Icon(Icons.favorite_border, size: 64, color: colorScheme.outline.withAlpha(100)),
+                BrandLogo(customSize: 64, color: colorScheme.outline.withAlpha(100)),
                 const SizedBox(height: 16),
                 const Center(
                   child: Text(
@@ -102,7 +121,7 @@ class _MyListingsTab extends ConsumerWidget {
                 const SizedBox(height: 24),
                 Center(
                   child: OutlinedButton(
-                    onPressed: () => _showListPetSheet(context, ref),
+                    onPressed: () => showListPetSheet(context, ref),
                     child: const Text('Start Listing'),
                   ),
                 ),
@@ -124,10 +143,11 @@ class _MyListingsTab extends ConsumerWidget {
                       radius: 28,
                       backgroundColor: colorScheme.surfaceContainerHighest,
                       backgroundImage: pet.profileImageUrl.isNotEmpty
-                          ? NetworkImage(pet.profileImageUrl)
+                          ? CachedNetworkImageProvider(pet.profileImageUrl)
                           : null,
                       child: pet.profileImageUrl.isEmpty
-                          ? Icon(Icons.pets,
+                          ? BrandLogo(
+                              size: BrandLogoSize.small,
                               color: colorScheme.primary)
                           : null,
                     ),
@@ -163,24 +183,26 @@ class _MyListingsTab extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // Discover Tab  —  swipeable card stack
 // ─────────────────────────────────────────────────────────────────────────────
-class _DiscoverTab extends ConsumerStatefulWidget {
+class DiscoveryTab extends ConsumerStatefulWidget {
   final bool hasActivePet;
   final bool isPetLoading;
 
-  const _DiscoverTab({
+  const DiscoveryTab({super.key, 
     required this.hasActivePet,
     required this.isPetLoading,
   });
 
   @override
-  ConsumerState<_DiscoverTab> createState() => _DiscoverTabState();
+  ConsumerState<DiscoveryTab> createState() => DiscoveryTabState();
 }
 
-class _DiscoverTabState extends ConsumerState<_DiscoverTab>
+class DiscoveryTabState extends ConsumerState<DiscoveryTab>
     with TickerProviderStateMixin {
-  int _currentIndex = 0;
-  String? _filterAnimal; // null = For You
-  final Set<String> _dismissedPetIds = {};
+  int currentIndex = 0;
+  String? filterAnimal; // null = For You
+  final Set<String> dismissedPetIds = {};
+  // Tracks pets whose discovery feeds are known to be empty after loading.
+  final Set<String> allCaughtUpPetIds = {};
 
   // Drag tracking
   double _dragX = 0.0;
@@ -215,6 +237,16 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
     _swipeOutController.addStatusListener(_onSwipeOutStatus);
     _snapBackController.addListener(_onSnapBackFrame);
     _snapBackController.addStatusListener(_onSnapBackStatus);
+
+    // Seed the discovery pet selector with the global active pet on first load.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final activePetId = ref.read(petProvider).activePet?.id;
+      if (ref.read(discoveryActivePetIdProvider) == null &&
+          activePetId != null) {
+        ref.read(discoveryActivePetIdProvider.notifier).select(activePetId);
+      }
+    });
   }
 
   @override
@@ -245,14 +277,20 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
     final allPets = ref.read(matchProvider).discoveryPets;
     setState(() {
       _dragX = 0;
-      _dismissedPetIds.add(pet.id);
+      dismissedPetIds.add(pet.id);
       _clampIndex(allPets);
       _isAnimating = false;
     });
 
     if (!liked) return;
 
-    ref.read(matchProvider.notifier).sendLikeRequest(pet.id).then((success) {
+    // Pass the currently-selected discovery pet so the like is sent from
+    // the correct pet (not the global active pet).
+    final discoveryPetId = ref.read(discoveryActivePetIdProvider);
+    ref
+        .read(matchProvider.notifier)
+        .sendLikeRequest(pet.id, fromPetId: discoveryPetId)
+        .then((success) {
       if (!mounted) return;
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -263,7 +301,8 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
         );
         return;
       }
-      setState(() => _dismissedPetIds.remove(pet.id));
+      // On failure: re-show the pet by removing it from the dismissed set.
+      setState(() => dismissedPetIds.remove(pet.id));
       final error = ref.read(matchProvider).error;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -321,7 +360,7 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
     final filteredPets =
         _applyFilter(ref.read(matchProvider).discoveryPets);
     if (_isAnimating || filteredPets.isEmpty) return;
-    final pet = filteredPets[_currentIndex];
+    final pet = filteredPets[currentIndex];
     _swipingPet = pet;
     _pendingLike = liked;
 
@@ -340,41 +379,82 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
 
   List<PetModel> _applyFilter(List<PetModel> allPets) {
     final visible =
-        allPets.where((p) => !_dismissedPetIds.contains(p.id)).toList();
-    if (_filterAnimal == null) return visible;
-    if (_filterAnimal == 'Nearby') {
+        allPets.where((p) => !dismissedPetIds.contains(p.id)).toList();
+    if (filterAnimal == null) return visible;
+    if (filterAnimal == 'Nearby') {
       return [...visible]
         ..sort((a, b) =>
             _fakeDistanceMi(a).compareTo(_fakeDistanceMi(b)));
     }
-    return visible.where((p) => p.animalType == _filterAnimal).toList();
+    return visible.where((p) => p.animalType == filterAnimal).toList();
   }
 
   void _clampIndex(List<PetModel> allPets) {
     final filtered = _applyFilter(allPets);
     if (filtered.isEmpty) {
-      _currentIndex = 0;
-    } else if (_currentIndex >= filtered.length) {
-      _currentIndex = filtered.length - 1;
+      currentIndex = 0;
+    } else if (currentIndex >= filtered.length) {
+      currentIndex = filtered.length - 1;
     }
   }
 
   int _fakeDistanceMi(PetModel pet) => (pet.id.hashCode.abs() % 25) + 1;
 
+  // ── Pet selector ─────────────────────────────────────────────────────────
+
+  void _selectPet(PetModel pet) {
+    // Stop any in-flight swipe animation cleanly before switching.
+    if (_isAnimating) {
+      _swipeOutController.stop();
+      _snapBackController.stop();
+      _isAnimating = false;
+      _swipingPet = null;
+      _pendingLike = null;
+    }
+    ref.read(discoveryActivePetIdProvider.notifier).select(pet.id);
+    setState(() {
+      dismissedPetIds.clear();
+      currentIndex = 0;
+      _dragX = 0;
+    });
+    ref.read(matchProvider.notifier).load(pet.id);
+  }
+
   // ── Build ────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    // Sync dismissed IDs when the discovery list reloads
+    // Sync dismissed IDs when the discovery list reloads and track caught-up.
     ref.listen<MatchState>(matchProvider, (prev, next) {
-      if (prev?.discoveryPets == next.discoveryPets) return;
+      if (!mounted) return;
+      final petsChanged = prev?.discoveryPets != next.discoveryPets;
+      // A full load cycle just completed (isLoading transitioned false→false
+      // via true, i.e. prev was loading and now it's done).
+      final loadCycleFinished =
+          prev?.isLoading == true && !next.isLoading;
+      final loadFinishedEmpty = loadCycleFinished && next.discoveryPets.isEmpty;
+
+      if (!petsChanged && !loadFinishedEmpty) return;
+
       final currentIds = next.discoveryPets.map((p) => p.id).toSet();
-      if (mounted) {
-        setState(() {
-          _dismissedPetIds.removeWhere((id) => !currentIds.contains(id));
+      setState(() {
+        if (petsChanged) {
+          // Only purge dismissed IDs during a real load cycle (when
+          // isLoading transitioned). Optimistic updates from sendLikeRequest
+          // set petsChanged=true but keep isLoading=false throughout, so we
+          // skip the purge there to avoid re-showing the just-dismissed pet
+          // if a concurrent network fetch brings it back momentarily.
+          if (loadCycleFinished) {
+            dismissedPetIds.removeWhere((id) => !currentIds.contains(id));
+          }
           _clampIndex(next.discoveryPets);
-        });
-      }
+        }
+        if (loadFinishedEmpty) {
+          final selId = ref.read(discoveryActivePetIdProvider) ??
+              ref.read(petProvider).activePet?.id;
+          if (selId != null) allCaughtUpPetIds.add(selId);
+        }
+      });
     });
 
     final matchState = ref.watch(matchProvider);
@@ -395,7 +475,7 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
             children: [
-              Icon(Icons.pets_outlined, size: 64, color: colorScheme.outline.withAlpha(100)),
+              BrandLogo(customSize: 64, color: colorScheme.outline.withAlpha(100)),
               const SizedBox(height: 16),
           const Center(
             child: Text(
@@ -453,8 +533,17 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
 
     final screenWidth = MediaQuery.of(context).size.width;
 
+    final myPets = ref.watch(petProvider).myPets;
+
     return Column(
       children: [
+        // ── Pet selector (only when user has multiple pets) ──────────
+        if (myPets.length > 1)
+          PetSelectorBar(
+            allCaughtUpPetIds: allCaughtUpPetIds,
+            onPetSelected: _selectPet,
+          ),
+
         // ── Filter chips ────────────────────────────────────────────
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -463,13 +552,13 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
           child: Row(
             children: List.generate(_filterLabels.length, (i) {
               final value = _filterValues[i];
-              final isSelected = _filterAnimal == value;
+              final isSelected = filterAnimal == value;
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: GestureDetector(
                   onTap: () => setState(() {
-                    _filterAnimal = value;
-                    _currentIndex = 0;
+                    filterAnimal = value;
+                    currentIndex = 0;
                   }),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
@@ -515,8 +604,9 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
                     padding:
                         EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
                     children: [
-                      Icon(Icons.favorite_border,
-                          size: 64, color: colorScheme.outline.withAlpha(100)),
+                      BrandLogo(
+                          customSize: 64,
+                          color: colorScheme.outline.withAlpha(100)),
                       const SizedBox(height: 16),
                       Center(
                         child: Text(
@@ -528,114 +618,129 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
                     ],
                   ),
                 )
-              : Padding(
-                  padding:
-                      EdgeInsets.fromLTRB(20, 0, 20, navSpace),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Stack(
-                          alignment: Alignment.topCenter,
-                          children: [
-                            // Background card (next in queue)
-                            if (filteredPets.length > 1)
-                              Positioned(
-                                bottom: 0,
-                                left: 16,
-                                right: 16,
-                                top: 8,
-                                child: Transform.scale(
-                                  scale: 0.95,
-                                  child: _PetCard(
-                                    pet: filteredPets[(_currentIndex + 1) %
-                                        filteredPets.length],
-                                    isBackground: true,
-                                    dragX: 0,
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    final sw = MediaQuery.of(context).size.width;
+                    // Responsive button sizes clamped for phone → tablet
+                    final skipSize = (sw * 0.158).clamp(52.0, 70.0);
+                    final starSize = (sw * 0.138).clamp(44.0, 60.0);
+                    final likeSize = (sw * 0.198).clamp(64.0, 84.0);
+                    final hPad = (sw * 0.048).clamp(12.0, 24.0);
+                    final btnGap = sw * 0.045;
+
+                    return Padding(
+                      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, navSpace),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: Stack(
+                              alignment: Alignment.topCenter,
+                              children: [
+                                // Background card (next in queue)
+                                if (filteredPets.length > 1)
+                                  Positioned(
+                                    bottom: 0,
+                                    left: 12,
+                                    right: 12,
+                                    top: 8,
+                                    child: Transform.scale(
+                                      scale: 0.95,
+                                      child: PetCard(
+                                        pet: filteredPets[(currentIndex + 1) %
+                                            filteredPets.length],
+                                        isBackground: true,
+                                        dragX: 0,
+                                      ),
+                                    ),
+                                  ),
+
+                                // Foreground card — draggable
+                                GestureDetector(
+                                  onHorizontalDragUpdate: _onDragUpdate,
+                                  onHorizontalDragEnd: (d) =>
+                                      _onDragEnd(d, screenWidth),
+                                  child: Transform.translate(
+                                    offset: Offset(
+                                      _dragX,
+                                      _dragX.abs() * 0.05,
+                                    ),
+                                  child: Transform.rotate(
+                                    angle: (_dragX / screenWidth) * 0.35,
+                                    child: RepaintBoundary(
+                                      child: PetCard(
+                                        pet: filteredPets[currentIndex],
+                                        isBackground: false,
+                                        dragX: _dragX,
+                                        onTap: () => context.push(
+                                            '/pet/${filteredPets[currentIndex].id}'),
+                                      ),
+                                    ),
+                                  ),
                                   ),
                                 ),
-                              ),
+                              ],
+                            ),
+                          ),
 
-                            // Foreground card — draggable
-                            GestureDetector(
-                              onHorizontalDragUpdate: _onDragUpdate,
-                              onHorizontalDragEnd: (d) =>
-                                  _onDragEnd(d, screenWidth),
-                              child: Transform.translate(
-                                offset: Offset(
-                                  _dragX,
-                                  _dragX.abs() * 0.05,
+                          // ── Action buttons ────────────────────────
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Skip
+                                ActionButton(
+                                  size: skipSize,
+                                  color: colorScheme.surfaceContainerHighest,
+                                  borderColor:
+                                      colorScheme.outline.withAlpha(80),
+                                  child: Icon(Icons.close_rounded,
+                                      size: skipSize * 0.42,
+                                      color: colorScheme.onSurfaceVariant),
+                                  onTap: () =>
+                                      _commitSwipe(false, screenWidth),
                                 ),
-                                child: Transform.rotate(
-                                  angle: (_dragX / screenWidth) * 0.35,
-                                  child: _PetCard(
-                                    pet: filteredPets[_currentIndex],
-                                    isBackground: false,
-                                    dragX: _dragX,
-                                    onTap: () => context.push(
-                                        '/pet/${filteredPets[_currentIndex].id}'),
+                                SizedBox(width: btnGap),
+                                // Profile details
+                                ActionButton(
+                                  size: starSize,
+                                  color: colorScheme.surfaceContainerHighest,
+                                  borderColor:
+                                      colorScheme.outline.withAlpha(80),
+                                  child: Icon(Icons.star_rounded,
+                                      size: starSize * 0.44,
+                                      color: colorScheme.secondary),
+                                  onTap: () => context.push(
+                                      '/pet/${filteredPets[currentIndex].id}'),
+                                ),
+                                SizedBox(width: btnGap),
+                                // Like
+                                ActionButton(
+                                  size: likeSize,
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      colorScheme.primary,
+                                      colorScheme.primary.withAlpha(180)
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
                                   ),
+                                  shadowColor:
+                                      colorScheme.primary.withAlpha(77),
+                                  child: Icon(Icons.favorite,
+                                      size: likeSize * 0.44,
+                                      color: colorScheme.onPrimary),
+                                  onTap: () =>
+                                      _commitSwipe(true, screenWidth),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-
-                      // ── Action buttons ────────────────────────────
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 20),
-                        child: Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.center,
-                          children: [
-                            // Skip
-                            _ActionButton(
-                              size: 64,
-                              color: colorScheme.surfaceContainerHighest,
-                              borderColor: colorScheme.outline.withAlpha(80),
-                              child: Icon(Icons.close_rounded,
-                                  size: 28,
-                                  color: colorScheme.onSurfaceVariant),
-                              onTap: () =>
-                                  _commitSwipe(false, screenWidth),
-                            ),
-                            const SizedBox(width: 20),
-                            // Profile details
-                            _ActionButton(
-                              size: 56,
-                              color: colorScheme.surfaceContainerHighest,
-                              borderColor: colorScheme.outline.withAlpha(80),
-                              child: Icon(Icons.star_rounded,
-                                  size: 26,
-                                  color: colorScheme.secondary),
-                              onTap: () => context.push(
-                                  '/pet/${filteredPets[_currentIndex].id}'),
-                            ),
-                            const SizedBox(width: 20),
-                            // Like
-                            _ActionButton(
-                              size: 80,
-                              gradient: LinearGradient(
-                                colors: [
-                                  colorScheme.primary,
-                                  colorScheme.primary.withAlpha(180)
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              shadowColor:
-                                  colorScheme.primary.withAlpha(77),
-                              child: Icon(Icons.favorite,
-                                  size: 36, color: colorScheme.onPrimary),
-                              onTap: () =>
-                                  _commitSwipe(true, screenWidth),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
         ),
       ],
@@ -646,13 +751,13 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
 // ─────────────────────────────────────────────────────────────────────────────
 // Pet card — shows image, info section, and swipe overlays
 // ─────────────────────────────────────────────────────────────────────────────
-class _PetCard extends StatelessWidget {
+class PetCard extends StatelessWidget {
   final PetModel pet;
   final bool isBackground;
   final double dragX;
   final VoidCallback? onTap;
 
-  const _PetCard({
+  const PetCard({super.key, 
     required this.pet,
     required this.isBackground,
     required this.dragX,
@@ -696,223 +801,250 @@ class _PetCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: isBackground ? null : onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: isBackground
-              ? []
-              : [
-                  BoxShadow(
-                    color: colorScheme.shadow.withAlpha(60),
-                    blurRadius: 48,
-                    offset: const Offset(0, 24),
-                  ),
-                ],
-          border:
-              Border.all(color: colorScheme.outline.withAlpha(80), width: 1.5),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          children: [
-            // ── Photo ─────────────────────────────────────────────
-            Expanded(
-              flex: 3,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Pet image
-                  pet.profileImageUrl.isNotEmpty
-                      ? Image.network(
-                          pet.profileImageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => _imageFallback(colorScheme),
-                        )
-                      : _imageFallback(colorScheme),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final cardH = constraints.maxHeight;
+          final cardW = constraints.maxWidth;
+          // Responsive font sizes based on card dimensions
+          final nameFontSize = (cardH * 0.058).clamp(18.0, 28.0);
+          final subFontSize = (cardH * 0.036).clamp(12.0, 16.0);
+          final overlayFontSize = (cardW * 0.082).clamp(20.0, 34.0);
 
-                  // Like overlay (secondary, right swipe)
-                  if (!isBackground)
-                    Positioned.fill(
-                      child: Opacity(
-                        opacity: likeOpacity,
-                        child: Container(
-                          color:
-                              colorScheme.secondary.withAlpha(102),
-                          alignment: Alignment.topLeft,
-                          padding: const EdgeInsets.all(24),
+          return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: isBackground
+                ? []
+                : [
+                    BoxShadow(
+                      color: colorScheme.shadow.withAlpha(60),
+                      blurRadius: 40,
+                      offset: const Offset(0, 20),
+                    ),
+                  ],
+            border:
+                Border.all(color: colorScheme.outline.withAlpha(80), width: 1.5),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              // ── Photo ─────────────────────────────────────────────
+              Expanded(
+                flex: 3,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Pet image
+                    pet.profileImageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: pet.profileImageUrl,
+                            fit: BoxFit.cover,
+                            errorWidget: (_, _, _) => _imageFallback(colorScheme),
+                          )
+                        : _imageFallback(colorScheme),
+
+                    // Like overlay (secondary, right swipe)
+                    if (!isBackground)
+                      Positioned.fill(
+                        child: Opacity(
+                          opacity: likeOpacity,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              border: Border.all(
+                            color:
+                                colorScheme.secondary.withAlpha(102),
+                            alignment: Alignment.topLeft,
+                            padding: const EdgeInsets.all(20),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: colorScheme.secondary,
+                                    width: 2.5),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'LIKE',
+                                style: TextStyle(
                                   color: colorScheme.secondary,
-                                  width: 3),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'LIKE',
-                              style: TextStyle(
-                                color: colorScheme.secondary,
-                                fontSize: 32,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 3,
+                                  fontSize: overlayFontSize,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 2,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
 
-                  // Nope overlay (error, left swipe)
-                  if (!isBackground)
-                    Positioned.fill(
-                      child: Opacity(
-                        opacity: nopeOpacity,
-                        child: Container(
-                          color: colorScheme.error.withAlpha(102),
-                          alignment: Alignment.topRight,
-                          padding: const EdgeInsets.all(24),
+                    // Nope overlay (error, left swipe)
+                    if (!isBackground)
+                      Positioned.fill(
+                        child: Opacity(
+                          opacity: nopeOpacity,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: colorScheme.error, width: 3),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'NOPE',
-                              style: TextStyle(
-                                color: colorScheme.error,
-                                fontSize: 32,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 3,
+                            color: colorScheme.error.withAlpha(102),
+                            alignment: Alignment.topRight,
+                            padding: const EdgeInsets.all(20),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: colorScheme.error, width: 2.5),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'NOPE',
+                                style: TextStyle(
+                                  color: colorScheme.error,
+                                  fontSize: overlayFontSize,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 2,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
+
+                    // DistanceBadge
+                    Positioned(
+                      bottom: 16,
+                      left: 16,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.85),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                              color: colorScheme.outline.withAlpha(80)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.location_on,
+                                size: 13,
+                                color: colorScheme.primary),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$distanceMi mi away',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
 
-                  // Distance badge
-                  Positioned(
-                    bottom: 20,
-                    left: 20,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.85),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                            color: colorScheme.outline.withAlpha(80)),
+                    // Verified badge
+                    if (pet.isVerified)
+                      Positioned(
+                        top: 16,
+                        right: 16,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.verified,
+                              size: 18, color: colorScheme.onPrimary),
+                        ),
                       ),
-                      child: Row(
+                  ],
+                ),
+              ),
+
+              // ── Info ──────────────────────────────────────────────
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.topLeft,
+                    child: SizedBox(
+                      width: cardW - 32, // match horizontal padding
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.location_on,
-                              size: 14,
-                              color: colorScheme.primary),
-                          const SizedBox(width: 4),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  pet.name,
+                                  style: TextStyle(
+                                    fontSize: nameFontSize,
+                                    fontWeight: FontWeight.w800,
+                                    color: colorScheme.onSurface,
+                                    letterSpacing: -0.5,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary.withAlpha(38),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: BrandLogo(
+                                    size: BrandLogoSize.small,
+                                    color: colorScheme.primary),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
                           Text(
-                            '$distanceMi mi away',
+                            '${pet.age} yr${pet.age == 1 ? '' : 's'} • ${pet.breed}',
                             style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onSurface,
+                              fontSize: subFontSize,
+                              color: colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
                             ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              _TraitBadge(
+                                  label: 'Energy',
+                                  value: _energyLabel(),
+                                  fontSize: subFontSize),
+                              const SizedBox(width: 6),
+                              _TraitBadge(
+                                  label: 'Health',
+                                  value: _healthLabel(),
+                                  fontSize: subFontSize),
+                              const SizedBox(width: 6),
+                              _TraitBadge(
+                                  label: 'Social',
+                                  value: _socialLabel(),
+                                  fontSize: subFontSize),
+                            ],
                           ),
                         ],
                       ),
                     ),
                   ),
-
-                  // Verified badge
-                  if (pet.isVerified)
-                    Positioned(
-                      top: 20,
-                      right: 20,
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.verified,
-                            size: 20, color: colorScheme.onPrimary),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
-            // ── Info ──────────────────────────────────────────────
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            pet.name,
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              color: colorScheme.onSurface,
-                              letterSpacing: -0.5,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary.withAlpha(38),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.pets,
-                              size: 22, color: colorScheme.primary),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${pet.age} yr${pet.age == 1 ? '' : 's'} • ${pet.breed}',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        _TraitBadge(
-                            label: 'Energy',
-                            value: _energyLabel()),
-                        const SizedBox(width: 8),
-                        _TraitBadge(
-                            label: 'Health',
-                            value: _healthLabel()),
-                        const SizedBox(width: 8),
-                        _TraitBadge(
-                            label: 'Social',
-                            value: _socialLabel()),
-                      ],
-                    ),
-                  ],
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        );
+        },
       ),
     );
   }
@@ -920,7 +1052,7 @@ class _PetCard extends StatelessWidget {
   Widget _imageFallback(ColorScheme colorScheme) => Container(
         color: colorScheme.surface,
         child: Center(
-          child: Icon(Icons.pets, size: 80, color: colorScheme.primary),
+          child: BrandLogo(customSize: 80, color: colorScheme.primary),
         ),
       );
 }
@@ -928,8 +1060,8 @@ class _PetCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // Nearby Tab
 // ─────────────────────────────────────────────────────────────────────────────
-class _NearbyTab extends ConsumerWidget {
-  const _NearbyTab();
+class NearbyTab extends ConsumerWidget {
+  const NearbyTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -973,10 +1105,11 @@ class _NearbyTab extends ConsumerWidget {
                       backgroundColor:
                           colorScheme.surfaceContainerHighest,
                       backgroundImage: pet.profileImageUrl.isNotEmpty
-                          ? NetworkImage(pet.profileImageUrl)
+                          ? CachedNetworkImageProvider(pet.profileImageUrl)
                           : null,
                       child: pet.profileImageUrl.isEmpty
-                          ? Icon(Icons.pets,
+                          ? BrandLogo(
+                              size: BrandLogoSize.small,
                               color: colorScheme.onSurfaceVariant)
                           : null,
                     ),
@@ -1026,30 +1159,38 @@ class _NearbyTab extends ConsumerWidget {
 class _TraitBadge extends StatelessWidget {
   final String label;
   final String value;
-  const _TraitBadge({required this.label, required this.value});
+  final double fontSize;
+  const _TraitBadge({
+    required this.label,
+    required this.value,
+    this.fontSize = 13,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final labelFontSize = (fontSize * 0.82).clamp(9.0, 12.0);
+    final valueFontSize = fontSize.clamp(11.0, 14.0);
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainerHighest,
           border: Border.all(color: colorScheme.outline.withAlpha(80)),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(label,
                 style: TextStyle(
-                    fontSize: 11,
+                    fontSize: labelFontSize,
                     color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500)),
             const SizedBox(height: 2),
             Text(value,
                 style: TextStyle(
-                    fontSize: 13,
+                    fontSize: valueFontSize,
                     fontWeight: FontWeight.w700,
                     color: colorScheme.primary)),
           ],
@@ -1059,7 +1200,7 @@ class _TraitBadge extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
+class ActionButton extends StatelessWidget {
   final double size;
   final Color? color;
   final Color? borderColor;
@@ -1068,7 +1209,7 @@ class _ActionButton extends StatelessWidget {
   final Widget child;
   final VoidCallback onTap;
 
-  const _ActionButton({
+  const ActionButton({super.key, 
     required this.size,
     required this.child,
     required this.onTap,
@@ -1116,9 +1257,159 @@ class _ActionButton extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Pet selector bar — horizontal chip row for choosing discovery pet
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Renders a horizontal scrollable row of pet chips.
+/// Hidden when the user has only one pet.
+class PetSelectorBar extends ConsumerWidget {
+  final Set<String> allCaughtUpPetIds;
+  final ValueChanged<PetModel> onPetSelected;
+
+  const PetSelectorBar({super.key, 
+    required this.allCaughtUpPetIds,
+    required this.onPetSelected,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final myPets = ref.watch(petProvider).myPets;
+    if (myPets.length <= 1) return const SizedBox.shrink();
+
+    final selectedId = ref.watch(discoveryActivePetIdProvider) ??
+        ref.watch(petProvider).activePet?.id;
+
+    return SizedBox(
+      height: 110,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: myPets.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          final pet = myPets[index];
+          return _PetSelectorChip(
+            pet: pet,
+            isSelected: pet.id == selectedId,
+            isCaughtUp: allCaughtUpPetIds.contains(pet.id),
+            onTap: () => onPetSelected(pet),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _PetSelectorChip extends StatelessWidget {
+  final PetModel pet;
+  final bool isSelected;
+  final bool isCaughtUp;
+  final VoidCallback onTap;
+
+  const _PetSelectorChip({
+    required this.pet,
+    required this.isSelected,
+    required this.isCaughtUp,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final selectedColor = AppTheme.primaryAccent;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 76,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? selectedColor.withAlpha(28)
+              : colorScheme.surfaceContainerHighest,
+          border: Border.all(
+            color: isSelected
+                ? selectedColor
+                : colorScheme.outline.withAlpha(70),
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: isSelected
+                    ? Border.all(color: selectedColor, width: 2)
+                    : Border.all(
+                        color: colorScheme.outline.withAlpha(60), width: 1),
+              ),
+              child: ClipOval(
+                child: pet.profileImageUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: pet.profileImageUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (_, _) => BrandLogo(
+                          customSize: 20,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        errorWidget: (_, _, _) => BrandLogo(
+                          customSize: 20,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      )
+                    : Container(
+                        color: colorScheme.surfaceContainerHighest,
+                        child: BrandLogo(
+                          customSize: 20,
+                          color: isSelected
+                              ? selectedColor
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              pet.name,
+              style: GoogleFonts.dmSans(
+                fontSize: 11,
+                fontWeight:
+                    isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? selectedColor : colorScheme.onSurface,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+            if (isCaughtUp)
+              Text(
+                'All caught up',
+                style: GoogleFonts.dmSans(
+                  fontSize: 9,
+                  color: colorScheme.onSurfaceVariant.withAlpha(140),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // List a pet for breeding — bottom sheet
 // ─────────────────────────────────────────────────────────────────────────────
-void _showListPetSheet(BuildContext context, WidgetRef ref) {
+void showListPetSheet(BuildContext context, WidgetRef ref) {
   final myOwnedPets = ref.read(petProvider).myPets;
   final colorScheme = Theme.of(context).colorScheme;
   showModalBottomSheet(
@@ -1234,8 +1525,8 @@ class _ListPetSheetState extends State<_ListPetSheet> {
                                                 pet.profileImageUrl)
                                             : null,
                                     child: pet.profileImageUrl.isEmpty
-                                        ? Icon(Icons.pets,
-                                            size: 18,
+                                        ? BrandLogo(
+                                            customSize: 18,
                                             color: colorScheme.primary)
                                         : null,
                                   ),

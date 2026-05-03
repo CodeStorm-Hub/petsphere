@@ -55,6 +55,12 @@ class AuthRepository {
     await supabase.auth.signOut();
   }
 
+  /// Password reset email (deep link / redirect URL must be configured per
+  /// [Supabase Flutter setup](https://supabase.com/docs/guides/getting-started/quickstarts/flutter)).
+  Future<void> requestPasswordReset(String email) async {
+    await supabase.auth.resetPasswordForEmail(email.trim());
+  }
+
   // -------------------------------------------------------------------------
   // Get the currently authenticated user (null if not logged in)
   // -------------------------------------------------------------------------

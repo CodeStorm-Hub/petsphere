@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../controllers/auth_controller.dart';
+import '../widgets/brand_logo.dart';
 
 
 class RegistrationScreen extends ConsumerStatefulWidget {
@@ -123,13 +124,9 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                       ),
                       Expanded(
                         child: Center(
-                          child: Text(
-                            'PetSphere',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: colorScheme.onSurface,
-                              letterSpacing: -0.3,
-                            ),
+                          child: BrandLogo(
+                            size: BrandLogoSize.small,
+                            withText: true,
                           ),
                         ),
                       ),
@@ -170,8 +167,11 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF9F3ED),
+                                color: colorScheme.primaryContainer.withAlpha(30),
                                 borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: colorScheme.outline.withAlpha(40),
+                                ),
                               ),
                               child: Row(
                                 children: [
@@ -182,17 +182,18 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                                             child: CircleAvatar(
                                               radius: 14,
                                               backgroundColor: [
-//                                                 const colorScheme.secondary,
-                                                const Color(0xFFFFE087),
-//                                                 const colorScheme.tertiaryContainer,
+                                                colorScheme.primaryContainer,
+                                                colorScheme.secondaryContainer,
+                                                colorScheme.tertiaryContainer,
                                               ][i],
-                                              child: Icon(Icons.pets,
-                                                  size: 13,
-                                                  color: [
-//                                                     const colorScheme.primary,
-                                                    const Color(0xFF745C00),
-//                                                     const colorScheme.onTertiary,
-                                                  ][i]),
+                                              child: BrandLogo(
+                                                customSize: 13,
+                                                color: [
+                                                  colorScheme.onPrimaryContainer,
+                                                  colorScheme.onSecondaryContainer,
+                                                  colorScheme.onTertiaryContainer,
+                                                ][i],
+                                              ),
                                             ),
                                           )),
                                   const SizedBox(width: 12),
@@ -387,7 +388,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                                           ),
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () => launchUrl(Uri.parse(
-                                                'https://petsphere.app/terms')),
+                                                'https://petfolio.app/terms')),
                                         ),
                                         const TextSpan(text: ' and '),
                                         TextSpan(
@@ -400,7 +401,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                                           ),
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () => launchUrl(Uri.parse(
-                                                'https://petsphere.app/privacy')),
+                                                'https://petfolio.app/privacy')),
                                         ),
                                         const TextSpan(text: '.'),
                                       ],

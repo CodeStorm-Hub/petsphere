@@ -204,9 +204,9 @@ class PetAllergy {
   Color get severityColor {
     switch (severity) {
       case 'life_threatening':
-        return Colors.red;
+        return const Color(0xFFE85D75); // error
       case 'severe':
-        return Colors.deepOrange;
+        return const Color(0xFFE85D75); // error
       case 'moderate':
         return AppTheme.primaryAccent;
       default:
@@ -303,7 +303,7 @@ class ParasitePrevention {
   }
 
   Color get urgencyColor {
-    if (isOverdue) return Colors.red;
+    if (isOverdue) return const Color(0xFFE85D75); // error
     final days = daysUntilDue;
     if (days != null && days <= 7) return AppTheme.primaryAccent;
     return AppTheme.secondaryAccent;

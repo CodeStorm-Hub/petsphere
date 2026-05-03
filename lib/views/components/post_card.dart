@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:video_player/video_player.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/post_model.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/media_utils.dart';
 import '../../widgets/common/petfolio_widgets.dart';
+import '../../widgets/brand_logo.dart';
 
 /// Instagram-style edge-to-edge post card.
 ///
@@ -24,6 +26,8 @@ class PostCard extends StatefulWidget {
   final VoidCallback onCommentIconTap;
   final VoidCallback onShareIconTap;
   final VoidCallback? onPetTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const PostCard({
     super.key,
@@ -33,6 +37,8 @@ class PostCard extends StatefulWidget {
     required this.onCommentIconTap,
     required this.onShareIconTap,
     this.onPetTap,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -104,6 +110,32 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                   );
                 },
               ),
+              if (widget.onEdit != null) ...[
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.edit_outlined),
+                  title: const Text('Edit Post'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    widget.onEdit!();
+                  },
+                ),
+              ],
+              if (widget.onDelete != null)
+                ListTile(
+                  leading: Icon(
+                    Icons.delete_outline_rounded,
+                    color: colorScheme.error,
+                  ),
+                  title: Text(
+                    'Delete Post',
+                    style: TextStyle(color: colorScheme.error),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    widget.onDelete!();
+                  },
+                ),
               ListTile(
                 leading: Icon(
                   Icons.report_problem_outlined,
@@ -281,54 +313,54 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
               onDoubleTap: _handleDoubleTap,
               child: AspectRatio(
                 aspectRatio: 1,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    isVideoMedia(widget.post.mediaUrl)
-                        ? _PostVideoPlayer(
-                            key: ValueKey(widget.post.mediaUrl),
-                            url: widget.post.mediaUrl,
-                          )
-                        : Image.network(
-                            widget.post.mediaUrl,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, progress) {
-                              if (progress == null) return child;
-                              return const _MediaLoadingPlaceholder();
-                            },
-                            errorBuilder: (ctx, err, stack) =>
-                                _MediaErrorPlaceholder(
-                                  colorScheme: colorScheme,
-                                ),
-                          ),
-                    IgnorePointer(
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 250),
-                        opacity: _showHeart ? 1.0 : 0.0,
-                        child: Center(
-                          child: AnimatedScale(
-                            scale: _showHeart ? 1.0 : 0.4,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOutBack,
-                            child: Icon(
-                              Icons.favorite,
-                              size: 96,
-                              color: colorScheme.onPrimary,
-                              shadows: [
-                                Shadow(
-                                  color: colorScheme.scrim.withValues(
-                                    alpha: 0.4,
+                child: RepaintBoundary(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      isVideoMedia(widget.post.mediaUrl)
+                          ? _PostVideoPlayer(
+                              key: ValueKey(widget.post.mediaUrl),
+                              url: widget.post.mediaUrl,
+                            )
+                          : CachedNetworkImage(
+                              imageUrl: widget.post.mediaUrl,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) =>
+                                  const _MediaLoadingPlaceholder(),
+                              errorWidget: (ctx, url, err) =>
+                                  _MediaErrorPlaceholder(
+                                    colorScheme: colorScheme,
                                   ),
-                                  blurRadius: 24,
-                                  offset: Offset(0, 4),
-                                ),
-                              ],
+                            ),
+                      IgnorePointer(
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 250),
+                          opacity: _showHeart ? 1.0 : 0.0,
+                          child: Center(
+                            child: AnimatedScale(
+                              scale: _showHeart ? 1.0 : 0.4,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOutBack,
+                              child: Icon(
+                                Icons.favorite,
+                                size: 96,
+                                color: colorScheme.onPrimary,
+                                shadows: [
+                                  Shadow(
+                                    color: colorScheme.scrim.withValues(
+                                      alpha: 0.4,
+                                    ),
+                                    blurRadius: 24,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -603,7 +635,7 @@ class _MediaErrorPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(color: colorScheme.surfaceContainerHigh),
-      child: Icon(Icons.pets, size: 56, color: colorScheme.onSurfaceVariant),
+      child: BrandLogo(customSize: 56, color: colorScheme.onSurfaceVariant),
     );
   }
 }
@@ -628,9 +660,8 @@ class _StoryRingAvatar extends StatelessWidget {
       backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
       backgroundColor: colorScheme.surfaceContainerHighest,
       child: imageUrl.isEmpty
-          ? Icon(
-              Icons.pets,
-              size: radius * 0.9,
+          ? BrandLogo(
+              customSize: radius * 0.9,
               color: colorScheme.onSurfaceVariant,
             )
           : null,

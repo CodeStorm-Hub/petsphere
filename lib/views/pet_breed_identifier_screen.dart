@@ -338,7 +338,7 @@ class _BreedResultsSheet extends StatelessWidget {
                     children: [
                       _StatItem(label: 'Lifespan', value: '10-12 yrs', icon: Icons.favorite_rounded),
                       _StatItem(label: 'Weight', value: '55-75 lbs', icon: Icons.monitor_weight_rounded),
-                      _StatItem(label: 'Group', value: 'Sporting', icon: Icons.pets_rounded),
+                      _StatItem(label: 'Group', value: 'Sporting', icon: Icons.groups),
                     ],
                   ),
                 ],

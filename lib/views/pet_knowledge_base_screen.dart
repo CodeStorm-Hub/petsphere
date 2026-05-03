@@ -151,11 +151,12 @@ class _KnowledgeSearch extends StatelessWidget {
 class _CategorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final categories = [
-      {'label': 'Health', 'icon': Icons.medical_services_rounded, 'color': Colors.blue},
-      {'label': 'Nutrition', 'icon': Icons.restaurant_rounded, 'color': Colors.green},
-      {'label': 'Training', 'icon': Icons.psychology_rounded, 'color': Colors.orange},
-      {'label': 'First Aid', 'icon': Icons.healing_rounded, 'color': Colors.red},
+      {'label': 'Health', 'icon': Icons.medical_services_rounded, 'color': colorScheme.primary},
+      {'label': 'Nutrition', 'icon': Icons.restaurant_rounded, 'color': colorScheme.tertiary},
+      {'label': 'Training', 'icon': Icons.psychology_rounded, 'color': colorScheme.secondary},
+      {'label': 'First Aid', 'icon': Icons.healing_rounded, 'color': colorScheme.error},
     ];
 
     return Row(

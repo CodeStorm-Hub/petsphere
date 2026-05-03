@@ -55,25 +55,20 @@ class HealthState {
     return result;
   }
 
-  DentalLog? get lastHomeBrushing => dentalLogs.firstWhere(
-        (d) => d.cleaningType == 'home_brushing',
-        orElse: () => DentalLog(
-          id: '',
-          petId: '',
-          logDate: DateTime(2000),
-          cleaningType: 'home_brushing',
-        ),
-      );
+  DentalLog? get lastHomeBrushing {
+    final matches = dentalLogs.where((d) => d.cleaningType == 'home_brushing').toList();
+    if (matches.isEmpty) return null;
+    matches.sort((a, b) => b.logDate.compareTo(a.logDate));
+    return matches.first;
+  }
 
-  DentalLog? get lastProfessionalCleaning => dentalLogs.firstWhere(
-        (d) => d.cleaningType == 'professional_cleaning',
-        orElse: () => DentalLog(
-          id: '',
-          petId: '',
-          logDate: DateTime(2000),
-          cleaningType: 'professional_cleaning',
-        ),
-      );
+  DentalLog? get lastProfessionalCleaning {
+    final matches =
+        dentalLogs.where((d) => d.cleaningType == 'professional_cleaning').toList();
+    if (matches.isEmpty) return null;
+    matches.sort((a, b) => b.logDate.compareTo(a.logDate));
+    return matches.first;
+  }
 
   /// Number of active health alerts (overdue medications, parasite, etc.)
   int get alertCount {
@@ -100,6 +95,7 @@ class HealthState {
     List<DentalLog>? dentalLogs,
     bool? isLoading,
     String? error,
+    bool clearError = false,
     String? activePetId,
   }) =>
       HealthState(
@@ -109,7 +105,7 @@ class HealthState {
         parasitePrevention: parasitePrevention ?? this.parasitePrevention,
         dentalLogs: dentalLogs ?? this.dentalLogs,
         isLoading: isLoading ?? this.isLoading,
-        error: error,
+        error: clearError ? null : (error ?? this.error),
         activePetId: activePetId ?? this.activePetId,
       );
 }
@@ -137,7 +133,7 @@ class HealthNotifier extends Notifier<HealthState> {
   }
 
   Future<void> _loadAll(String petId) async {
-    state = state.copyWith(isLoading: true, error: null, activePetId: petId);
+    state = state.copyWith(isLoading: true, clearError: true, activePetId: petId);
     try {
       final results = await Future.wait([
         _repo.fetchMedications(petId),

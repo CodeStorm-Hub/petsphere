@@ -38,7 +38,7 @@ class DailyTask {
       key: json['key'] as String,
       title: json['title'] as String? ?? '',
       subtitle: json['subtitle'] as String? ?? '',
-      iconKey: json['icon'] as String? ?? 'pets',
+      iconKey: json['icon'] as String? ?? 'checklist',
       done: json['done'] as bool? ?? false,
     );
   }
@@ -65,9 +65,11 @@ class DailyTask {
         return Icons.water_drop;
       case 'shower':
         return Icons.shower;
-      case 'pets':
+      case 'directions_walk':
+        return Icons.directions_walk;
+      case 'checklist':
       default:
-        return Icons.pets;
+        return Icons.checklist_rtl_outlined;
     }
   }
 
@@ -77,7 +79,7 @@ class DailyTask {
       key: 'walk',
       title: 'Morning Walk',
       subtitle: '30 minutes',
-      iconKey: 'pets',
+      iconKey: 'directions_walk',
     ),
     DailyTask(
       key: 'med',

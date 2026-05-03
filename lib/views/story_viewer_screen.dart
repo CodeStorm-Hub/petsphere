@@ -9,6 +9,7 @@ import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/story_model.dart';
 import '../utils/media_utils.dart';
+import '../widgets/brand_logo.dart';
 
 /// How long a still-image frame is displayed before auto-advancing.
 const Duration _kImageDuration = Duration(seconds: 7);
@@ -181,7 +182,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                                 stories[_index].pet.profileImageUrl)
                             : null,
                         child: stories[_index].pet.profileImageUrl.isEmpty
-                            ? const Icon(Icons.pets)
+                            ? const BrandLogo(size: BrandLogoSize.small)
                             : null,
                       ),
                       const SizedBox(width: 10),

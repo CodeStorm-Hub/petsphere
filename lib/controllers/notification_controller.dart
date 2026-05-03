@@ -39,6 +39,11 @@ class NotificationController extends Notifier<NotificationState> {
 
   @override
   NotificationState build() {
+    // Pre-set _userId so the auth listener below doesn't trigger a second
+    // _rebindTo call for the same user that the microtask is about to bind.
+    final userId = ref.read(authProvider).user?.id;
+    _userId = userId;
+
     ref.listen(authProvider, (prev, next) {
       final nextId = next.user?.id;
       if (nextId != _userId) {
@@ -47,7 +52,6 @@ class NotificationController extends Notifier<NotificationState> {
     });
     ref.onDispose(() => _channel?.unsubscribe());
 
-    final userId = ref.read(authProvider).user?.id;
     Future.microtask(() => _rebindTo(userId));
     return const NotificationState(isLoading: true);
   }

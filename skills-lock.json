@@ -7,6 +7,12 @@
       "skillPath": ".github/skills/ui/android-accessibility/SKILL.md",
       "computedHash": "85468a24bc8850ff20514ef95f4489c8cd9931a739043e0f39ab78f1781b9082"
     },
+    "android-adb": {
+      "source": "httprunner/skills",
+      "sourceType": "github",
+      "skillPath": "android-adb/SKILL.md",
+      "computedHash": "8bfc27c21a6c3b20ec258d1525c2b6e9b16644e2a2b48530e3dd125b36b627f9"
+    },
     "android-architecture": {
       "source": "new-silvermoon/awesome-android-agent-skills",
       "sourceType": "github",
