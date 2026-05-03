@@ -1,16 +1,8 @@
--- Pet care idempotent daily scoring + tighter pets SELECT (see docs/pet-care-research.md Implementation notes)
--- Safe to re-run: IF NOT EXISTS / DROP POLICY IF EXISTS
+-- Fix PostgREST 42P17 "infinite recursion detected in policy for relation pets".
+-- pets_select_authenticated referenced public.pets inside EXISTS subqueries, which
+-- re-evaluated the same SELECT policy. SECURITY DEFINER must SET row_security = off
+-- so the pets table read does not re-enter RLS.
 
-ALTER TABLE public.pet_care_gamification
-  ADD COLUMN IF NOT EXISTS daily_point_award_date date,
-  ADD COLUMN IF NOT EXISTS daily_point_award_accrued int NOT NULL DEFAULT 0;
-
-COMMENT ON COLUMN public.pet_care_gamification.daily_point_award_date IS
-  'Calendar day for which daily_point_award_accrued is valid; client resets on date change.';
-COMMENT ON COLUMN public.pet_care_gamification.daily_point_award_accrued IS
-  'Points already applied toward total for that day (idempotent cap; no clawback on uncheck).';
-
--- Avoid RLS recursion: policies on pets must not subquery public.pets directly.
 CREATE OR REPLACE FUNCTION public.pet_is_owned_by_auth_user(pet_uuid uuid)
 RETURNS boolean
 LANGUAGE sql
@@ -30,7 +22,7 @@ $$;
 REVOKE ALL ON FUNCTION public.pet_is_owned_by_auth_user(uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.pet_is_owned_by_auth_user(uuid) TO authenticated;
 
-DROP POLICY IF EXISTS "Anyone can view pets" ON public.pets;
+DROP POLICY IF EXISTS "pets_select_authenticated" ON public.pets;
 
 CREATE POLICY "pets_select_authenticated"
 ON public.pets FOR SELECT

@@ -45,7 +45,7 @@ class HomeScreen extends ConsumerWidget {
             Icon(Icons.pets, size: 22, color: colorScheme.primary),
             const SizedBox(width: 8),
             Text(
-              'Atelier',
+              'PetSphere',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,

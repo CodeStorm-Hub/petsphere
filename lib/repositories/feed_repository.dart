@@ -208,8 +208,12 @@ class FeedRepository {
   // Upload post media to Storage — returns the public URL
   // -------------------------------------------------------------------------
   Future<String> uploadPostMedia(File file) async {
+    final uid = supabase.auth.currentUser?.id;
+    if (uid == null || uid.isEmpty) {
+      throw StateError('Must be signed in to upload post media');
+    }
     final ext = file.path.split('.').last;
-    final path = '${DateTime.now().millisecondsSinceEpoch}.$ext';
+    final path = '$uid/${DateTime.now().millisecondsSinceEpoch}.$ext';
 
     await supabase.storage.from(kBucketPostMedia).upload(path, file);
 

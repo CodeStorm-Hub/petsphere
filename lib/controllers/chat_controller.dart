@@ -3,7 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/chat_thread_model.dart';
 import '../models/message_model.dart';
 import '../repositories/chat_repository.dart';
-import '../repositories/notification_repository.dart';
 import 'pet_controller.dart';
 
 // ---------------------------------------------------------------------------
@@ -72,35 +71,8 @@ class ThreadMessagesNotifier extends Notifier<List<MessageModel>> {
       // deduplicate by ID in the subscription callback above)
       state = state.map((m) => m.id == tempId ? sent : m).toList();
 
-      // Notify the other pet's owner
-      try {
-        final threads = ref.read(chatProvider).threads;
-        ChatThreadModel? thread;
-        for (final t in threads) {
-          if (t.id == threadId) {
-            thread = t;
-            break;
-          }
-        }
-        if (thread != null) {
-          for (final pet in thread.participantPets) {
-            if (pet.id != senderPetId && pet.userId.isNotEmpty) {
-              notificationRepository.sendNotification(
-                targetUserId: pet.userId,
-                title: 'New message',
-                body: text.trim().length > 100
-                    ? '${text.trim().substring(0, 100)}…'
-                    : text.trim(),
-                type: 'message',
-                entityType: 'message',
-                entityId: threadId,
-                actorPetId: senderPetId,
-              );
-              break;
-            }
-          }
-        }
-      } catch (_) {}
+      // Message notifications are handled by the DB trigger
+      // (notify_on_new_message) to avoid duplicates.
     } catch (_) {
       // Rollback optimistic message
       state = state.where((m) => m.id != tempId).toList();

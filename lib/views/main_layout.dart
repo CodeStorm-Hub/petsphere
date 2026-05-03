@@ -60,9 +60,14 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
 
     return Scaffold(
       extendBody: true,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: IndexedStack(
+            index: _currentIndex,
+            children: _screens,
+          ),
+        ),
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
@@ -103,6 +108,14 @@ class _GlassNavBar extends StatelessWidget {
     _NavItem(Icons.person_outline, Icons.person),
   ];
 
+  static const _semanticsLabels = [
+    'Home',
+    'Discover',
+    'Pet care',
+    'Marketplace',
+    'Profile',
+  ];
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -132,23 +145,29 @@ class _GlassNavBar extends StatelessWidget {
                   isActive ? colorScheme.primary : colorScheme.onSurfaceVariant;
 
               if (isCenter) {
-                return GestureDetector(
-                  onTap: () => onTap(i),
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          colorScheme.primary,
-                          colorScheme.primary.withAlpha(180),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                return Semantics(
+                  button: true,
+                  label: _semanticsLabels[i],
+                  child: GestureDetector(
+                    key: const ValueKey('bottom_nav_pet_care'),
+                    onTap: () => onTap(i),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            colorScheme.primary,
+                            colorScheme.primary.withAlpha(180),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                       ),
+                      child: Icon(Icons.add,
+                          color: colorScheme.onPrimary, size: 28),
                     ),
-                    child: Icon(Icons.add, color: colorScheme.onPrimary, size: 28),
                   ),
                 );
               }
@@ -169,10 +188,15 @@ class _GlassNavBar extends StatelessWidget {
               }
 
               return Expanded(
-                child: GestureDetector(
-                  onTap: () => onTap(i),
-                  behavior: HitTestBehavior.opaque,
-                  child: Center(child: child),
+                child: Semantics(
+                  button: true,
+                  label: _semanticsLabels[i],
+                  child: GestureDetector(
+                    key: ValueKey('bottom_nav_$i'),
+                    onTap: () => onTap(i),
+                    behavior: HitTestBehavior.opaque,
+                    child: Center(child: child),
+                  ),
                 ),
               );
             }),

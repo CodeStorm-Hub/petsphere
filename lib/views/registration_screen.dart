@@ -182,17 +182,19 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                                             child: CircleAvatar(
                                               radius: 14,
                                               backgroundColor: [
-//                                                 const colorScheme.secondary,
                                                 const Color(0xFFFFE087),
-//                                                 const colorScheme.tertiaryContainer,
+                                                colorScheme.secondaryContainer,
+                                                colorScheme.tertiaryContainer,
                                               ][i],
-                                              child: Icon(Icons.pets,
-                                                  size: 13,
-                                                  color: [
-//                                                     const colorScheme.primary,
-                                                    const Color(0xFF745C00),
-//                                                     const colorScheme.onTertiary,
-                                                  ][i]),
+                                              child: Icon(
+                                                Icons.pets,
+                                                size: 13,
+                                                color: [
+                                                  const Color(0xFF745C00),
+                                                  colorScheme.onSecondaryContainer,
+                                                  colorScheme.onTertiaryContainer,
+                                                ][i],
+                                              ),
                                             ),
                                           )),
                                   const SizedBox(width: 12),

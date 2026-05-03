@@ -65,10 +65,20 @@ class AuthNotifier extends Notifier<AuthState> {
         state = AuthState(status: AuthStatus.unauthenticated);
       } else {
         try {
-          final user = await authRepository.getCurrentUser();
+          final user = await authRepository
+              .getCurrentUser()
+              .timeout(const Duration(seconds: 15));
           state = AuthState(
             status: AuthStatus.authenticated,
             user: user,
+          );
+        } on TimeoutException catch (_) {
+          state = AuthState(
+            status: AuthStatus.authenticated,
+            user: UserModel(
+              id: supabaseUser.id,
+              email: supabaseUser.email ?? '',
+            ),
           );
         } catch (e) {
           debugPrint('Auth listener: profile fetch failed: $e');
@@ -89,11 +99,29 @@ class AuthNotifier extends Notifier<AuthState> {
 
   Future<void> _checkCurrentSession() async {
     try {
-      final user = await authRepository.getCurrentUser();
+      final user = await authRepository
+          .getCurrentUser()
+          .timeout(const Duration(seconds: 15));
       if (user != null) {
         state = state.copyWith(
           status: AuthStatus.authenticated,
           user: user,
+        );
+      } else {
+        state = state.copyWith(status: AuthStatus.unauthenticated);
+      }
+    } on TimeoutException catch (_) {
+      debugPrint(
+        'Session check timed out (profile fetch); using auth session only.',
+      );
+      final supabaseUser = Supabase.instance.client.auth.currentUser;
+      if (supabaseUser != null) {
+        state = state.copyWith(
+          status: AuthStatus.authenticated,
+          user: UserModel(
+            id: supabaseUser.id,
+            email: supabaseUser.email ?? '',
+          ),
         );
       } else {
         state = state.copyWith(status: AuthStatus.unauthenticated);

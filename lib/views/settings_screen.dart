@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/notification_controller.dart';
+import '../controllers/theme_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -19,6 +20,9 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
+          _SectionHeader(label: 'Appearance'),
+          _ThemeToggleTile(),
+          const Divider(),
           _SectionHeader(label: 'Account'),
           ListTile(
             leading: CircleAvatar(
@@ -124,6 +128,29 @@ class SettingsScreen extends ConsumerWidget {
             child: const Text('Sign Out'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ThemeToggleTile extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+    final isDark = themeMode == ThemeMode.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ListTile(
+      leading: Icon(
+        isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+        color: colorScheme.primary,
+      ),
+      title: const Text('Theme'),
+      subtitle: Text(isDark ? 'Dark' : 'Light'),
+      trailing: Switch(
+        value: isDark,
+        onChanged: (_) => ref.read(themeProvider.notifier).toggle(),
+        activeThumbColor: colorScheme.primary,
       ),
     );
   }

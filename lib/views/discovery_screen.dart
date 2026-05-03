@@ -1,11 +1,28 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../controllers/match_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/pet_model.dart';
+import '../theme/app_theme.dart';
 
 import 'main_layout.dart' show bottomNavSpaceFor;
+
+// Tracks which of the user's pets is selected for the discovery tab.
+// Scoped to the discovery tab — does NOT override the global activePetProvider.
+class _DiscoveryPetIdNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void select(String? petId) => state = petId;
+}
+
+final _discoveryActivePetIdProvider =
+    NotifierProvider<_DiscoveryPetIdNotifier, String?>(
+  _DiscoveryPetIdNotifier.new,
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Discovery Screen (tab host)
@@ -181,6 +198,8 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
   int _currentIndex = 0;
   String? _filterAnimal; // null = For You
   final Set<String> _dismissedPetIds = {};
+  // Tracks pets whose discovery feeds are known to be empty after loading.
+  final Set<String> _allCaughtUpPetIds = {};
 
   // Drag tracking
   double _dragX = 0.0;
@@ -215,6 +234,16 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
     _swipeOutController.addStatusListener(_onSwipeOutStatus);
     _snapBackController.addListener(_onSnapBackFrame);
     _snapBackController.addStatusListener(_onSnapBackStatus);
+
+    // Seed the discovery pet selector with the global active pet on first load.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final activePetId = ref.read(petProvider).activePet?.id;
+      if (ref.read(_discoveryActivePetIdProvider) == null &&
+          activePetId != null) {
+        ref.read(_discoveryActivePetIdProvider.notifier).select(activePetId);
+      }
+    });
   }
 
   @override
@@ -361,20 +390,52 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
 
   int _fakeDistanceMi(PetModel pet) => (pet.id.hashCode.abs() % 25) + 1;
 
+  // ── Pet selector ─────────────────────────────────────────────────────────
+
+  void _selectPet(PetModel pet) {
+    // Stop any in-flight swipe animation cleanly before switching.
+    if (_isAnimating) {
+      _swipeOutController.stop();
+      _snapBackController.stop();
+      _isAnimating = false;
+      _swipingPet = null;
+      _pendingLike = null;
+    }
+    ref.read(_discoveryActivePetIdProvider.notifier).select(pet.id);
+    setState(() {
+      _dismissedPetIds.clear();
+      _currentIndex = 0;
+      _dragX = 0;
+    });
+    ref.read(matchProvider.notifier).load(pet.id);
+  }
+
   // ── Build ────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    // Sync dismissed IDs when the discovery list reloads
+    // Sync dismissed IDs when the discovery list reloads and track caught-up.
     ref.listen<MatchState>(matchProvider, (prev, next) {
-      if (prev?.discoveryPets == next.discoveryPets) return;
+      if (!mounted) return;
+      final petsChanged = prev?.discoveryPets != next.discoveryPets;
+      // A load just finished with an empty feed for the selected pet.
+      final loadFinishedEmpty =
+          prev?.isLoading == true && !next.isLoading && next.discoveryPets.isEmpty;
+
+      if (!petsChanged && !loadFinishedEmpty) return;
+
       final currentIds = next.discoveryPets.map((p) => p.id).toSet();
-      if (mounted) {
-        setState(() {
+      setState(() {
+        if (petsChanged) {
           _dismissedPetIds.removeWhere((id) => !currentIds.contains(id));
           _clampIndex(next.discoveryPets);
-        });
-      }
+        }
+        if (loadFinishedEmpty) {
+          final selId = ref.read(_discoveryActivePetIdProvider) ??
+              ref.read(petProvider).activePet?.id;
+          if (selId != null) _allCaughtUpPetIds.add(selId);
+        }
+      });
     });
 
     final matchState = ref.watch(matchProvider);
@@ -453,8 +514,17 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
 
     final screenWidth = MediaQuery.of(context).size.width;
 
+    final myPets = ref.watch(petProvider).myPets;
+
     return Column(
       children: [
+        // ── Pet selector (only when user has multiple pets) ──────────
+        if (myPets.length > 1)
+          _PetSelectorBar(
+            allCaughtUpPetIds: _allCaughtUpPetIds,
+            onPetSelected: _selectPet,
+          ),
+
         // ── Filter chips ────────────────────────────────────────────
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -852,7 +922,7 @@ class _PetCard extends StatelessWidget {
             Expanded(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1033,7 +1103,7 @@ class _TraitBadge extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainerHighest,
           border: Border.all(color: colorScheme.outline.withAlpha(80)),
@@ -1110,6 +1180,159 @@ class _ActionButton extends StatelessWidget {
                 ],
         ),
         child: Center(child: child),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pet selector bar — horizontal chip row for choosing discovery pet
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Renders a horizontal scrollable row of pet chips.
+/// Hidden when the user has only one pet.
+class _PetSelectorBar extends ConsumerWidget {
+  final Set<String> allCaughtUpPetIds;
+  final ValueChanged<PetModel> onPetSelected;
+
+  const _PetSelectorBar({
+    required this.allCaughtUpPetIds,
+    required this.onPetSelected,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final myPets = ref.watch(petProvider).myPets;
+    if (myPets.length <= 1) return const SizedBox.shrink();
+
+    final selectedId = ref.watch(_discoveryActivePetIdProvider) ??
+        ref.watch(petProvider).activePet?.id;
+
+    return SizedBox(
+      height: 110,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: myPets.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          final pet = myPets[index];
+          return _PetSelectorChip(
+            pet: pet,
+            isSelected: pet.id == selectedId,
+            isCaughtUp: allCaughtUpPetIds.contains(pet.id),
+            onTap: () => onPetSelected(pet),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _PetSelectorChip extends StatelessWidget {
+  final PetModel pet;
+  final bool isSelected;
+  final bool isCaughtUp;
+  final VoidCallback onTap;
+
+  const _PetSelectorChip({
+    required this.pet,
+    required this.isSelected,
+    required this.isCaughtUp,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final selectedColor = AppTheme.primaryAccent;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 76,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? selectedColor.withAlpha(28)
+              : colorScheme.surfaceContainerHighest,
+          border: Border.all(
+            color: isSelected
+                ? selectedColor
+                : colorScheme.outline.withAlpha(70),
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: isSelected
+                    ? Border.all(color: selectedColor, width: 2)
+                    : Border.all(
+                        color: colorScheme.outline.withAlpha(60), width: 1),
+              ),
+              child: ClipOval(
+                child: pet.profileImageUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: pet.profileImageUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => Icon(
+                          Icons.pets,
+                          size: 20,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        errorWidget: (_, __, ___) => Icon(
+                          Icons.pets,
+                          size: 20,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      )
+                    : Container(
+                        color: colorScheme.surfaceContainerHighest,
+                        child: Icon(
+                          Icons.pets,
+                          size: 20,
+                          color: isSelected
+                              ? selectedColor
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              pet.name,
+              style: GoogleFonts.dmSans(
+                fontSize: 11,
+                fontWeight:
+                    isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? selectedColor : colorScheme.onSurface,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+            if (isCaughtUp)
+              Text(
+                'All caught up',
+                style: GoogleFonts.dmSans(
+                  fontSize: 9,
+                  color: colorScheme.onSurfaceVariant.withAlpha(140),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -405,13 +405,13 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'What type of pet\nare you adding?',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
               height: 1.2,
-              color: Color(0xFF2C3E50),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -498,13 +498,13 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Tell us about\nyour pet',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 height: 1.2,
-                color: Color(0xFF2C3E50),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
@@ -558,13 +558,13 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Almost done!',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
               height: 1.2,
-              color: Color(0xFF2C3E50),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -707,10 +707,10 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
         const SizedBox(width: 8),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 14,
-            color: Color(0xFF2C3E50),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],

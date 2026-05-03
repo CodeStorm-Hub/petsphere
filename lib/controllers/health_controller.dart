@@ -100,6 +100,7 @@ class HealthState {
     List<DentalLog>? dentalLogs,
     bool? isLoading,
     String? error,
+    bool clearError = false,
     String? activePetId,
   }) =>
       HealthState(
@@ -109,7 +110,7 @@ class HealthState {
         parasitePrevention: parasitePrevention ?? this.parasitePrevention,
         dentalLogs: dentalLogs ?? this.dentalLogs,
         isLoading: isLoading ?? this.isLoading,
-        error: error,
+        error: clearError ? null : (error ?? this.error),
         activePetId: activePetId ?? this.activePetId,
       );
 }
@@ -137,7 +138,7 @@ class HealthNotifier extends Notifier<HealthState> {
   }
 
   Future<void> _loadAll(String petId) async {
-    state = state.copyWith(isLoading: true, error: null, activePetId: petId);
+    state = state.copyWith(isLoading: true, clearError: true, activePetId: petId);
     try {
       final results = await Future.wait([
         _repo.fetchMedications(petId),

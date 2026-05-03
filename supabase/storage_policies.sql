@@ -1,4 +1,8 @@
 -- Run this in the Supabase SQL Editor (https://supabase.com/dashboard → SQL Editor)
+-- NOTE: Tightened storage RLS lives in migrations, e.g.
+-- supabase/migrations/20260504140000_review_remediation_rls_storage_posts_products.sql
+-- Prefer applying that migration on new environments; this file is a manual checklist.
+--
 -- Adds the required RLS policies to the `pet-images` storage bucket so
 -- authenticated users can upload, view, update, and delete their own files.
 

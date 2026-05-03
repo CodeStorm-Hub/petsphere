@@ -91,6 +91,25 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Users can update their own posts" ON public.posts;
+CREATE POLICY "Users can update their own posts"
+ON public.posts FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM public.pets
+    WHERE pets.id = posts.pet_id
+    AND pets.user_id = auth.uid()
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.pets
+    WHERE pets.id = posts.pet_id
+    AND pets.user_id = auth.uid()
+  )
+);
+
 -- ─────────────────────────────────────────────────────────
 -- POST LIKES TABLE
 -- ─────────────────────────────────────────────────────────

@@ -129,6 +129,11 @@ class MatchController extends Notifier<MatchState> {
     }
   }
 
+  /// Loads discovery pets for [petId] directly, bypassing the global
+  /// activePetProvider. Used by the per-tab pet selector on the discovery
+  /// screen so the global active pet remains unchanged.
+  Future<void> load(String petId) async => _load(petId);
+
   void setFilterBreed(String? breed) {
     final activePet = ref.read(activePetProvider);
     debugPrint(
@@ -243,15 +248,6 @@ class MatchController extends Notifier<MatchState> {
   }
 
   Future<void> acceptRequest(String requestId) async {
-    // Capture the request before any state change so we can read senderPet
-    MatchRequestModel? request;
-    for (final r in state.myRequests) {
-      if (r.id == requestId) {
-        request = r;
-        break;
-      }
-    }
-
     try {
       await matchRepository.updateRequestStatus(requestId, 'matched');
       state = state.copyWith(
@@ -261,21 +257,8 @@ class MatchController extends Notifier<MatchState> {
         }).toList(),
       );
 
-      // Notify the sender that their request was accepted
-      final senderPet = request?.senderPet;
-      if (senderPet != null && senderPet.userId.isNotEmpty) {
-        final myPet = ref.read(activePetProvider);
-        notificationRepository.sendNotification(
-          targetUserId: senderPet.userId,
-          title: "It's a match!",
-          body:
-              '${myPet?.name ?? 'Your match'} accepted your breeding request.',
-          type: 'match_accepted',
-          entityType: 'match_request',
-          entityId: requestId,
-          actorPetId: myPet?.id,
-        );
-      }
+      // Match accepted notifications are handled by the DB trigger
+      // (notify_on_match_accepted) to avoid duplicates.
 
       // A DB trigger creates the chat_threads row — refresh thread list so
       // the new thread immediately appears in the inbox.
