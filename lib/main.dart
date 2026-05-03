@@ -6,7 +6,7 @@ import 'package:marionette_flutter/marionette_flutter.dart';
 import 'controllers/bootstrap_controller.dart';
 import 'utils/routes.dart';
 import 'utils/supabase_config.dart';
-import 'theme/app_theme_v2_material3.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   if (kDebugMode) {
@@ -36,9 +36,9 @@ class PetSphereApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'PetSphere',
-      theme: AppThemeV2.darkTheme,
-      darkTheme: AppThemeV2.darkTheme,
-      themeMode: ThemeMode.dark,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.light,
       routerConfig: goRouter,
       debugShowCheckedModeBanner: false,
     );

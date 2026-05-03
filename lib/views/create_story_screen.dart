@@ -311,7 +311,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               itemCount: pets.length,
-                              separatorBuilder: (_, __) =>
+                              separatorBuilder: (_, _) =>
                                   const SizedBox(width: 10),
                               itemBuilder: (context, index) {
                                 final pet = pets[index];

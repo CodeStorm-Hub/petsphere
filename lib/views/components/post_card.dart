@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:video_player/video_player.dart';
 import '../../models/post_model.dart';
+import '../../theme/app_theme.dart';
 import '../../utils/media_utils.dart';
+import '../../widgets/common/petfolio_widgets.dart';
 
 /// Instagram-style edge-to-edge post card.
 ///
@@ -94,8 +96,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content:
-                          Text('Post hidden. We\'ll show you fewer like this.'),
+                      content: Text(
+                        'Post hidden. We\'ll show you fewer like this.',
+                      ),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -170,15 +173,15 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     final caption = widget.post.caption;
     final timeAgo = _formatTimeAgo(widget.post.createdAt);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        border: Border.all(color: colorScheme.outline),
-        borderRadius: BorderRadius.circular(20),
+    return GlassCard(
+      margin: const EdgeInsets.only(
+        bottom: AppTheme.md,
+        left: AppTheme.md,
+        right: AppTheme.md,
       ),
+      padding: EdgeInsets.zero,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -219,8 +222,11 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                               ),
                               if (widget.post.pet.isVerified) ...[
                                 const SizedBox(width: 4),
-                                const Icon(Icons.verified,
-                                    size: 14, color: Color(0xFF1DA1F2)),
+                                Icon(
+                                  Icons.verified,
+                                  size: 14,
+                                  color: colorScheme.primary,
+                                ),
                               ],
                             ],
                           ),
@@ -292,7 +298,8 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                             },
                             errorBuilder: (ctx, err, stack) =>
                                 _MediaErrorPlaceholder(
-                                    colorScheme: colorScheme),
+                                  colorScheme: colorScheme,
+                                ),
                           ),
                     IgnorePointer(
                       child: AnimatedOpacity(
@@ -309,7 +316,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                               color: colorScheme.onPrimary,
                               shadows: [
                                 Shadow(
-                                  color: Color(0x66000000),
+                                  color: colorScheme.scrim.withValues(
+                                    alpha: 0.4,
+                                  ),
                                   blurRadius: 24,
                                   offset: Offset(0, 4),
                                 ),
@@ -340,22 +349,28 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                         key: ValueKey(isLiked),
                         size: 26,
                         color: isLiked
-                            ? const Color(0xFFED4956)
+                            ? colorScheme.error
                             : colorScheme.onSurface,
                       ),
                     ),
                   ),
                   _ActionIcon(
                     onTap: widget.onCommentIconTap,
-                    child: Icon(Icons.mode_comment_outlined,
-                        size: 26, color: colorScheme.onSurface),
+                    child: Icon(
+                      Icons.mode_comment_outlined,
+                      size: 26,
+                      color: colorScheme.onSurface,
+                    ),
                   ),
                   _ActionIcon(
                     onTap: widget.onShareIconTap,
                     child: Transform.rotate(
                       angle: -0.5,
-                      child: Icon(Icons.send_outlined,
-                          size: 26, color: colorScheme.onSurface),
+                      child: Icon(
+                        Icons.send_outlined,
+                        size: 26,
+                        color: colorScheme.onSurface,
+                      ),
                     ),
                   ),
                   const Spacer(),
@@ -364,8 +379,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                       setState(() => _isSaved = !_isSaved);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content:
-                              Text(_isSaved ? 'Post Saved!' : 'Post Unsaved.'),
+                          content: Text(
+                            _isSaved ? 'Post Saved!' : 'Post Unsaved.',
+                          ),
                         ),
                       );
                     },
@@ -497,13 +513,15 @@ class _PostVideoPlayerState extends State<_PostVideoPlayer> {
     super.initState();
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
       ..setLooping(true)
-      ..initialize().then((_) {
-        if (!mounted) return;
-        setState(() => _isReady = true);
-        _controller.play();
-      }).catchError((_) {
-        if (mounted) setState(() => _hasError = true);
-      });
+      ..initialize()
+          .then((_) {
+            if (!mounted) return;
+            setState(() => _isReady = true);
+            _controller.play();
+          })
+          .catchError((_) {
+            if (mounted) setState(() => _hasError = true);
+          });
   }
 
   @override
@@ -552,7 +570,11 @@ class _PostVideoPlayerState extends State<_PostVideoPlayer> {
           Positioned(
             top: 12,
             right: 12,
-            child: Icon(Icons.videocam_rounded, color: colorScheme.onPrimary, size: 22),
+            child: Icon(
+              Icons.videocam_rounded,
+              color: colorScheme.onPrimary,
+              size: 22,
+            ),
           ),
         ],
       ),
@@ -566,19 +588,8 @@ class _MediaLoadingPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF211F1B), Theme.of(context).colorScheme.outline],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-      ),
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+      child: const ShimmerLoader(height: double.infinity),
     );
   }
 }
@@ -591,13 +602,7 @@ class _MediaErrorPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF211F1B), colorScheme.outline],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
+      decoration: BoxDecoration(color: colorScheme.surfaceContainerHigh),
       child: Icon(Icons.pets, size: 56, color: colorScheme.onSurfaceVariant),
     );
   }
@@ -623,23 +628,24 @@ class _StoryRingAvatar extends StatelessWidget {
       backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
       backgroundColor: colorScheme.surfaceContainerHighest,
       child: imageUrl.isEmpty
-          ? Icon(Icons.pets,
-              size: radius * 0.9, color: colorScheme.onSurfaceVariant)
+          ? Icon(
+              Icons.pets,
+              size: radius * 0.9,
+              color: colorScheme.onSurfaceVariant,
+            )
           : null,
     );
 
     if (!showRing) return inner;
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            Color(0xFFFFC837),
-            Color(0xFFFF8008),
-            Color(0xFFFE2D49),
-            Color(0xFFBC2A8D),
-            Color(0xFF4F5BD5),
+            Theme.of(context).colorScheme.secondary,
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.tertiary,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -670,10 +676,7 @@ class _ActionIcon extends StatelessWidget {
     return InkResponse(
       onTap: onTap,
       radius: 22,
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: child,
-      ),
+      child: Padding(padding: const EdgeInsets.all(8), child: child),
     );
   }
 }

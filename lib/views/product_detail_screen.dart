@@ -149,7 +149,7 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                             images[i],
                             fit: BoxFit.cover,
                             width: double.infinity,
-                            errorBuilder: (_, __, ___) => Container(
+                            errorBuilder: (_, _, _) => Container(
                               color: colorScheme.surfaceContainerHighest,
                               child: Icon(Icons.image_not_supported,
                                   size: 64,
@@ -663,7 +663,7 @@ class _ComplementaryProducts extends ConsumerWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: complementary.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final p = complementary[index];
           return GestureDetector(
@@ -693,7 +693,7 @@ class _ComplementaryProducts extends ConsumerWidget {
                             height: 70,
                             width: double.infinity,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
+                            errorBuilder: (_, _, _) => Container(
                               height: 70,
                               color: colorScheme.surfaceContainerHighest,
                               child: Icon(Icons.image_not_supported,
