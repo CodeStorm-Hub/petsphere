@@ -55,25 +55,20 @@ class HealthState {
     return result;
   }
 
-  DentalLog? get lastHomeBrushing => dentalLogs.firstWhere(
-        (d) => d.cleaningType == 'home_brushing',
-        orElse: () => DentalLog(
-          id: '',
-          petId: '',
-          logDate: DateTime(2000),
-          cleaningType: 'home_brushing',
-        ),
-      );
+  DentalLog? get lastHomeBrushing {
+    final matches = dentalLogs.where((d) => d.cleaningType == 'home_brushing').toList();
+    if (matches.isEmpty) return null;
+    matches.sort((a, b) => b.logDate.compareTo(a.logDate));
+    return matches.first;
+  }
 
-  DentalLog? get lastProfessionalCleaning => dentalLogs.firstWhere(
-        (d) => d.cleaningType == 'professional_cleaning',
-        orElse: () => DentalLog(
-          id: '',
-          petId: '',
-          logDate: DateTime(2000),
-          cleaningType: 'professional_cleaning',
-        ),
-      );
+  DentalLog? get lastProfessionalCleaning {
+    final matches =
+        dentalLogs.where((d) => d.cleaningType == 'professional_cleaning').toList();
+    if (matches.isEmpty) return null;
+    matches.sort((a, b) => b.logDate.compareTo(a.logDate));
+    return matches.first;
+  }
 
   /// Number of active health alerts (overdue medications, parasite, etc.)
   int get alertCount {

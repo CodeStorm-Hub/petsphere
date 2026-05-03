@@ -48,15 +48,14 @@ class AuthNotifier extends Notifier<AuthState> {
   // Guard: prevent auth listener from overwriting state during active operations
   bool _isPerformingAuthAction = false;
 
+  /// Supabase auth stream uses the SDK type named `AuthState` (same name as our
+  /// widget layer state class); keep this untyped to avoid import clashes.
+  StreamSubscription<dynamic>? _authSubscription;
+
   @override
   AuthState build() {
-    _init();
-    return AuthState();
-  }
-
-  void _init() {
-    // Listen to Supabase auth state changes continuously
-    authRepository.authStateChanges.listen((event) async {
+    ref.onDispose(() => _authSubscription?.cancel());
+    _authSubscription ??= authRepository.authStateChanges.listen((event) async {
       // Skip if we're in the middle of login/register — those set state directly
       if (_isPerformingAuthAction) return;
 
@@ -95,6 +94,8 @@ class AuthNotifier extends Notifier<AuthState> {
 
     // Check current session immediately
     _checkCurrentSession();
+
+    return AuthState();
   }
 
   Future<void> _checkCurrentSession() async {

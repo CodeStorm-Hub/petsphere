@@ -6,11 +6,13 @@ class PetRepository {
   // -------------------------------------------------------------------------
   // Fetch all pets (for discovery / feed)
   // -------------------------------------------------------------------------
-  Future<List<PetModel>> fetchAllPets() async {
+  /// Bounded list for discovery/admin-style views — not every pet in the system at scale.
+  Future<List<PetModel>> fetchAllPets({int limit = 500}) async {
     final data = await supabase
         .from('pets')
         .select()
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .limit(limit);
 
     return (data as List<dynamic>)
         .map((e) => PetModel.fromJson(e as Map<String, dynamic>))

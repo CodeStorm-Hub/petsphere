@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../controllers/chat_controller.dart';
 import '../controllers/notification_controller.dart';
 import '../controllers/pet_controller.dart';
@@ -23,15 +24,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void initState() {
     super.initState();
     // Initialize the per-thread messages notifier with real Supabase data + Realtime
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       ref.read(threadMessagesProvider.notifier).init(widget.threadId);
       ref.read(chatProvider.notifier).markThreadAsRead(widget.threadId);
       ref.read(notificationProvider.notifier).markMessagesAsRead();
-      // If the thread list hasn't included this thread yet (e.g. navigated
-      // directly via the Message button before the list refreshed), force a
-      // refresh so the app bar can resolve the other pet's name and avatar.
-      if (!ref.read(chatProvider).threads.any((t) => t.id == widget.threadId)) {
-        ref.read(chatProvider.notifier).refresh();
+
+      var chats = ref.read(chatProvider);
+      if (!chats.threads.any((t) => t.id == widget.threadId)) {
+        await ref.read(chatProvider.notifier).refresh();
+      }
+      chats = ref.read(chatProvider);
+      if (!chats.threads.any((t) => t.id == widget.threadId)) {
+        await ref.read(chatProvider.notifier).ensureThreadLoaded(widget.threadId);
       }
     });
   }
@@ -165,10 +169,56 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final myPetId = ref.watch(activePetProvider)?.id ?? '';
     final colorScheme = Theme.of(context).colorScheme;
 
-    // Find the thread from the list
+    // Find the thread from the list (or merge via ensureThreadLoaded in initState).
     final threadList = chatState.threads.where((t) => t.id == widget.threadId);
     if (threadList.isEmpty) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      if (chatState.isLoading) {
+        return const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        );
+      }
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.pop(),
+          ),
+          title: const Text('Chat'),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.chat_bubble_outline,
+                  size: 48,
+                  color: colorScheme.outline,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  chatState.error ??
+                      'Could not load this conversation. Check your connection and try again.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: colorScheme.onSurface),
+                ),
+                const SizedBox(height: 24),
+                FilledButton.icon(
+                  onPressed: () async {
+                    await ref.read(chatProvider.notifier).refresh();
+                    await ref
+                        .read(chatProvider.notifier)
+                        .ensureThreadLoaded(widget.threadId);
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     }
     final thread = threadList.first;
     final otherPet = thread.participantPets.firstWhere(
@@ -207,20 +257,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             style: TextStyle(color: colorScheme.onTertiary))
                         : null,
                   ),
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                            color: colorScheme.surfaceContainerLowest, width: 2),
-                      ),
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(width: 12),
@@ -236,15 +272,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       letterSpacing: -0.3,
                     ),
                   ),
-                  Text(
-                    'ONLINE',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: colorScheme.onTertiary,
-                      letterSpacing: 1.2,
+                  if (otherPet.breed.isNotEmpty)
+                    Text(
+                      otherPet.breed,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ],

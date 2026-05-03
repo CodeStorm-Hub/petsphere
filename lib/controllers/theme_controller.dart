@@ -2,23 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils/theme_bootstrap.dart';
+
 const _kThemeModeKey = 'theme_mode';
 
 class ThemeNotifier extends Notifier<ThemeMode> {
   @override
   ThemeMode build() {
-    _loadSavedTheme();
-    return ThemeMode.light;
+    final boot = pendingBootstrapThemeMode ?? ThemeMode.light;
+    pendingBootstrapThemeMode = null;
+    Future.microtask(_reconcileWithPrefs);
+    return boot;
   }
 
-  Future<void> _loadSavedTheme() async {
+  Future<void> _reconcileWithPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString(_kThemeModeKey);
-    if (saved == 'dark') {
-      state = ThemeMode.dark;
-    } else {
-      state = ThemeMode.light;
-    }
+    final mode =
+        saved == 'dark' ? ThemeMode.dark : ThemeMode.light;
+    if (state != mode) state = mode;
   }
 
   Future<void> toggle() async {

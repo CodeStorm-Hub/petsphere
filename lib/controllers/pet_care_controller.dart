@@ -429,6 +429,7 @@ class PetCareNotifier extends Notifier<PetCareState> {
     if (today == null) return;
     try {
       final saved = await petCareRepository.upsertLog(today);
+      if (!ref.mounted) return;
       // Keep the server-assigned id but otherwise prefer the local copy
       // (the user may have toggled more between save & response).
       final logs = state.recentLogs;

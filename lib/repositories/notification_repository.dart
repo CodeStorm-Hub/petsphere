@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/notification_model.dart';
 import '../utils/supabase_config.dart';
@@ -73,7 +75,14 @@ class NotificationRepository {
         if (entityId != null) 'entity_id': entityId,
         if (actorPetId != null) 'actor_pet_id': actorPetId,
       });
-    } catch (_) {}
+    } catch (e, st) {
+      developer.log(
+        'sendNotification insert failed',
+        name: 'NotificationRepository',
+        error: e,
+        stackTrace: st,
+      );
+    }
   }
 
   /// Real-time INSERT subscription for a specific user.
@@ -96,7 +105,14 @@ class NotificationRepository {
             try {
               final model = NotificationModel.fromJson(payload.newRecord);
               onNew(model);
-            } catch (_) {}
+            } catch (e, st) {
+              developer.log(
+                'Notification realtime parse failed',
+                name: 'NotificationRepository',
+                error: e,
+                stackTrace: st,
+              );
+            }
           },
         )
         .subscribe();

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
 import 'controllers/auth_controller.dart';
@@ -8,6 +9,7 @@ import 'controllers/bootstrap_controller.dart';
 import 'controllers/theme_controller.dart';
 import 'utils/routes.dart';
 import 'utils/supabase_config.dart';
+import 'utils/theme_bootstrap.dart';
 import 'theme/app_theme_v2_material3.dart';
 
 /// Set via `flutter test integration_test/... --dart-define=INTEGRATION_TEST=true`
@@ -37,6 +39,10 @@ Future<void> main() async {
     url: supabaseInitUrl,
     anonKey: supabaseInitAnonKey,
   );
+
+  final prefs = await SharedPreferences.getInstance();
+  pendingBootstrapThemeMode =
+      prefs.getString('theme_mode') == 'dark' ? ThemeMode.dark : ThemeMode.light;
 
   runApp(const ProviderScope(child: PetSphereApp()));
 }

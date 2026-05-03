@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/chat_thread_model.dart';
@@ -25,19 +27,31 @@ class ThreadMessagesNotifier extends Notifier<List<MessageModel>> {
   Future<void> init(String threadId) async {
     _threadId = threadId;
 
+    // Clear immediately so a fast thread switch never shows the prior thread.
+    state = [];
+    _channel?.unsubscribe();
+    _channel = null;
+
     // Load initial messages
     try {
       final messages = await chatRepository.fetchMessages(threadId);
+      if (_threadId != threadId) return;
       state = messages;
-    } catch (_) {
-      state = [];
+    } catch (e, st) {
+      developer.log(
+        'fetchMessages failed',
+        name: 'ThreadMessagesNotifier',
+        error: e,
+        stackTrace: st,
+      );
+      if (_threadId == threadId) state = [];
     }
 
     // Subscribe to real-time updates
-    _channel?.unsubscribe();
     _channel = chatRepository.subscribeToMessages(
       threadId: threadId,
       onMessage: (message) {
+        if (_threadId != threadId) return;
         if (!state.any((m) => m.id == message.id)) {
           state = [...state, message];
         }
@@ -73,7 +87,13 @@ class ThreadMessagesNotifier extends Notifier<List<MessageModel>> {
 
       // Message notifications are handled by the DB trigger
       // (notify_on_new_message) to avoid duplicates.
-    } catch (_) {
+    } catch (e, st) {
+      developer.log(
+        'sendMessage failed',
+        name: 'ThreadMessagesNotifier',
+        error: e,
+        stackTrace: st,
+      );
       // Rollback optimistic message
       state = state.where((m) => m.id != tempId).toList();
     }
@@ -194,6 +214,42 @@ class ChatController extends Notifier<ChatState> {
     } catch (e) {
       state = state.copyWith(error: 'Could not start chat: $e');
       return null;
+    }
+  }
+
+  /// When navigating directly to `/chat/:id`, the thread may not yet appear in
+  /// [state.threads]. Fetch that row (with participant pets) and merge it in.
+  Future<void> ensureThreadLoaded(String threadId) async {
+    if (state.threads.any((t) => t.id == threadId)) return;
+
+    final activePet = ref.read(activePetProvider);
+    if (activePet == null) return;
+
+    try {
+      final thread =
+          await chatRepository.fetchThreadById(threadId, activePet.id);
+      if (thread == null) return;
+
+      final unreadCounts = await chatRepository.fetchUnreadCountsForThreads(
+        [threadId],
+        activePet.id,
+      );
+      final merged = thread.copyWith(
+        unreadCount: unreadCounts[threadId] ?? thread.unreadCount,
+      );
+
+      if (state.threads.any((t) => t.id == threadId)) return;
+      state = state.copyWith(
+        threads: [merged, ...state.threads],
+      );
+    } catch (e, st) {
+      developer.log(
+        'ensureThreadLoaded failed',
+        name: 'ChatController',
+        error: e,
+        stackTrace: st,
+      );
+      state = state.copyWith(error: 'Could not load conversation header.');
     }
   }
 

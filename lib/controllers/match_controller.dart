@@ -69,17 +69,26 @@ class MatchState {
 // ---------------------------------------------------------------------------
 class MatchController extends Notifier<MatchState> {
   int _loadGeneration = 0; // cancel stale async loads
+  String? _lastLoadedPetId;
 
   @override
   MatchState build() {
     final activePet = ref.watch(activePetProvider);
-    debugPrint('[MatchController] build: activePet=${activePet?.name}');
-    if (activePet != null) {
-      // Initial load — state already has filterAnimal/filterBreed as null
-      _load(activePet.id);
+    if (activePet == null) {
+      _lastLoadedPetId = null;
+      return MatchState();
+    }
+
+    // Do not return a fresh [MatchState(isLoading: true)] on every rebuild —
+    // that wipes discovery data whenever [activePetProvider] notifies with the
+    // same pet id (new model instance). Only reset loading when the pet id changes.
+    if (_lastLoadedPetId != activePet.id) {
+      _lastLoadedPetId = activePet.id;
+      Future.microtask(() => _load(activePet.id));
       return MatchState(isLoading: true);
     }
-    return MatchState();
+
+    return state;
   }
 
   Future<void> _load(String myPetId) async {

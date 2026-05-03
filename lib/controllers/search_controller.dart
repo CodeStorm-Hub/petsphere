@@ -28,13 +28,14 @@ class SearchState {
     bool? isLoading,
     String? error,
     String? query,
+    bool clearError = false,
   }) {
     return SearchState(
       posts: posts ?? this.posts,
       pets: pets ?? this.pets,
       products: products ?? this.products,
       isLoading: isLoading ?? this.isLoading,
-      error: error,
+      error: clearError ? null : (error ?? this.error),
       query: query ?? this.query,
     );
   }
@@ -52,7 +53,7 @@ class SearchNotifier extends Notifier<SearchState> {
       return;
     }
 
-    state = state.copyWith(isLoading: true, query: query, error: null);
+    state = state.copyWith(isLoading: true, query: query, clearError: true);
 
     try {
       final results = await Future.wait([

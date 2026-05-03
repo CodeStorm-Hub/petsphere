@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import '../models/post_model.dart';
@@ -115,7 +117,14 @@ class FeedNotifier extends Notifier<FeedState> {
           return post.copyWith(comments: [...post.comments, comment]);
         }).toList(),
       );
-    } catch (_) {}
+    } catch (e, st) {
+      developer.log(
+        'Realtime comment fetch failed',
+        name: 'FeedNotifier',
+        error: e,
+        stackTrace: st,
+      );
+    }
   }
 
   Future<void> _fetchPosts() async {
