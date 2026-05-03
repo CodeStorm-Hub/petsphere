@@ -8,6 +8,7 @@ import '../controllers/match_controller.dart';
 import '../controllers/notification_controller.dart';
 import '../models/notification_model.dart';
 import 'components/pet_avatar.dart';
+import '../widgets/brand_logo.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -92,13 +93,18 @@ class _ActivityTab extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () => ref.read(notificationProvider.notifier).refresh(),
       child: items.isEmpty
-          ? ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: const [
-                SizedBox(height: 120),
-                Center(child: Text('No activity yet.')),
-              ],
-            )
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  const SizedBox(height: 120),
+                  BrandLogo(
+                    customSize: 64,
+                    color: Theme.of(context).colorScheme.outline.withAlpha(100),
+                  ),
+                  const SizedBox(height: 16),
+                  const Center(child: Text('No activity yet.')),
+                ],
+              )
           : ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: items.length,
@@ -245,9 +251,14 @@ class _RequestsTab extends ConsumerWidget {
       child: myRequests.isEmpty
           ? ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              children: const [
-                SizedBox(height: 120),
-                Center(child: Text('No new requests.')),
+              children: [
+                const SizedBox(height: 120),
+                BrandLogo(
+                  customSize: 64,
+                  color: Theme.of(context).colorScheme.outline.withAlpha(100),
+                ),
+                const SizedBox(height: 16),
+                const Center(child: Text('No new requests.')),
               ],
             )
           : ListView.separated(

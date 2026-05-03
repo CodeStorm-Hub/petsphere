@@ -357,12 +357,12 @@ class _PostDetailContent extends ConsumerWidget {
   }
 
   void _sharePost(BuildContext context, PostModel post) {
-    final link = 'https://petsphere.app/post/${post.id}';
+    final link = 'https://petfolio.app/post/${post.id}';
     final caption = post.caption.isNotEmpty ? '"${post.caption}"\n\n' : '';
     SharePlus.instance.share(
       ShareParams(
-        text: 'Check out ${post.pet.name} on PetSphere! $caption$link',
-        subject: 'PetSphere — ${post.pet.name}',
+        text: 'Check out ${post.pet.name} on PetFolio! $caption$link',
+        subject: 'PetFolio — ${post.pet.name}',
       ),
     );
   }

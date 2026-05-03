@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/pet_model.dart';
+import '../widgets/brand_logo.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../utils/image_upload_helper.dart';
@@ -1128,7 +1129,7 @@ class _EmptyPetsState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.pets, size: 64, color: colorScheme.primary),
+              const BrandLogo(customSize: 64),
               const SizedBox(height: 16),
               Text(
                 'Create a pet profile first',
@@ -1260,13 +1261,7 @@ class _AuthorAvatar extends StatelessWidget {
                   ? CachedNetworkImageProvider(pet.profileImageUrl)
                   : null,
               child: pet.profileImageUrl.isEmpty
-                  ? Text(
-                      pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                          color: colorScheme.onPrimary),
-                    )
+                  ? const BrandLogo(customSize: 14)
                   : null,
             ),
             const SizedBox(width: 8),

@@ -43,7 +43,7 @@ class PetActivityLog {
         'training' => Icons.school,
         'grooming' => Icons.content_cut,
         'social' => Icons.people,
-        'free_roam' => Icons.pets,
+        'free_roam' => Icons.holiday_village_outlined,
         _ => Icons.fitness_center,
       };
 

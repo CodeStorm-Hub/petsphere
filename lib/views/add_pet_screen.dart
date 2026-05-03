@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../controllers/pet_controller.dart';
 import '../utils/image_upload_helper.dart';
 import '../utils/supabase_config.dart';
+import '../widgets/brand_logo.dart';
 
 class AddPetScreen extends ConsumerStatefulWidget {
   const AddPetScreen({super.key});
@@ -702,7 +703,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.pets, size: 22),
+                        const BrandLogo(customSize: 22, color: Colors.white),
                         const SizedBox(width: 10),
                         Text(
                           'Add ${_nameController.text.trim().isNotEmpty ? _nameController.text.trim() : 'Pet'}',

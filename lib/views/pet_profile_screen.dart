@@ -21,6 +21,7 @@ import '../repositories/pet_repository.dart';
 import '../controllers/chat_controller.dart';
 import '../controllers/match_controller.dart';
 import 'components/public_care_badges_row.dart';
+import '../widgets/brand_logo.dart';
 
 typedef VisitProfileArgs = ({String? petId, String? userId});
 
@@ -186,15 +187,16 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
             SliverAppBar(
               pinned: true,
               automaticallyImplyLeading: false,
+              toolbarHeight: 44,
               leading: isVisitor
                   ? Padding(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(6),
                       child: InkWell(
                         onTap: () => context.pop(),
                         borderRadius: BorderRadius.circular(24),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: colorScheme.surface.withAlpha(180),
+                            color: colorScheme.surfaceContainer.withAlpha(200),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -207,23 +209,6 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     )
                   : null,
               actions: [
-                if (!isVisitor && isOwnerView)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: InkWell(
-                      onTap: () => showLogoutConfirmation(context),
-                      borderRadius: BorderRadius.circular(24),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surface.withAlpha(180),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.logout_rounded,
-                            color: colorScheme.onSurface, size: 20),
-                      ),
-                    ),
-                  ),
                 if (!isVisitor)
                   Padding(
                     padding: const EdgeInsets.only(right: 12),
@@ -231,19 +216,20 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                       onTap: () => context.push('/settings'),
                       borderRadius: BorderRadius.circular(24),
                       child: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
-                          color: colorScheme.surface.withAlpha(180),
+                          color: colorScheme.surfaceContainer.withAlpha(200),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(Icons.settings_rounded,
-                            color: colorScheme.onSurface, size: 20),
+                            color: colorScheme.onSurface, size: 18),
                       ),
                     ),
                   ),
               ],
-              backgroundColor: colorScheme.surface,
+              backgroundColor: Colors.transparent,
               elevation: 0,
+              scrolledUnderElevation: 0,
               surfaceTintColor: Colors.transparent,
             ),
 
@@ -372,7 +358,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                       ),
                     if (!isOwnerView && selectedPet != null)
                       InfoChip(
-                        icon: Icons.pets_rounded,
+                        useBrandIcon: true,
                         text:
                             '${selectedPet.breed}  ·  ${selectedPet.animalType}',
                         colorScheme: colorScheme,
@@ -431,8 +417,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         ),
                         onShare: () {
                           final link = isOwnerView
-                              ? 'https://petsphere.app/user/${visitHostUser!.id}'
-                              : 'https://petsphere.app/pet/${selectedPet?.id ?? ''}';
+                              ? 'https://petfolio.app/user/${visitHostUser!.id}'
+                              : 'https://petfolio.app/pet/${selectedPet?.id ?? ''}';
                           final name = isOwnerView
                               ? userName
                               : (selectedPet?.name ?? '');
@@ -475,8 +461,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                               label: const Text('Share'),
                               onPressed: () {
                                 final link = isOwnerView
-                                    ? 'https://petsphere.app/user/${accountUser?.id ?? ''}'
-                                    : 'https://petsphere.app/pet/${selectedPet?.id ?? ''}';
+                                    ? 'https://petfolio.app/user/${accountUser?.id ?? ''}'
+                                    : 'https://petfolio.app/pet/${selectedPet?.id ?? ''}';
                                 final name = isOwnerView
                                     ? userName
                                     : (selectedPet?.name ?? '');
@@ -2143,12 +2129,14 @@ class SheetFieldLabel extends StatelessWidget {
 
 /// Small icon + text chip used for location/breed/email under the name.
 class InfoChip extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final bool useBrandIcon;
   final String text;
   final ColorScheme colorScheme;
 
   const InfoChip({super.key, 
-    required this.icon,
+    this.icon,
+    this.useBrandIcon = false,
     required this.text,
     required this.colorScheme,
   });
@@ -2160,7 +2148,9 @@ class InfoChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: colorScheme.onSurfaceVariant),
+          useBrandIcon
+              ? BrandLogo(customSize: 13, color: colorScheme.onSurfaceVariant)
+              : Icon(icon!, size: 13, color: colorScheme.onSurfaceVariant),
           const SizedBox(width: 4),
           Flexible(
             child: Text(
@@ -2207,7 +2197,7 @@ class EmptyPetsCta extends StatelessWidget {
               ),
             ),
             child:
-                Icon(Icons.pets, size: 48, color: colorScheme.tertiary),
+                BrandLogo(customSize: 48, color: colorScheme.tertiary),
           ),
           const SizedBox(height: 20),
           Text(
@@ -2355,12 +2345,7 @@ class PetCarouselAvatar extends StatelessWidget {
                   : null,
               backgroundColor: colorScheme.surfaceContainer,
               child: pet.profileImageUrl.isEmpty
-                  ? Text(
-                      pet.name.isNotEmpty
-                          ? pet.name[0].toUpperCase()
-                          : '?',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 10))
+                  ? const BrandLogo(customSize: 14)
                   : null,
             ),
             const SizedBox(width: 8),

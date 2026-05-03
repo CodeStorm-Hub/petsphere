@@ -40,13 +40,14 @@ class PetfolioShadows extends ThemeExtension<PetfolioShadows> {
 class AppTheme {
   const AppTheme._();
 
-  static const primary = Color(0xFF2979FF);
-  static const primaryLight = Color(0xFF5BA3F5);
+  // Instagram blue as primary for the modern social feel
+  static const primary = Color(0xFF0095F6);
+  static const primaryLight = Color(0xFF47B4FF);
   static const amber = Color(0xFFFFA726);
   static const deepNavy = Color(0xFF1D1D1F);
-  static const midNavy = Color(0xFF86868B);
+  static const midNavy = Color(0xFF737373);
   static const bgLight = Color(0xFFFFFFFF);
-  static const bgSoft = Color(0xFFF5F5F7);
+  static const bgSoft = Color(0xFFF5F5F5);
   static const glassWhite = Color(0x99FFFFFF);
   static const glassBorder = Color(0x1A000000);
   static const white = Colors.white;
@@ -57,11 +58,14 @@ class AppTheme {
   static const textPrimary = deepNavy;
   static const textSecondary = midNavy;
 
-  static const darkBackground = Color(0xFF071426);
-  static const darkSurface = Color(0xFF0D223E);
-  static const darkSoft = Color(0xFF18365F);
-  static const darkText = Color(0xFFF7F9FF);
-  static const darkMuted = Color(0xFFB9CBE5);
+  // Instagram-inspired dark palette
+  static const darkBackground = Color(0xFF000000);   // Pure black (IG bg)
+  static const darkSurface = Color(0xFF121212);       // Cards / sheets
+  static const darkSoft = Color(0xFF1C1C1C);          // Elevated containers
+  static const darkInput = Color(0xFF262626);         // Input fields
+  static const darkBorder = Color(0xFF262626);        // Dividers / borders
+  static const darkText = Color(0xFFF5F5F5);          // Primary text
+  static const darkMuted = Color(0xFFA8A8A8);         // Secondary / muted text
 
   static const xs = 4.0;
   static const sm = 8.0;
@@ -93,19 +97,19 @@ class AppTheme {
       brightness: brightness,
       primary: primary,
       onPrimary: white,
-      primaryContainer: primary.withValues(alpha: isDark ? 0.22 : 0.10),
+      primaryContainer: primary.withValues(alpha: isDark ? 0.18 : 0.10),
       onPrimaryContainer: isDark ? darkText : deepNavy,
       secondary: amber,
       onSecondary: isDark ? deepNavy : white,
-      secondaryContainer: amber.withValues(alpha: isDark ? 0.22 : 0.14),
+      secondaryContainer: amber.withValues(alpha: isDark ? 0.18 : 0.14),
       onSecondaryContainer: isDark ? darkText : deepNavy,
       tertiary: primaryLight,
       onTertiary: white,
-      tertiaryContainer: primaryLight.withValues(alpha: isDark ? 0.20 : 0.12),
+      tertiaryContainer: primaryLight.withValues(alpha: isDark ? 0.16 : 0.12),
       onTertiaryContainer: isDark ? darkText : deepNavy,
-      error: const Color(0xFFE85D75),
+      error: const Color(0xFFED4956),  // Instagram red
       onError: white,
-      errorContainer: const Color(0xFFE85D75).withValues(alpha: 0.12),
+      errorContainer: const Color(0xFFED4956).withValues(alpha: 0.15),
       onErrorContainer: isDark ? darkText : deepNavy,
       surface: isDark ? darkSurface : white,
       onSurface: isDark ? darkText : deepNavy,
@@ -115,11 +119,9 @@ class AppTheme {
       surfaceContainerHigh: isDark ? darkSoft : bgSoft,
       surfaceContainerHighest: isDark ? darkSoft : bgSoft,
       onSurfaceVariant: isDark ? darkMuted : midNavy,
-      outline: isDark ? primaryLight.withValues(alpha: 0.35) : glassBorder,
-      outlineVariant: isDark
-          ? primaryLight.withValues(alpha: 0.22)
-          : glassBorder,
-      shadow: primary,
+      outline: isDark ? const Color(0xFF363636) : glassBorder,
+      outlineVariant: isDark ? const Color(0xFF262626) : glassBorder,
+      shadow: Colors.black,
       scrim: Colors.black,
       inverseSurface: isDark ? bgLight : deepNavy,
       onInverseSurface: isDark ? deepNavy : bgLight,
@@ -315,7 +317,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? darkSoft : bgSoft,
+        fillColor: isDark ? darkInput : bgSoft,
         border: inputBorder,
         enabledBorder: inputBorder,
         focusedBorder: OutlineInputBorder(
@@ -388,7 +390,7 @@ class AppTheme {
         shape: CircleBorder(),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: isDark ? darkSurface : deepNavy,
+        backgroundColor: isDark ? darkSoft : deepNavy,
         contentTextStyle: textTheme.bodySmall?.copyWith(color: white),
         actionTextColor: primaryLight,
         elevation: 0,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/brand_logo.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -71,7 +72,12 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ],
                 ),
-                child: Icon(Icons.pets, size: 56, color: colorScheme.onPrimary),
+                child: Center(
+                  child: BrandLogo(
+                    size: BrandLogoSize.large,
+                    color: colorScheme.onPrimary,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 28),
@@ -80,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen>
               child: Column(
                 children: [
                   Text(
-                    'PetSphere',
+                    'PetFolio',
                     style: theme.textTheme.displaySmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.onSurface,

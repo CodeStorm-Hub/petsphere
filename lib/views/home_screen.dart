@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../widgets/brand_logo.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,12 +31,14 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final feedState = ref.watch(feedProvider);
-    final activePet = ref.watch(activePetProvider);
-    final currentPetId = activePet?.id ?? '';
+    final activePetId = ref.watch(activePetProvider.select((p) => p?.id ?? ''));
     final authState = ref.watch(authProvider);
     final userName = authState.user?.name ?? 'Pet Lover';
-    final myPets = ref.watch(petProvider).myPets;
+    final myPets = ref.watch(petProvider.select((s) => s.myPets));
+    final feedPosts = ref.watch(feedProvider.select((s) => s.posts));
+    final feedLoading = ref.watch(feedProvider.select((s) => s.isLoading));
+    final feedError = ref.watch(feedProvider.select((s) => s.error));
+    final feedStories = ref.watch(feedProvider.select((s) => s.stories));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -56,20 +59,9 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
         titleSpacing: 16,
-        title: Row(
-          children: [
-            Icon(Icons.pets, size: 22, color: colorScheme.primary),
-            const SizedBox(width: 8),
-            Text(
-              'PetSphere',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
-                color: colorScheme.onSurface,
-              ),
-            ),
-          ],
+        title: BrandLogo(
+          size: BrandLogoSize.small,
+          withText: true,
         ),
         actions: [
           IconButton(
@@ -91,8 +83,11 @@ class HomeScreen extends ConsumerWidget {
         child: _buildBody(
           context,
           ref,
-          feedState,
-          currentPetId,
+          feedPosts,
+          feedLoading,
+          feedError,
+          feedStories,
+          activePetId,
           firstName,
           myPets,
         ),
@@ -103,7 +98,10 @@ class HomeScreen extends ConsumerWidget {
   Widget _buildBody(
     BuildContext context,
     WidgetRef ref,
-    FeedState feedState,
+    List<PostModel> posts,
+    bool isLoading,
+    String? error,
+    List<StoryModel> stories,
     String currentPetId,
     String userName,
     List<PetModel> myPets,
@@ -123,7 +121,7 @@ class HomeScreen extends ConsumerWidget {
       );
     }
 
-    if (feedState.isLoading) {
+    if (isLoading) {
       return Padding(
         padding: EdgeInsets.only(bottom: navSpace),
         child: Center(
@@ -145,7 +143,7 @@ class HomeScreen extends ConsumerWidget {
       );
     }
 
-    if (feedState.error != null) {
+    if (error != null) {
       return Padding(
         padding: EdgeInsets.only(bottom: navSpace),
         child: Center(
@@ -158,7 +156,7 @@ class HomeScreen extends ConsumerWidget {
                 Icon(Icons.error_outline, size: 48, color: colorScheme.error),
                 const SizedBox(height: AppTheme.md),
                 Text(
-                  feedState.error!,
+                  error,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium,
                 ),
@@ -183,21 +181,23 @@ class HomeScreen extends ConsumerWidget {
             // ── Stories row (Instagram-style) ────────────────────────
             if (myPets.isNotEmpty)
               SliverToBoxAdapter(
-                child: _StoriesRow(
-                  pets: myPets,
-                  stories: feedState.stories,
-                  currentPetId: currentPetId,
-                  onCreateStory: () => _openCreateStoryForPet(
-                    context,
-                    myPets,
+                child: RepaintBoundary(
+                  child: _StoriesRow(
+                    pets: myPets,
+                    stories: stories,
                     currentPetId: currentPetId,
-                  ),
-                  onStoryTap: (petId) => context.push('/story/$petId'),
-                  onYourStoryTap: (petId) => _onYourStoryTap(
-                    context,
-                    myPets,
-                    currentPetId: currentPetId,
-                    storyPetId: petId,
+                    onCreateStory: () => _openCreateStoryForPet(
+                      context,
+                      myPets,
+                      currentPetId: currentPetId,
+                    ),
+                    onStoryTap: (petId) => context.push('/story/$petId'),
+                    onYourStoryTap: (petId) => _onYourStoryTap(
+                      context,
+                      myPets,
+                      currentPetId: currentPetId,
+                      storyPetId: petId,
+                    ),
                   ),
                 ),
               ),
@@ -213,7 +213,7 @@ class HomeScreen extends ConsumerWidget {
               ),
 
             // ── Empty state ──────────────────────────────────────────
-            if (feedState.posts.isEmpty)
+            if (posts.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: Padding(
@@ -263,38 +263,40 @@ class HomeScreen extends ConsumerWidget {
                 padding: EdgeInsets.only(bottom: navSpace),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
-                    final post = feedState.posts[index];
-                    return PostCard(
-                      post: post,
-                      currentPetId: currentPetId,
-                      onLikeToggle: () {
-                        ref
-                            .read(feedProvider.notifier)
-                            .toggleLike(post.id, currentPetId);
-                      },
-                      onCommentIconTap: () {
-                        _showCommentSheet(
+                    final post = posts[index];
+                    return RepaintBoundary(
+                      child: PostCard(
+                        post: post,
+                        currentPetId: currentPetId,
+                        onLikeToggle: () {
+                          ref
+                              .read(feedProvider.notifier)
+                              .toggleLike(post.id, currentPetId);
+                        },
+                        onCommentIconTap: () {
+                          _showCommentSheet(
+                            context,
+                            post.id,
+                            currentPetId,
+                            ref.read(activePetProvider)?.name ?? 'Unknown',
+                          );
+                        },
+                        onShareIconTap: () => _showShareSheet(context, ref, post),
+                        onPetTap: () => openPetProfile(
                           context,
-                          post.id,
-                          currentPetId,
-                          ref.read(activePetProvider)?.name ?? 'Unknown',
-                        );
-                      },
-                      onShareIconTap: () => _showShareSheet(context, ref, post),
-                      onPetTap: () => openPetProfile(
-                        context,
-                        ref,
-                        petId: post.pet.id,
-                        petUserId: post.pet.userId,
+                          ref,
+                          petId: post.pet.id,
+                          petUserId: post.pet.userId,
+                        ),
+                        onEdit: post.pet.userId == ref.read(authProvider).user?.id
+                            ? () => showEditPostDialog(context, ref, post)
+                            : null,
+                        onDelete: post.pet.userId == ref.read(authProvider).user?.id
+                            ? () => showDeletePostDialog(context, ref, post)
+                            : null,
                       ),
-                      onEdit: post.pet.userId == ref.read(authProvider).user?.id
-                          ? () => showEditPostDialog(context, ref, post)
-                          : null,
-                      onDelete: post.pet.userId == ref.read(authProvider).user?.id
-                          ? () => showDeletePostDialog(context, ref, post)
-                          : null,
                     );
-                  }, childCount: feedState.posts.length),
+                  }, childCount: posts.length),
                 ),
               ),
           ],
@@ -308,12 +310,12 @@ class HomeScreen extends ConsumerWidget {
     WidgetRef ref,
     PostModel post,
   ) async {
-    final shareLink = 'https://petsphere.app/post/${post.id}';
+    final shareLink = 'https://petfolio.app/post/${post.id}';
 
     final result = await SharePlus.instance.share(
       ShareParams(
-        text: 'Check out this pet on PetSphere!\n$shareLink',
-        subject: 'PetSphere',
+        text: 'Check out this pet on PetFolio!\n$shareLink',
+        subject: 'PetFolio',
       ),
     );
 
@@ -968,9 +970,8 @@ class _StoryItem extends StatelessWidget {
       backgroundColor: colorScheme.surfaceContainerHighest,
       backgroundImage: imageUrl.isNotEmpty ? CachedNetworkImageProvider(imageUrl) : null,
       child: imageUrl.isEmpty
-          ? Icon(
-              Icons.pets,
-              size: innerRadius * 0.8,
+          ? BrandLogo(
+              customSize: innerRadius * 0.8,
               color: colorScheme.onSurfaceVariant,
             )
           : null,
