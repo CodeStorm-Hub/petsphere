@@ -155,6 +155,72 @@ class FollowRepository {
         .eq('follower_user_id', userId);
     return (data as List).length;
   }
+
+  // -------------------------------------------------------------------------
+  // Get list of follower user IDs (direct pet followers + owner followers)
+  // Returns unique follower user IDs with basic user profile info via the
+  // users table join.
+  // -------------------------------------------------------------------------
+  Future<List<Map<String, dynamic>>> fetchPetFollowersList(String petId) async {
+    final pet = await supabase
+        .from('pets')
+        .select('user_id')
+        .eq('id', petId)
+        .maybeSingle();
+
+    if (pet == null) return [];
+    final ownerUserId = pet['user_id'] as String;
+
+    final results = await Future.wait([
+      // Direct pet followers
+      supabase
+          .from('follows')
+          .select('follower_user_id, created_at')
+          .not('followed_pet_id', 'is', null)
+          .eq('followed_pet_id', petId),
+      // Owner followers (implicit pet followers)
+      supabase
+          .from('follows')
+          .select('follower_user_id, created_at')
+          .not('followed_user_id', 'is', null)
+          .eq('followed_user_id', ownerUserId),
+    ]);
+
+    final seen = <String>{};
+    final combined = <Map<String, dynamic>>[];
+
+    for (final row in [...(results[0] as List), ...(results[1] as List)]) {
+      final userId = row['follower_user_id'] as String;
+      if (seen.add(userId)) {
+        combined.add({'user_id': userId, 'created_at': row['created_at']});
+      }
+    }
+
+    if (combined.isEmpty) return [];
+
+    // Fetch user profiles for all follower IDs
+    final followerIds = combined.map((r) => r['user_id'] as String).toList();
+    final profiles = await supabase
+        .from('users')
+        .select('id, name, profile_image_url')
+        .inFilter('id', followerIds);
+
+    final profileMap = {
+      for (final p in profiles as List<dynamic>)
+        (p as Map<String, dynamic>)['id'] as String: p,
+    };
+
+    return combined.map((r) {
+      final uid = r['user_id'] as String;
+      final profile = profileMap[uid] ?? {'id': uid, 'name': 'Unknown', 'profile_image_url': ''};
+      return {
+        'user_id': uid,
+        'name': (profile['name'] ?? 'Unknown') as String,
+        'profile_image_url': (profile['profile_image_url'] ?? '') as String,
+        'created_at': r['created_at'],
+      };
+    }).toList();
+  }
 }
 
 final followRepository = FollowRepository();
