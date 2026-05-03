@@ -266,7 +266,7 @@ class _ProgressBar extends StatelessWidget {
 
     return AnimatedBuilder(
       animation: progress as AnimationController,
-      builder: (_, __) => bar((progress as AnimationController).value),
+      builder: (_, _) => bar((progress as AnimationController).value),
     );
   }
 }
@@ -407,7 +407,7 @@ class _StoryImageState extends State<_StoryImage> {
         }
         return const Center(child: CircularProgressIndicator());
       },
-      errorBuilder: (_, __, ___) {
+      errorBuilder: (_, _, _) {
         // Even on error, start timer so the viewer doesn't get stuck.
         if (!_reported) {
           _reported = true;

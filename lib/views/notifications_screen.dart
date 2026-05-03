@@ -102,7 +102,7 @@ class _ActivityTab extends ConsumerWidget {
           : ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: items.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final n = items[index];
                 return _NotificationTile(notification: n);
@@ -253,7 +253,7 @@ class _RequestsTab extends ConsumerWidget {
           : ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: myRequests.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final req = myRequests[index];
                 final senderPet = req.senderPet;

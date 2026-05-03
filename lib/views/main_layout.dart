@@ -1,8 +1,8 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/pet_controller.dart';
+import '../theme/app_theme.dart';
 
 import 'home_screen.dart';
 import 'pet_profile_screen.dart';
@@ -60,13 +60,15 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
 
     return Scaffold(
       extendBody: true,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          padding: const EdgeInsets.fromLTRB(
+            AppTheme.md,
+            0,
+            AppTheme.md,
+            AppTheme.md,
+          ),
           child: _GlassNavBar(
             currentIndex: _currentIndex,
             profileImageUrl: activePet?.profileImageUrl ?? '',
@@ -109,18 +111,13 @@ class _GlassNavBar extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(30),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          height: 64,
+      borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+      child: Container(
+        height: 64,
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withAlpha(240),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(
-              color: colorScheme.outline.withAlpha(80),
-              width: 1,
-            ),
+            color: theme.bottomNavigationBarTheme.backgroundColor,
+            borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+            border: Border.all(color: colorScheme.outline, width: 1),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -128,27 +125,30 @@ class _GlassNavBar extends StatelessWidget {
               final isActive = currentIndex == i;
               final isCenter = i == 2;
               final isProfile = i == 4;
-              final iconColor =
-                  isActive ? colorScheme.primary : colorScheme.onSurfaceVariant;
+              final iconColor = isActive
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant;
 
               if (isCenter) {
                 return GestureDetector(
                   onTap: () => onTap(i),
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 280),
+                    curve: Curves.easeOut,
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
+                      color: colorScheme.primary,
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          colorScheme.primary,
-                          colorScheme.primary.withAlpha(180),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      boxShadow: Theme.of(
+                        context,
+                      ).extension<PetfolioShadows>()?.button,
                     ),
-                    child: Icon(Icons.add, color: colorScheme.onPrimary, size: 28),
+                    child: Icon(
+                      Icons.add,
+                      color: colorScheme.onPrimary,
+                      size: 28,
+                    ),
                   ),
                 );
               }
@@ -172,13 +172,28 @@ class _GlassNavBar extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () => onTap(i),
                   behavior: HitTestBehavior.opaque,
-                  child: Center(child: child),
+                  child: Center(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 280),
+                      curve: Curves.easeOut,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: ShapeDecoration(
+                        color: isActive
+                            ? colorScheme.primary.withValues(alpha: 0.10)
+                            : Colors.transparent,
+                        shape: const StadiumBorder(),
+                      ),
+                      child: child,
+                    ),
+                  ),
                 ),
               );
             }),
           ),
         ),
-      ),
     );
   }
 }

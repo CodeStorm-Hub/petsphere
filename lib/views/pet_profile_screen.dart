@@ -254,18 +254,18 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                 ref.watch(ownerFollowerCountProvider(statsUserId)).when(
                                   data: (c) => _StatColumn(label: 'followers', value: '$c'),
                                   loading: () => const _StatColumn(label: 'followers', value: '···'),
-                                  error: (_, __) => const _StatColumn(label: 'followers', value: '0'),
+                                  error: (_, _) => const _StatColumn(label: 'followers', value: '0'),
                                 ),
                                 ref.watch(followingCountProvider(statsUserId)).when(
                                   data: (c) => _StatColumn(label: 'following', value: '$c'),
                                   loading: () => const _StatColumn(label: 'following', value: '···'),
-                                  error: (_, __) => const _StatColumn(label: 'following', value: '0'),
+                                  error: (_, _) => const _StatColumn(label: 'following', value: '0'),
                                 ),
                               ] else if (selectedPet != null) ...[
                                 ref.watch(petFollowerCountProvider(selectedPet.id)).when(
                                   data: (c) => _StatColumn(label: 'followers', value: '$c'),
                                   loading: () => const _StatColumn(label: 'followers', value: '···'),
-                                  error: (_, __) => const _StatColumn(label: 'followers', value: '0'),
+                                  error: (_, _) => const _StatColumn(label: 'followers', value: '0'),
                                 ),
                                 _StatColumn(label: 'pets', value: '${profilePets.length}'),
                               ],
@@ -615,7 +615,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                               Image.network(
                                 post.mediaUrl,
                                 fit: BoxFit.cover,
-                                errorBuilder: (ctx, _, __) => Container(
+                                errorBuilder: (ctx, _, _) => Container(
                                   color: colorScheme.surfaceContainer,
                                   child: Icon(Icons.image_outlined, color: colorScheme.onSurfaceVariant),
                                 ),
@@ -1032,7 +1032,7 @@ class _ProfileVisitorActionRow extends ConsumerWidget {
           ),
         ),
       ),
-      error: (_, __) => ElevatedButton(
+      error: (_, _) => ElevatedButton(
         onPressed: () {
           ref.read(followControllerProvider.notifier).toggleFollowOwner(ownerId);
         },
@@ -1076,7 +1076,7 @@ class _ProfileVisitorActionRow extends ConsumerWidget {
           ),
         ),
       ),
-      error: (_, __) => ElevatedButton(
+      error: (_, _) => ElevatedButton(
         onPressed: () {
           ref.read(followControllerProvider.notifier).toggleFollowPet(petId);
         },

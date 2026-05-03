@@ -318,7 +318,7 @@ class _BadgesGrid extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const Text('Failed to load badge definitions'),
+      error: (_, _) => const Text('Failed to load badge definitions'),
     );
   }
 }

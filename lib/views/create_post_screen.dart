@@ -93,7 +93,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       Expanded(
                         child: ListView.separated(
                           itemCount: availablePets.length,
-                          separatorBuilder: (_, __) => Divider(
+                          separatorBuilder: (_, _) => Divider(
                               height: 1, color: colorScheme.outline),
                           itemBuilder: (context, index) {
                             final pet = availablePets[index];
@@ -457,7 +457,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: myPets.length,
-                          separatorBuilder: (_, __) =>
+                          separatorBuilder: (_, _) =>
                               const SizedBox(width: 10),
                           itemBuilder: (context, index) {
                             final pet = myPets[index];
