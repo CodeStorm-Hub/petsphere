@@ -281,7 +281,13 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
 
     if (!liked) return;
 
-    ref.read(matchProvider.notifier).sendLikeRequest(pet.id).then((success) {
+    // Pass the currently-selected discovery pet so the like is sent from
+    // the correct pet (not the global active pet).
+    final discoveryPetId = ref.read(discoveryActivePetIdProvider);
+    ref
+        .read(matchProvider.notifier)
+        .sendLikeRequest(pet.id, fromPetId: discoveryPetId)
+        .then((success) {
       if (!mounted) return;
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -292,6 +298,7 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
         );
         return;
       }
+      // On failure: re-show the pet by removing it from the dismissed set.
       setState(() => dismissedPetIds.remove(pet.id));
       final error = ref.read(matchProvider).error;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -418,16 +425,25 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
     ref.listen<MatchState>(matchProvider, (prev, next) {
       if (!mounted) return;
       final petsChanged = prev?.discoveryPets != next.discoveryPets;
-      // A load just finished with an empty feed for the selected pet.
-      final loadFinishedEmpty =
-          prev?.isLoading == true && !next.isLoading && next.discoveryPets.isEmpty;
+      // A full load cycle just completed (isLoading transitioned false→false
+      // via true, i.e. prev was loading and now it's done).
+      final loadCycleFinished =
+          prev?.isLoading == true && !next.isLoading;
+      final loadFinishedEmpty = loadCycleFinished && next.discoveryPets.isEmpty;
 
       if (!petsChanged && !loadFinishedEmpty) return;
 
       final currentIds = next.discoveryPets.map((p) => p.id).toSet();
       setState(() {
         if (petsChanged) {
-          dismissedPetIds.removeWhere((id) => !currentIds.contains(id));
+          // Only purge dismissed IDs during a real load cycle (when
+          // isLoading transitioned). Optimistic updates from sendLikeRequest
+          // set petsChanged=true but keep isLoading=false throughout, so we
+          // skip the purge there to avoid re-showing the just-dismissed pet
+          // if a concurrent network fetch brings it back momentarily.
+          if (loadCycleFinished) {
+            dismissedPetIds.removeWhere((id) => !currentIds.contains(id));
+          }
           _clampIndex(next.discoveryPets);
         }
         if (loadFinishedEmpty) {

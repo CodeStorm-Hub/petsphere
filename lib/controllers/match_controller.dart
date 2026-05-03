@@ -91,15 +91,19 @@ class MatchController extends Notifier<MatchState> {
     return state;
   }
 
-  Future<void> _load(String myPetId) async {
+  // When [silent] is true the loading flag is NOT set, so the UI avoids a
+  // full-screen spinner. Use this for background refreshes (e.g. after a like).
+  Future<void> _load(String myPetId, {bool silent = false}) async {
     final gen = ++_loadGeneration;
     final userId = ref.read(authProvider).user?.id;
     if (userId == null) {
-      state = state.copyWith(isLoading: false);
+      if (!silent) state = state.copyWith(isLoading: false);
       return;
     }
 
-    state = state.copyWith(isLoading: true, clearError: true);
+    if (!silent) state = state.copyWith(isLoading: true, clearError: true);
+
+    _currentDiscoveryPetId = myPetId;
 
     try {
       final futures = await Future.wait([
@@ -142,6 +146,12 @@ class MatchController extends Notifier<MatchState> {
   /// activePetProvider. Used by the per-tab pet selector on the discovery
   /// screen so the global active pet remains unchanged.
   Future<void> load(String petId) async => _load(petId);
+
+  /// The pet ID that was most recently loaded into this controller.
+  /// Tracks which pet the discovery screen is currently browsing for,
+  /// even when it differs from the global [activePetProvider].
+  String? get currentDiscoveryPetId => _currentDiscoveryPetId;
+  String? _currentDiscoveryPetId;
 
   void setFilterBreed(String? breed) {
     final activePet = ref.read(activePetProvider);
@@ -199,12 +209,32 @@ class MatchController extends Notifier<MatchState> {
     }).toList();
   }
 
-  Future<bool> sendLikeRequest(String receiverPetId) async {
-    final activePet = ref.read(activePetProvider);
-    if (activePet == null) return false;
+  /// Send a like/match request from the currently-browsing pet to [receiverPetId].
+  ///
+  /// [fromPetId] should be the pet selected in the Discovery tab
+  /// (from [discoveryActivePetIdProvider]). It defaults to the global
+  /// [activePetProvider] only as a fallback.
+  Future<bool> sendLikeRequest(
+    String receiverPetId, {
+    String? fromPetId,
+  }) async {
+    // Resolve the sender: prefer the explicitly passed discovery pet,
+    // fall back to _currentDiscoveryPetId, then the global active pet.
+    final myPets = ref.read(petProvider).myPets;
+    final targetId = fromPetId ?? _currentDiscoveryPetId;
+    PetModel? senderPet;
+    if (targetId != null) {
+      try {
+        senderPet = myPets.firstWhere((p) => p.id == targetId);
+      } catch (_) {
+        senderPet = null;
+      }
+    }
+    senderPet ??= ref.read(activePetProvider);
+    if (senderPet == null) return false;
 
     // Prevent liking own pets
-    final myPetIds = ref.read(petProvider).myPets.map((p) => p.id).toSet();
+    final myPetIds = myPets.map((p) => p.id).toSet();
     if (myPetIds.contains(receiverPetId)) {
       state = state.copyWith(error: 'You cannot like your own pet.');
       return false;
@@ -221,9 +251,11 @@ class MatchController extends Notifier<MatchState> {
 
     try {
       await matchRepository.sendLikeRequest(
-        senderPetId: activePet.id,
+        senderPetId: senderPet.id,
         receiverPetId: receiverPetId,
       );
+
+      // Optimistically remove the liked pet from the in-memory list.
       final discoveryPets =
           state.discoveryPets.where((p) => p.id != receiverPetId).toList();
       final allDiscoveryPets =
@@ -239,16 +271,17 @@ class MatchController extends Notifier<MatchState> {
           targetUserId: receiverPet.userId,
           title: 'New breeding interest',
           body:
-              '${activePet.name} is interested in breeding with ${receiverPet.name}.',
+              '${senderPet.name} is interested in breeding with ${receiverPet.name}.',
           type: 'match_request',
           entityType: 'match_request',
-          entityId: activePet.id,
-          actorPetId: activePet.id,
+          entityId: senderPet.id,
+          actorPetId: senderPet.id,
         );
       }
 
-      // Refresh sent requests
-      _load(activePet.id);
+      // Silent background refresh for the correct (discovery-selected) pet —
+      // does NOT show a loading spinner, so the UI transition is seamless.
+      _load(senderPet.id, silent: true);
       return true;
     } catch (e) {
       state = state.copyWith(error: 'Could not send request: $e');
