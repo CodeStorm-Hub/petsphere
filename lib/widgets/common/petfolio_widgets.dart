@@ -67,14 +67,14 @@ class PillButton extends StatefulWidget {
   });
 
   @override
-  State<PillButton> createState() => _PillButtonState();
+  State<PillButton> createState() => PillButtonState();
 }
 
-class _PillButtonState extends State<PillButton> {
-  bool _pressed = false;
+class PillButtonState extends State<PillButton> {
+  bool pressed = false;
 
-  void _setPressed(bool value) {
-    if (_pressed != value) setState(() => _pressed = value);
+  void setPressed(bool value) {
+    if (pressed != value) setState(() => pressed = value);
   }
 
   @override
@@ -106,11 +106,11 @@ class _PillButtonState extends State<PillButton> {
           );
 
     return GestureDetector(
-      onTapDown: widget.onPressed == null ? null : (_) => _setPressed(true),
-      onTapCancel: widget.onPressed == null ? null : () => _setPressed(false),
-      onTapUp: widget.onPressed == null ? null : (_) => _setPressed(false),
+      onTapDown: widget.onPressed == null ? null : (_) => setPressed(true),
+      onTapCancel: widget.onPressed == null ? null : () => setPressed(false),
+      onTapUp: widget.onPressed == null ? null : (_) => setPressed(false),
       child: AnimatedScale(
-        scale: _pressed ? 0.97 : 1,
+        scale: pressed ? 0.97 : 1,
         duration: const Duration(milliseconds: 120),
         curve: Curves.easeOut,
         child: button,
@@ -144,30 +144,30 @@ class AnimatedBadge extends StatefulWidget {
   const AnimatedBadge({super.key, required this.child});
 
   @override
-  State<AnimatedBadge> createState() => _AnimatedBadgeState();
+  State<AnimatedBadge> createState() => AnimatedBadgeState();
 }
 
-class _AnimatedBadgeState extends State<AnimatedBadge>
+class AnimatedBadgeState extends State<AnimatedBadge>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _scale;
+  late final AnimationController controller;
+  late final Animation<double> scale;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
-    _scale = Tween<double>(
+    scale = Tween<double>(
       begin: 1,
       end: 1.4,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    controller.dispose();
     super.dispose();
   }
 
@@ -186,7 +186,7 @@ class _AnimatedBadgeState extends State<AnimatedBadge>
         mainAxisSize: MainAxisSize.min,
         children: [
           ScaleTransition(
-            scale: _scale,
+            scale: scale,
             child: Container(
               width: 8,
               height: 8,
@@ -210,27 +210,27 @@ class VitalsBar extends StatefulWidget {
   const VitalsBar({super.key, required this.value});
 
   @override
-  State<VitalsBar> createState() => _VitalsBarState();
+  State<VitalsBar> createState() => VitalsBarState();
 }
 
-class _VitalsBarState extends State<VitalsBar>
+class VitalsBarState extends State<VitalsBar>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late Animation<double> _animation;
+  late final AnimationController controller;
+  late Animation<double> animation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _animation = Tween<double>(
+    animation = Tween<double>(
       begin: 0,
       end: widget.value.clamp(0, 1),
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _controller.forward();
+      if (mounted) controller.forward();
     });
   }
 
@@ -238,17 +238,17 @@ class _VitalsBarState extends State<VitalsBar>
   void didUpdateWidget(covariant VitalsBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.value != widget.value) {
-      _animation = Tween<double>(
-        begin: _animation.value,
+      animation = Tween<double>(
+        begin: animation.value,
         end: widget.value.clamp(0, 1),
-      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-      _controller.forward(from: 0);
+      ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
+      controller.forward(from: 0);
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    controller.dispose();
     super.dispose();
   }
 
@@ -256,12 +256,12 @@ class _VitalsBarState extends State<VitalsBar>
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return AnimatedBuilder(
-      animation: _animation,
+      animation: animation,
       builder: (context, _) {
         return ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
-            value: _animation.value,
+            value: animation.value,
             minHeight: 8,
             backgroundColor: colorScheme.surfaceContainerHigh,
             valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
@@ -287,17 +287,17 @@ class ShimmerLoader extends StatefulWidget {
   });
 
   @override
-  State<ShimmerLoader> createState() => _ShimmerLoaderState();
+  State<ShimmerLoader> createState() => ShimmerLoaderState();
 }
 
-class _ShimmerLoaderState extends State<ShimmerLoader>
+class ShimmerLoaderState extends State<ShimmerLoader>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+  late final AnimationController controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat();
@@ -305,7 +305,7 @@ class _ShimmerLoaderState extends State<ShimmerLoader>
 
   @override
   void dispose() {
-    _controller.dispose();
+    controller.dispose();
     super.dispose();
   }
 
@@ -313,7 +313,7 @@ class _ShimmerLoaderState extends State<ShimmerLoader>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AnimatedBuilder(
-      animation: _controller,
+      animation: controller,
       builder: (context, _) {
         return Container(
           height: widget.height,
@@ -321,8 +321,8 @@ class _ShimmerLoaderState extends State<ShimmerLoader>
           decoration: BoxDecoration(
             borderRadius: widget.borderRadius,
             gradient: LinearGradient(
-              begin: Alignment(-1 + _controller.value * 2, 0),
-              end: Alignment(_controller.value * 2, 0),
+              begin: Alignment(-1 + controller.value * 2, 0),
+              end: Alignment(controller.value * 2, 0),
               colors: [
                 theme.colorScheme.surfaceContainerHigh,
                 theme.colorScheme.surfaceContainer,
@@ -343,7 +343,7 @@ class FadeSlideIn extends StatefulWidget {
   const FadeSlideIn({super.key, required this.child, this.delayMs = 0});
 
   @override
-  State<FadeSlideIn> createState() => _FadeSlideInState();
+  State<FadeSlideIn> createState() => FadeSlideInState();
 }
 
 class PetfolioGradientBackground extends StatefulWidget {
@@ -353,10 +353,10 @@ class PetfolioGradientBackground extends StatefulWidget {
 
   @override
   State<PetfolioGradientBackground> createState() =>
-      _PetfolioGradientBackgroundState();
+      PetfolioGradientBackgroundState();
 }
 
-class _PetfolioGradientBackgroundState extends State<PetfolioGradientBackground> {
+class PetfolioGradientBackgroundState extends State<PetfolioGradientBackground> {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
@@ -367,25 +367,25 @@ class _PetfolioGradientBackgroundState extends State<PetfolioGradientBackground>
 }
 
 
-class _FadeSlideInState extends State<FadeSlideIn> {
-  bool _visible = false;
+class FadeSlideInState extends State<FadeSlideIn> {
+  bool visible = false;
 
   @override
   void initState() {
     super.initState();
     Future<void>.delayed(Duration(milliseconds: widget.delayMs), () {
-      if (mounted) setState(() => _visible = true);
+      if (mounted) setState(() => visible = true);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
-      opacity: _visible ? 1 : 0,
+      opacity: visible ? 1 : 0,
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeOut,
       child: AnimatedSlide(
-        offset: _visible ? Offset.zero : const Offset(0, 0.15),
+        offset: visible ? Offset.zero : const Offset(0, 0.15),
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeOut,
         child: widget.child,

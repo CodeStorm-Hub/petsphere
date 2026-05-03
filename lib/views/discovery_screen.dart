@@ -12,16 +12,16 @@ import 'main_layout.dart' show bottomNavSpaceFor;
 
 // Tracks which of the user's pets is selected for the discovery tab.
 // Scoped to the discovery tab — does NOT override the global activePetProvider.
-class _DiscoveryPetIdNotifier extends Notifier<String?> {
+class DiscoveryPetIdNotifier extends Notifier<String?> {
   @override
   String? build() => null;
 
   void select(String? petId) => state = petId;
 }
 
-final _discoveryActivePetIdProvider =
-    NotifierProvider<_DiscoveryPetIdNotifier, String?>(
-  _DiscoveryPetIdNotifier.new,
+final discoveryActivePetIdProvider =
+    NotifierProvider<DiscoveryPetIdNotifier, String?>(
+  DiscoveryPetIdNotifier.new,
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -63,18 +63,18 @@ class DiscoveryScreen extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.add_circle_outline),
               tooltip: 'New Listing',
-              onPressed: () => _showListPetSheet(context, ref),
+              onPressed: () => showListPetSheet(context, ref),
             ),
           ],
         ),
         body: TabBarView(
           children: [
-            _DiscoverTab(
+            DiscoveryTab(
               hasActivePet: petState.activePet != null,
               isPetLoading: petState.isLoading,
             ),
-            const _NearbyTab(),
-            _MyListingsTab(listedPets: listedPets, navSpace: navSpace),
+            const NearbyTab(),
+            MyListingsTab(listedPets: listedPets, navSpace: navSpace),
           ],
         ),
       ),
@@ -85,10 +85,10 @@ class DiscoveryScreen extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // My Listings Tab
 // ─────────────────────────────────────────────────────────────────────────────
-class _MyListingsTab extends ConsumerWidget {
+class MyListingsTab extends ConsumerWidget {
   final List<PetModel> listedPets;
   final double navSpace;
-  const _MyListingsTab({required this.listedPets, required this.navSpace});
+  const MyListingsTab({super.key, required this.listedPets, required this.navSpace});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -119,7 +119,7 @@ class _MyListingsTab extends ConsumerWidget {
                 const SizedBox(height: 24),
                 Center(
                   child: OutlinedButton(
-                    onPressed: () => _showListPetSheet(context, ref),
+                    onPressed: () => showListPetSheet(context, ref),
                     child: const Text('Start Listing'),
                   ),
                 ),
@@ -141,7 +141,7 @@ class _MyListingsTab extends ConsumerWidget {
                       radius: 28,
                       backgroundColor: colorScheme.surfaceContainerHighest,
                       backgroundImage: pet.profileImageUrl.isNotEmpty
-                          ? NetworkImage(pet.profileImageUrl)
+                          ? CachedNetworkImageProvider(pet.profileImageUrl)
                           : null,
                       child: pet.profileImageUrl.isEmpty
                           ? Icon(Icons.pets,
@@ -180,26 +180,26 @@ class _MyListingsTab extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // Discover Tab  —  swipeable card stack
 // ─────────────────────────────────────────────────────────────────────────────
-class _DiscoverTab extends ConsumerStatefulWidget {
+class DiscoveryTab extends ConsumerStatefulWidget {
   final bool hasActivePet;
   final bool isPetLoading;
 
-  const _DiscoverTab({
+  const DiscoveryTab({super.key, 
     required this.hasActivePet,
     required this.isPetLoading,
   });
 
   @override
-  ConsumerState<_DiscoverTab> createState() => _DiscoverTabState();
+  ConsumerState<DiscoveryTab> createState() => DiscoveryTabState();
 }
 
-class _DiscoverTabState extends ConsumerState<_DiscoverTab>
+class DiscoveryTabState extends ConsumerState<DiscoveryTab>
     with TickerProviderStateMixin {
-  int _currentIndex = 0;
-  String? _filterAnimal; // null = For You
-  final Set<String> _dismissedPetIds = {};
+  int currentIndex = 0;
+  String? filterAnimal; // null = For You
+  final Set<String> dismissedPetIds = {};
   // Tracks pets whose discovery feeds are known to be empty after loading.
-  final Set<String> _allCaughtUpPetIds = {};
+  final Set<String> allCaughtUpPetIds = {};
 
   // Drag tracking
   double _dragX = 0.0;
@@ -239,9 +239,9 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final activePetId = ref.read(petProvider).activePet?.id;
-      if (ref.read(_discoveryActivePetIdProvider) == null &&
+      if (ref.read(discoveryActivePetIdProvider) == null &&
           activePetId != null) {
-        ref.read(_discoveryActivePetIdProvider.notifier).select(activePetId);
+        ref.read(discoveryActivePetIdProvider.notifier).select(activePetId);
       }
     });
   }
@@ -274,7 +274,7 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
     final allPets = ref.read(matchProvider).discoveryPets;
     setState(() {
       _dragX = 0;
-      _dismissedPetIds.add(pet.id);
+      dismissedPetIds.add(pet.id);
       _clampIndex(allPets);
       _isAnimating = false;
     });
@@ -292,7 +292,7 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
         );
         return;
       }
-      setState(() => _dismissedPetIds.remove(pet.id));
+      setState(() => dismissedPetIds.remove(pet.id));
       final error = ref.read(matchProvider).error;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -350,7 +350,7 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
     final filteredPets =
         _applyFilter(ref.read(matchProvider).discoveryPets);
     if (_isAnimating || filteredPets.isEmpty) return;
-    final pet = filteredPets[_currentIndex];
+    final pet = filteredPets[currentIndex];
     _swipingPet = pet;
     _pendingLike = liked;
 
@@ -369,22 +369,22 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
 
   List<PetModel> _applyFilter(List<PetModel> allPets) {
     final visible =
-        allPets.where((p) => !_dismissedPetIds.contains(p.id)).toList();
-    if (_filterAnimal == null) return visible;
-    if (_filterAnimal == 'Nearby') {
+        allPets.where((p) => !dismissedPetIds.contains(p.id)).toList();
+    if (filterAnimal == null) return visible;
+    if (filterAnimal == 'Nearby') {
       return [...visible]
         ..sort((a, b) =>
             _fakeDistanceMi(a).compareTo(_fakeDistanceMi(b)));
     }
-    return visible.where((p) => p.animalType == _filterAnimal).toList();
+    return visible.where((p) => p.animalType == filterAnimal).toList();
   }
 
   void _clampIndex(List<PetModel> allPets) {
     final filtered = _applyFilter(allPets);
     if (filtered.isEmpty) {
-      _currentIndex = 0;
-    } else if (_currentIndex >= filtered.length) {
-      _currentIndex = filtered.length - 1;
+      currentIndex = 0;
+    } else if (currentIndex >= filtered.length) {
+      currentIndex = filtered.length - 1;
     }
   }
 
@@ -401,10 +401,10 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
       _swipingPet = null;
       _pendingLike = null;
     }
-    ref.read(_discoveryActivePetIdProvider.notifier).select(pet.id);
+    ref.read(discoveryActivePetIdProvider.notifier).select(pet.id);
     setState(() {
-      _dismissedPetIds.clear();
-      _currentIndex = 0;
+      dismissedPetIds.clear();
+      currentIndex = 0;
       _dragX = 0;
     });
     ref.read(matchProvider.notifier).load(pet.id);
@@ -427,13 +427,13 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
       final currentIds = next.discoveryPets.map((p) => p.id).toSet();
       setState(() {
         if (petsChanged) {
-          _dismissedPetIds.removeWhere((id) => !currentIds.contains(id));
+          dismissedPetIds.removeWhere((id) => !currentIds.contains(id));
           _clampIndex(next.discoveryPets);
         }
         if (loadFinishedEmpty) {
-          final selId = ref.read(_discoveryActivePetIdProvider) ??
+          final selId = ref.read(discoveryActivePetIdProvider) ??
               ref.read(petProvider).activePet?.id;
-          if (selId != null) _allCaughtUpPetIds.add(selId);
+          if (selId != null) allCaughtUpPetIds.add(selId);
         }
       });
     });
@@ -520,8 +520,8 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
       children: [
         // ── Pet selector (only when user has multiple pets) ──────────
         if (myPets.length > 1)
-          _PetSelectorBar(
-            allCaughtUpPetIds: _allCaughtUpPetIds,
+          PetSelectorBar(
+            allCaughtUpPetIds: allCaughtUpPetIds,
             onPetSelected: _selectPet,
           ),
 
@@ -533,13 +533,13 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
           child: Row(
             children: List.generate(_filterLabels.length, (i) {
               final value = _filterValues[i];
-              final isSelected = _filterAnimal == value;
+              final isSelected = filterAnimal == value;
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: GestureDetector(
                   onTap: () => setState(() {
-                    _filterAnimal = value;
-                    _currentIndex = 0;
+                    filterAnimal = value;
+                    currentIndex = 0;
                   }),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
@@ -616,8 +616,8 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
                                 top: 8,
                                 child: Transform.scale(
                                   scale: 0.95,
-                                  child: _PetCard(
-                                    pet: filteredPets[(_currentIndex + 1) %
+                                  child: PetCard(
+                                    pet: filteredPets[(currentIndex + 1) %
                                         filteredPets.length],
                                     isBackground: true,
                                     dragX: 0,
@@ -637,12 +637,12 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
                                 ),
                                 child: Transform.rotate(
                                   angle: (_dragX / screenWidth) * 0.35,
-                                  child: _PetCard(
-                                    pet: filteredPets[_currentIndex],
+                                  child: PetCard(
+                                    pet: filteredPets[currentIndex],
                                     isBackground: false,
                                     dragX: _dragX,
                                     onTap: () => context.push(
-                                        '/pet/${filteredPets[_currentIndex].id}'),
+                                        '/pet/${filteredPets[currentIndex].id}'),
                                   ),
                                 ),
                               ),
@@ -660,7 +660,7 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
                               MainAxisAlignment.center,
                           children: [
                             // Skip
-                            _ActionButton(
+                            ActionButton(
                               size: 64,
                               color: colorScheme.surfaceContainerHighest,
                               borderColor: colorScheme.outline.withAlpha(80),
@@ -672,7 +672,7 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
                             ),
                             const SizedBox(width: 20),
                             // Profile details
-                            _ActionButton(
+                            ActionButton(
                               size: 56,
                               color: colorScheme.surfaceContainerHighest,
                               borderColor: colorScheme.outline.withAlpha(80),
@@ -680,11 +680,11 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
                                   size: 26,
                                   color: colorScheme.secondary),
                               onTap: () => context.push(
-                                  '/pet/${filteredPets[_currentIndex].id}'),
+                                  '/pet/${filteredPets[currentIndex].id}'),
                             ),
                             const SizedBox(width: 20),
                             // Like
-                            _ActionButton(
+                            ActionButton(
                               size: 80,
                               gradient: LinearGradient(
                                 colors: [
@@ -716,13 +716,13 @@ class _DiscoverTabState extends ConsumerState<_DiscoverTab>
 // ─────────────────────────────────────────────────────────────────────────────
 // Pet card — shows image, info section, and swipe overlays
 // ─────────────────────────────────────────────────────────────────────────────
-class _PetCard extends StatelessWidget {
+class PetCard extends StatelessWidget {
   final PetModel pet;
   final bool isBackground;
   final double dragX;
   final VoidCallback? onTap;
 
-  const _PetCard({
+  const PetCard({super.key, 
     required this.pet,
     required this.isBackground,
     required this.dragX,
@@ -793,10 +793,10 @@ class _PetCard extends StatelessWidget {
                 children: [
                   // Pet image
                   pet.profileImageUrl.isNotEmpty
-                      ? Image.network(
-                          pet.profileImageUrl,
+                      ? CachedNetworkImage(
+                          imageUrl: pet.profileImageUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => _imageFallback(colorScheme),
+                          errorWidget: (_, _, _) => _imageFallback(colorScheme),
                         )
                       : _imageFallback(colorScheme),
 
@@ -864,7 +864,7 @@ class _PetCard extends StatelessWidget {
                       ),
                     ),
 
-                  // Distance badge
+                  // DistanceBadge
                   Positioned(
                     bottom: 20,
                     left: 20,
@@ -998,8 +998,8 @@ class _PetCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // Nearby Tab
 // ─────────────────────────────────────────────────────────────────────────────
-class _NearbyTab extends ConsumerWidget {
-  const _NearbyTab();
+class NearbyTab extends ConsumerWidget {
+  const NearbyTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1129,7 +1129,7 @@ class _TraitBadge extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
+class ActionButton extends StatelessWidget {
   final double size;
   final Color? color;
   final Color? borderColor;
@@ -1138,7 +1138,7 @@ class _ActionButton extends StatelessWidget {
   final Widget child;
   final VoidCallback onTap;
 
-  const _ActionButton({
+  const ActionButton({super.key, 
     required this.size,
     required this.child,
     required this.onTap,
@@ -1191,11 +1191,11 @@ class _ActionButton extends StatelessWidget {
 
 /// Renders a horizontal scrollable row of pet chips.
 /// Hidden when the user has only one pet.
-class _PetSelectorBar extends ConsumerWidget {
+class PetSelectorBar extends ConsumerWidget {
   final Set<String> allCaughtUpPetIds;
   final ValueChanged<PetModel> onPetSelected;
 
-  const _PetSelectorBar({
+  const PetSelectorBar({super.key, 
     required this.allCaughtUpPetIds,
     required this.onPetSelected,
   });
@@ -1205,7 +1205,7 @@ class _PetSelectorBar extends ConsumerWidget {
     final myPets = ref.watch(petProvider).myPets;
     if (myPets.length <= 1) return const SizedBox.shrink();
 
-    final selectedId = ref.watch(_discoveryActivePetIdProvider) ??
+    final selectedId = ref.watch(discoveryActivePetIdProvider) ??
         ref.watch(petProvider).activePet?.id;
 
     return SizedBox(
@@ -1341,7 +1341,7 @@ class _PetSelectorChip extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // List a pet for breeding — bottom sheet
 // ─────────────────────────────────────────────────────────────────────────────
-void _showListPetSheet(BuildContext context, WidgetRef ref) {
+void showListPetSheet(BuildContext context, WidgetRef ref) {
   final myOwnedPets = ref.read(petProvider).myPets;
   final colorScheme = Theme.of(context).colorScheme;
   showModalBottomSheet(

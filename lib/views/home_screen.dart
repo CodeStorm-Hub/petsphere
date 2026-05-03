@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
@@ -449,7 +450,7 @@ class HomeScreen extends ConsumerWidget {
                                           colorScheme.surfaceContainerHighest,
                                       backgroundImage:
                                           pet.profileImageUrl.isNotEmpty
-                                          ? NetworkImage(pet.profileImageUrl)
+                                          ? CachedNetworkImageProvider(pet.profileImageUrl)
                                           : null,
                                       child: pet.profileImageUrl.isEmpty
                                           ? Text(
@@ -965,7 +966,7 @@ class _StoryItem extends StatelessWidget {
     Widget avatar = CircleAvatar(
       radius: innerRadius,
       backgroundColor: colorScheme.surfaceContainerHighest,
-      backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+      backgroundImage: imageUrl.isNotEmpty ? CachedNetworkImageProvider(imageUrl) : null,
       child: imageUrl.isEmpty
           ? Icon(
               Icons.pets,

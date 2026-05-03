@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../controllers/auth_controller.dart';
@@ -24,7 +25,7 @@ import 'components/public_care_badges_row.dart';
 typedef VisitProfileArgs = ({String? petId, String? userId});
 
 /// Loads a host user + all their pets (for `/pet/:id` and `/user/:id` visitor profile).
-final _visitProfileDataProvider = FutureProvider.family<
+final visitProfileDataProvider = FutureProvider.family<
     Map<String, dynamic>, VisitProfileArgs>((ref, args) async {
   final petId = args.petId;
   final userIdArg = args.userId;
@@ -64,14 +65,14 @@ class PetProfileScreen extends ConsumerStatefulWidget {
 
 class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
   String? selectedId;
-  String? _postCategory;
+  String? postCategory;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     if (widget.visitPetId != null || widget.visitUserId != null) {
       return ref
-          .watch(_visitProfileDataProvider((
+          .watch(visitProfileDataProvider((
         petId: widget.visitPetId,
         userId: widget.visitUserId,
       )))
@@ -84,15 +85,15 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
           appBar: AppBar(leading: const BackButton()),
           body: Center(child: Text('Error: $e')),
         ),
-        data: (d) => _buildScaffoldCore(
+        data: (d) => buildScaffoldCore(
             isVisitor: true, visitData: d, colorScheme: colorScheme),
       );
     }
-    return _buildScaffoldCore(
+    return buildScaffoldCore(
         isVisitor: false, visitData: null, colorScheme: colorScheme);
   }
 
-  Widget _buildScaffoldCore({
+  Widget buildScaffoldCore({
     required bool isVisitor,
     required ColorScheme colorScheme,
     Map<String, dynamic>? visitData,
@@ -154,11 +155,11 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
             .where((post) => post.pet.id == selectedPet?.id)
             .toList();
 
-    final displayedPosts = (_postCategory == null || isOwnerView)
+    final displayedPosts = (postCategory == null || isOwnerView)
         ? allPetPosts
         : allPetPosts
             .where((p) =>
-                p.caption.toLowerCase().contains(_postCategory!.toLowerCase()))
+                p.caption.toLowerCase().contains(postCategory!.toLowerCase()))
             .toList();
 
     final statsUserId = postsUserId;
@@ -169,7 +170,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
       body: RefreshIndicator(
         onRefresh: () async {
           if (isVisitor) {
-            ref.invalidate(_visitProfileDataProvider((
+            ref.invalidate(visitProfileDataProvider((
               petId: widget.visitPetId,
               userId: widget.visitUserId,
             )));
@@ -210,7 +211,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                   Padding(
                     padding: const EdgeInsets.only(right: 4),
                     child: InkWell(
-                      onTap: () => _showLogoutConfirmation(context),
+                      onTap: () => showLogoutConfirmation(context),
                       borderRadius: BorderRadius.circular(24),
                       child: Container(
                         padding: const EdgeInsets.all(8),
@@ -257,7 +258,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        _buildFloatingAvatar(
+                        buildFloatingAvatar(
                           colorScheme: colorScheme,
                           isOwnerView: isOwnerView,
                           ownerForHeader: ownerForHeader,
@@ -268,7 +269,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              _StatColumn(
+                              StatColumn(
                                 label: 'posts',
                                 value: '${displayedPosts.length}',
                               ),
@@ -277,22 +278,22 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                     .watch(ownerFollowerCountProvider(
                                         statsUserId))
                                     .when(
-                                      data: (c) => _StatColumn(
+                                      data: (c) => StatColumn(
                                           label: 'followers', value: '$c'),
-                                      loading: () => const _StatColumn(
+                                      loading: () => const StatColumn(
                                           label: 'followers', value: '···'),
-                                      error: (_, _) => const _StatColumn(
+                                      error: (_, _) => const StatColumn(
                                           label: 'followers', value: '0'),
                                     ),
                                 ref
                                     .watch(
                                         followingCountProvider(statsUserId))
                                     .when(
-                                      data: (c) => _StatColumn(
+                                      data: (c) => StatColumn(
                                           label: 'following', value: '$c'),
-                                      loading: () => const _StatColumn(
+                                      loading: () => const StatColumn(
                                           label: 'following', value: '···'),
-                                      error: (_, _) => const _StatColumn(
+                                      error: (_, _) => const StatColumn(
                                           label: 'following', value: '0'),
                                     ),
                               ] else if (selectedPet != null) ...[
@@ -300,14 +301,14 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                     .watch(petFollowerCountProvider(
                                         selectedPet.id))
                                     .when(
-                                      data: (c) => _StatColumn(
+                                      data: (c) => StatColumn(
                                           label: 'followers', value: '$c'),
-                                      loading: () => const _StatColumn(
+                                      loading: () => const StatColumn(
                                           label: 'followers', value: '···'),
-                                      error: (_, _) => const _StatColumn(
+                                      error: (_, _) => const StatColumn(
                                           label: 'followers', value: '0'),
                                     ),
-                                _StatColumn(
+                                StatColumn(
                                   label: 'pets',
                                   value: '${profilePets.length}',
                                 ),
@@ -355,7 +356,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     if (!isVisitor &&
                         isOwnerView &&
                         accountUser?.email != null)
-                      _InfoChip(
+                      InfoChip(
                         icon: Icons.alternate_email_rounded,
                         text:
                             '${accountUser!.email}${accountUser.location?.isNotEmpty == true ? "  ·  ${accountUser.location}" : ""}',
@@ -364,13 +365,13 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     if (isVisitor &&
                         isOwnerView &&
                         (visitHostUser?.location?.isNotEmpty ?? false))
-                      _InfoChip(
+                      InfoChip(
                         icon: Icons.location_on_outlined,
                         text: visitHostUser!.location!,
                         colorScheme: colorScheme,
                       ),
                     if (!isOwnerView && selectedPet != null)
-                      _InfoChip(
+                      InfoChip(
                         icon: Icons.pets_rounded,
                         text:
                             '${selectedPet.breed}  ·  ${selectedPet.animalType}',
@@ -419,11 +420,11 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
 
                     // ── Action buttons ───────────────────────────────
                     if (isVisitor)
-                      _ProfileVisitorActionRow(
+                      ProfileVisitorActionRow(
                         isOwnerView: isOwnerView,
                         visitHostUser: visitHostUser!,
                         selectedPet: selectedPet,
-                        onMessage: () => _onVisitorMessage(
+                        onMessage: () => onVisitorMessage(
                           isOwnerView: isOwnerView,
                           selectedPet: selectedPet,
                           profilePets: profilePets,
@@ -435,7 +436,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           final name = isOwnerView
                               ? userName
                               : (selectedPet?.name ?? '');
-                          _showProfileShareSheet(context, link, name);
+                          showProfileShareSheet(context, link, name);
                         },
                       )
                     else
@@ -448,9 +449,9 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                               label: const Text('Edit Profile'),
                               onPressed: () {
                                 if (isOwnerView) {
-                                  _showEditOwnerSheet(context, accountUser);
+                                  showEditOwnerSheet(context, accountUser);
                                 } else if (selectedPet != null) {
-                                  _showEditPetSheet(context, selectedPet);
+                                  showEditPetSheet(context, selectedPet);
                                 }
                               },
                               style: ElevatedButton.styleFrom(
@@ -479,7 +480,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                 final name = isOwnerView
                                     ? userName
                                     : (selectedPet?.name ?? '');
-                                _showProfileShareSheet(context, link, name);
+                                showProfileShareSheet(context, link, name);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
@@ -560,7 +561,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () => setState(() => selectedId = 'owner'),
-                      child: _OwnerCarouselAvatar(
+                      child: OwnerCarouselAvatar(
                         user: ownerForHeader,
                         isSelected: isOwnerView,
                       ),
@@ -569,7 +570,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () => setState(() => selectedId = pet.id),
-                        child: _PetCarouselAvatar(
+                        child: PetCarouselAvatar(
                           pet: pet,
                           isSelected: pet.id == selectedId,
                         ),
@@ -578,7 +579,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () => context.push('/add_pet'),
-                        child: const _AddPetAvatar(),
+                        child: const AddPetAvatar(),
                       ),
                   ],
                 ),
@@ -604,13 +605,13 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           padding: const EdgeInsets.only(right: 8),
                           child: GestureDetector(
                             onTap: () =>
-                                setState(() => _postCategory = cat),
+                                setState(() => postCategory = cat),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 8),
                               decoration: BoxDecoration(
-                                color: _postCategory == cat
+                                color: postCategory == cat
                                     ? colorScheme.secondary
                                     : colorScheme.secondaryContainer,
                                 borderRadius: BorderRadius.circular(9999),
@@ -620,7 +621,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                 style: GoogleFonts.dmSans(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
-                                  color: _postCategory == cat
+                                  color: postCategory == cat
                                       ? colorScheme.onSecondary
                                       : colorScheme.onSecondaryContainer,
                                 ),
@@ -638,7 +639,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
             // ── Posts grid ────────────────────────────────────────────
             if (profilePets.isEmpty && isOwnerView && !isVisitor)
               SliverToBoxAdapter(
-                child: _EmptyPetsCta(
+                child: EmptyPetsCta(
                   onAddPet: () => context.push('/add_pet'),
                 ),
               )
@@ -742,14 +743,17 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                   ),
                                 )
                               else
-                                Image.network(
-                                  post.mediaUrl,
+                                CachedNetworkImage(
+                                  imageUrl: post.mediaUrl,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (ctx, _, _) => Container(
+                                  placeholder: (context, url) => Container(
+                                    color: colorScheme.surfaceContainer,
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      Container(
                                     color: colorScheme.surfaceContainer,
                                     child: Icon(Icons.image_outlined,
-                                        color:
-                                            colorScheme.onSurfaceVariant),
+                                        color: colorScheme.onSurfaceVariant),
                                   ),
                                 ),
                               if (isVideoMedia(post.mediaUrl))
@@ -772,7 +776,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                         colorScheme.surfaceContainerHighest,
                                     backgroundImage: post
                                             .pet.profileImageUrl.isNotEmpty
-                                        ? NetworkImage(
+                                        ? CachedNetworkImageProvider(
                                             post.pet.profileImageUrl)
                                         : null,
                                     child: post.pet.profileImageUrl.isEmpty
@@ -821,7 +825,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
   }
 
   /// Premium circular avatar with warm amber ring.
-  Widget _buildFloatingAvatar({
+  Widget buildFloatingAvatar({
     required ColorScheme colorScheme,
     required bool isOwnerView,
     required UserModel? ownerForHeader,
@@ -860,7 +864,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               ? colorScheme.tertiary.withAlpha(26)
               : colorScheme.surfaceContainer,
           backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
-              ? NetworkImage(imageUrl)
+              ? CachedNetworkImageProvider(imageUrl)
               : null,
           child: !hasImage
               ? (isOwnerView
@@ -883,7 +887,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
     );
   }
 
-  void _showProfileShareSheet(
+  void showProfileShareSheet(
       BuildContext context, String shareLink, String name) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -1047,26 +1051,26 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
     );
   }
 
-  void _showEditOwnerSheet(BuildContext context, UserModel? user) {
+  void showEditOwnerSheet(BuildContext context, UserModel? user) {
     if (user == null) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _EditOwnerSheet(user: user),
+      builder: (ctx) => EditOwnerSheet(user: user),
     );
   }
 
-  void _showEditPetSheet(BuildContext context, PetModel pet) {
+  void showEditPetSheet(BuildContext context, PetModel pet) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _EditPetSheet(pet: pet),
+      builder: (ctx) => EditPetSheet(pet: pet),
     );
   }
 
-  void _showLogoutConfirmation(BuildContext context) {
+  void showLogoutConfirmation(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
@@ -1095,7 +1099,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
     );
   }
 
-  Future<void> _onVisitorMessage({
+  Future<void> onVisitorMessage({
     required bool isOwnerView,
     required PetModel? selectedPet,
     required List<PetModel> profilePets,
@@ -1157,8 +1161,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
 // ─────────────────────────────────────────────────────────
 // Visitor Action Row — Follow | Message | Share
 // ─────────────────────────────────────────────────────────
-class _ProfileVisitorActionRow extends ConsumerWidget {
-  const _ProfileVisitorActionRow({
+class ProfileVisitorActionRow extends ConsumerWidget {
+  const ProfileVisitorActionRow({super.key, 
     required this.isOwnerView,
     required this.visitHostUser,
     required this.selectedPet,
@@ -1358,16 +1362,16 @@ class _ProfileVisitorActionRow extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────
 // Edit Owner Profile Bottom Sheet
 // ─────────────────────────────────────────────────────────
-class _EditOwnerSheet extends ConsumerStatefulWidget {
+class EditOwnerSheet extends ConsumerStatefulWidget {
   final UserModel user;
 
-  const _EditOwnerSheet({required this.user});
+  const EditOwnerSheet({super.key, required this.user});
 
   @override
-  ConsumerState<_EditOwnerSheet> createState() => _EditOwnerSheetState();
+  ConsumerState<EditOwnerSheet> createState() => EditOwnerSheetState();
 }
 
-class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
+class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
   late TextEditingController _nameController;
   late TextEditingController _bioController;
   late TextEditingController _locationController;
@@ -1550,7 +1554,8 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
                       backgroundImage: _newAvatar != null
                           ? FileImage(_newAvatar!) as ImageProvider
                           : (hasAvatar
-                              ? NetworkImage(currentAvatarUrl) as ImageProvider
+                              ? CachedNetworkImageProvider(currentAvatarUrl)
+                                  as ImageProvider
                               : null),
                       child: (_newAvatar == null && !hasAvatar)
                           ? Text(
@@ -1591,7 +1596,7 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
               ),
             ),
             const SizedBox(height: 24),
-            _SheetFieldLabel(
+            SheetFieldLabel(
                 icon: Icons.badge_outlined,
                 label: 'Display Name',
                 colorScheme: colorScheme),
@@ -1602,7 +1607,7 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
               decoration: _sheetInputDecoration('Your name', colorScheme),
             ),
             const SizedBox(height: 20),
-            _SheetFieldLabel(
+            SheetFieldLabel(
                 icon: Icons.description_outlined,
                 label: 'Bio',
                 colorScheme: colorScheme),
@@ -1616,7 +1621,7 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
                   'Tell others about yourself...', colorScheme),
             ),
             const SizedBox(height: 20),
-            _SheetFieldLabel(
+            SheetFieldLabel(
                 icon: Icons.location_on_outlined,
                 label: 'Location',
                 colorScheme: colorScheme),
@@ -1693,16 +1698,16 @@ class _EditOwnerSheetState extends ConsumerState<_EditOwnerSheet> {
 // ─────────────────────────────────────────────────────────
 // Edit Pet Bottom Sheet
 // ─────────────────────────────────────────────────────────
-class _EditPetSheet extends ConsumerStatefulWidget {
+class EditPetSheet extends ConsumerStatefulWidget {
   final PetModel pet;
 
-  const _EditPetSheet({required this.pet});
+  const EditPetSheet({super.key, required this.pet});
 
   @override
-  ConsumerState<_EditPetSheet> createState() => _EditPetSheetState();
+  ConsumerState<EditPetSheet> createState() => EditPetSheetState();
 }
 
-class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
+class EditPetSheetState extends ConsumerState<EditPetSheet> {
   late TextEditingController _nameController;
   late TextEditingController _bioController;
   late TextEditingController _breedController;
@@ -1965,7 +1970,8 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
                       backgroundImage: _newAvatar != null
                           ? FileImage(_newAvatar!) as ImageProvider
                           : (widget.pet.profileImageUrl.isNotEmpty
-                              ? NetworkImage(widget.pet.profileImageUrl)
+                              ? CachedNetworkImageProvider(
+                                  widget.pet.profileImageUrl)
                                   as ImageProvider
                               : null),
                       child: (_newAvatar == null &&
@@ -2105,12 +2111,12 @@ class _EditPetSheetState extends ConsumerState<_EditPetSheet> {
 // Shared Widgets
 // ─────────────────────────────────────────────────────────
 
-class _SheetFieldLabel extends StatelessWidget {
+class SheetFieldLabel extends StatelessWidget {
   final IconData icon;
   final String label;
   final ColorScheme colorScheme;
 
-  const _SheetFieldLabel({
+  const SheetFieldLabel({super.key, 
     required this.icon,
     required this.label,
     required this.colorScheme,
@@ -2136,12 +2142,12 @@ class _SheetFieldLabel extends StatelessWidget {
 }
 
 /// Small icon + text chip used for location/breed/email under the name.
-class _InfoChip extends StatelessWidget {
+class InfoChip extends StatelessWidget {
   final IconData icon;
   final String text;
   final ColorScheme colorScheme;
 
-  const _InfoChip({
+  const InfoChip({super.key, 
     required this.icon,
     required this.text,
     required this.colorScheme,
@@ -2174,10 +2180,10 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-class _EmptyPetsCta extends StatelessWidget {
+class EmptyPetsCta extends StatelessWidget {
   final VoidCallback onAddPet;
 
-  const _EmptyPetsCta({required this.onAddPet});
+  const EmptyPetsCta({super.key, required this.onAddPet});
 
   @override
   Widget build(BuildContext context) {
@@ -2246,12 +2252,12 @@ class _EmptyPetsCta extends StatelessWidget {
   }
 }
 
-class _OwnerCarouselAvatar extends StatelessWidget {
+class OwnerCarouselAvatar extends StatelessWidget {
   final UserModel? user;
   final bool isSelected;
 
-  const _OwnerCarouselAvatar(
-      {required this.user, required this.isSelected});
+  const OwnerCarouselAvatar(
+      {super.key, required this.user, required this.isSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -2282,7 +2288,9 @@ class _OwnerCarouselAvatar extends StatelessWidget {
               radius: 14,
               backgroundColor: colorScheme.primary.withAlpha(51),
               backgroundImage:
-                  hasImage ? NetworkImage(user!.profileImageUrl!) : null,
+                  hasImage
+                      ? CachedNetworkImageProvider(user!.profileImageUrl!)
+                      : null,
               child: !hasImage
                   ? Text(
                       user?.initials ?? '?',
@@ -2310,12 +2318,12 @@ class _OwnerCarouselAvatar extends StatelessWidget {
   }
 }
 
-class _PetCarouselAvatar extends StatelessWidget {
+class PetCarouselAvatar extends StatelessWidget {
   final PetModel pet;
   final bool isSelected;
 
-  const _PetCarouselAvatar(
-      {required this.pet, required this.isSelected});
+  const PetCarouselAvatar(
+      {super.key, required this.pet, required this.isSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -2343,7 +2351,7 @@ class _PetCarouselAvatar extends StatelessWidget {
             CircleAvatar(
               radius: 14,
               backgroundImage: pet.profileImageUrl.isNotEmpty
-                  ? NetworkImage(pet.profileImageUrl)
+                  ? CachedNetworkImageProvider(pet.profileImageUrl)
                   : null,
               backgroundColor: colorScheme.surfaceContainer,
               child: pet.profileImageUrl.isEmpty
@@ -2374,8 +2382,8 @@ class _PetCarouselAvatar extends StatelessWidget {
   }
 }
 
-class _AddPetAvatar extends StatelessWidget {
-  const _AddPetAvatar();
+class AddPetAvatar extends StatelessWidget {
+  const AddPetAvatar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -2418,11 +2426,11 @@ class _AddPetAvatar extends StatelessWidget {
   }
 }
 
-class _StatColumn extends StatelessWidget {
+class StatColumn extends StatelessWidget {
   final String label;
   final String value;
 
-  const _StatColumn({required this.label, required this.value});
+  const StatColumn({super.key, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

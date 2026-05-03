@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -36,13 +37,13 @@ class MainLayout extends ConsumerStatefulWidget {
   const MainLayout({super.key});
 
   @override
-  ConsumerState<MainLayout> createState() => _MainLayoutState();
+  ConsumerState<MainLayout> createState() => MainLayoutState();
 }
 
-class _MainLayoutState extends ConsumerState<MainLayout> {
-  int _currentIndex = 0;
+class MainLayoutState extends ConsumerState<MainLayout> {
+  int currentIndex = 0;
 
-  static const List<Widget> _screens = [
+  static const List<Widget> screens = [
     HomeScreen(),
     DiscoveryScreen(),
     SizedBox.shrink(),
@@ -53,7 +54,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
   @override
   Widget build(BuildContext context) {
     ref.listen<String?>(profilePetNavigationProvider, (prev, next) {
-      if (next != null) setState(() => _currentIndex = 4);
+      if (next != null) setState(() => currentIndex = 4);
     });
 
     final activePet = ref.watch(activePetProvider);
@@ -64,8 +65,8 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1200),
           child: IndexedStack(
-            index: _currentIndex,
-            children: _screens,
+            index: currentIndex,
+            children: screens,
           ),
         ),
       ),
@@ -77,15 +78,15 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
             AppTheme.md,
             AppTheme.md,
           ),
-          child: _GlassNavBar(
-            currentIndex: _currentIndex,
+          child: GlassNavBar(
+            currentIndex: currentIndex,
             profileImageUrl: activePet?.profileImageUrl ?? '',
             onTap: (index) {
               if (index == 2) {
                 context.push('/pet_care');
                 return;
               }
-              setState(() => _currentIndex = index);
+              setState(() => currentIndex = index);
             },
           ),
         ),
@@ -94,23 +95,23 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
   }
 }
 
-class _GlassNavBar extends StatelessWidget {
+class GlassNavBar extends StatelessWidget {
   final int currentIndex;
   final String profileImageUrl;
   final ValueChanged<int> onTap;
 
-  const _GlassNavBar({
+  const GlassNavBar({super.key, 
     required this.currentIndex,
     required this.profileImageUrl,
     required this.onTap,
   });
 
-  static const _items = [
-    _NavItem(Icons.home_outlined, Icons.home),
-    _NavItem(Icons.search, Icons.search),
-    _NavItem(Icons.add, Icons.add), // Center FAB
-    _NavItem(Icons.storefront_outlined, Icons.storefront),
-    _NavItem(Icons.person_outline, Icons.person),
+  static const items = [
+    NavItem(Icons.home_outlined, Icons.home),
+    NavItem(Icons.search, Icons.search),
+    NavItem(Icons.add, Icons.add), // Center FAB
+    NavItem(Icons.storefront_outlined, Icons.storefront),
+    NavItem(Icons.person_outline, Icons.person),
   ];
 
 
@@ -130,7 +131,7 @@ class _GlassNavBar extends StatelessWidget {
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(_items.length, (i) {
+            children: List.generate(items.length, (i) {
               final isActive = currentIndex == i;
               final isCenter = i == 2;
               final isProfile = i == 4;
@@ -164,14 +165,14 @@ class _GlassNavBar extends StatelessWidget {
 
               final Widget child;
               if (isProfile) {
-                child = _ProfileTabAvatar(
+                child = ProfileTabAvatar(
                   imageUrl: profileImageUrl,
                   isActive: isActive,
                   ringColor: iconColor,
                 );
               } else {
                 child = Icon(
-                  isActive ? _items[i].active : _items[i].inactive,
+                  isActive ? items[i].active : items[i].inactive,
                   color: iconColor,
                   size: 26,
                 );
@@ -207,12 +208,12 @@ class _GlassNavBar extends StatelessWidget {
   }
 }
 
-class _ProfileTabAvatar extends StatelessWidget {
+class ProfileTabAvatar extends StatelessWidget {
   final String imageUrl;
   final bool isActive;
   final Color ringColor;
 
-  const _ProfileTabAvatar({
+  const ProfileTabAvatar({super.key, 
     required this.imageUrl,
     required this.isActive,
     required this.ringColor,
@@ -224,7 +225,9 @@ class _ProfileTabAvatar extends StatelessWidget {
     final avatar = CircleAvatar(
       radius: 12,
       backgroundColor: colorScheme.surfaceContainerHighest,
-      backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+      backgroundImage: imageUrl.isNotEmpty
+          ? CachedNetworkImageProvider(imageUrl)
+          : null,
       child: imageUrl.isEmpty
           ? Icon(Icons.person, size: 16, color: colorScheme.onSurfaceVariant)
           : null,
@@ -244,8 +247,8 @@ class _ProfileTabAvatar extends StatelessWidget {
   }
 }
 
-class _NavItem {
+class NavItem {
   final IconData inactive;
   final IconData active;
-  const _NavItem(this.inactive, this.active);
+  const NavItem(this.inactive, this.active);
 }
