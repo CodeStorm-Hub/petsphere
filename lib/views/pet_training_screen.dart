@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/pet_controller.dart';
+import '../widgets/brand_logo.dart';
 
 class PetTrainingScreen extends ConsumerWidget {
   const PetTrainingScreen({super.key});
@@ -27,7 +28,7 @@ class PetTrainingScreen extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.pets, size: 64, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                const BrandLogo(customSize: 64),
                 const SizedBox(height: 24),
                 Text(
                   'No Active Pet',

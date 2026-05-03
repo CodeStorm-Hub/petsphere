@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/chat_thread_model.dart';
+import '../../widgets/brand_logo.dart';
 import '../../utils/pet_navigation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -45,7 +46,7 @@ class ChatThreadTile extends ConsumerWidget {
               : null,
           backgroundColor: theme.colorScheme.surfaceContainerHighest,
           child: otherPet.profileImageUrl.isEmpty
-              ? Icon(Icons.pets, color: theme.colorScheme.onSurfaceVariant)
+              ? const BrandLogo(size: BrandLogoSize.small)
               : null,
         ),
       ),

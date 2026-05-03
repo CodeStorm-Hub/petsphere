@@ -12,6 +12,7 @@ import '../utils/care_gamification_logic.dart';
 import '../utils/care_personalization.dart';
 import 'care_goal_editor_modal.dart';
 import 'health_tab.dart';
+import '../widgets/brand_logo.dart';
 
 class _SetupBanner extends StatelessWidget {
   const _SetupBanner({required this.onTap});
@@ -400,11 +401,7 @@ class _PetCareScreenState extends ConsumerState<PetCareScreen>
                                         ? NetworkImage(pet.profileImageUrl)
                                         : null,
                                 child: pet.profileImageUrl.isEmpty
-                                    ? Icon(Icons.pets,
-                                        size: 16,
-                                        color: isSelected
-                                            ? colorScheme.primary
-                                            : colorScheme.onSurfaceVariant)
+                                    ? const BrandLogo(customSize: 16)
                                     : null,
                               ),
                               const SizedBox(width: 8),
@@ -473,7 +470,7 @@ class _NoActivePet extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       children: [
         const SizedBox(height: 80),
-        Icon(Icons.pets, size: 56, color: colorScheme.onSurfaceVariant),
+        const BrandLogo(customSize: 56),
         const SizedBox(height: 16),
         Text(
           'Add a pet to start tracking care',

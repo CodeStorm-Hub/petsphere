@@ -128,8 +128,8 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                       SharePlus.instance.share(
                         ShareParams(
                           text:
-                              'Check out ${product.name} on PetSphere — \$${product.price.toStringAsFixed(2)}\nhttps://petsphere.app/product/${product.id}',
-                          subject: 'PetSphere — ${product.name}',
+                              'Check out ${product.name} on PetFolio — \$${product.price.toStringAsFixed(2)}\nhttps://petfolio.app/product/${product.id}',
+                          subject: 'PetFolio — ${product.name}',
                         ),
                       );
                     },

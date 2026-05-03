@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../widgets/brand_logo.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/search_controller.dart';
@@ -167,7 +168,7 @@ class _PetsResultTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (searchState.query.isEmpty) return const _SearchPlaceholder(icon: Icons.pets_outlined, label: 'Find furry friends');
+    if (searchState.query.isEmpty) return const _SearchPlaceholder(useBrandIcon: true, label: 'Find furry friends');
     if (searchState.pets.isEmpty) return const _NoResults();
 
     return ListView.builder(
@@ -178,7 +179,7 @@ class _PetsResultTab extends StatelessWidget {
         return ListTile(
           leading: CircleAvatar(
             backgroundImage: pet.profileImageUrl.isNotEmpty ? NetworkImage(pet.profileImageUrl) : null,
-            child: pet.profileImageUrl.isEmpty ? const Icon(Icons.pets) : null,
+            child: pet.profileImageUrl.isEmpty ? const BrandLogo(size: BrandLogoSize.small) : null,
           ),
           title: Text(pet.name, style: const TextStyle(fontWeight: FontWeight.bold)),
           subtitle: Text('${pet.animalType} • ${pet.breed}'),
@@ -229,9 +230,10 @@ class _ProductsResultTab extends ConsumerWidget {
 }
 
 class _SearchPlaceholder extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final bool useBrandIcon;
   final String label;
-  const _SearchPlaceholder({required this.icon, required this.label});
+  const _SearchPlaceholder({this.icon, this.useBrandIcon = false, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -240,7 +242,9 @@ class _SearchPlaceholder extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: colorScheme.outlineVariant),
+          useBrandIcon
+              ? BrandLogo(customSize: 64, color: colorScheme.outlineVariant)
+              : Icon(icon!, size: 64, color: colorScheme.outlineVariant),
           const SizedBox(height: 16),
           Text(label, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 16)),
         ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/brand_logo.dart';
 
 class PetAvatar extends StatelessWidget {
   final String imageUrl;
@@ -32,8 +33,10 @@ class PetAvatar extends StatelessWidget {
         backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
         backgroundColor: colorScheme.surface,
         child: imageUrl.isEmpty
-            ? Icon(Icons.pets,
-                size: radius, color: colorScheme.onSurfaceVariant)
+            ? BrandLogo(
+                customSize: radius,
+                color: colorScheme.onSurfaceVariant,
+              )
             : null,
       ),
     );

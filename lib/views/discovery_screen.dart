@@ -7,6 +7,7 @@ import '../controllers/match_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../models/pet_model.dart';
 import '../theme/app_theme.dart';
+import '../widgets/brand_logo.dart';
 
 import 'main_layout.dart' show bottomNavSpaceFor;
 
@@ -34,6 +35,7 @@ class DiscoveryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final petState = ref.watch(petProvider);
     final myPets = petState.myPets;
+    final activePetId = ref.watch(activePetProvider.select((p) => p?.id));
     final listedPets = myPets.where((p) => p.isBreedingListed).toList();
     final navSpace = bottomNavSpaceFor(context);
     final colorScheme = Theme.of(context).colorScheme;
@@ -70,7 +72,7 @@ class DiscoveryScreen extends ConsumerWidget {
         body: TabBarView(
           children: [
             DiscoveryTab(
-              hasActivePet: petState.activePet != null,
+              hasActivePet: activePetId != null,
               isPetLoading: petState.isLoading,
             ),
             const NearbyTab(),
@@ -101,7 +103,7 @@ class MyListingsTab extends ConsumerWidget {
               padding: EdgeInsets.only(bottom: navSpace),
               children: [
                 const SizedBox(height: 100),
-                Icon(Icons.favorite_border, size: 64, color: colorScheme.outline.withAlpha(100)),
+                BrandLogo(customSize: 64, color: colorScheme.outline.withAlpha(100)),
                 const SizedBox(height: 16),
                 const Center(
                   child: Text(
@@ -144,7 +146,8 @@ class MyListingsTab extends ConsumerWidget {
                           ? CachedNetworkImageProvider(pet.profileImageUrl)
                           : null,
                       child: pet.profileImageUrl.isEmpty
-                          ? Icon(Icons.pets,
+                          ? BrandLogo(
+                              size: BrandLogoSize.small,
                               color: colorScheme.primary)
                           : null,
                     ),
@@ -472,7 +475,7 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
             children: [
-              Icon(Icons.pets_outlined, size: 64, color: colorScheme.outline.withAlpha(100)),
+              BrandLogo(customSize: 64, color: colorScheme.outline.withAlpha(100)),
               const SizedBox(height: 16),
           const Center(
             child: Text(
@@ -601,8 +604,9 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
                     padding:
                         EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
                     children: [
-                      Icon(Icons.favorite_border,
-                          size: 64, color: colorScheme.outline.withAlpha(100)),
+                      BrandLogo(
+                          customSize: 64,
+                          color: colorScheme.outline.withAlpha(100)),
                       const SizedBox(height: 16),
                       Center(
                         child: Text(
@@ -614,114 +618,129 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
                     ],
                   ),
                 )
-              : Padding(
-                  padding:
-                      EdgeInsets.fromLTRB(20, 0, 20, navSpace),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Stack(
-                          alignment: Alignment.topCenter,
-                          children: [
-                            // Background card (next in queue)
-                            if (filteredPets.length > 1)
-                              Positioned(
-                                bottom: 0,
-                                left: 16,
-                                right: 16,
-                                top: 8,
-                                child: Transform.scale(
-                                  scale: 0.95,
-                                  child: PetCard(
-                                    pet: filteredPets[(currentIndex + 1) %
-                                        filteredPets.length],
-                                    isBackground: true,
-                                    dragX: 0,
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    final sw = MediaQuery.of(context).size.width;
+                    // Responsive button sizes clamped for phone → tablet
+                    final skipSize = (sw * 0.158).clamp(52.0, 70.0);
+                    final starSize = (sw * 0.138).clamp(44.0, 60.0);
+                    final likeSize = (sw * 0.198).clamp(64.0, 84.0);
+                    final hPad = (sw * 0.048).clamp(12.0, 24.0);
+                    final btnGap = sw * 0.045;
+
+                    return Padding(
+                      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, navSpace),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: Stack(
+                              alignment: Alignment.topCenter,
+                              children: [
+                                // Background card (next in queue)
+                                if (filteredPets.length > 1)
+                                  Positioned(
+                                    bottom: 0,
+                                    left: 12,
+                                    right: 12,
+                                    top: 8,
+                                    child: Transform.scale(
+                                      scale: 0.95,
+                                      child: PetCard(
+                                        pet: filteredPets[(currentIndex + 1) %
+                                            filteredPets.length],
+                                        isBackground: true,
+                                        dragX: 0,
+                                      ),
+                                    ),
+                                  ),
+
+                                // Foreground card — draggable
+                                GestureDetector(
+                                  onHorizontalDragUpdate: _onDragUpdate,
+                                  onHorizontalDragEnd: (d) =>
+                                      _onDragEnd(d, screenWidth),
+                                  child: Transform.translate(
+                                    offset: Offset(
+                                      _dragX,
+                                      _dragX.abs() * 0.05,
+                                    ),
+                                  child: Transform.rotate(
+                                    angle: (_dragX / screenWidth) * 0.35,
+                                    child: RepaintBoundary(
+                                      child: PetCard(
+                                        pet: filteredPets[currentIndex],
+                                        isBackground: false,
+                                        dragX: _dragX,
+                                        onTap: () => context.push(
+                                            '/pet/${filteredPets[currentIndex].id}'),
+                                      ),
+                                    ),
+                                  ),
                                   ),
                                 ),
-                              ),
+                              ],
+                            ),
+                          ),
 
-                            // Foreground card — draggable
-                            GestureDetector(
-                              onHorizontalDragUpdate: _onDragUpdate,
-                              onHorizontalDragEnd: (d) =>
-                                  _onDragEnd(d, screenWidth),
-                              child: Transform.translate(
-                                offset: Offset(
-                                  _dragX,
-                                  _dragX.abs() * 0.05,
+                          // ── Action buttons ────────────────────────
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Skip
+                                ActionButton(
+                                  size: skipSize,
+                                  color: colorScheme.surfaceContainerHighest,
+                                  borderColor:
+                                      colorScheme.outline.withAlpha(80),
+                                  child: Icon(Icons.close_rounded,
+                                      size: skipSize * 0.42,
+                                      color: colorScheme.onSurfaceVariant),
+                                  onTap: () =>
+                                      _commitSwipe(false, screenWidth),
                                 ),
-                                child: Transform.rotate(
-                                  angle: (_dragX / screenWidth) * 0.35,
-                                  child: PetCard(
-                                    pet: filteredPets[currentIndex],
-                                    isBackground: false,
-                                    dragX: _dragX,
-                                    onTap: () => context.push(
-                                        '/pet/${filteredPets[currentIndex].id}'),
+                                SizedBox(width: btnGap),
+                                // Profile details
+                                ActionButton(
+                                  size: starSize,
+                                  color: colorScheme.surfaceContainerHighest,
+                                  borderColor:
+                                      colorScheme.outline.withAlpha(80),
+                                  child: Icon(Icons.star_rounded,
+                                      size: starSize * 0.44,
+                                      color: colorScheme.secondary),
+                                  onTap: () => context.push(
+                                      '/pet/${filteredPets[currentIndex].id}'),
+                                ),
+                                SizedBox(width: btnGap),
+                                // Like
+                                ActionButton(
+                                  size: likeSize,
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      colorScheme.primary,
+                                      colorScheme.primary.withAlpha(180)
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
                                   ),
+                                  shadowColor:
+                                      colorScheme.primary.withAlpha(77),
+                                  child: Icon(Icons.favorite,
+                                      size: likeSize * 0.44,
+                                      color: colorScheme.onPrimary),
+                                  onTap: () =>
+                                      _commitSwipe(true, screenWidth),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-
-                      // ── Action buttons ────────────────────────────
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 20),
-                        child: Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.center,
-                          children: [
-                            // Skip
-                            ActionButton(
-                              size: 64,
-                              color: colorScheme.surfaceContainerHighest,
-                              borderColor: colorScheme.outline.withAlpha(80),
-                              child: Icon(Icons.close_rounded,
-                                  size: 28,
-                                  color: colorScheme.onSurfaceVariant),
-                              onTap: () =>
-                                  _commitSwipe(false, screenWidth),
-                            ),
-                            const SizedBox(width: 20),
-                            // Profile details
-                            ActionButton(
-                              size: 56,
-                              color: colorScheme.surfaceContainerHighest,
-                              borderColor: colorScheme.outline.withAlpha(80),
-                              child: Icon(Icons.star_rounded,
-                                  size: 26,
-                                  color: colorScheme.secondary),
-                              onTap: () => context.push(
-                                  '/pet/${filteredPets[currentIndex].id}'),
-                            ),
-                            const SizedBox(width: 20),
-                            // Like
-                            ActionButton(
-                              size: 80,
-                              gradient: LinearGradient(
-                                colors: [
-                                  colorScheme.primary,
-                                  colorScheme.primary.withAlpha(180)
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              shadowColor:
-                                  colorScheme.primary.withAlpha(77),
-                              child: Icon(Icons.favorite,
-                                  size: 36, color: colorScheme.onPrimary),
-                              onTap: () =>
-                                  _commitSwipe(true, screenWidth),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
         ),
       ],
@@ -782,223 +801,250 @@ class PetCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: isBackground ? null : onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: isBackground
-              ? []
-              : [
-                  BoxShadow(
-                    color: colorScheme.shadow.withAlpha(60),
-                    blurRadius: 48,
-                    offset: const Offset(0, 24),
-                  ),
-                ],
-          border:
-              Border.all(color: colorScheme.outline.withAlpha(80), width: 1.5),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          children: [
-            // ── Photo ─────────────────────────────────────────────
-            Expanded(
-              flex: 3,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Pet image
-                  pet.profileImageUrl.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: pet.profileImageUrl,
-                          fit: BoxFit.cover,
-                          errorWidget: (_, _, _) => _imageFallback(colorScheme),
-                        )
-                      : _imageFallback(colorScheme),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final cardH = constraints.maxHeight;
+          final cardW = constraints.maxWidth;
+          // Responsive font sizes based on card dimensions
+          final nameFontSize = (cardH * 0.058).clamp(18.0, 28.0);
+          final subFontSize = (cardH * 0.036).clamp(12.0, 16.0);
+          final overlayFontSize = (cardW * 0.082).clamp(20.0, 34.0);
 
-                  // Like overlay (secondary, right swipe)
-                  if (!isBackground)
-                    Positioned.fill(
-                      child: Opacity(
-                        opacity: likeOpacity,
-                        child: Container(
-                          color:
-                              colorScheme.secondary.withAlpha(102),
-                          alignment: Alignment.topLeft,
-                          padding: const EdgeInsets.all(24),
+          return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: isBackground
+                ? []
+                : [
+                    BoxShadow(
+                      color: colorScheme.shadow.withAlpha(60),
+                      blurRadius: 40,
+                      offset: const Offset(0, 20),
+                    ),
+                  ],
+            border:
+                Border.all(color: colorScheme.outline.withAlpha(80), width: 1.5),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              // ── Photo ─────────────────────────────────────────────
+              Expanded(
+                flex: 3,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Pet image
+                    pet.profileImageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: pet.profileImageUrl,
+                            fit: BoxFit.cover,
+                            errorWidget: (_, _, _) => _imageFallback(colorScheme),
+                          )
+                        : _imageFallback(colorScheme),
+
+                    // Like overlay (secondary, right swipe)
+                    if (!isBackground)
+                      Positioned.fill(
+                        child: Opacity(
+                          opacity: likeOpacity,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              border: Border.all(
+                            color:
+                                colorScheme.secondary.withAlpha(102),
+                            alignment: Alignment.topLeft,
+                            padding: const EdgeInsets.all(20),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: colorScheme.secondary,
+                                    width: 2.5),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'LIKE',
+                                style: TextStyle(
                                   color: colorScheme.secondary,
-                                  width: 3),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'LIKE',
-                              style: TextStyle(
-                                color: colorScheme.secondary,
-                                fontSize: 32,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 3,
+                                  fontSize: overlayFontSize,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 2,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
 
-                  // Nope overlay (error, left swipe)
-                  if (!isBackground)
-                    Positioned.fill(
-                      child: Opacity(
-                        opacity: nopeOpacity,
-                        child: Container(
-                          color: colorScheme.error.withAlpha(102),
-                          alignment: Alignment.topRight,
-                          padding: const EdgeInsets.all(24),
+                    // Nope overlay (error, left swipe)
+                    if (!isBackground)
+                      Positioned.fill(
+                        child: Opacity(
+                          opacity: nopeOpacity,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: colorScheme.error, width: 3),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'NOPE',
-                              style: TextStyle(
-                                color: colorScheme.error,
-                                fontSize: 32,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 3,
+                            color: colorScheme.error.withAlpha(102),
+                            alignment: Alignment.topRight,
+                            padding: const EdgeInsets.all(20),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: colorScheme.error, width: 2.5),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'NOPE',
+                                style: TextStyle(
+                                  color: colorScheme.error,
+                                  fontSize: overlayFontSize,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 2,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
+
+                    // DistanceBadge
+                    Positioned(
+                      bottom: 16,
+                      left: 16,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.85),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                              color: colorScheme.outline.withAlpha(80)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.location_on,
+                                size: 13,
+                                color: colorScheme.primary),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$distanceMi mi away',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
 
-                  // DistanceBadge
-                  Positioned(
-                    bottom: 20,
-                    left: 20,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.85),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                            color: colorScheme.outline.withAlpha(80)),
+                    // Verified badge
+                    if (pet.isVerified)
+                      Positioned(
+                        top: 16,
+                        right: 16,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.verified,
+                              size: 18, color: colorScheme.onPrimary),
+                        ),
                       ),
-                      child: Row(
+                  ],
+                ),
+              ),
+
+              // ── Info ──────────────────────────────────────────────
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.topLeft,
+                    child: SizedBox(
+                      width: cardW - 32, // match horizontal padding
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.location_on,
-                              size: 14,
-                              color: colorScheme.primary),
-                          const SizedBox(width: 4),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  pet.name,
+                                  style: TextStyle(
+                                    fontSize: nameFontSize,
+                                    fontWeight: FontWeight.w800,
+                                    color: colorScheme.onSurface,
+                                    letterSpacing: -0.5,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary.withAlpha(38),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: BrandLogo(
+                                    size: BrandLogoSize.small,
+                                    color: colorScheme.primary),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
                           Text(
-                            '$distanceMi mi away',
+                            '${pet.age} yr${pet.age == 1 ? '' : 's'} • ${pet.breed}',
                             style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onSurface,
+                              fontSize: subFontSize,
+                              color: colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
                             ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              _TraitBadge(
+                                  label: 'Energy',
+                                  value: _energyLabel(),
+                                  fontSize: subFontSize),
+                              const SizedBox(width: 6),
+                              _TraitBadge(
+                                  label: 'Health',
+                                  value: _healthLabel(),
+                                  fontSize: subFontSize),
+                              const SizedBox(width: 6),
+                              _TraitBadge(
+                                  label: 'Social',
+                                  value: _socialLabel(),
+                                  fontSize: subFontSize),
+                            ],
                           ),
                         ],
                       ),
                     ),
                   ),
-
-                  // Verified badge
-                  if (pet.isVerified)
-                    Positioned(
-                      top: 20,
-                      right: 20,
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.verified,
-                            size: 20, color: colorScheme.onPrimary),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
-            // ── Info ──────────────────────────────────────────────
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            pet.name,
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              color: colorScheme.onSurface,
-                              letterSpacing: -0.5,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary.withAlpha(38),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.pets,
-                              size: 22, color: colorScheme.primary),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${pet.age} yr${pet.age == 1 ? '' : 's'} • ${pet.breed}',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        _TraitBadge(
-                            label: 'Energy',
-                            value: _energyLabel()),
-                        const SizedBox(width: 8),
-                        _TraitBadge(
-                            label: 'Health',
-                            value: _healthLabel()),
-                        const SizedBox(width: 8),
-                        _TraitBadge(
-                            label: 'Social',
-                            value: _socialLabel()),
-                      ],
-                    ),
-                  ],
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        );
+        },
       ),
     );
   }
@@ -1006,7 +1052,7 @@ class PetCard extends StatelessWidget {
   Widget _imageFallback(ColorScheme colorScheme) => Container(
         color: colorScheme.surface,
         child: Center(
-          child: Icon(Icons.pets, size: 80, color: colorScheme.primary),
+          child: BrandLogo(customSize: 80, color: colorScheme.primary),
         ),
       );
 }
@@ -1059,10 +1105,11 @@ class NearbyTab extends ConsumerWidget {
                       backgroundColor:
                           colorScheme.surfaceContainerHighest,
                       backgroundImage: pet.profileImageUrl.isNotEmpty
-                          ? NetworkImage(pet.profileImageUrl)
+                          ? CachedNetworkImageProvider(pet.profileImageUrl)
                           : null,
                       child: pet.profileImageUrl.isEmpty
-                          ? Icon(Icons.pets,
+                          ? BrandLogo(
+                              size: BrandLogoSize.small,
                               color: colorScheme.onSurfaceVariant)
                           : null,
                     ),
@@ -1112,30 +1159,38 @@ class NearbyTab extends ConsumerWidget {
 class _TraitBadge extends StatelessWidget {
   final String label;
   final String value;
-  const _TraitBadge({required this.label, required this.value});
+  final double fontSize;
+  const _TraitBadge({
+    required this.label,
+    required this.value,
+    this.fontSize = 13,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final labelFontSize = (fontSize * 0.82).clamp(9.0, 12.0);
+    final valueFontSize = fontSize.clamp(11.0, 14.0);
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainerHighest,
           border: Border.all(color: colorScheme.outline.withAlpha(80)),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(label,
                 style: TextStyle(
-                    fontSize: 11,
+                    fontSize: labelFontSize,
                     color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500)),
             const SizedBox(height: 2),
             Text(value,
                 style: TextStyle(
-                    fontSize: 13,
+                    fontSize: valueFontSize,
                     fontWeight: FontWeight.w700,
                     color: colorScheme.primary)),
           ],
@@ -1300,22 +1355,19 @@ class _PetSelectorChip extends StatelessWidget {
                     ? CachedNetworkImage(
                         imageUrl: pet.profileImageUrl,
                         fit: BoxFit.cover,
-                        placeholder: (_, _) => Icon(
-                          Icons.pets,
-                          size: 20,
+                        placeholder: (_, _) => BrandLogo(
+                          customSize: 20,
                           color: colorScheme.onSurfaceVariant,
                         ),
-                        errorWidget: (_, _, _) => Icon(
-                          Icons.pets,
-                          size: 20,
+                        errorWidget: (_, _, _) => BrandLogo(
+                          customSize: 20,
                           color: colorScheme.onSurfaceVariant,
                         ),
                       )
                     : Container(
                         color: colorScheme.surfaceContainerHighest,
-                        child: Icon(
-                          Icons.pets,
-                          size: 20,
+                        child: BrandLogo(
+                          customSize: 20,
                           color: isSelected
                               ? selectedColor
                               : colorScheme.onSurfaceVariant,
@@ -1473,8 +1525,8 @@ class _ListPetSheetState extends State<_ListPetSheet> {
                                                 pet.profileImageUrl)
                                             : null,
                                     child: pet.profileImageUrl.isEmpty
-                                        ? Icon(Icons.pets,
-                                            size: 18,
+                                        ? BrandLogo(
+                                            customSize: 18,
                                             color: colorScheme.primary)
                                         : null,
                                   ),

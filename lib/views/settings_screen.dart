@@ -9,6 +9,7 @@ import '../controllers/pet_care_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../controllers/theme_controller.dart';
 import '../models/care_badge_model.dart';
+import '../widgets/brand_logo.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -76,19 +77,19 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.privacy_tip_outlined),
             title: const Text('Privacy Policy'),
             trailing: const Icon(Icons.open_in_new, size: 18),
-            onTap: () => launchUrl(Uri.parse('https://petsphere.app/privacy')),
+            onTap: () => launchUrl(Uri.parse('https://petfolio.app/privacy')),
           ),
           ListTile(
             leading: const Icon(Icons.description_outlined),
             title: const Text('Terms of Service'),
             trailing: const Icon(Icons.open_in_new, size: 18),
-            onTap: () => launchUrl(Uri.parse('https://petsphere.app/terms')),
+            onTap: () => launchUrl(Uri.parse('https://petfolio.app/terms')),
           ),
           ListTile(
             leading: const Icon(Icons.support_outlined),
             title: const Text('Help & Support'),
             trailing: const Icon(Icons.open_in_new, size: 18),
-            onTap: () => launchUrl(Uri.parse('mailto:support@petsphere.app')),
+            onTap: () => launchUrl(Uri.parse('mailto:support@petfolio.app')),
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
@@ -268,8 +269,7 @@ class _AchievementsBadgesSection extends ConsumerWidget {
                               ? NetworkImage(pet.profileImageUrl)
                               : null,
                           child: pet.profileImageUrl.isEmpty
-                              ? Icon(Icons.pets,
-                                  size: 14, color: colorScheme.primary)
+                              ? const BrandLogo(customSize: 14)
                               : null,
                         ),
                         const SizedBox(width: 8),
@@ -394,7 +394,7 @@ class _AchievementsBadgesSection extends ConsumerWidget {
               Navigator.pop(ctx);
               share_plus.SharePlus.instance.share(
                 share_plus.ShareParams(
-                  text: 'I just earned the "${def.title}" badge on PetSphere! ${def.iconEmoji} ${def.description}',
+                  text: 'I just earned the "${def.title}" badge on PetFolio! ${def.iconEmoji} ${def.description}',
                 ),
               );
             },

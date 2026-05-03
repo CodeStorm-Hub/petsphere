@@ -3,36 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/pet_controller.dart';
-import '../theme/app_theme.dart';
 
 import 'home_screen.dart';
 import 'pet_profile_screen.dart';
 import 'discovery_screen.dart';
 import 'marketplace_screen.dart';
 
-// ── Instagram-style bottom nav layout tokens ───────────────────────────────
-// The bar is a flat, opaque surface that sits at the bottom of the screen
-// (like Instagram's app bar). Screens hosted in MainLayout still use
-// extendBody: true so any safe-area inset is rendered behind the bar; they
-// should call [bottomNavSpaceFor] to reserve enough space at the bottom of
-// scrollable content so list items aren't hidden behind it.
+// ── Bottom nav layout tokens ───────────────────────────────────────────────
+/// Visual height of the bottom nav bar (excluding the system safe-area inset).
+const double kBottomNavBarHeight = 60.0;
 
-/// Visual height of the Instagram-style bottom nav (excluding the system
-/// safe-area inset). 28px icon + 14px top/bottom padding = 56dp tall.
-const double kBottomNavBarHeight = 56.0;
-
-/// Extra breathing room placed between the last piece of in-screen content
-/// and the top edge of the nav bar.
+/// Extra breathing room between in-screen content and the nav bar top edge.
 const double kBottomNavBarGap = 8.0;
 
 /// Total bottom padding screens hosted in [MainLayout] should reserve so
-/// scrollable content is fully visible above the bottom navigation bar on
-/// every device (with or without a home-indicator safe area).
+/// scrollable content stays fully visible above the nav bar on every device.
 double bottomNavSpaceFor(BuildContext context) {
   final inset = MediaQuery.viewPaddingOf(context).bottom;
   return kBottomNavBarHeight + kBottomNavBarGap + inset;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MainLayout
+// ─────────────────────────────────────────────────────────────────────────────
 class MainLayout extends ConsumerStatefulWidget {
   const MainLayout({super.key});
 
@@ -46,13 +39,14 @@ class MainLayoutState extends ConsumerState<MainLayout> {
   static const List<Widget> screens = [
     HomeScreen(),
     DiscoveryScreen(),
-    SizedBox.shrink(),
+    SizedBox.shrink(), // index 2 → /pet_care push, not a tab screen
     MarketplaceScreen(),
     PetProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    // Navigate to profile tab when a pet is tapped from another screen
     ref.listen<String?>(profilePetNavigationProvider, (prev, next) {
       if (next != null) setState(() => currentIndex = 4);
     });
@@ -70,48 +64,55 @@ class MainLayoutState extends ConsumerState<MainLayout> {
           ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppTheme.md,
-            0,
-            AppTheme.md,
-            AppTheme.md,
-          ),
-          child: GlassNavBar(
-            currentIndex: currentIndex,
-            profileImageUrl: activePet?.profileImageUrl ?? '',
-            onTap: (index) {
-              if (index == 2) {
-                context.push('/pet_care');
-                return;
-              }
-              setState(() => currentIndex = index);
-            },
-          ),
+      bottomNavigationBar: RepaintBoundary(
+        child: PetfolioNavBar(
+          currentIndex: currentIndex,
+          profileImageUrl: activePet?.profileImageUrl ?? '',
+          onTap: (index) {
+            // Index 2 is the centre FAB — push a new route, don't switch tab
+            if (index == 2) {
+              context.push('/pet_care');
+              return;
+            }
+            setState(() => currentIndex = index);
+          },
         ),
       ),
     );
   }
 }
 
-class GlassNavBar extends StatelessWidget {
+// ─────────────────────────────────────────────────────────────────────────────
+// Nav item model
+// ─────────────────────────────────────────────────────────────────────────────
+class NavItem {
+  final IconData inactive;
+  final IconData active;
+  final String label;
+  const NavItem(this.inactive, this.active, this.label);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PetfolioNavBar — modern floating pill with labels + animations
+// ─────────────────────────────────────────────────────────────────────────────
+class PetfolioNavBar extends StatelessWidget {
   final int currentIndex;
   final String profileImageUrl;
   final ValueChanged<int> onTap;
 
-  const GlassNavBar({super.key, 
+  const PetfolioNavBar({
+    super.key,
     required this.currentIndex,
     required this.profileImageUrl,
     required this.onTap,
   });
 
-  static const items = [
-    NavItem(Icons.home_outlined, Icons.home),
-    NavItem(Icons.search, Icons.search),
-    NavItem(Icons.add, Icons.add), // Center FAB
-    NavItem(Icons.storefront_outlined, Icons.storefront),
-    NavItem(Icons.person_outline, Icons.person),
+  static const List<NavItem> _items = [
+    NavItem(Icons.home_outlined, Icons.home_rounded, 'Home'),
+    NavItem(Icons.search_rounded, Icons.search_rounded, 'Discover'),
+    NavItem(Icons.add_rounded, Icons.add_rounded, ''), // centre FAB
+    NavItem(Icons.storefront_outlined, Icons.storefront_rounded, 'Shop'),
+    NavItem(Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
   ];
 
   /// TalkBack / VoiceOver labels (center index 2 uses [centerFabSemanticLabel]).
@@ -125,123 +126,135 @@ class GlassNavBar extends StatelessWidget {
 
   static const String centerFabSemanticLabel = 'Pet Care';
 
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-      child: Container(
-        height: 64,
-          decoration: BoxDecoration(
-            color: theme.bottomNavigationBarTheme.backgroundColor,
-            borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-            border: Border.all(color: colorScheme.outline, width: 1),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(items.length, (i) {
-              final isActive = currentIndex == i;
-              final isCenter = i == 2;
-              final isProfile = i == 4;
-              final iconColor = isActive
-                  ? colorScheme.primary
-                  : colorScheme.onSurfaceVariant;
+    final barBg = isDark ? const Color(0xFF1C1C1C) : cs.surface;
+    final barBorder =
+        isDark ? const Color(0xFF2E2E2E) : cs.outline.withAlpha(55);
 
-              if (isCenter) {
-                return Semantics(
-                  button: true,
-                  label: centerFabSemanticLabel,
-                  hint: 'Opens pet care diary, goals, and daily checklist',
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+
+    return Container(
+      height: kBottomNavBarHeight + bottomInset,
+      padding: EdgeInsets.only(bottom: bottomInset),
+      decoration: BoxDecoration(
+        color: barBg,
+        border: Border(
+          top: BorderSide(color: barBorder, width: 1),
+        ),
+      ),
+      child: Row(
+        children: List.generate(_items.length, (i) {
+          final isActive = currentIndex == i;
+          final isCenter = i == 2;
+          final isProfile = i == 4;
+          final iconColor =
+              isActive ? cs.primary : cs.onSurfaceVariant;
+
+          // ── Centre gradient FAB ───────────────────────────────────
+          if (isCenter) {
+            return Expanded(
+              child: Semantics(
+                button: true,
+                label: centerFabSemanticLabel,
+                hint: 'Opens pet care diary, goals, and daily checklist',
+                onTap: () => onTap(i),
+                excludeSemantics: true,
+                child: GestureDetector(
                   onTap: () => onTap(i),
-                  excludeSemantics: true,
-                  child: GestureDetector(
-                    onTap: () => onTap(i),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 280),
-                      curve: Curves.easeOut,
-                      width: 48,
-                      height: 48,
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Container(
+                      width: 50,
+                      height: 50,
                       decoration: BoxDecoration(
-                        color: colorScheme.primary,
+                        gradient: LinearGradient(
+                          colors: [cs.primary, cs.primary.withAlpha(200)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                         shape: BoxShape.circle,
-                        boxShadow: Theme.of(
-                          context,
-                        ).extension<PetfolioShadows>()?.button,
+                        boxShadow: [
+                          BoxShadow(
+                            color: cs.primary.withAlpha(80),
+                            blurRadius: 14,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      child: Icon(
-                        Icons.add,
-                        color: colorScheme.onPrimary,
-                        size: 28,
-                      ),
+                      child: Icon(Icons.add_rounded,
+                          color: cs.onPrimary, size: 28),
                     ),
                   ),
-                );
-              }
+                ),
+              ),
+            );
+          }
 
-              final Widget child;
-              if (isProfile) {
-                child = ProfileTabAvatar(
-                  imageUrl: profileImageUrl,
-                  isActive: isActive,
-                  ringColor: iconColor,
-                );
-              } else {
-                child = Icon(
-                  isActive ? items[i].active : items[i].inactive,
-                  color: iconColor,
-                  size: 26,
-                );
-              }
-
-              return Expanded(
-                child: Semantics(
-                  button: true,
-                  selected: isActive,
-                  label: tabSemanticLabels[i],
-                  hint: i == 4 && profileImageUrl.isEmpty
-                      ? 'Your profile and pets'
-                      : null,
-                  onTap: () => onTap(i),
-                  excludeSemantics: true,
-                  child: GestureDetector(
-                    onTap: () => onTap(i),
-                    behavior: HitTestBehavior.opaque,
+          // ── Regular / profile tabs ────────────────────────────────
+          return Expanded(
+            child: Semantics(
+              button: true,
+              selected: isActive,
+              label: tabSemanticLabels[i],
+              hint: i == 4 && profileImageUrl.isEmpty
+                  ? 'Your profile and pets'
+                  : null,
+              onTap: () => onTap(i),
+              excludeSemantics: true,
+              child: GestureDetector(
+                onTap: () => onTap(i),
+                behavior: HitTestBehavior.opaque,
+                child: Center(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 230),
+                    curve: Curves.easeOutCubic,
+                    padding: const EdgeInsets.all(10),
                     child: Center(
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 280),
-                        curve: Curves.easeOut,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: ShapeDecoration(
-                          color: isActive
-                              ? colorScheme.primary.withValues(alpha: 0.10)
-                              : Colors.transparent,
-                          shape: const StadiumBorder(),
-                        ),
-                        child: child,
+                      child: AnimatedScale(
+                        scale: isActive ? 1.12 : 1.0,
+                        duration: const Duration(milliseconds: 230),
+                        curve: Curves.easeOutBack,
+                        child: isProfile
+                            ? NavProfileAvatar(
+                                imageUrl: profileImageUrl,
+                                isActive: isActive,
+                                ringColor: cs.primary,
+                              )
+                            : Icon(
+                                isActive
+                                    ? _items[i].active
+                                    : _items[i].inactive,
+                                color: iconColor,
+                                size: 26,
+                              ),
                       ),
                     ),
                   ),
                 ),
-              );
-            }),
-          ),
-        ),
+              ),
+            ),
+          );
+        }),
+      ),
     );
   }
 }
 
-class ProfileTabAvatar extends StatelessWidget {
+// ─────────────────────────────────────────────────────────────────────────────
+// NavProfileAvatar — pet avatar with animated active ring
+// ─────────────────────────────────────────────────────────────────────────────
+class NavProfileAvatar extends StatelessWidget {
   final String imageUrl;
   final bool isActive;
   final Color ringColor;
 
-  const ProfileTabAvatar({super.key, 
+  const NavProfileAvatar({
+    super.key,
     required this.imageUrl,
     required this.isActive,
     required this.ringColor,
@@ -249,34 +262,32 @@ class ProfileTabAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final avatar = CircleAvatar(
-      radius: 12,
-      backgroundColor: colorScheme.surfaceContainerHighest,
-      backgroundImage: imageUrl.isNotEmpty
-          ? CachedNetworkImageProvider(imageUrl)
-          : null,
-      child: imageUrl.isEmpty
-          ? Icon(Icons.person, size: 16, color: colorScheme.onSurfaceVariant)
-          : null,
-    );
-
-    return Container(
+    final cs = Theme.of(context).colorScheme;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 230),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isActive ? ringColor : Colors.transparent,
-          width: 1.5,
+          color: isActive ? ringColor : cs.outline.withAlpha(55),
+          width: isActive ? 2.0 : 1.0,
         ),
       ),
       padding: const EdgeInsets.all(2),
-      child: avatar,
+      child: CircleAvatar(
+        radius: 11,
+        backgroundColor: cs.surfaceContainerHighest,
+        backgroundImage: imageUrl.isNotEmpty
+            ? CachedNetworkImageProvider(imageUrl)
+            : null,
+        child: imageUrl.isEmpty
+            ? Icon(Icons.person_rounded,
+                size: 14, color: cs.onSurfaceVariant)
+            : null,
+      ),
     );
   }
 }
 
-class NavItem {
-  final IconData inactive;
-  final IconData active;
-  const NavItem(this.inactive, this.active);
-}
+// Keep old name as alias so nothing else breaks if referenced elsewhere
+typedef GlassNavBar = PetfolioNavBar;
+typedef ProfileTabAvatar = NavProfileAvatar;

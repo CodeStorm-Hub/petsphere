@@ -44,11 +44,11 @@ Future<void> main() async {
   pendingBootstrapThemeMode =
       prefs.getString('theme_mode') == 'dark' ? ThemeMode.dark : ThemeMode.light;
 
-  runApp(const ProviderScope(child: PetSphereApp()));
+  runApp(const ProviderScope(child: PetFolioApp()));
 }
 
-class PetSphereApp extends ConsumerWidget {
-  const PetSphereApp({super.key});
+class PetFolioApp extends ConsumerWidget {
+  const PetFolioApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -64,7 +64,7 @@ class PetSphereApp extends ConsumerWidget {
 
     return _AppLifecycleBootstrapSync(
       child: MaterialApp.router(
-        title: 'PetSphere',
+        title: 'PetFolio',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: themeMode,

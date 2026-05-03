@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/pet_model.dart';
+import '../../widgets/brand_logo.dart';
 
 class MatchPetCard extends StatelessWidget {
   final PetModel pet;
@@ -48,8 +49,7 @@ class MatchPetCard extends StatelessWidget {
                     fit: BoxFit.cover,
                     errorBuilder: (ctx, err, stack) => Container(
                       color: colorScheme.surfaceContainerHighest,
-                      child: Icon(Icons.pets,
-                          size: 40, color: colorScheme.onSurfaceVariant),
+                      child: const BrandLogo(customSize: 40),
                     ),
                   ),
                   // Verified badge overlay

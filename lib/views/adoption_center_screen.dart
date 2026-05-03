@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/brand_logo.dart';
 
 class AdoptionCenterScreen extends StatelessWidget {
   const AdoptionCenterScreen({super.key});
@@ -57,8 +58,8 @@ class _AdoptionHeader extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _FilterChip(label: 'Dogs', icon: Icons.pets, isSelected: true),
-                _FilterChip(label: 'Cats', icon: Icons.pets),
+                _FilterChip(label: 'Dogs', isBrandIcon: true, isSelected: true),
+                _FilterChip(label: 'Cats', isBrandIcon: true),
                 _FilterChip(label: 'Birds', icon: Icons.flutter_dash),
                 _FilterChip(label: 'Small Pets', icon: Icons.bug_report),
               ],
@@ -72,10 +73,11 @@ class _AdoptionHeader extends StatelessWidget {
 
 class _FilterChip extends StatelessWidget {
   final String label;
-  final IconData icon;
+  final IconData? icon;
+  final bool isBrandIcon;
   final bool isSelected;
 
-  const _FilterChip({required this.label, required this.icon, this.isSelected = false});
+  const _FilterChip({required this.label, this.icon, this.isBrandIcon = false, this.isSelected = false});
 
   @override
   Widget build(BuildContext context) {
@@ -90,8 +92,15 @@ class _FilterChip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: isSelected ? colorScheme.onPrimary : colorScheme.primary),
-          const SizedBox(width: 8),
+          if (isBrandIcon)
+            BrandLogo(
+                customSize: 16,
+                color: isSelected ? colorScheme.onPrimary : colorScheme.primary)
+          else if (icon != null)
+            Icon(icon,
+                size: 16,
+                color: isSelected ? colorScheme.onPrimary : colorScheme.primary),
+          if (isBrandIcon || icon != null) const SizedBox(width: 8),
           Text(
             label,
             style: TextStyle(

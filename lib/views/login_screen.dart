@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/auth_controller.dart';
 import '../repositories/auth_repository.dart';
+import '../widgets/brand_logo.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -194,21 +195,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       children: [
                         // Brand header
                         Center(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.pets,
-                                  size: 28, color: colorScheme.primary),
-                              const SizedBox(width: 10),
-                              Text(
-                                'PetSphere',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  color: colorScheme.onSurface,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                            ],
+                          child: BrandLogo(
+                            size: BrandLogoSize.small,
+                            withText: true,
                           ),
                         ),
                         const SizedBox(height: 40),
