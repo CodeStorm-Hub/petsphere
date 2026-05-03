@@ -221,7 +221,7 @@ class _AchievementsBlock extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }
@@ -1044,7 +1044,7 @@ class _ProgressRing extends StatelessWidget {
                 tween: Tween(begin: 0, end: progress.clamp(0.0, 1.0)),
                 duration: const Duration(milliseconds: 400),
                 curve: Curves.easeOutCubic,
-                builder: (_, value, __) => CircularProgressIndicator(
+                builder: (_, value, _) => CircularProgressIndicator(
                   value: value,
                   strokeWidth: 8,
                   backgroundColor: colorScheme.outlineVariant,
@@ -1291,7 +1291,7 @@ class _FeedingTab extends ConsumerWidget {
                   tween: Tween(begin: 0, end: todayLog.caloriesProgress),
                   duration: const Duration(milliseconds: 400),
                   curve: Curves.easeOutCubic,
-                  builder: (_, value, __) => CircularProgressIndicator(
+                  builder: (_, value, _) => CircularProgressIndicator(
                     value: value,
                     strokeWidth: 12,
                     backgroundColor: colorScheme.outlineVariant,

@@ -732,7 +732,16 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                       color: Colors.white,
                                     ),
                                   ),
-                                ],
+                                ),
+                              )
+                            else
+                              Image.network(
+                                post.mediaUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (ctx, _, _) => Container(
+                                  color: colorScheme.surfaceContainer,
+                                  child: Icon(Icons.image_outlined, color: colorScheme.onSurfaceVariant),
+                                ),
                               ),
                             ),
                           ),

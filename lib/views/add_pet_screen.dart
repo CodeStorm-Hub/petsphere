@@ -441,7 +441,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                   decoration: BoxDecoration(
                     color: isSelected
                         ? option.color.withAlpha(26)
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                        : Theme.of(context).colorScheme.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected ? option.color : Theme.of(context).colorScheme.onSurfaceVariant,
@@ -578,52 +578,75 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
           Center(
             child: GestureDetector(
               onTap: _showImageSourceSheet,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: 180,
-                height: 180,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  border: Border.all(
-                    color: _selectedImage != null
-                        ? const Color(0xFFFF8A65)
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                    width: _selectedImage != null ? 3 : 1.5,
-                  ),
-                  boxShadow: _selectedImage != null
-                      ? [
-                          BoxShadow(
-                            color: const Color(0xFFFF8A65).withAlpha(51),
-                            blurRadius: 20,
-                            offset: const Offset(0, 6),
+              child: Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: 160,
+                    height: 160,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                      border: Border.all(
+                        color: _selectedImage != null
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.outline,
+                        width: _selectedImage != null ? 3 : 2,
+                      ),
+                      boxShadow: _selectedImage != null
+                          ? [
+                              BoxShadow(
+                                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              )
+                            ]
+                          : [],
+                      image: _selectedImage != null
+                          ? DecorationImage(
+                              image: FileImage(_selectedImage!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: _selectedImage == null
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_a_photo_outlined,
+                                size: 40,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Upload Photo',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
                           )
-                        ]
-                      : [],
-                  image: _selectedImage != null
-                      ? DecorationImage(
-                          image: FileImage(_selectedImage!),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                ),
-                child: _selectedImage == null
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add_a_photo_rounded,
-                              size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Add Photo',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      )
-                    : null,
+                        : null,
+                  ),
+                  if (_selectedImage == null)
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 3),
+                        ),
+                        child: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary, size: 20),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -722,14 +745,14 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
       hintText: hint,
       hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 14),
       filled: true,
-      fillColor: Theme.of(context).colorScheme.onSurfaceVariant,
+      fillColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),

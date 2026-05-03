@@ -796,7 +796,7 @@ class _PetCard extends StatelessWidget {
                       ? Image.network(
                           pet.profileImageUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _imageFallback(colorScheme),
+                          errorBuilder: (_, _, _) => _imageFallback(colorScheme),
                         )
                       : _imageFallback(colorScheme),
 
