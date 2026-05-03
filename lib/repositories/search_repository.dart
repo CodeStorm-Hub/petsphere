@@ -25,7 +25,7 @@ class SearchRepository {
     final response = await _client
         .from('pets')
         .select('*')
-        .or('name.ilike.%$query%,breed.ilike.%$query%,species.ilike.%$query%')
+        .or('name.ilike.%$query%,breed.ilike.%$query%,animal_type.ilike.%$query%')
         .limit(20);
 
     return (response as List).map((json) => PetModel.fromJson(json)).toList();

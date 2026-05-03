@@ -1241,35 +1241,40 @@ class _ProfileVisitorActionRow extends ConsumerWidget {
               ? _visitFollowForOwner(context, ref, visitHostUser.id)
               : _visitFollowForPet(context, ref, selectedPet!.id),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 8),
         Expanded(
-          child: OutlinedButton.icon(
-            icon: const Icon(Icons.chat_bubble_outline_rounded, size: 15),
+          child: FilledButton.icon(
+            icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16),
             label: const Text('Message',
                 maxLines: 1, overflow: TextOverflow.ellipsis),
             onPressed: onMessage,
-            style: OutlinedButton.styleFrom(
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.secondaryContainer,
+              foregroundColor: colorScheme.onSecondaryContainer,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(999),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              side: BorderSide(color: colorScheme.outline),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 13, horizontal: 12),
+              minimumSize: const Size(0, 44),
             ),
           ),
         ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: OutlinedButton.icon(
-            icon: const Icon(Icons.ios_share_rounded, size: 15),
-            label: const Text('Share',
-                maxLines: 1, overflow: TextOverflow.ellipsis),
-            onPressed: onShare,
-            style: OutlinedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
+        const SizedBox(width: 8),
+        Semantics(
+          label: 'Share profile',
+          child: InkWell(
+            onTap: onShare,
+            borderRadius: BorderRadius.circular(999),
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: colorScheme.outline),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              side: BorderSide(color: colorScheme.outline),
+              child: Icon(Icons.ios_share_rounded,
+                  size: 20, color: colorScheme.onSurface),
             ),
           ),
         ),

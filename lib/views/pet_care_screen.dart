@@ -343,19 +343,103 @@ class _PetCareScreenState extends ConsumerState<PetCareScreen>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final myPets = ref.watch(petProvider).myPets;
+    final activePet = ref.watch(activePetProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pet Care'),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: colorScheme.primary,
-          unselectedLabelColor: colorScheme.onSurfaceVariant,
-          indicatorColor: colorScheme.primary,
-          tabs: const [
-            Tab(text: 'Care Diary'),
-            Tab(text: 'Health'),
-            Tab(text: 'Feeding'),
-          ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(
+            (myPets.length > 1 ? 80.0 : 0.0) + kTextTabBarHeight,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Per-pet selector row (shown when user has multiple pets)
+              if (myPets.length > 1)
+                SizedBox(
+                  height: 80,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 8),
+                    itemCount: myPets.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    itemBuilder: (context, i) {
+                      final pet = myPets[i];
+                      final isSelected = pet.id == activePet?.id;
+                      return GestureDetector(
+                        onTap: () =>
+                            ref.read(petProvider.notifier).setActivePet(pet),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? colorScheme.primary.withAlpha(28)
+                                : colorScheme.surfaceContainerHighest,
+                            border: Border.all(
+                              color: isSelected
+                                  ? colorScheme.primary
+                                  : colorScheme.outline.withAlpha(70),
+                              width: isSelected ? 2 : 1,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircleAvatar(
+                                radius: 18,
+                                backgroundColor:
+                                    colorScheme.surfaceContainerHighest,
+                                backgroundImage:
+                                    pet.profileImageUrl.isNotEmpty
+                                        ? NetworkImage(pet.profileImageUrl)
+                                        : null,
+                                child: pet.profileImageUrl.isEmpty
+                                    ? Icon(Icons.pets,
+                                        size: 16,
+                                        color: isSelected
+                                            ? colorScheme.primary
+                                            : colorScheme.onSurfaceVariant)
+                                    : null,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                pet.name,
+                                style: TextStyle(
+                                  fontWeight: isSelected
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  fontSize: 13,
+                                  color: isSelected
+                                      ? colorScheme.primary
+                                      : colorScheme.onSurface,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              TabBar(
+                controller: _tabController,
+                labelColor: colorScheme.primary,
+                unselectedLabelColor: colorScheme.onSurfaceVariant,
+                indicatorColor: colorScheme.primary,
+                tabs: const [
+                  Tab(text: 'Care Diary'),
+                  Tab(text: 'Health'),
+                  Tab(text: 'Feeding'),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       body: RefreshIndicator(
@@ -417,7 +501,6 @@ class _DashboardTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
-    final myPets = ref.watch(petProvider).myPets;
     final activePet = ref.watch(activePetProvider);
     final careState = ref.watch(petCareProvider);
     final todayLog = careState.todayLog;
@@ -442,10 +525,6 @@ class _DashboardTab extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        if (myPets.isNotEmpty) ...[
-          _PetSelector(myPets: myPets, activeId: activePet.id),
-          const SizedBox(height: 16),
-        ],
         if (needsSetup) ...[
           _SetupBanner(
             onTap: () async {
@@ -738,54 +817,6 @@ class _DashboardTab extends ConsumerWidget {
         ),
         const SizedBox(height: 80),
       ],
-    );
-  }
-}
-
-// ───────────── Pet selector ─────────────
-class _PetSelector extends ConsumerWidget {
-  const _PetSelector({required this.myPets, required this.activeId});
-
-  final List myPets;
-  final String activeId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      height: 72,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: myPets.length,
-        itemBuilder: (context, i) {
-          final pet = myPets[i];
-          final isSelected = pet.id == activeId;
-          return GestureDetector(
-            onTap: () => ref.read(petProvider.notifier).setActivePet(pet),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 6),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color:
-                      isSelected ? colorScheme.primary : Colors.transparent,
-                  width: 3,
-                ),
-              ),
-              child: CircleAvatar(
-                radius: 30,
-                backgroundColor: colorScheme.surface,
-                backgroundImage: pet.profileImageUrl.isNotEmpty
-                    ? NetworkImage(pet.profileImageUrl)
-                    : null,
-                child: pet.profileImageUrl.isEmpty
-                    ? Icon(Icons.pets, color: colorScheme.onSurfaceVariant)
-                    : null,
-              ),
-            ),
-          );
-        },
-      ),
     );
   }
 }

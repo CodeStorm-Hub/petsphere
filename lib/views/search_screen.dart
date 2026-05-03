@@ -49,6 +49,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with SingleTickerPr
           child: SearchBar(
             controller: _searchController,
             hintText: 'Search pets, posts, products...',
+            onChanged: _onSearch,
             onSubmitted: _onSearch,
             leading: const Icon(Icons.search),
             trailing: [
@@ -58,6 +59,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with SingleTickerPr
                   onPressed: () {
                     _searchController.clear();
                     ref.read(searchProvider.notifier).clear();
+                    setState(() {});
                   },
                 ),
             ],
