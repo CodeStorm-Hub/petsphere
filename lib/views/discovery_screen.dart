@@ -757,304 +757,329 @@ class PetCard extends StatelessWidget {
   final double dragX;
   final VoidCallback? onTap;
 
-  const PetCard({super.key, 
+  const PetCard({
+    super.key,
     required this.pet,
     required this.isBackground,
     required this.dragX,
     this.onTap,
   });
 
-  String _energyLabel() {
-    final v = (pet.name.length + pet.age * 3) % 10;
-    final e = 50 + v * 5;
-    if (e >= 85) return 'High';
-    if (e >= 65) return 'Medium';
-    return 'Calm';
+  String _petVibe() {
+    final vibes = [
+      'Cuddle Bug',
+      'Adventurer',
+      'Quiet Observer',
+      'Social Butterfly',
+      'Playful Spirit',
+      'Gentle Soul',
+      'Energy King',
+      'Smarty Pants'
+    ];
+    return vibes[pet.id.hashCode.abs() % vibes.length];
   }
 
-  String _healthLabel() {
-    final v = (pet.breed.length + pet.age) % 10;
-    final h = 60 + v * 4;
-    if (h >= 88) return 'Perfect';
-    if (h >= 70) return 'Good';
-    return 'Fair';
-  }
-
-  String _socialLabel() {
-    final v = (pet.animalType.length + pet.name.length) % 10;
-    final s = 55 + v * 4;
-    if (s >= 85) return 'Friendly';
-    if (s >= 65) return 'Sociable';
-    return 'Reserved';
+  IconData _vibeIcon(String vibe) {
+    switch (vibe) {
+      case 'Cuddle Bug': return Icons.favorite_rounded;
+      case 'Adventurer': return Icons.explore_rounded;
+      case 'Quiet Observer': return Icons.visibility_rounded;
+      case 'Social Butterfly': return Icons.groups_rounded;
+      case 'Playful Spirit': return Icons.auto_awesome_rounded;
+      case 'Gentle Soul': return Icons.spa_rounded;
+      case 'Energy King': return Icons.bolt_rounded;
+      case 'Smarty Pants': return Icons.psychology_rounded;
+      default: return Icons.pets_rounded;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final distanceMi = (pet.id.hashCode.abs() % 25) + 1;
+    final vibe = _petVibe();
     final likeOpacity = isBackground
         ? 0.0
-        : (dragX / 120).clamp(0.0, 1.0).toDouble();
+        : (dragX / 100).clamp(0.0, 1.0).toDouble();
     final nopeOpacity = isBackground
         ? 0.0
-        : (-dragX / 120).clamp(0.0, 1.0).toDouble();
+        : (-dragX / 100).clamp(0.0, 1.0).toDouble();
     final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTap: isBackground ? null : onTap,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final cardH = constraints.maxHeight;
-          final cardW = constraints.maxWidth;
-          // Responsive font sizes based on card dimensions
-          final nameFontSize = (cardH * 0.058).clamp(18.0, 28.0);
-          final subFontSize = (cardH * 0.036).clamp(12.0, 16.0);
-          final overlayFontSize = (cardW * 0.082).clamp(20.0, 34.0);
-
           return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: isBackground
-                ? []
-                : [
-                    BoxShadow(
-                      color: colorScheme.shadow.withAlpha(60),
-                      blurRadius: 40,
-                      offset: const Offset(0, 20),
-                    ),
-                  ],
-            border:
-                Border.all(color: colorScheme.outline.withAlpha(80), width: 1.5),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              // ── Photo ─────────────────────────────────────────────
-              Expanded(
-                flex: 3,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Pet image
-                    pet.profileImageUrl.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: pet.profileImageUrl,
-                            fit: BoxFit.cover,
-                            errorWidget: (_, _, _) => _imageFallback(colorScheme),
-                          )
-                        : _imageFallback(colorScheme),
-
-                    // Like overlay (secondary, right swipe)
-                    if (!isBackground)
-                      Positioned.fill(
-                        child: Opacity(
-                          opacity: likeOpacity,
-                          child: Container(
-                            color:
-                                colorScheme.secondary.withAlpha(102),
-                            alignment: Alignment.topLeft,
-                            padding: const EdgeInsets.all(20),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: colorScheme.secondary,
-                                    width: 2.5),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'LIKE',
-                                style: TextStyle(
-                                  color: colorScheme.secondary,
-                                  fontSize: overlayFontSize,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 2,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(32),
+              boxShadow: isBackground
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: colorScheme.shadow.withAlpha(45),
+                        blurRadius: 40,
+                        offset: const Offset(0, 20),
                       ),
-
-                    // Nope overlay (error, left swipe)
-                    if (!isBackground)
-                      Positioned.fill(
-                        child: Opacity(
-                          opacity: nopeOpacity,
-                          child: Container(
-                            color: colorScheme.error.withAlpha(102),
-                            alignment: Alignment.topRight,
-                            padding: const EdgeInsets.all(20),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: colorScheme.error, width: 2.5),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'NOPE',
-                                style: TextStyle(
-                                  color: colorScheme.error,
-                                  fontSize: overlayFontSize,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 2,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                    // DistanceBadge
-                    Positioned(
-                      bottom: 16,
-                      left: 16,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainerHighest
-                              .withValues(alpha: 0.85),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                              color: colorScheme.outline.withAlpha(80)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.location_on,
-                                size: 13,
-                                color: colorScheme.primary),
-                            const SizedBox(width: 4),
-                            Text(
-                              '$distanceMi mi away',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: colorScheme.onSurface,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Verified badge
-                    if (pet.isVerified)
-                      Positioned(
-                        top: 16,
-                        right: 16,
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.verified,
-                              size: 18, color: colorScheme.onPrimary),
-                        ),
-                      ),
-                  ],
-                ),
+                    ],
+              border: Border.all(
+                color: colorScheme.outline.withAlpha(40),
+                width: 1.0,
               ),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // ── Full Photo ───────────────────────────────────────────
+                pet.profileImageUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: pet.profileImageUrl,
+                        fit: BoxFit.cover,
+                        errorWidget: (_, _, _) => _imageFallback(colorScheme),
+                      )
+                    : _imageFallback(colorScheme),
 
-              // ── Info ──────────────────────────────────────────────
-              Expanded(
-                flex: 2,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.topLeft,
-                    child: SizedBox(
-                      width: cardW - 32, // match horizontal padding
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  pet.name,
-                                  style: TextStyle(
-                                    fontSize: nameFontSize,
-                                    fontWeight: FontWeight.w800,
-                                    color: colorScheme.onSurface,
-                                    letterSpacing: -0.5,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                width: 34,
-                                height: 34,
-                                decoration: BoxDecoration(
-                                  color: colorScheme.primary.withAlpha(38),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: BrandLogo(
-                                    size: BrandLogoSize.small,
-                                    color: colorScheme.primary),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${pet.age} yr${pet.age == 1 ? '' : 's'} • ${pet.breed}',
-                            style: TextStyle(
-                              fontSize: subFontSize,
-                              color: colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              _TraitBadge(
-                                  label: 'Energy',
-                                  value: _energyLabel(),
-                                  fontSize: subFontSize),
-                              const SizedBox(width: 6),
-                              _TraitBadge(
-                                  label: 'Health',
-                                  value: _healthLabel(),
-                                  fontSize: subFontSize),
-                              const SizedBox(width: 6),
-                              _TraitBadge(
-                                  label: 'Social',
-                                  value: _socialLabel(),
-                                  fontSize: subFontSize),
-                            ],
-                          ),
+                // ── Immersive Gradient Overlay ───────────────────────────
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0.4, 0.7, 1.0],
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withAlpha(80),
+                          Colors.black.withAlpha(180),
                         ],
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        );
+
+                // ── Top Badges ───────────────────────────────────────────
+                Positioned(
+                  top: 20,
+                  left: 20,
+                  right: 20,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withAlpha(100),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: Colors.white24),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.location_on,
+                                size: 14, color: Colors.white70),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$distanceMi mi',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (pet.isVerified)
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: Colors.blueAccent,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.verified,
+                              size: 16, color: Colors.white),
+                        ),
+                    ],
+                  ),
+                ),
+
+                // ── Swipe Decision Overlays ──────────────────────────────
+                if (!isBackground) ...[
+                  Center(
+                    child: Opacity(
+                      opacity: likeOpacity,
+                      child: Transform.rotate(
+                        angle: -0.15,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          decoration: BoxDecoration(
+                            border:
+                                Border.all(color: Colors.greenAccent, width: 4),
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.black26,
+                          ),
+                          child: Text(
+                            'LOVE',
+                            style: TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: 42,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 4,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Opacity(
+                      opacity: nopeOpacity,
+                      child: Transform.rotate(
+                        angle: 0.15,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          decoration: BoxDecoration(
+                            border:
+                                Border.all(color: Colors.redAccent, width: 4),
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.black26,
+                          ),
+                          child: Text(
+                            'NOPE',
+                            style: TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 42,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 4,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+
+                // ── Bottom Info Panel ─────────────────────────────────────
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Personality Vibe Tag
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withAlpha(220),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(_vibeIcon(vibe),
+                                  size: 14, color: colorScheme.onPrimary),
+                              const SizedBox(width: 6),
+                              Text(
+                                vibe.toUpperCase(),
+                                style: TextStyle(
+                                  color: colorScheme.onPrimary,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Name and Age
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              pet.name,
+                              style: GoogleFonts.playfairDisplay(
+                                color: Colors.white,
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              '${pet.age}',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 28,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        // Breed and Type
+                        Row(
+                          children: [
+                            const Icon(Icons.pets,
+                                size: 14, color: Colors.white60),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                '${pet.breed} • ${pet.animalType}',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (pet.bio.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            pet.bio,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white.withAlpha(180),
+                              fontSize: 14,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
   }
 
-  Widget _imageFallback(ColorScheme colorScheme) => Container(
-        color: colorScheme.surface,
-        child: Center(
-          child: BrandLogo(customSize: 80, color: colorScheme.primary),
+  Widget _imageFallback(ColorScheme colorScheme) {
+    return Container(
+      color: colorScheme.surfaceContainerHighest,
+      child: Center(
+        child: BrandLogo(
+          customSize: 80,
+          color: colorScheme.primary.withAlpha(100),
         ),
-      );
+      ),
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1154,52 +1179,8 @@ class NearbyTab extends ConsumerWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Shared small widgets
+// Action Button
 // ─────────────────────────────────────────────────────────────────────────────
-class _TraitBadge extends StatelessWidget {
-  final String label;
-  final String value;
-  final double fontSize;
-  const _TraitBadge({
-    required this.label,
-    required this.value,
-    this.fontSize = 13,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final labelFontSize = (fontSize * 0.82).clamp(9.0, 12.0);
-    final valueFontSize = fontSize.clamp(11.0, 14.0);
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
-          border: Border.all(color: colorScheme.outline.withAlpha(80)),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(label,
-                style: TextStyle(
-                    fontSize: labelFontSize,
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500)),
-            const SizedBox(height: 2),
-            Text(value,
-                style: TextStyle(
-                    fontSize: valueFontSize,
-                    fontWeight: FontWeight.w700,
-                    color: colorScheme.primary)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class ActionButton extends StatelessWidget {
   final double size;
   final Color? color;
