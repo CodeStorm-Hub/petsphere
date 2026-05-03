@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,22 +19,33 @@ class SearchScreen extends ConsumerStatefulWidget {
 class _SearchScreenState extends ConsumerState<SearchScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    // Auto-focus the search bar when the screen opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _tabController.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
   void _onSearch(String query) {
-    ref.read(searchProvider.notifier).search(query);
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      ref.read(searchProvider.notifier).search(query);
+    });
   }
 
   @override
@@ -46,26 +58,51 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with SingleTickerPr
         titleSpacing: 0,
         title: Padding(
           padding: const EdgeInsets.only(right: 16),
-          child: SearchBar(
+          child: TextField(
             controller: _searchController,
-            hintText: 'Search pets, posts, products...',
-            onChanged: _onSearch,
-            onSubmitted: _onSearch,
-            leading: const Icon(Icons.search),
-            trailing: [
-              if (_searchController.text.isNotEmpty)
-                IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    ref.read(searchProvider.notifier).clear();
-                    setState(() {});
-                  },
-                ),
-            ],
-            elevation: WidgetStateProperty.all(0),
-            backgroundColor: WidgetStateProperty.all(colorScheme.surfaceContainerHighest.withAlpha(150)),
-            shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            focusNode: _searchFocusNode,
+            autofocus: true,
+            textInputAction: TextInputAction.search,
+            onChanged: (v) {
+              _onSearch(v);
+              setState(() {});
+            },
+            onSubmitted: (v) {
+              _debounce?.cancel();
+              ref.read(searchProvider.notifier).search(v);
+            },
+            style: TextStyle(color: colorScheme.onSurface),
+            decoration: InputDecoration(
+              hintText: 'Search pets, posts, products...',
+              hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+              prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: Icon(Icons.clear, color: colorScheme.onSurfaceVariant),
+                      onPressed: () {
+                        _searchController.clear();
+                        _debounce?.cancel();
+                        ref.read(searchProvider.notifier).clear();
+                        setState(() {});
+                      },
+                    )
+                  : null,
+              filled: true,
+              fillColor: colorScheme.surfaceContainerHighest.withAlpha(150),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+            ),
           ),
         ),
         bottom: TabBar(

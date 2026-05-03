@@ -329,3 +329,14 @@ class MatchController extends Notifier<MatchState> {
 final matchProvider = NotifierProvider<MatchController, MatchState>(() {
   return MatchController();
 });
+
+/// Aggregated incoming match requests for ALL of the current user's pets.
+/// Used by the Notifications screen so the Requests tab always shows the
+/// full picture regardless of which pet is selected in the Discovery tab.
+final allMatchRequestsProvider =
+    FutureProvider<List<MatchRequestModel>>((ref) async {
+  final myPets = ref.watch(petProvider).myPets;
+  if (myPets.isEmpty) return [];
+  final petIds = myPets.map((p) => p.id).toList();
+  return matchRepository.fetchAllMyRequests(petIds);
+});

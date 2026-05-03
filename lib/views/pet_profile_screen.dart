@@ -297,17 +297,24 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                           label: 'following', value: '0'),
                                     ),
                               ] else if (selectedPet != null) ...[
-                                ref
-                                    .watch(petFollowerCountProvider(
-                                        selectedPet.id))
-                                    .when(
-                                      data: (c) => StatColumn(
-                                          label: 'followers', value: '$c'),
-                                      loading: () => const StatColumn(
-                                          label: 'followers', value: '···'),
-                                      error: (_, _) => const StatColumn(
-                                          label: 'followers', value: '0'),
-                                    ),
+                                // Tappable follower count → opens followers list
+                                GestureDetector(
+                                  onTap: () => context.push(
+                                      '/pet/${selectedPet!.id}/followers'),
+                                  child: ref
+                                      .watch(petFollowerCountProvider(
+                                          selectedPet.id))
+                                      .when(
+                                        data: (c) => StatColumn(
+                                            label: 'followers',
+                                            value: '$c',
+                                            tappable: !isVisitor),
+                                        loading: () => const StatColumn(
+                                            label: 'followers', value: '···'),
+                                        error: (_, _) => const StatColumn(
+                                            label: 'followers', value: '0'),
+                                      ),
+                                ),
                                 StatColumn(
                                   label: 'pets',
                                   value: '${profilePets.length}',
@@ -2429,8 +2436,14 @@ class AddPetAvatar extends StatelessWidget {
 class StatColumn extends StatelessWidget {
   final String label;
   final String value;
+  final bool tappable;
 
-  const StatColumn({super.key, required this.label, required this.value});
+  const StatColumn({
+    super.key,
+    required this.label,
+    required this.value,
+    this.tappable = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -2446,13 +2459,26 @@ class StatColumn extends StatelessWidget {
             color: colorScheme.onSurface,
           ),
         ),
-        Text(
-          label,
-          style: GoogleFonts.dmSans(
-            color: colorScheme.onSurfaceVariant,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.dmSans(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (tappable) ...[
+              const SizedBox(width: 2),
+              Icon(
+                Icons.chevron_right,
+                size: 14,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ],
         ),
       ],
     );
