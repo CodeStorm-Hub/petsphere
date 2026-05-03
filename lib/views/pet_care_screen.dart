@@ -512,6 +512,9 @@ class _DashboardTab extends ConsumerWidget {
 
     final completedTasks = todayLog.completedTasks;
     final totalTasks = todayLog.tasks.length;
+    final checklistProgress =
+        totalTasks == 0 ? 0.0 : completedTasks / totalTasks;
+    final checklistPct = (checklistProgress * 100).round();
 
     final o = careState.onboarding;
     final oData = o?.data ?? const <String, dynamic>{};
@@ -621,18 +624,24 @@ class _DashboardTab extends ConsumerWidget {
         ),
         const SizedBox(height: 24),
 
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Daily Checklist', style: theme.textTheme.titleLarge),
-            Text(
-              '${(totalTasks == 0 ? 0 : completedTasks / totalTasks * 100).toInt()}%',
-              style: TextStyle(
-                color: colorScheme.primary,
-                fontWeight: FontWeight.bold,
+        Semantics(
+          header: true,
+          label:
+              'Daily checklist, $checklistPct percent complete, $completedTasks of $totalTasks tasks done',
+          excludeSemantics: true,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Daily Checklist', style: theme.textTheme.titleLarge),
+              Text(
+                '$checklistPct%',
+                style: TextStyle(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 4),
         Text(
@@ -643,11 +652,16 @@ class _DashboardTab extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 8),
-        LinearProgressIndicator(
-          value: totalTasks == 0 ? 0 : completedTasks / totalTasks,
-          backgroundColor: colorScheme.outlineVariant,
-          color: colorScheme.primary,
-          borderRadius: BorderRadius.circular(999),
+        Semantics(
+          label: 'Checklist progress, $completedTasks of $totalTasks tasks',
+          value: '$checklistPct percent',
+          excludeSemantics: true,
+          child: LinearProgressIndicator(
+            value: checklistProgress,
+            backgroundColor: colorScheme.outlineVariant,
+            color: colorScheme.primary,
+            borderRadius: BorderRadius.circular(999),
+          ),
         ),
         const SizedBox(height: 16),
 
@@ -1032,45 +1046,51 @@ class _ProgressRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      children: [
-        SizedBox(
-          width: 72,
-          height: 72,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: progress.clamp(0.0, 1.0)),
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeOutCubic,
-                builder: (_, value, _) => CircularProgressIndicator(
-                  value: value,
-                  strokeWidth: 8,
-                  backgroundColor: colorScheme.outlineVariant,
-                  color: color,
-                ),
-              ),
-              Center(
-                child: Text(
-                  centerText,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
+    final valueDescription = centerText.replaceAll('\n', ' ');
+    final pctRounded = (progress.clamp(0.0, 1.0) * 100).round();
+    return Semantics(
+      label: '$label, $valueDescription, $pctRounded percent',
+      excludeSemantics: true,
+      child: Column(
+        children: [
+          SizedBox(
+            width: 72,
+            height: 72,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: progress.clamp(0.0, 1.0)),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutCubic,
+                  builder: (_, value, _) => CircularProgressIndicator(
+                    value: value,
+                    strokeWidth: 8,
+                    backgroundColor: colorScheme.outlineVariant,
+                    color: color,
                   ),
                 ),
-              ),
-            ],
+                Center(
+                  child: Text(
+                    centerText,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(label,
-            style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 13,
-            )),
-      ],
+          const SizedBox(height: 8),
+          Text(label,
+              style: TextStyle(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 13,
+              )),
+        ],
+      ),
     );
   }
 }

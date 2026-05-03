@@ -210,34 +210,52 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                 if (!isVisitor && isOwnerView)
                   Padding(
                     padding: const EdgeInsets.only(right: 4),
-                    child: InkWell(
-                      onTap: () => showLogoutConfirmation(context),
-                      borderRadius: BorderRadius.circular(24),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surface.withAlpha(180),
-                          shape: BoxShape.circle,
+                    child: Tooltip(
+                      message: 'Sign out',
+                      child: InkWell(
+                        onTap: () => showLogoutConfirmation(context),
+                        borderRadius: BorderRadius.circular(24),
+                        child: Semantics(
+                          button: true,
+                          label: 'Sign out',
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: colorScheme.surface.withAlpha(180),
+                              shape: BoxShape.circle,
+                            ),
+                            child: ExcludeSemantics(
+                              child: Icon(Icons.logout_rounded,
+                                  color: colorScheme.onSurface, size: 20),
+                            ),
+                          ),
                         ),
-                        child: Icon(Icons.logout_rounded,
-                            color: colorScheme.onSurface, size: 20),
                       ),
                     ),
                   ),
                 if (!isVisitor)
                   Padding(
                     padding: const EdgeInsets.only(right: 12),
-                    child: InkWell(
-                      onTap: () => context.push('/settings'),
-                      borderRadius: BorderRadius.circular(24),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surface.withAlpha(180),
-                          shape: BoxShape.circle,
+                    child: Tooltip(
+                      message: 'Settings',
+                      child: InkWell(
+                        onTap: () => context.push('/settings'),
+                        borderRadius: BorderRadius.circular(24),
+                        child: Semantics(
+                          button: true,
+                          label: 'Settings',
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: colorScheme.surface.withAlpha(180),
+                              shape: BoxShape.circle,
+                            ),
+                            child: ExcludeSemantics(
+                              child: Icon(Icons.settings_rounded,
+                                  color: colorScheme.onSurface, size: 20),
+                            ),
+                          ),
                         ),
-                        child: Icon(Icons.settings_rounded,
-                            color: colorScheme.onSurface, size: 20),
                       ),
                     ),
                   ),
@@ -583,10 +601,16 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         ),
                       ),
                     if (!isVisitor)
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
+                      Semantics(
+                        button: true,
+                        label: 'Add pet',
+                        hint: 'Opens the add new pet form',
                         onTap: () => context.push('/add_pet'),
-                        child: const AddPetAvatar(),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => context.push('/add_pet'),
+                          child: const ExcludeSemantics(child: AddPetAvatar()),
+                        ),
                       ),
                   ],
                 ),
@@ -2448,39 +2472,44 @@ class StatColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          value,
-          style: GoogleFonts.dmSans(
-            fontWeight: FontWeight.w800,
-            fontSize: 20,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        Row(
+    return Semantics(
+      label: '$value $label',
+      child: ExcludeSemantics(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              label,
+              value,
               style: GoogleFonts.dmSans(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w800,
+                fontSize: 20,
+                color: colorScheme.onSurface,
               ),
             ),
-            if (tappable) ...[
-              const SizedBox(width: 2),
-              Icon(
-                Icons.chevron_right,
-                size: 14,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ],
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.dmSans(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (tappable) ...[
+                  const SizedBox(width: 2),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 14,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ],
+            ),
           ],
         ),
-      ],
+      ),
     );
   }
 }

@@ -114,6 +114,17 @@ class GlassNavBar extends StatelessWidget {
     NavItem(Icons.person_outline, Icons.person),
   ];
 
+  /// TalkBack / VoiceOver labels (center index 2 uses [centerFabSemanticLabel]).
+  static const List<String> tabSemanticLabels = [
+    'Home',
+    'Discover',
+    '', // placeholder; never read — center slot is not an Expanded tab
+    'Marketplace',
+    'Profile',
+  ];
+
+  static const String centerFabSemanticLabel = 'Pet Care';
+
 
   @override
   Widget build(BuildContext context) {
@@ -140,24 +151,31 @@ class GlassNavBar extends StatelessWidget {
                   : colorScheme.onSurfaceVariant;
 
               if (isCenter) {
-                return GestureDetector(
+                return Semantics(
+                  button: true,
+                  label: centerFabSemanticLabel,
+                  hint: 'Opens pet care diary, goals, and daily checklist',
                   onTap: () => onTap(i),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 280),
-                    curve: Curves.easeOut,
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      shape: BoxShape.circle,
-                      boxShadow: Theme.of(
-                        context,
-                      ).extension<PetfolioShadows>()?.button,
-                    ),
-                    child: Icon(
-                      Icons.add,
-                      color: colorScheme.onPrimary,
-                      size: 28,
+                  excludeSemantics: true,
+                  child: GestureDetector(
+                    onTap: () => onTap(i),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 280),
+                      curve: Curves.easeOut,
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: Theme.of(
+                          context,
+                        ).extension<PetfolioShadows>()?.button,
+                      ),
+                      child: Icon(
+                        Icons.add,
+                        color: colorScheme.onPrimary,
+                        size: 28,
+                      ),
                     ),
                   ),
                 );
@@ -179,24 +197,34 @@ class GlassNavBar extends StatelessWidget {
               }
 
               return Expanded(
-                child: GestureDetector(
+                child: Semantics(
+                  button: true,
+                  selected: isActive,
+                  label: tabSemanticLabels[i],
+                  hint: i == 4 && profileImageUrl.isEmpty
+                      ? 'Your profile and pets'
+                      : null,
                   onTap: () => onTap(i),
-                  behavior: HitTestBehavior.opaque,
-                  child: Center(
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 280),
-                      curve: Curves.easeOut,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
+                  excludeSemantics: true,
+                  child: GestureDetector(
+                    onTap: () => onTap(i),
+                    behavior: HitTestBehavior.opaque,
+                    child: Center(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 280),
+                        curve: Curves.easeOut,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: ShapeDecoration(
+                          color: isActive
+                              ? colorScheme.primary.withValues(alpha: 0.10)
+                              : Colors.transparent,
+                          shape: const StadiumBorder(),
+                        ),
+                        child: child,
                       ),
-                      decoration: ShapeDecoration(
-                        color: isActive
-                            ? colorScheme.primary.withValues(alpha: 0.10)
-                            : Colors.transparent,
-                        shape: const StadiumBorder(),
-                      ),
-                      child: child,
                     ),
                   ),
                 ),
