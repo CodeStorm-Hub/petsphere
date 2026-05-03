@@ -117,7 +117,7 @@ class _GearReviewCard extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.star, color: Colors.amber, size: 14),
+                            Icon(Icons.star, color: colorScheme.tertiary, size: 14),
                             const SizedBox(width: 4),
                             Text('$rating', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                             Text(' ($reviewCount)', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12)),

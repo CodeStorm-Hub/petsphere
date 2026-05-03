@@ -153,7 +153,7 @@ class _NotificationTile extends ConsumerWidget {
       case 'profile_follow':
       case 'pet_follow':
         icon = Icons.person_add;
-        bg = Colors.blue;
+        bg = colors.primary;
         break;
       default:
         icon = Icons.notifications;

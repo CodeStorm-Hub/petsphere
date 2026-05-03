@@ -14,6 +14,7 @@ import '../models/pet_model.dart';
 import '../models/post_model.dart';
 import '../models/story_model.dart';
 import '../theme/app_theme.dart';
+import '../utils/post_actions.dart';
 import '../utils/pet_navigation.dart';
 import '../widgets/common/petfolio_widgets.dart';
 import 'components/post_card.dart';
@@ -285,6 +286,12 @@ class HomeScreen extends ConsumerWidget {
                         petId: post.pet.id,
                         petUserId: post.pet.userId,
                       ),
+                      onEdit: post.pet.userId == ref.read(authProvider).user?.id
+                          ? () => showEditPostDialog(context, ref, post)
+                          : null,
+                      onDelete: post.pet.userId == ref.read(authProvider).user?.id
+                          ? () => showDeletePostDialog(context, ref, post)
+                          : null,
                     );
                   }, childCount: feedState.posts.length),
                 ),

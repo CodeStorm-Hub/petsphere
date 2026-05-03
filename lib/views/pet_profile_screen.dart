@@ -165,11 +165,6 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
     final bottomSpace =
         isVisitor ? 32.0 : bottomNavSpaceFor(context);
 
-    // Hero image: pet's profile photo for pet view, owner avatar for owner view
-    final heroImageUrl = isOwnerView
-        ? (ownerForHeader?.profileImageUrl ?? '')
-        : (selectedPet?.profileImageUrl ?? '');
-
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
@@ -188,7 +183,6 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
           slivers: [
             // ── Hero SliverAppBar ────────────────────────────────────
             SliverAppBar(
-              expandedHeight: 220,
               pinned: true,
               automaticallyImplyLeading: false,
               leading: isVisitor
@@ -199,12 +193,12 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         borderRadius: BorderRadius.circular(24),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.black.withAlpha(110),
+                            color: colorScheme.surface.withAlpha(180),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_back_rounded,
-                            color: Colors.white,
+                            color: colorScheme.onSurface,
                             size: 20,
                           ),
                         ),
@@ -221,11 +215,11 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.black.withAlpha(110),
+                          color: colorScheme.surface.withAlpha(180),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.logout_rounded,
-                            color: Colors.white, size: 20),
+                        child: Icon(Icons.logout_rounded,
+                            color: colorScheme.onSurface, size: 20),
                       ),
                     ),
                   ),
@@ -238,45 +232,18 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.black.withAlpha(110),
+                          color: colorScheme.surface.withAlpha(180),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.settings_rounded,
-                            color: Colors.white, size: 20),
+                        child: Icon(Icons.settings_rounded,
+                            color: colorScheme.onSurface, size: 20),
                       ),
                     ),
                   ),
               ],
-              flexibleSpace: FlexibleSpaceBar(
-                collapseMode: CollapseMode.parallax,
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Hero image
-                    if (heroImageUrl.isNotEmpty)
-                      Image.network(
-                        heroImageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            _buildHeroFallback(colorScheme),
-                      )
-                    else
-                      _buildHeroFallback(colorScheme),
-                    // Gradient overlay — darkens towards the bottom
-                    const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          stops: [0.35, 1.0],
-                          colors: [Colors.transparent, Colors.black87],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               backgroundColor: colorScheme.surface,
+              elevation: 0,
+              surfaceTintColor: Colors.transparent,
             ),
 
             // ── Profile Header ───────────────────────────────────────
@@ -314,7 +281,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                           label: 'followers', value: '$c'),
                                       loading: () => const _StatColumn(
                                           label: 'followers', value: '···'),
-                                      error: (_, __) => const _StatColumn(
+                                      error: (_, _) => const _StatColumn(
                                           label: 'followers', value: '0'),
                                     ),
                                 ref
@@ -325,7 +292,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                           label: 'following', value: '$c'),
                                       loading: () => const _StatColumn(
                                           label: 'following', value: '···'),
-                                      error: (_, __) => const _StatColumn(
+                                      error: (_, _) => const _StatColumn(
                                           label: 'following', value: '0'),
                                     ),
                               ] else if (selectedPet != null) ...[
@@ -337,7 +304,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                           label: 'followers', value: '$c'),
                                       loading: () => const _StatColumn(
                                           label: 'followers', value: '···'),
-                                      error: (_, __) => const _StatColumn(
+                                      error: (_, _) => const _StatColumn(
                                           label: 'followers', value: '0'),
                                     ),
                                 _StatColumn(
@@ -732,16 +699,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                       color: Colors.white,
                                     ),
                                   ),
-                                ),
-                              )
-                            else
-                              Image.network(
-                                post.mediaUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (ctx, _, _) => Container(
-                                  color: colorScheme.surfaceContainer,
-                                  child: Icon(Icons.image_outlined, color: colorScheme.onSurfaceVariant),
-                                ),
+                                ],
                               ),
                             ),
                           ),
@@ -787,7 +745,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                 Image.network(
                                   post.mediaUrl,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (ctx, _, __) => Container(
+                                  errorBuilder: (ctx, _, _) => Container(
                                     color: colorScheme.surfaceContainer,
                                     child: Icon(Icons.image_outlined,
                                         color:
@@ -859,29 +817,6 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               ),
             )
           : null,
-    );
-  }
-
-  /// Gradient fallback when no hero image is available.
-  Widget _buildHeroFallback(ColorScheme colorScheme) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFD4845A), // AppTheme.primaryAccent
-            Color(0xFF4A7C59), // AppTheme.secondaryAccent
-          ],
-        ),
-      ),
-      child: Center(
-        child: Icon(
-          Icons.pets_rounded,
-          size: 72,
-          color: Colors.white.withAlpha(60),
-        ),
-      ),
     );
   }
 
@@ -1307,7 +1242,7 @@ class _ProfileVisitorActionRow extends ConsumerWidget {
           ),
         ),
       ),
-      error: (_, __) => ElevatedButton.icon(
+      error: (_, _) => ElevatedButton.icon(
         icon: const Icon(Icons.person_add_rounded, size: 15),
         label: const Text('Follow'),
         onPressed: () {
@@ -1371,7 +1306,7 @@ class _ProfileVisitorActionRow extends ConsumerWidget {
           ),
         ),
       ),
-      error: (_, __) => ElevatedButton.icon(
+      error: (_, _) => ElevatedButton.icon(
         icon: const Icon(Icons.person_add_rounded, size: 15),
         label: const Text('Follow'),
         onPressed: () {

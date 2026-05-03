@@ -274,11 +274,12 @@ class _EmergencyContactCard extends StatelessWidget {
 class _ActionGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final actions = [
-      {'title': 'CPR & Choking', 'icon': Icons.heart_broken_rounded, 'color': Colors.red},
-      {'title': 'Bleeding', 'icon': Icons.bloodtype_rounded, 'color': Colors.redAccent},
-      {'title': 'Heatstroke', 'icon': Icons.wb_sunny_rounded, 'color': Colors.orange},
-      {'title': 'Fractures', 'icon': Icons.settings_accessibility_rounded, 'color': Colors.brown},
+      {'title': 'CPR & Choking', 'icon': Icons.heart_broken_rounded, 'color': colorScheme.error},
+      {'title': 'Bleeding', 'icon': Icons.bloodtype_rounded, 'color': colorScheme.error},
+      {'title': 'Heatstroke', 'icon': Icons.wb_sunny_rounded, 'color': colorScheme.secondary},
+      {'title': 'Fractures', 'icon': Icons.settings_accessibility_rounded, 'color': colorScheme.tertiary},
     ];
 
     return GridView.builder(

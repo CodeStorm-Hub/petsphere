@@ -1214,7 +1214,7 @@ class _PetSelectorBar extends ConsumerWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         itemCount: myPets.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final pet = myPets[index];
           return _PetSelectorChip(
@@ -1284,12 +1284,12 @@ class _PetSelectorChip extends StatelessWidget {
                     ? CachedNetworkImage(
                         imageUrl: pet.profileImageUrl,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => Icon(
+                        placeholder: (_, _) => Icon(
                           Icons.pets,
                           size: 20,
                           color: colorScheme.onSurfaceVariant,
                         ),
-                        errorWidget: (_, __, ___) => Icon(
+                        errorWidget: (_, _, _) => Icon(
                           Icons.pets,
                           size: 20,
                           color: colorScheme.onSurfaceVariant,

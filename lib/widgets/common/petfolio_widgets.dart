@@ -356,27 +356,7 @@ class PetfolioGradientBackground extends StatefulWidget {
       _PetfolioGradientBackgroundState();
 }
 
-class _PetfolioGradientBackgroundState extends State<PetfolioGradientBackground>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _motion;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 8000),
-    )..repeat(reverse: true);
-    _motion = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
+class _PetfolioGradientBackgroundState extends State<PetfolioGradientBackground> {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
@@ -386,17 +366,6 @@ class _PetfolioGradientBackgroundState extends State<PetfolioGradientBackground>
   }
 }
 
-class _BlurBlob extends StatelessWidget {
-  final Color color;
-  final double size;
-
-  const _BlurBlob({required this.color, required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox.shrink();
-  }
-}
 
 class _FadeSlideInState extends State<FadeSlideIn> {
   bool _visible = false;

@@ -200,7 +200,7 @@ class _AchievementsBadgesSection extends ConsumerWidget {
         padding: EdgeInsets.all(16),
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
       data: (defs) {
         final bySlug = {for (final d in defs) d.slug: d};
         final allUnlocks = careState.unlocks;
@@ -295,7 +295,7 @@ class _AchievementsBadgesSection extends ConsumerWidget {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: petUnlockMap[pet.id]!.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      separatorBuilder: (_, _) => const SizedBox(width: 8),
                       itemBuilder: (ctx, i) {
                         final unlock = petUnlockMap[pet.id]![i];
                         final def = bySlug[unlock.badgeSlug];

@@ -258,6 +258,34 @@ class FeedRepository {
   }
 
   // -------------------------------------------------------------------------
+  // Update a post
+  // -------------------------------------------------------------------------
+  Future<PostModel> updatePost({
+    required String postId,
+    required String caption,
+    String? location,
+    List<String>? taggedPetIds,
+    List<String>? taggedPetNames,
+  }) async {
+    final payload = {
+      'caption': caption,
+      'location': ?location,
+      'tagged_pet_ids': ?taggedPetIds,
+      'tagged_pet_names': ?taggedPetNames,
+    };
+
+    final data = await supabase
+        .from('posts')
+        .update(payload)
+        .eq('id', postId)
+        .select(
+            '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
+        .single();
+
+    return PostModel.fromJson(data);
+  }
+
+  // -------------------------------------------------------------------------
   // Delete a post and its related data
   // -------------------------------------------------------------------------
   Future<void> deletePost(String postId) async {

@@ -117,10 +117,10 @@ class _OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final statusColor = switch (order.status) {
-      'pending' => const Color(0xFFFFB74D),
-      'confirmed' => const Color(0xFF4FC3F7),
-      'shipped' => const Color(0xFF64B5F6),
-      'delivered' => const Color(0xFF81C784),
+      'pending' => colorScheme.secondary,
+      'confirmed' => colorScheme.primary,
+      'shipped' => colorScheme.primary,
+      'delivered' => colorScheme.tertiary,
       'cancelled' => colorScheme.error,
       _ => colorScheme.onSurfaceVariant,
     };

@@ -30,12 +30,12 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
   late Animation<double> _fadeAnim;
 
   final List<_AnimalOption> _animalOptions = [
-    _AnimalOption('Dog', Icons.pets, const Color(0xFFFF8A65)),
-    _AnimalOption('Cat', Icons.catching_pokemon, const Color(0xFF4FC3F7)),
-    _AnimalOption('Bird', Icons.flutter_dash, const Color(0xFF81C784)),
-    _AnimalOption('Rabbit', Icons.cruelty_free, const Color(0xFFBA68C8)),
-    _AnimalOption('Fish', Icons.water, const Color(0xFF4DD0E1)),
-    _AnimalOption('Other', Icons.emoji_nature, const Color(0xFFFFB74D)),
+    _AnimalOption('Dog', Icons.pets),
+    _AnimalOption('Cat', Icons.catching_pokemon),
+    _AnimalOption('Bird', Icons.flutter_dash),
+    _AnimalOption('Rabbit', Icons.cruelty_free),
+    _AnimalOption('Fish', Icons.water),
+    _AnimalOption('Other', Icons.emoji_nature),
   ];
 
   @override
@@ -111,11 +111,11 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF8A65).withAlpha(26),
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.photo_library_rounded,
-                    color: Color(0xFFFF8A65)),
+                child: Icon(Icons.photo_library_rounded,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer),
               ),
               title: const Text('Choose from Gallery',
                   style: TextStyle(fontWeight: FontWeight.w600)),
@@ -129,11 +129,11 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4FC3F7).withAlpha(26),
+                  color: Theme.of(context).colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.camera_alt_rounded,
-                    color: Color(0xFF4FC3F7)),
+                child: Icon(Icons.camera_alt_rounded,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer),
               ),
               title: const Text('Take a Photo',
                   style: TextStyle(fontWeight: FontWeight.w600)),
@@ -231,7 +231,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                             'Photo upload failed — saving pet without photo.')),
                   ],
                 ),
-                backgroundColor: Colors.orange.shade700,
+                backgroundColor: Theme.of(context).colorScheme.error,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
@@ -261,7 +261,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                   Text('${_nameController.text.trim()} added successfully!'),
                 ],
               ),
-              backgroundColor: const Color(0xFF81C784),
+              backgroundColor: Theme.of(context).colorScheme.tertiary,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
@@ -285,7 +285,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFDFD),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded),
@@ -360,9 +360,9 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
             child: LinearProgressIndicator(
               value: (_currentStep + 1) / 3,
               minHeight: 4,
-              backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               valueColor:
-                  const AlwaysStoppedAnimation<Color>(Color(0xFFFF8A65)),
+                  AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
             ),
           ),
         ],
@@ -433,6 +433,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
             itemBuilder: (context, index) {
               final option = _animalOptions[index];
               final isSelected = _selectedAnimalType == option.label;
+              final optionColor = Theme.of(context).colorScheme.primary;
               return GestureDetector(
                 onTap: () => setState(() => _selectedAnimalType = option.label),
                 child: AnimatedContainer(
@@ -440,17 +441,17 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                   curve: Curves.easeOut,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? option.color.withAlpha(26)
+                        ? optionColor.withAlpha(26)
                         : Theme.of(context).colorScheme.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isSelected ? option.color : Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: isSelected ? optionColor : Theme.of(context).colorScheme.onSurfaceVariant,
                       width: isSelected ? 2.5 : 1,
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: option.color.withAlpha(51),
+                              color: optionColor.withAlpha(51),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             )
@@ -463,7 +464,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                       Icon(
                         option.icon,
                         size: 36,
-                        color: isSelected ? option.color : Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: isSelected ? optionColor : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -473,7 +474,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                           fontWeight:
                               isSelected ? FontWeight.bold : FontWeight.w500,
                           color:
-                              isSelected ? option.color : Theme.of(context).colorScheme.onSurfaceVariant,
+                              isSelected ? optionColor : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -682,7 +683,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
             child: FilledButton(
               onPressed: _isSaving ? null : _submitPet,
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFFF8A65),
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -726,7 +727,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
   Widget _buildInputLabel(String label, IconData icon) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: const Color(0xFFFF8A65)),
+        Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           label,
@@ -756,7 +757,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFFF8A65), width: 2),
+        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
     );
@@ -766,7 +767,6 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
 class _AnimalOption {
   final String label;
   final IconData icon;
-  final Color color;
 
-  const _AnimalOption(this.label, this.icon, this.color);
+  const _AnimalOption(this.label, this.icon);
 }

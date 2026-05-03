@@ -170,8 +170,11 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF9F3ED),
+                                color: colorScheme.primaryContainer.withAlpha(30),
                                 borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: colorScheme.outline.withAlpha(40),
+                                ),
                               ),
                               child: Row(
                                 children: [
@@ -182,7 +185,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                                             child: CircleAvatar(
                                               radius: 14,
                                               backgroundColor: [
-                                                const Color(0xFFFFE087),
+                                                colorScheme.primaryContainer,
                                                 colorScheme.secondaryContainer,
                                                 colorScheme.tertiaryContainer,
                                               ][i],
@@ -190,7 +193,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                                                 Icons.pets,
                                                 size: 13,
                                                 color: [
-                                                  const Color(0xFF745C00),
+                                                  colorScheme.onPrimaryContainer,
                                                   colorScheme.onSecondaryContainer,
                                                   colorScheme.onTertiaryContainer,
                                                 ][i],

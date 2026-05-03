@@ -49,9 +49,9 @@ class PetActivityLog {
 
   /// Color for the intensity level.
   Color get intensityColor => switch (intensity) {
-        'low' => Colors.green,
-        'high' => Colors.orange,
-        _ => Colors.blue,
+        'low' => const Color(0xFF5BA3F5), // tertiary
+        'high' => const Color(0xFFFFA726), // secondary
+        _ => const Color(0xFF2979FF), // primary
       };
 
   factory PetActivityLog.fromJson(Map<String, dynamic> json) {

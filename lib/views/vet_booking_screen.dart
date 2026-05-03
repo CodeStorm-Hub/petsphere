@@ -155,7 +155,7 @@ class _VetCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.star, color: Colors.amber, size: 14),
+                        Icon(Icons.star, color: colorScheme.tertiary, size: 14),
                         const SizedBox(width: 4),
                         Text(
                           '${vet['rating']}',
@@ -184,7 +184,7 @@ class _VetCard extends StatelessWidget {
               ),
               Column(
                 children: [
-                  Text(vet['price'], style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                  Text(vet['price'], style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.tertiary)),
                   const SizedBox(height: 8),
                   Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
                 ],

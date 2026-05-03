@@ -10,10 +10,7 @@ class PetInsuranceHubScreen extends ConsumerStatefulWidget {
 }
 
 class _PetInsuranceHubScreenState extends ConsumerState<PetInsuranceHubScreen> {
-  final List<Map<String, dynamic>> _claims = [
-    {'title': 'Annual Wellness Exam', 'date': 'Oct 12, 2024', 'amount': 145.00, 'status': 'Approved', 'icon': Icons.check_circle_rounded, 'color': Colors.green},
-    {'title': 'Ear Infection Treatment', 'date': 'Sep 28, 2024', 'amount': 88.50, 'status': 'Pending', 'icon': Icons.pending_rounded, 'color': Colors.orange},
-  ];
+
 
   void _fileClaim() {
     showModalBottomSheet(
@@ -28,6 +25,11 @@ class _PetInsuranceHubScreenState extends ConsumerState<PetInsuranceHubScreen> {
   Widget build(BuildContext context) {
     final pet = ref.watch(petProvider);
     final colorScheme = Theme.of(context).colorScheme;
+
+    final List<Map<String, dynamic>> claims = [
+      {'title': 'Annual Wellness Exam', 'date': 'Oct 12, 2024', 'amount': 145.00, 'status': 'Approved', 'icon': Icons.check_circle_rounded, 'color': colorScheme.tertiary},
+      {'title': 'Ear Infection Treatment', 'date': 'Sep 28, 2024', 'amount': 88.50, 'status': 'Pending', 'icon': Icons.pending_rounded, 'color': colorScheme.secondary},
+    ];
 
     return Scaffold(
       body: CustomScrollView(
@@ -66,7 +68,7 @@ class _PetInsuranceHubScreenState extends ConsumerState<PetInsuranceHubScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  ..._claims.map((claim) => _ClaimCard(claim: claim)),
+                  ...claims.map((claim) => _ClaimCard(claim: claim)),
                   const SizedBox(height: 32),
                   _DocumentVault(),
                   const SizedBox(height: 32),
@@ -212,10 +214,10 @@ class _CoverageBreakdown extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _CoverageItem(title: 'Accidents & Injuries', subtitle: r'Covered up to $15,000', icon: Icons.emergency_rounded, color: Colors.redAccent),
-              _CoverageItem(title: 'Illnesses', subtitle: 'Hereditary, chronic & more', icon: Icons.medication_rounded, color: Colors.blueAccent),
-              _CoverageItem(title: 'Diagnostics', subtitle: 'X-rays, MRIs & bloodwork', icon: Icons.biotech_rounded, color: Colors.purpleAccent),
-              _CoverageItem(title: 'Dental Care', subtitle: 'Injury & illness related', icon: Icons.health_and_safety_rounded, color: Colors.teal, isLast: true),
+              _CoverageItem(title: 'Accidents & Injuries', subtitle: r'Covered up to $15,000', icon: Icons.emergency_rounded, color: colorScheme.error),
+              _CoverageItem(title: 'Illnesses', subtitle: 'Hereditary, chronic & more', icon: Icons.medication_rounded, color: colorScheme.primary),
+              _CoverageItem(title: 'Diagnostics', subtitle: 'X-rays, MRIs & bloodwork', icon: Icons.biotech_rounded, color: colorScheme.secondary),
+              _CoverageItem(title: 'Dental Care', subtitle: 'Injury & illness related', icon: Icons.health_and_safety_rounded, color: colorScheme.tertiary, isLast: true),
             ],
           ),
         ),
@@ -256,7 +258,7 @@ class _CoverageItem extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.check_circle_rounded, color: Colors.green, size: 20),
+              Icon(Icons.check_circle_rounded, color: Theme.of(context).colorScheme.tertiary, size: 20),
             ],
           ),
         ),
@@ -421,7 +423,7 @@ class _InsurancePerks extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Icon(Icons.stars_rounded, color: Colors.amber, size: 48),
+          Icon(Icons.stars_rounded, color: colorScheme.secondary, size: 48),
           const SizedBox(height: 16),
           const Text('Multi-Pet Advantage', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 22)),
           const SizedBox(height: 8),
@@ -479,7 +481,7 @@ class _FileClaimSheet extends StatelessWidget {
             ),
             child: Column(
               children: [
-                const Icon(Icons.cloud_upload_rounded, size: 32, color: Colors.blue),
+                Icon(Icons.cloud_upload_rounded, size: 32, color: colorScheme.primary),
                 const SizedBox(height: 12),
                 const Text('Upload Medical Invoices', style: TextStyle(fontWeight: FontWeight.bold)),
                 Text('PDF, JPG or PNG (Max 10MB)', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12)),

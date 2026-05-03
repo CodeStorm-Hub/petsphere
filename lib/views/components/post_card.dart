@@ -24,6 +24,8 @@ class PostCard extends StatefulWidget {
   final VoidCallback onCommentIconTap;
   final VoidCallback onShareIconTap;
   final VoidCallback? onPetTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const PostCard({
     super.key,
@@ -33,6 +35,8 @@ class PostCard extends StatefulWidget {
     required this.onCommentIconTap,
     required this.onShareIconTap,
     this.onPetTap,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -104,6 +108,32 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                   );
                 },
               ),
+              if (widget.onEdit != null) ...[
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.edit_outlined),
+                  title: const Text('Edit Post'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    widget.onEdit!();
+                  },
+                ),
+              ],
+              if (widget.onDelete != null)
+                ListTile(
+                  leading: Icon(
+                    Icons.delete_outline_rounded,
+                    color: colorScheme.error,
+                  ),
+                  title: Text(
+                    'Delete Post',
+                    style: TextStyle(color: colorScheme.error),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    widget.onDelete!();
+                  },
+                ),
               ListTile(
                 leading: Icon(
                   Icons.report_problem_outlined,

@@ -50,19 +50,19 @@ enum ExpenseCategory {
   Color get color {
     switch (this) {
       case ExpenseCategory.food:
-        return Colors.orange;
+        return const Color(0xFFFFA726); // secondary
       case ExpenseCategory.health:
-        return Colors.redAccent;
+        return const Color(0xFFE85D75); // error
       case ExpenseCategory.toys:
-        return Colors.purpleAccent;
+        return const Color(0xFF5BA3F5); // tertiary
       case ExpenseCategory.grooming:
-        return Colors.blueAccent;
+        return const Color(0xFF2979FF); // primary
       case ExpenseCategory.insurance:
-        return Colors.teal;
+        return const Color(0xFF1D1D1F); // deepNavy
       case ExpenseCategory.training:
-        return Colors.indigo;
+        return const Color(0xFF86868B); // midNavy
       case ExpenseCategory.other:
-        return Colors.grey;
+        return const Color(0xFF86868B); // midNavy
     }
   }
 }

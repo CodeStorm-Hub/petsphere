@@ -219,22 +219,22 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                       if (product.isBestseller) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(
+                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFD54F).withAlpha(60),
+                            color: colorScheme.tertiaryContainer,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.local_fire_department,
-                                  size: 13, color: Color(0xFF795548)),
+                                  size: 13, color: colorScheme.onTertiaryContainer),
                               SizedBox(width: 3),
                               Text(
                                 'BESTSELLER',
                                 style: TextStyle(
-                                  color: Color(0xFF795548),
+                                  color: colorScheme.onTertiaryContainer,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 0.5,
@@ -323,7 +323,7 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                             horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: product.stock > 0
-                              ? const Color(0xFF81C784).withAlpha(30)
+                              ? colorScheme.tertiaryContainer.withAlpha(80)
                               : colorScheme.error.withAlpha(30),
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -333,7 +333,7 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                               : 'Out of stock',
                           style: TextStyle(
                             color: product.stock > 0
-                                ? colorScheme.onTertiary
+                                ? colorScheme.onTertiaryContainer
                                 : colorScheme.error,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -552,7 +552,7 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                                         'Added $_quantity × ${product.name} to cart'),
                                   ],
                                 ),
-                                backgroundColor: const Color(0xFF81C784),
+                                backgroundColor: colorScheme.tertiary,
                                 behavior: SnackBarBehavior.floating,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12)),

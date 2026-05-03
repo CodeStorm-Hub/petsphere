@@ -174,9 +174,9 @@ class _TimelineItem extends StatelessWidget {
     IconData icon;
     Color iconColor;
     switch (event['type']) {
-      case 'achievement': icon = Icons.workspace_premium_rounded; iconColor = Colors.amber; break;
-      case 'health': icon = Icons.medical_services_rounded; iconColor = Colors.redAccent; break;
-      case 'photo': icon = Icons.camera_alt_rounded; iconColor = Colors.blueAccent; break;
+      case 'achievement': icon = Icons.workspace_premium_rounded; iconColor = colorScheme.tertiary; break;
+      case 'health': icon = Icons.medical_services_rounded; iconColor = colorScheme.error; break;
+      case 'photo': icon = Icons.camera_alt_rounded; iconColor = colorScheme.secondary; break;
       default: icon = Icons.stars_rounded; iconColor = colorScheme.primary;
     }
 
@@ -241,7 +241,7 @@ class _TimelineItem extends StatelessWidget {
                         const SizedBox(height: 12),
                         Row(
                           children: [
-                            _ReactionIcon(icon: Icons.favorite_rounded, count: '24', color: Colors.red),
+                            _ReactionIcon(icon: Icons.favorite_rounded, count: '24', color: colorScheme.error),
                             const SizedBox(width: 16),
                             _ReactionIcon(icon: Icons.chat_bubble_rounded, count: '8', color: colorScheme.primary),
                           ],

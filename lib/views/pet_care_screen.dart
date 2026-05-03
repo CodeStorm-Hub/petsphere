@@ -365,7 +365,7 @@ class _PetCareScreenState extends ConsumerState<PetCareScreen>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 8),
                     itemCount: myPets.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
                     itemBuilder: (context, i) {
                       final pet = myPets[i];
                       final isSelected = pet.id == activePet?.id;
@@ -598,13 +598,13 @@ class _DashboardTab extends ConsumerWidget {
                   _ProgressRing(
                     label: 'Calories',
                     progress: todayLog.caloriesProgress,
-                    color: Colors.orange,
+                    color: colorScheme.secondary,
                     centerText: '${todayLog.consumedKcal}\nkcal',
                   ),
                   _ProgressRing(
                     label: 'Water',
                     progress: todayLog.waterProgress,
-                    color: Colors.blue,
+                    color: colorScheme.primary,
                     centerText:
                         '${todayLog.waterCups}/${todayLog.dailyWaterGoalCups}\ncups',
                   ),
@@ -702,115 +702,115 @@ class _DashboardTab extends ConsumerWidget {
             _QuickActionItem(
               label: 'Vet Booking',
               icon: Icons.calendar_month,
-              color: Colors.blue,
+              color: colorScheme.primary,
               onTap: () => context.push('/vet_booking'),
             ),
             _QuickActionItem(
               label: 'Emergency',
               icon: Icons.emergency,
-              color: Colors.red,
+              color: colorScheme.error,
               onTap: () => context.push('/emergency_care'),
             ),
             _QuickActionItem(
               label: 'Nutrition',
               icon: Icons.restaurant,
-              color: Colors.orange,
+              color: colorScheme.secondary,
               onTap: () => context.push('/nutrition_planner'),
             ),
             _QuickActionItem(
               label: 'Expenses',
               icon: Icons.payments,
-              color: Colors.green,
+              color: colorScheme.tertiary,
               onTap: () => context.push('/expenses'),
             ),
             _QuickActionItem(
               label: 'Growth',
               icon: Icons.show_chart,
-              color: Colors.purple,
+              color: colorScheme.primary,
               onTap: () => context.push('/growth_charts'),
             ),
             _QuickActionItem(
               label: 'Insurance',
               icon: Icons.security,
-              color: Colors.cyan,
+              color: colorScheme.secondary,
               onTap: () => context.push('/insurance'),
             ),
             _QuickActionItem(
               label: 'Training',
               icon: Icons.school,
-              color: Colors.brown,
+              color: colorScheme.onSurfaceVariant,
               onTap: () => context.push('/training'),
             ),
             _QuickActionItem(
               label: 'Adoption',
               icon: Icons.favorite,
-              color: Colors.pink,
+              color: colorScheme.error,
               onTap: () => context.push('/adoption_center'),
             ),
             _QuickActionItem(
               label: 'Places',
               icon: Icons.map,
-              color: Colors.teal,
+              color: colorScheme.secondary,
               onTap: () => context.push('/pet_friendly_places'),
             ),
             _QuickActionItem(
               label: 'Events',
               icon: Icons.event,
-              color: Colors.indigo,
+              color: colorScheme.primary,
               onTap: () => context.push('/events'),
             ),
             _QuickActionItem(
               label: 'Medical',
               icon: Icons.folder_shared_rounded,
-              color: Colors.blueGrey,
+              color: colorScheme.tertiary,
               onTap: () => context.push('/medical_records'),
             ),
             _QuickActionItem(
               label: 'Sitters',
               icon: Icons.person_search,
-              color: Colors.amber,
+              color: colorScheme.tertiary,
               onTap: () => context.push('/sitters'),
             ),
             _QuickActionItem(
               label: 'Timeline',
               icon: Icons.history,
-              color: Colors.deepPurple,
+              color: colorScheme.secondary,
               onTap: () => context.push('/pet_timeline'),
             ),
             _QuickActionItem(
               label: 'Identifier',
               icon: Icons.camera_alt,
-              color: Colors.blue,
+              color: colorScheme.primary,
               onTap: () => context.push('/breed_identifier'),
             ),
             _QuickActionItem(
               label: 'Knowledge',
               icon: Icons.menu_book,
-              color: Colors.lightGreen,
+              color: colorScheme.secondary,
               onTap: () => context.push('/knowledge_base'),
             ),
             _QuickActionItem(
               label: 'Reviews',
               icon: Icons.rate_review,
-              color: Colors.orangeAccent,
+              color: colorScheme.secondary,
               onTap: () => context.push('/gear_reviews'),
             ),
             _QuickActionItem(
               label: 'Groups',
               icon: Icons.groups,
-              color: Colors.deepOrange,
+              color: colorScheme.error,
               onTap: () => context.push('/community_groups'),
             ),
             _QuickActionItem(
               label: 'Lost/Found',
               icon: Icons.location_searching,
-              color: Colors.redAccent,
+              color: colorScheme.error,
               onTap: () => context.push('/lost_and_found'),
             ),
             _QuickActionItem(
               label: 'Memorial',
               icon: Icons.cloud,
-              color: Colors.blueAccent,
+              color: colorScheme.primary,
               onTap: () => context.push('/memorial'),
             ),
           ],
@@ -952,9 +952,9 @@ class _StreakBanner extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.local_fire_department,
-                color: Colors.orange,
+                color: colorScheme.secondary,
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -1295,9 +1295,9 @@ class _FeedingTab extends ConsumerWidget {
                     value: value,
                     strokeWidth: 12,
                     backgroundColor: colorScheme.outlineVariant,
-                    color: todayLog.treatsOverBudget
+                    color: todayLog.consumedKcal > todayLog.dailyCalorieGoal
                         ? colorScheme.error
-                        : Colors.orange,
+                        : colorScheme.secondary,
                   ),
                 ),
                 Center(
@@ -1344,7 +1344,7 @@ class _FeedingTab extends ConsumerWidget {
               _CalorieChip(
                 label: 'Meals',
                 value: '${todayLog.mealKcal}',
-                color: Colors.orange,
+                color: colorScheme.secondary,
               ),
               if (todayLog.treatsKcal > 0) ...[
                 const SizedBox(width: 8),
@@ -1353,7 +1353,7 @@ class _FeedingTab extends ConsumerWidget {
                   value: '${todayLog.treatsKcal}',
                   color: todayLog.treatsOverBudget
                       ? colorScheme.error
-                      : Colors.amber,
+                      : colorScheme.tertiary,
                 ),
               ],
             ],
@@ -1471,8 +1471,8 @@ class _FeedingTab extends ConsumerWidget {
             Text('Water Intake', style: theme.textTheme.titleLarge),
             Text(
               '${todayLog.waterCups} / ${todayLog.dailyWaterGoalCups} cups',
-              style: const TextStyle(
-                color: Colors.blue,
+              style: TextStyle(
+                color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -1498,17 +1498,17 @@ class _FeedingTab extends ConsumerWidget {
                 height: 64,
                 decoration: BoxDecoration(
                   color: isFilled
-                      ? Colors.blue.withValues(alpha: 0.2)
+                      ? colorScheme.primary.withValues(alpha: 0.2)
                       : colorScheme.surfaceContainer,
                   border: Border.all(
-                    color: isFilled ? Colors.blue : colorScheme.outlineVariant,
+                    color: isFilled ? colorScheme.primary : colorScheme.outlineVariant,
                     width: 2,
                   ),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Icon(
                   Icons.water_drop,
-                  color: isFilled ? Colors.blue : colorScheme.outlineVariant,
+                  color: isFilled ? colorScheme.primary : colorScheme.outlineVariant,
                   size: 28,
                 ),
               ),

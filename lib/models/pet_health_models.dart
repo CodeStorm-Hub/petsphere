@@ -29,7 +29,7 @@ class PetSymptom {
   Color get severityColor {
     switch (severity) {
       case 'severe':
-        return Colors.red;
+        return const Color(0xFFE85D75);
       case 'moderate':
         return AppTheme.primaryAccent;
       default:

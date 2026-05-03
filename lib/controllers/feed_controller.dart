@@ -256,6 +256,28 @@ class FeedNotifier extends Notifier<FeedState> {
   }
 
   // -------------------------------------------------------------------------
+  // Update Post
+  // -------------------------------------------------------------------------
+  Future<bool> updatePost({
+    required String postId,
+    required String caption,
+  }) async {
+    try {
+      final updatedPost = await feedRepository.updatePost(
+        postId: postId,
+        caption: caption,
+      );
+      state = state.copyWith(
+        posts: state.posts.map((p) => p.id == postId ? updatedPost : p).toList(),
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: 'Failed to update post: $e');
+      return false;
+    }
+  }
+
+  // -------------------------------------------------------------------------
   // Delete Post
   // -------------------------------------------------------------------------
   Future<bool> deletePost(String postId) async {

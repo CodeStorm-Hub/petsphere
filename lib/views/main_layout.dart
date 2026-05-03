@@ -113,13 +113,6 @@ class _GlassNavBar extends StatelessWidget {
     _NavItem(Icons.person_outline, Icons.person),
   ];
 
-  static const _semanticsLabels = [
-    'Home',
-    'Discover',
-    'Pet care',
-    'Marketplace',
-    'Profile',
-  ];
 
   @override
   Widget build(BuildContext context) {

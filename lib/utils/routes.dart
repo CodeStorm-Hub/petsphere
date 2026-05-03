@@ -291,8 +291,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline,
-                  size: 56, color: Colors.redAccent),
+              Icon(Icons.error_outline,
+                  size: 56, color: Theme.of(context).colorScheme.error),
               const SizedBox(height: 12),
               Text(
                 'We could not find what you were looking for.',

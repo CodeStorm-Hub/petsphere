@@ -10,7 +10,7 @@ import 'controllers/theme_controller.dart';
 import 'utils/routes.dart';
 import 'utils/supabase_config.dart';
 import 'utils/theme_bootstrap.dart';
-import 'theme/app_theme_v2_material3.dart';
+import 'theme/app_theme.dart';
 
 /// Set via `flutter test integration_test/... --dart-define=INTEGRATION_TEST=true`
 /// so [IntegrationTestWidgetsFlutterBinding] is not replaced by Marionette.
@@ -22,7 +22,7 @@ const bool _kIntegrationTest = bool.fromEnvironment(
 /// `flutter drive` + [enableFlutterDriverExtension] needs a normal binding in debug.
 const bool _kFlutterDriverTest = bool.fromEnvironment(
   'FLUTTER_DRIVER_TEST',
-  defaultValue: false,
+  defaultValue: true,
 );
 
 Future<void> main() async {
@@ -65,8 +65,8 @@ class PetSphereApp extends ConsumerWidget {
     return _AppLifecycleBootstrapSync(
       child: MaterialApp.router(
         title: 'PetSphere',
-        theme: AppThemeV2.lightTheme,
-        darkTheme: AppThemeV2.darkTheme,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
         themeMode: themeMode,
         routerConfig: goRouter,
         debugShowCheckedModeBanner: false,

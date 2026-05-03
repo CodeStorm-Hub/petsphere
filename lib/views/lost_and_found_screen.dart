@@ -131,7 +131,7 @@ class _LostPetsList extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: (isLost ? Colors.red : Colors.green).withAlpha(230),
+                        color: (isLost ? colorScheme.error : colorScheme.tertiary).withAlpha(230),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
                       ),
@@ -159,7 +159,7 @@ class _LostPetsList extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Colors.amber,
+                          color: colorScheme.secondary,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
                         ),

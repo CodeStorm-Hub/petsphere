@@ -8,6 +8,7 @@ class GamificationScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final care = ref.watch(petCareProvider);
     final stats = care.gamification;
 
@@ -44,7 +45,7 @@ class GamificationScreen extends ConsumerWidget {
                   label: 'Current Streak',
                   value: '${care.streakDays} Days',
                   icon: Icons.local_fire_department,
-                  color: Colors.orange,
+                  color: colorScheme.secondary,
                 ),
               ),
               const SizedBox(width: 16),
@@ -53,7 +54,7 @@ class GamificationScreen extends ConsumerWidget {
                   label: 'Best Streak',
                   value: '${stats.bestStreakDays} Days',
                   icon: Icons.emoji_events,
-                  color: Colors.amber,
+                  color: colorScheme.tertiary,
                 ),
               ),
             ],

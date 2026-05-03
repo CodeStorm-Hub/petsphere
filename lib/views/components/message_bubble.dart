@@ -32,16 +32,16 @@ class MessageBubble extends StatelessWidget {
           ),
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           decoration: BoxDecoration(
-            // Sent: gradient from primary to primary-dim (Stitch spec)
+            // Sent: gradient from primary to primaryContainer (blue theme)
             gradient: isMe
                 ? LinearGradient(
-                    colors: [colorScheme.primary, Color(0xFF8A3B21)],
+                    colors: [colorScheme.primary, colorScheme.primaryContainer],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   )
                 : null,
             // Received: surface-container-highest
-            color: isMe ? null : const Color(0xFFE8E1DA),
+            color: isMe ? null : colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(18),
               topRight: const Radius.circular(18),
@@ -65,8 +65,7 @@ class MessageBubble extends StatelessWidget {
               Text(
                 message.text,
                 style: TextStyle(
-                  color:
-                      isMe ? const Color(0xFFFFF7F5) : const Color(0xFF35322D),
+                  color: isMe ? colorScheme.onPrimary : colorScheme.onSurface,
                   fontSize: 15,
                   height: 1.4,
                 ),
@@ -91,7 +90,7 @@ class MessageBubble extends StatelessWidget {
                       message.isRead ? Icons.done_all : Icons.done,
                       size: 13,
                       color: message.isRead
-                          ? const Color(0xFF4FC3F7)
+                          ? colorScheme.tertiary
                           : colorScheme.onPrimary.withAlpha(180),
                     ),
                   ],

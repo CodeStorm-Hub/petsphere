@@ -103,7 +103,7 @@ class LikedPetsScreen extends ConsumerWidget {
         color = colorScheme.error;
         label = 'Declined';
       case 'pending':
-        color = Colors.orange;
+        color = colorScheme.tertiary;
         label = 'Pending';
       default:
         color = colorScheme.onSurfaceVariant;

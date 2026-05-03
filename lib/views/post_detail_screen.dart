@@ -6,6 +6,7 @@ import '../controllers/pet_controller.dart';
 import '../controllers/auth_controller.dart';
 import '../models/post_model.dart';
 import '../utils/pet_navigation.dart';
+import '../utils/post_actions.dart';
 import 'components/post_card.dart';
 
 class PostDetailScreen extends ConsumerWidget {
@@ -84,12 +85,18 @@ class _PostDetailContent extends ConsumerWidget {
       appBar: AppBar(
         title: Text(post.pet.name),
         actions: [
-          if (isOwnPost)
+          if (isOwnPost) ...[
+            IconButton(
+              icon: Icon(Icons.edit_outlined, color: colorScheme.primary),
+              tooltip: 'Edit Post',
+              onPressed: () => _showEditDialog(context, ref, post),
+            ),
             IconButton(
               icon: Icon(Icons.delete_outline, color: colorScheme.error),
               tooltip: 'Delete Post',
               onPressed: () => _confirmDelete(context, ref, post),
             ),
+          ],
         ],
       ),
       body: RefreshIndicator(
@@ -121,6 +128,17 @@ class _PostDetailContent extends ConsumerWidget {
                     petUserId: post.pet.userId,
                   );
                 },
+                onEdit: post.pet.userId == ref.read(authProvider).user?.id
+                    ? () => showEditPostDialog(context, ref, post)
+                    : null,
+                onDelete: post.pet.userId == ref.read(authProvider).user?.id
+                    ? () => showDeletePostDialog(
+                          context,
+                          ref,
+                          post,
+                          onDeleteSuccess: () => Navigator.pop(context),
+                        )
+                    : null,
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -160,10 +178,10 @@ class _PostDetailContent extends ConsumerWidget {
                         final ago = _timeAgo(comment.createdAt);
                         final colors = [
                           colorScheme.error,
-                          Colors.blue,
+                          colorScheme.primary,
                           colorScheme.secondary,
-                          Colors.orange,
-                          Colors.purple,
+                          colorScheme.tertiary,
+                          colorScheme.primaryContainer,
                         ];
                         final bg =
                             colors[comment.petName.length % colors.length];
@@ -235,6 +253,49 @@ class _PostDetailContent extends ConsumerWidget {
     );
   }
 
+  void _showEditDialog(BuildContext context, WidgetRef ref, PostModel post) {
+    final controller = TextEditingController(text: post.caption);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Edit Caption'),
+        content: TextField(
+          controller: controller,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: 'Enter new caption...',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final newCaption = controller.text.trim();
+              if (newCaption == post.caption) {
+                Navigator.pop(ctx);
+                return;
+              }
+              final success = await ref
+                  .read(feedProvider.notifier)
+                  .updatePost(postId: post.id, caption: newCaption);
+              if (ctx.mounted) Navigator.pop(ctx);
+              if (context.mounted && success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Post updated')),
+                );
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
   static String _timeAgo(DateTime dateTime) {
     final diff = DateTime.now().difference(dateTime);
     if (diff.inSeconds < 60) return 'Just now';
@@ -268,7 +329,7 @@ class _PostDetailContent extends ConsumerWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: const Text('Post deleted'),
-                      backgroundColor: const Color(0xFF81C784),
+                      backgroundColor: Theme.of(context).colorScheme.tertiary,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -393,10 +454,10 @@ class _CommentSheetState extends ConsumerState<_CommentSheet> {
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
                     suffixIcon: IconButton(
-                      icon: const Icon(Icons.send_rounded,
-                          color: Color(0xFFFF8A65)),
-                      onPressed: _submit,
-                    ),
+                       icon: Icon(Icons.send_rounded,
+                          color: Theme.of(context).colorScheme.primary),
+                       onPressed: _submit,
+                     ),
                   ),
                   onSubmitted: (_) => _submit(),
                 ),

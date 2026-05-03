@@ -114,7 +114,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        backgroundColor: const Color(0xFF81C784),
+                        backgroundColor: Theme.of(context).colorScheme.tertiary,
                       ),
                     );
                   }
