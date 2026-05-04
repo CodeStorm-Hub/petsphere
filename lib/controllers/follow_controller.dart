@@ -142,3 +142,16 @@ final petFollowersListProvider = FutureProvider.family<
     List<Map<String, dynamic>>, String>((ref, petId) async {
   return followRepository.fetchPetFollowersList(petId);
 });
+
+/// Follower list (user profiles) for a specific owner.
+final ownerFollowersListProvider = FutureProvider.family<
+    List<Map<String, dynamic>>, String>((ref, ownerId) async {
+  return followRepository.fetchOwnerFollowersList(ownerId);
+});
+
+/// List of entities a user is following.
+final followingListProvider = FutureProvider.family<
+    List<Map<String, dynamic>>, String>((ref, userId) async {
+  return followRepository.fetchFollowingList(userId);
+});
+

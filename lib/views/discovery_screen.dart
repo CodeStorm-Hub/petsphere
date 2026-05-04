@@ -9,7 +9,7 @@ import '../models/pet_model.dart';
 import '../theme/app_theme.dart';
 import '../widgets/brand_logo.dart';
 
-import 'main_layout.dart' show bottomNavSpaceFor;
+import '../utils/layout_utils.dart';
 
 // Tracks which of the user's pets is selected for the discovery tab.
 // Scoped to the discovery tab — does NOT override the global activePetProvider.

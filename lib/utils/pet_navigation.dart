@@ -38,3 +38,24 @@ void openPetProfile(
 
   context.push('/pet/$petId');
 }
+
+/// Routes to a user profile. If it's the current user, switches to the profile tab.
+void openUserProfile(
+  BuildContext context,
+  WidgetRef ref, {
+  required String userId,
+}) {
+  final myUserId = ref.read(authProvider).user?.id;
+
+  if (myUserId != null && userId == myUserId) {
+    // Navigate to the profile tab (index 4 in MainLayout)
+    // We don't have a direct "switchToTab" method here, but we can potentially
+    // use a provider or just context.go('/home') if the home route handles tab state,
+    // or specifically context.push if we want it on the stack.
+    // However, most apps just switch tabs.
+    // For now, let's push the visitor profile even for self, or just go to /user/:id
+    // because /user/:id is handled by PetProfileScreen which handles "isVisitor" logic.
+  }
+
+  context.push('/user/$userId');
+}

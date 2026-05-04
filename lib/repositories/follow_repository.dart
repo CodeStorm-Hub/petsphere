@@ -159,7 +159,7 @@ class FollowRepository {
   // -------------------------------------------------------------------------
   // Get list of follower user IDs (direct pet followers + owner followers)
   // Returns unique follower user IDs with basic user profile info via the
-  // users table join.
+  // profiles table join.
   // -------------------------------------------------------------------------
   Future<List<Map<String, dynamic>>> fetchPetFollowersList(String petId) async {
     final pet = await supabase
@@ -196,12 +196,128 @@ class FollowRepository {
       }
     }
 
-    if (combined.isEmpty) return [];
+    return _fetchProfilesForFollowers(combined);
+  }
 
-    // Fetch user profiles for all follower IDs
-    final followerIds = combined.map((r) => r['user_id'] as String).toList();
+  // -------------------------------------------------------------------------
+  // Get list of follower user IDs for an owner
+  // -------------------------------------------------------------------------
+  Future<List<Map<String, dynamic>>> fetchOwnerFollowersList(
+      String ownerId) async {
+    final data = await supabase
+        .from('follows')
+        .select('follower_user_id, created_at')
+        .not('followed_user_id', 'is', null)
+        .eq('followed_user_id', ownerId);
+
+    final combined = (data as List).map((r) => {
+          'user_id': r['follower_user_id'] as String,
+          'created_at': r['created_at'],
+        }).toList();
+
+    return _fetchProfilesForFollowers(combined);
+  }
+
+  // -------------------------------------------------------------------------
+  // Get list of entities (pets/owners) a user is following
+  // -------------------------------------------------------------------------
+  Future<List<Map<String, dynamic>>> fetchFollowingList(String userId) async {
+    final data = await supabase
+        .from('follows')
+        .select('followed_user_id, followed_pet_id, created_at')
+        .eq('follower_user_id', userId);
+
+    final List<Map<String, dynamic>> list = [];
+    for (final row in data as List) {
+      final followedUserId = row['followed_user_id'] as String?;
+      final followedPetId = row['followed_pet_id'] as String?;
+
+      if (followedUserId != null) {
+        list.add({
+          'id': followedUserId,
+          'type': 'owner',
+          'created_at': row['created_at'],
+        });
+      } else if (followedPetId != null) {
+        list.add({
+          'id': followedPetId,
+          'type': 'pet',
+          'created_at': row['created_at'],
+        });
+      }
+    }
+
+    if (list.isEmpty) return [];
+
+    // Fetch details for each
+    final ownerIds = list
+        .where((e) => e['type'] == 'owner')
+        .map((e) => e['id'] as String)
+        .toList();
+    final petIds = list
+        .where((e) => e['type'] == 'pet')
+        .map((e) => e['id'] as String)
+        .toList();
+
+    final results = await Future.wait([
+      if (ownerIds.isNotEmpty)
+        supabase
+            .from('profiles')
+            .select('id, name, profile_image_url')
+            .inFilter('id', ownerIds)
+      else
+        Future.value([]),
+      if (petIds.isNotEmpty)
+        supabase.from('pets').select('id, name, image_url').inFilter('id', petIds)
+      else
+        Future.value([]),
+    ]);
+
+    final profileMap = {
+      for (final p in results[0])
+        (p as Map<String, dynamic>)['id'] as String: p,
+    };
+    final petMap = {
+      for (final p in results[1])
+        (p as Map<String, dynamic>)['id'] as String: p,
+    };
+
+    return list.map((e) {
+      final id = e['id'] as String;
+      if (e['type'] == 'owner') {
+        final p = profileMap[id] ??
+            {'id': id, 'name': 'Unknown Owner', 'profile_image_url': ''};
+        return {
+          'id': id,
+          'type': 'owner',
+          'name': p['name'] ?? 'Unknown',
+          'image_url': p['profile_image_url'] ?? '',
+          'created_at': e['created_at'],
+        };
+      } else {
+        final p = petMap[id] ?? {'id': id, 'name': 'Unknown Pet', 'image_url': ''};
+        return {
+          'id': id,
+          'type': 'pet',
+          'name': p['name'] ?? 'Unknown',
+          'image_url': p['image_url'] ?? '',
+          'created_at': e['created_at'],
+        };
+      }
+    }).toList();
+  }
+
+  // -------------------------------------------------------------------------
+  // Helper to fetch profile info for a list of user IDs
+  // -------------------------------------------------------------------------
+  Future<List<Map<String, dynamic>>> _fetchProfilesForFollowers(
+      List<Map<String, dynamic>> followersWithDates) async {
+    if (followersWithDates.isEmpty) return [];
+
+    final followerIds =
+        followersWithDates.map((r) => r['user_id'] as String).toList();
     final profiles = await supabase
-        .from('users')
+        .from('profiles')
         .select('id, name, profile_image_url')
         .inFilter('id', followerIds);
 
@@ -210,9 +326,10 @@ class FollowRepository {
         (p as Map<String, dynamic>)['id'] as String: p,
     };
 
-    return combined.map((r) {
+    return followersWithDates.map((r) {
       final uid = r['user_id'] as String;
-      final profile = profileMap[uid] ?? {'id': uid, 'name': 'Unknown', 'profile_image_url': ''};
+      final profile = profileMap[uid] ??
+          {'id': uid, 'name': 'Unknown', 'profile_image_url': ''};
       return {
         'user_id': uid,
         'name': (profile['name'] ?? 'Unknown') as String,

@@ -203,7 +203,30 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/pet/:id/followers',
         builder: (context, state) {
           final petId = state.pathParameters['id']!;
-          return PetFollowersScreen(petId: petId);
+          return PetFollowersScreen(
+            petId: petId,
+            type: FollowListType.petFollowers,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/user/:id/followers',
+        builder: (context, state) {
+          final userId = state.pathParameters['id']!;
+          return PetFollowersScreen(
+            userId: userId,
+            type: FollowListType.ownerFollowers,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/user/:id/following',
+        builder: (context, state) {
+          final userId = state.pathParameters['id']!;
+          return PetFollowersScreen(
+            userId: userId,
+            type: FollowListType.following,
+          );
         },
       ),
       GoRoute(
