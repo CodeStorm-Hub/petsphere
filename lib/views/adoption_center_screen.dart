@@ -13,7 +13,6 @@ class AdoptionCenterScreen extends ConsumerStatefulWidget {
 
 class _AdoptionCenterScreenState extends ConsumerState<AdoptionCenterScreen> {
   int _currentIndex = 0;
-  double _swipeProgress = 0.0; // -1.0 to 1.0
 
   @override
   Widget build(BuildContext context) {
@@ -77,12 +76,11 @@ class _AdoptionCenterScreenState extends ConsumerState<AdoptionCenterScreen> {
                       pet: _mockPets[actualIndex],
                       isTop: reverseIndex == 0,
                       onSwipe: (progress) {
-                        setState(() => _swipeProgress = progress);
+                        // Progress update ignored as it's not currently used for UI effects
                       },
                       onComplete: () {
                         setState(() {
                           _currentIndex++;
-                          _swipeProgress = 0.0;
                         });
                       },
                     );
