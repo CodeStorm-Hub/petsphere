@@ -115,6 +115,17 @@ class PetfolioNavBar extends StatelessWidget {
     NavItem(Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
   ];
 
+  /// TalkBack / VoiceOver labels (center index 2 uses [centerFabSemanticLabel]).
+  static const List<String> tabSemanticLabels = [
+    'Home',
+    'Discover',
+    '', // placeholder; never read — center slot is not an Expanded tab
+    'Marketplace',
+    'Profile',
+  ];
+
+  static const String centerFabSemanticLabel = 'Pet Care';
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -141,34 +152,43 @@ class PetfolioNavBar extends StatelessWidget {
           final isActive = currentIndex == i;
           final isCenter = i == 2;
           final isProfile = i == 4;
+          final iconColor =
+              isActive ? cs.primary : cs.onSurfaceVariant;
 
           // ── Centre gradient FAB ───────────────────────────────────
           if (isCenter) {
             return Expanded(
-              child: GestureDetector(
+              child: Semantics(
+                button: true,
+                label: centerFabSemanticLabel,
+                hint: 'Opens pet care diary, goals, and daily checklist',
                 onTap: () => onTap(i),
-                behavior: HitTestBehavior.opaque,
-                child: Center(
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [cs.primary, cs.primary.withAlpha(200)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: cs.primary.withAlpha(80),
-                          blurRadius: 14,
-                          offset: const Offset(0, 4),
+                excludeSemantics: true,
+                child: GestureDetector(
+                  onTap: () => onTap(i),
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [cs.primary, cs.primary.withAlpha(200)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                      ],
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: cs.primary.withAlpha(80),
+                            blurRadius: 14,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Icon(Icons.add_rounded,
+                          color: cs.onPrimary, size: 28),
                     ),
-                    child: Icon(Icons.add_rounded,
-                        color: cs.onPrimary, size: 28),
                   ),
                 ),
               ),
@@ -176,36 +196,43 @@ class PetfolioNavBar extends StatelessWidget {
           }
 
           // ── Regular / profile tabs ────────────────────────────────
-          final iconColor =
-              isActive ? cs.primary : cs.onSurfaceVariant;
-
           return Expanded(
-            child: GestureDetector(
+            child: Semantics(
+              button: true,
+              selected: isActive,
+              label: tabSemanticLabels[i],
+              hint: i == 4 && profileImageUrl.isEmpty
+                  ? 'Your profile and pets'
+                  : null,
               onTap: () => onTap(i),
-              behavior: HitTestBehavior.opaque,
-              child: Center(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 230),
-                  curve: Curves.easeOutCubic,
-                  padding: const EdgeInsets.all(10),
-                  child: Center(
-                    child: AnimatedScale(
-                      scale: isActive ? 1.12 : 1.0,
-                      duration: const Duration(milliseconds: 230),
-                      curve: Curves.easeOutBack,
-                      child: isProfile
-                          ? NavProfileAvatar(
-                              imageUrl: profileImageUrl,
-                              isActive: isActive,
-                              ringColor: cs.primary,
-                            )
-                          : Icon(
-                              isActive
-                                  ? _items[i].active
-                                  : _items[i].inactive,
-                              color: iconColor,
-                              size: 26,
-                            ),
+              excludeSemantics: true,
+              child: GestureDetector(
+                onTap: () => onTap(i),
+                behavior: HitTestBehavior.opaque,
+                child: Center(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 230),
+                    curve: Curves.easeOutCubic,
+                    padding: const EdgeInsets.all(10),
+                    child: Center(
+                      child: AnimatedScale(
+                        scale: isActive ? 1.12 : 1.0,
+                        duration: const Duration(milliseconds: 230),
+                        curve: Curves.easeOutBack,
+                        child: isProfile
+                            ? NavProfileAvatar(
+                                imageUrl: profileImageUrl,
+                                isActive: isActive,
+                                ringColor: cs.primary,
+                              )
+                            : Icon(
+                                isActive
+                                    ? _items[i].active
+                                    : _items[i].inactive,
+                                color: iconColor,
+                                size: 26,
+                              ),
+                      ),
                     ),
                   ),
                 ),

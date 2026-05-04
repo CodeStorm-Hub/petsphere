@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../controllers/marketplace_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/auth_controller.dart';
-import '../theme/app_theme.dart';
 import 'components/product_card.dart';
 import 'main_layout.dart' show bottomNavSpaceFor;
 
@@ -64,7 +62,16 @@ class MarketplaceScreen extends ConsumerWidget {
               actions: [
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
-                  child: _CartButton(count: cartState.totalItemCount),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.receipt_long_outlined),
+                        tooltip: 'Order History',
+                        onPressed: () => context.push('/orders'),
+                      ),
+                      _CartButton(count: cartState.totalItemCount),
+                    ],
+                  ),
                 ),
                 const SizedBox(width: 16),
               ],
@@ -73,7 +80,7 @@ class MarketplaceScreen extends ConsumerWidget {
             // ── Search & Filter ───────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Row(
                   children: [
                     Expanded(
@@ -84,12 +91,76 @@ class MarketplaceScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: cs.primary, // Brand color instead of green
+                        color: cs.primary,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(Icons.tune_rounded, color: Colors.white, size: 24),
                     ),
                   ],
+                ),
+              ),
+            ),
+
+            // ── Member Exclusive Promo Banner ──────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Semantics(
+                  button: true,
+                  label: 'Member Exclusive: Summer Grooming Kit — Now 20% Off. Tap to browse Grooming.',
+                  child: GestureDetector(
+                    onTap: () => ref.read(marketplaceProvider.notifier).setFilter('Grooming'),
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [cs.primary, cs.secondary],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: cs.primary.withAlpha(40),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.workspace_premium_rounded, color: cs.onPrimary, size: 32),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'MEMBER EXCLUSIVE',
+                                  style: GoogleFonts.dmSans(
+                                    color: cs.onPrimary.withAlpha(200),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Summer Grooming Kit — Now 20% Off',
+                                  style: GoogleFonts.dmSans(
+                                    color: cs.onPrimary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.chevron_right_rounded, color: cs.onPrimary),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -108,6 +179,10 @@ class MarketplaceScreen extends ConsumerWidget {
                     _CategoryChip(label: 'Toys', value: 'Toys', current: marketState.filterCategory),
                     const SizedBox(width: 12),
                     _CategoryChip(label: 'Bedding', value: 'Bedding', current: marketState.filterCategory),
+                    const SizedBox(width: 12),
+                    _CategoryChip(label: 'Grooming', value: 'Grooming', current: marketState.filterCategory),
+                    const SizedBox(width: 12),
+                    _CategoryChip(label: 'Treats', value: 'Treats', current: marketState.filterCategory),
                     const SizedBox(width: 12),
                     _CategoryChip(label: 'Accessories', value: 'Accessories', current: marketState.filterCategory),
                   ],
@@ -238,68 +313,6 @@ class _MarketSearchBar extends StatelessWidget {
     );
   }
 }
-
-
-
-class _PromoBanner extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _PromoBanner({
-    required this.title,
-    required this.subtitle,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'OFFER',
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.2,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: GoogleFonts.playfairDisplay(
-                textStyle: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-            ),
-            Text(
-              subtitle,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _CategoryChip extends ConsumerWidget {
   final String label;
   final String? value;
@@ -318,7 +331,7 @@ class _CategoryChip extends ConsumerWidget {
       selected: isSelected,
       onSelected: (_) => ref.read(marketplaceProvider.notifier).setFilter(value),
       backgroundColor: theme.cardColor,
-      selectedColor: cs.primary, // Brand color instead of green
+      selectedColor: cs.primary,
       labelStyle: GoogleFonts.dmSans(
         color: isSelected ? Colors.white : cs.onSurface,
         fontSize: 14,
@@ -335,23 +348,3 @@ class _CategoryChip extends ConsumerWidget {
     );
   }
 }
-
-class _SliverCategoryDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-  _SliverCategoryDelegate({required this.child});
-
-  @override
-  double get minExtent => 60.0;
-  @override
-  double get maxExtent => 60.0;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
-  }
-
-  @override
-  bool shouldRebuild(_SliverCategoryDelegate oldDelegate) => false;
-}
-
-

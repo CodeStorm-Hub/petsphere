@@ -356,14 +356,18 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
             ],
           ),
           const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: (_currentStep + 1) / 3,
-              minHeight: 4,
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-              valueColor:
-                  AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+          Semantics(
+            label: 'Step ${_currentStep + 1} of 3: ${_stepTitle()}',
+            value: '${((_currentStep + 1) / 3 * 100).round()} percent complete',
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: (_currentStep + 1) / 3,
+                minHeight: 4,
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+              ),
             ),
           ),
         ],
@@ -435,50 +439,58 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
               final option = _animalOptions[index];
               final isSelected = _selectedAnimalType == option.label;
               final optionColor = Theme.of(context).colorScheme.primary;
-              return GestureDetector(
+              return Semantics(
+                button: true,
+                selected: isSelected,
+                label: option.label,
                 onTap: () => setState(() => _selectedAnimalType = option.label),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOut,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? optionColor.withAlpha(26)
-                        : Theme.of(context).colorScheme.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected ? optionColor : Theme.of(context).colorScheme.onSurfaceVariant,
-                      width: isSelected ? 2.5 : 1,
-                    ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: optionColor.withAlpha(51),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            )
-                          ]
-                        : [],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        option.icon,
-                        size: 36,
-                        color: isSelected ? optionColor : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        option.label,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.w500,
-                          color:
-                              isSelected ? optionColor : Theme.of(context).colorScheme.onSurfaceVariant,
+                child: ExcludeSemantics(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedAnimalType = option.label),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOut,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? optionColor.withAlpha(26)
+                            : Theme.of(context).colorScheme.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isSelected ? optionColor : Theme.of(context).colorScheme.onSurfaceVariant,
+                          width: isSelected ? 2.5 : 1,
                         ),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: optionColor.withAlpha(51),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                )
+                              ]
+                            : [],
                       ),
-                    ],
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            option.icon,
+                            size: 36,
+                            color: isSelected ? optionColor : Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            option.label,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight:
+                                  isSelected ? FontWeight.bold : FontWeight.w500,
+                              color:
+                                  isSelected ? optionColor : Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               );
