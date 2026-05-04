@@ -269,9 +269,9 @@ class FeedRepository {
   }) async {
     final payload = {
       'caption': caption,
-      if (location != null) 'location': location,
-      if (taggedPetIds != null) 'tagged_pet_ids': taggedPetIds,
-      if (taggedPetNames != null) 'tagged_pet_names': taggedPetNames,
+      'location': ?location,
+      'tagged_pet_ids': ?taggedPetIds,
+      'tagged_pet_names': ?taggedPetNames,
     };
 
     final data = await supabase

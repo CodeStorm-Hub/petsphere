@@ -3,8 +3,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../theme/app_theme.dart';
-import '../widgets/brand_logo.dart';
 
 class AdoptionCenterScreen extends ConsumerStatefulWidget {
   const AdoptionCenterScreen({super.key});
