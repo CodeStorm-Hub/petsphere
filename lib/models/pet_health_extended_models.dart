@@ -145,7 +145,7 @@ class MedicationDose {
 
   Color get statusColor {
     if (isGiven) return AppTheme.secondaryAccent;
-    if (isOverdue) return AppTheme.primaryAccent;
+    if (isOverdue) return AppTheme.alertAccent;
     return AppTheme.textSecondary;
   }
 

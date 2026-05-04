@@ -26,33 +26,32 @@ import '../widgets/brand_logo.dart';
 typedef VisitProfileArgs = ({String? petId, String? userId});
 
 /// Loads a host user + all their pets (for `/pet/:id` and `/user/:id` visitor profile).
-final visitProfileDataProvider = FutureProvider.family<
-    Map<String, dynamic>, VisitProfileArgs>((ref, args) async {
-  final petId = args.petId;
-  final userIdArg = args.userId;
+final visitProfileDataProvider =
+    FutureProvider.family<Map<String, dynamic>, VisitProfileArgs>((
+      ref,
+      args,
+    ) async {
+      final petId = args.petId;
+      final userIdArg = args.userId;
 
-  String targetUserId;
-  PetModel? initialPet;
+      String targetUserId;
+      PetModel? initialPet;
 
-  if (petId != null) {
-    initialPet = await petRepository.fetchPetById(petId);
-    if (initialPet == null) throw Exception('Pet not found');
-    targetUserId = initialPet.userId;
-  } else if (userIdArg != null) {
-    targetUserId = userIdArg;
-  } else {
-    throw Exception('Must provide petId or userId');
-  }
+      if (petId != null) {
+        initialPet = await petRepository.fetchPetById(petId);
+        if (initialPet == null) throw Exception('Pet not found');
+        targetUserId = initialPet.userId;
+      } else if (userIdArg != null) {
+        targetUserId = userIdArg;
+      } else {
+        throw Exception('Must provide petId or userId');
+      }
 
-  final user = await ref.read(publicUserProvider(targetUserId).future);
-  final allPets = await petRepository.fetchMyPets(targetUserId);
+      final user = await ref.read(publicUserProvider(targetUserId).future);
+      final allPets = await petRepository.fetchMyPets(targetUserId);
 
-  return {
-    'user': user,
-    'pets': allPets,
-    'initialPet': initialPet,
-  };
-});
+      return {'user': user, 'pets': allPets, 'initialPet': initialPet};
+    });
 
 class PetProfileScreen extends ConsumerStatefulWidget {
   const PetProfileScreen({super.key, this.visitPetId, this.visitUserId});
@@ -73,25 +72,33 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     if (widget.visitPetId != null || widget.visitUserId != null) {
       return ref
-          .watch(visitProfileDataProvider((
-        petId: widget.visitPetId,
-        userId: widget.visitUserId,
-      )))
+          .watch(
+            visitProfileDataProvider((
+              petId: widget.visitPetId,
+              userId: widget.visitUserId,
+            )),
+          )
           .when(
-        loading: () => Scaffold(
-          appBar: AppBar(),
-          body: const Center(child: CircularProgressIndicator()),
-        ),
-        error: (e, _) => Scaffold(
-          appBar: AppBar(leading: const BackButton()),
-          body: Center(child: Text('Error: $e')),
-        ),
-        data: (d) => buildScaffoldCore(
-            isVisitor: true, visitData: d, colorScheme: colorScheme),
-      );
+            loading: () => Scaffold(
+              appBar: AppBar(),
+              body: const Center(child: CircularProgressIndicator()),
+            ),
+            error: (e, _) => Scaffold(
+              appBar: AppBar(leading: const BackButton()),
+              body: Center(child: Text('Error: $e')),
+            ),
+            data: (d) => buildScaffoldCore(
+              isVisitor: true,
+              visitData: d,
+              colorScheme: colorScheme,
+            ),
+          );
     }
     return buildScaffoldCore(
-        isVisitor: false, visitData: null, colorScheme: colorScheme);
+      isVisitor: false,
+      visitData: null,
+      colorScheme: colorScheme,
+    );
   }
 
   Widget buildScaffoldCore({
@@ -126,8 +133,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
 
     final userName =
         (isVisitor ? visitHostUser?.name : accountUser?.name) ?? 'Pet Lover';
-    final UserModel? ownerForHeader =
-        isVisitor ? visitHostUser : accountUser;
+    final UserModel? ownerForHeader = isVisitor ? visitHostUser : accountUser;
 
     var isOwnerView = selectedId == 'owner';
 
@@ -150,31 +156,35 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
         : (accountUser?.id ?? '');
     final allPetPosts = isOwnerView
         ? feedState.posts
-            .where((post) => post.pet.userId == postsUserId)
-            .toList()
+              .where((post) => post.pet.userId == postsUserId)
+              .toList()
         : feedState.posts
-            .where((post) => post.pet.id == selectedPet?.id)
-            .toList();
+              .where((post) => post.pet.id == selectedPet?.id)
+              .toList();
 
     final displayedPosts = (postCategory == null || isOwnerView)
         ? allPetPosts
         : allPetPosts
-            .where((p) =>
-                p.caption.toLowerCase().contains(postCategory!.toLowerCase()))
-            .toList();
+              .where(
+                (p) => p.caption.toLowerCase().contains(
+                  postCategory!.toLowerCase(),
+                ),
+              )
+              .toList();
 
     final statsUserId = postsUserId;
-    final bottomSpace =
-        isVisitor ? 32.0 : bottomNavSpaceFor(context);
+    final bottomSpace = isVisitor ? 32.0 : bottomNavSpaceFor(context);
 
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
           if (isVisitor) {
-            ref.invalidate(visitProfileDataProvider((
-              petId: widget.visitPetId,
-              userId: widget.visitUserId,
-            )));
+            ref.invalidate(
+              visitProfileDataProvider((
+                petId: widget.visitPetId,
+                userId: widget.visitUserId,
+              )),
+            );
           } else {
             await ref.read(petProvider.notifier).reload();
           }
@@ -258,6 +268,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                             ),
                           ),
                         ),
+
                       ),
                     ),
                   ),
@@ -296,44 +307,65 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                               ),
                               if (isOwnerView) ...[
                                 ref
-                                    .watch(ownerFollowerCountProvider(
-                                        statsUserId))
+                                    .watch(
+                                      ownerFollowerCountProvider(statsUserId),
+                                    )
                                     .when(
                                       data: (c) => StatColumn(
-                                          label: 'followers', value: '$c'),
+                                        label: 'followers',
+                                        value: '$c',
+                                      ),
                                       loading: () => const StatColumn(
-                                          label: 'followers', value: '···'),
+                                        label: 'followers',
+                                        value: '···',
+                                      ),
                                       error: (_, _) => const StatColumn(
-                                          label: 'followers', value: '0'),
+                                        label: 'followers',
+                                        value: '0',
+                                      ),
                                     ),
                                 ref
-                                    .watch(
-                                        followingCountProvider(statsUserId))
+                                    .watch(followingCountProvider(statsUserId))
                                     .when(
                                       data: (c) => StatColumn(
-                                          label: 'following', value: '$c'),
+                                        label: 'following',
+                                        value: '$c',
+                                      ),
                                       loading: () => const StatColumn(
-                                          label: 'following', value: '···'),
+                                        label: 'following',
+                                        value: '···',
+                                      ),
                                       error: (_, _) => const StatColumn(
-                                          label: 'following', value: '0'),
+                                        label: 'following',
+                                        value: '0',
+                                      ),
                                     ),
                               ] else if (selectedPet != null) ...[
                                 // Tappable follower count → opens followers list
                                 GestureDetector(
                                   onTap: () => context.push(
-                                      '/pet/${selectedPet!.id}/followers'),
+                                    '/pet/${selectedPet!.id}/followers',
+                                  ),
                                   child: ref
-                                      .watch(petFollowerCountProvider(
-                                          selectedPet.id))
+                                      .watch(
+                                        petFollowerCountProvider(
+                                          selectedPet.id,
+                                        ),
+                                      )
                                       .when(
                                         data: (c) => StatColumn(
-                                            label: 'followers',
-                                            value: '$c',
-                                            tappable: !isVisitor),
+                                          label: 'followers',
+                                          value: '$c',
+                                          tappable: !isVisitor,
+                                        ),
                                         loading: () => const StatColumn(
-                                            label: 'followers', value: '···'),
+                                          label: 'followers',
+                                          value: '···',
+                                        ),
                                         error: (_, _) => const StatColumn(
-                                            label: 'followers', value: '0'),
+                                          label: 'followers',
+                                          value: '0',
+                                        ),
                                       ),
                                 ),
                                 StatColumn(
@@ -353,9 +385,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                       children: [
                         Flexible(
                           child: Text(
-                            isOwnerView
-                                ? userName
-                                : (selectedPet?.name ?? ''),
+                            isOwnerView ? userName : (selectedPet?.name ?? ''),
                             style: GoogleFonts.playfairDisplay(
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
@@ -366,8 +396,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (!isOwnerView &&
-                            (selectedPet?.isVerified ?? false))
+                        if (!isOwnerView && (selectedPet?.isVerified ?? false))
                           Padding(
                             padding: const EdgeInsets.only(left: 6),
                             child: Icon(
@@ -381,9 +410,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     const SizedBox(height: 4),
 
                     // Info row: breed/location/email
-                    if (!isVisitor &&
-                        isOwnerView &&
-                        accountUser?.email != null)
+                    if (!isVisitor && isOwnerView && accountUser?.email != null)
                       InfoChip(
                         icon: Icons.alternate_email_rounded,
                         text:
@@ -410,34 +437,33 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     // Bio
                     Text(
                       isOwnerView
-                          ? ((isVisitor
-                                      ? visitHostUser?.bio
-                                      : accountUser?.bio)
-                                  ?.isNotEmpty ==
-                              true
-                              ? (isVisitor
-                                  ? visitHostUser!.bio!
-                                  : accountUser!.bio!)
-                              : (isVisitor
-                                  ? 'No bio yet.'
-                                  : 'Tap "Edit profile" to add a bio.'))
+                          ? ((isVisitor ? visitHostUser?.bio : accountUser?.bio)
+                                        ?.isNotEmpty ==
+                                    true
+                                ? (isVisitor
+                                      ? visitHostUser!.bio!
+                                      : accountUser!.bio!)
+                                : (isVisitor
+                                      ? 'No bio yet.'
+                                      : 'Tap "Edit profile" to add a bio.'))
                           : (selectedPet?.bio.isNotEmpty == true
-                              ? selectedPet!.bio
-                              : 'No bio yet.'),
+                                ? selectedPet!.bio
+                                : 'No bio yet.'),
                       style: GoogleFonts.dmSans(
-                        color: (isOwnerView &&
+                        color:
+                            (isOwnerView &&
                                     (isVisitor
-                                        ? (visitHostUser?.bio?.isEmpty ??
-                                            true)
+                                        ? (visitHostUser?.bio?.isEmpty ?? true)
                                         : (accountUser?.bio?.isEmpty ??
-                                            true))) ||
+                                              true))) ||
                                 (!isOwnerView &&
                                     selectedPet?.bio.isEmpty == true)
                             ? colorScheme.onSurfaceVariant
                             : colorScheme.onSurface,
                         fontSize: 14,
                         height: 1.5,
-                        fontStyle: (isOwnerView &&
+                        fontStyle:
+                            (isOwnerView &&
                                 !isVisitor &&
                                 (accountUser?.bio?.isEmpty ?? true))
                             ? FontStyle.italic
@@ -472,8 +498,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         children: [
                           Expanded(
                             child: ElevatedButton.icon(
-                              icon:
-                                  const Icon(Icons.edit_outlined, size: 16),
+                              icon: const Icon(Icons.edit_outlined, size: 16),
                               label: const Text('Edit Profile'),
                               onPressed: () {
                                 if (isOwnerView) {
@@ -483,23 +508,25 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                 }
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    colorScheme.surfaceContainer,
+                                backgroundColor: colorScheme.surfaceContainer,
                                 foregroundColor: colorScheme.onSurface,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(999),
                                 ),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: ElevatedButton.icon(
-                              icon: const Icon(Icons.ios_share_rounded,
-                                  size: 16),
+                              icon: const Icon(
+                                Icons.ios_share_rounded,
+                                size: 16,
+                              ),
                               label: const Text('Share'),
                               onPressed: () {
                                 final link = isOwnerView
@@ -511,15 +538,15 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                 showProfileShareSheet(context, link, name);
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    colorScheme.surfaceContainer,
+                                backgroundColor: colorScheme.surfaceContainer,
                                 foregroundColor: colorScheme.onSurface,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(999),
                                 ),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                               ),
                             ),
                           ),
@@ -549,7 +576,20 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                      'Request sent to ${selectedPet.name}!'),
+                                    'Request sent to ${selectedPet.name}!',
+                                  ),
+                                ),
+                              );
+                            } else {
+                              final err = ref.read(matchProvider).error;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    err ?? 'Could not send match request.',
+                                  ),
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.error,
                                 ),
                               );
                             }
@@ -557,8 +597,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           style: FilledButton.styleFrom(
                             backgroundColor: AppTheme.primaryAccent,
                             foregroundColor: Colors.white,
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 14),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(999),
                             ),
@@ -633,17 +672,18 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                         'Playtime',
                         'Nap',
                         'Outdoor',
-                        'Food'
+                        'Food',
                       ])
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: GestureDetector(
-                            onTap: () =>
-                                setState(() => postCategory = cat),
+                            onTap: () => setState(() => postCategory = cat),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 8),
+                                horizontal: 20,
+                                vertical: 8,
+                              ),
                               decoration: BoxDecoration(
                                 color: postCategory == cat
                                     ? colorScheme.secondary
@@ -673,9 +713,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
             // ── Posts grid ────────────────────────────────────────────
             if (profilePets.isEmpty && isOwnerView && !isVisitor)
               SliverToBoxAdapter(
-                child: EmptyPetsCta(
-                  onAddPet: () => context.push('/add_pet'),
-                ),
+                child: EmptyPetsCta(onAddPet: () => context.push('/add_pet')),
               )
             else if (displayedPosts.isEmpty)
               SliverToBoxAdapter(
@@ -684,9 +722,11 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     padding: const EdgeInsets.only(top: 40.0),
                     child: Column(
                       children: [
-                        Icon(Icons.camera_alt_outlined,
-                            size: 48,
-                            color: colorScheme.onSurfaceVariant),
+                        Icon(
+                          Icons.camera_alt_outlined,
+                          size: 48,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           'No posts yet',
@@ -701,11 +741,12 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           isOwnerView
                               ? 'Create a post to see it here.'
                               : (isVisitor
-                                  ? 'No posts from ${selectedPet?.name ?? 'this pet'} yet.'
-                                  : 'Create a post as ${selectedPet?.name ?? 'this pet'}.'),
+                                    ? 'No posts from ${selectedPet?.name ?? 'this pet'} yet.'
+                                    : 'Create a post as ${selectedPet?.name ?? 'this pet'}.'),
                           style: GoogleFonts.dmSans(
-                              color: colorScheme.onSurfaceVariant,
-                              fontSize: 13),
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 13,
+                          ),
                         ),
                         if (!isVisitor &&
                             !isOwnerView &&
@@ -713,10 +754,13 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           const SizedBox(height: 16),
                           GestureDetector(
                             onTap: () => context.push(
-                                '/create_post?petId=${selectedPet!.id}'),
+                              '/create_post?petId=${selectedPet!.id}',
+                            ),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppTheme.primaryAccent,
                                 borderRadius: BorderRadius.circular(9999),
@@ -724,8 +768,11 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.add_a_photo_outlined,
-                                      size: 16, color: Colors.white),
+                                  const Icon(
+                                    Icons.add_a_photo_outlined,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
                                   const SizedBox(width: 8),
                                   Text(
                                     'Create Post',
@@ -748,92 +795,90 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 sliver: SliverGrid(
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     mainAxisSpacing: 4,
                     crossAxisSpacing: 4,
                     childAspectRatio: 1,
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final post = displayedPosts[index];
-                      return GestureDetector(
-                        onTap: () => context.push('/post/${post.id}'),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              if (isVideoMedia(post.mediaUrl))
-                                Container(
-                                  color: colorScheme.scrim.withAlpha(51),
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.play_circle_fill_rounded,
-                                      color: AppTheme.primaryAccent,
-                                      size: 42,
-                                    ),
-                                  ),
-                                )
-                              else
-                                CachedNetworkImage(
-                                  imageUrl: post.mediaUrl,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => Container(
-                                    color: colorScheme.surfaceContainer,
-                                  ),
-                                  errorWidget: (context, url, error) =>
-                                      Container(
-                                    color: colorScheme.surfaceContainer,
-                                    child: Icon(Icons.image_outlined,
-                                        color: colorScheme.onSurfaceVariant),
-                                  ),
-                                ),
-                              if (isVideoMedia(post.mediaUrl))
-                                const Positioned(
-                                  top: 4,
-                                  right: 4,
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final post = displayedPosts[index];
+                    return GestureDetector(
+                      onTap: () => context.push('/post/${post.id}'),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            if (isVideoMedia(post.mediaUrl))
+                              Container(
+                                color: colorScheme.scrim.withAlpha(51),
+                                child: Center(
                                   child: Icon(
-                                    Icons.videocam_rounded,
-                                    color: Colors.white,
-                                    size: 18,
+                                    Icons.play_circle_fill_rounded,
+                                    color: AppTheme.primaryAccent,
+                                    size: 42,
                                   ),
                                 ),
-                              if (isOwnerView)
-                                Positioned(
-                                  bottom: 4,
-                                  right: 4,
-                                  child: CircleAvatar(
-                                    radius: 11,
-                                    backgroundColor:
-                                        colorScheme.surfaceContainerHighest,
-                                    backgroundImage: post
-                                            .pet.profileImageUrl.isNotEmpty
-                                        ? CachedNetworkImageProvider(
-                                            post.pet.profileImageUrl)
-                                        : null,
-                                    child: post.pet.profileImageUrl.isEmpty
-                                        ? Text(
-                                            post.pet.name.isNotEmpty
-                                                ? post.pet.name[0]
-                                                : '?',
-                                            style: TextStyle(
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.bold,
-                                              color: colorScheme.primary,
-                                            ),
-                                          )
-                                        : null,
+                              )
+                            else
+                              CachedNetworkImage(
+                                imageUrl: post.mediaUrl,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  color: colorScheme.surfaceContainer,
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  color: colorScheme.surfaceContainer,
+                                  child: Icon(
+                                    Icons.image_outlined,
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 ),
-                            ],
-                          ),
+                              ),
+                            if (isVideoMedia(post.mediaUrl))
+                              const Positioned(
+                                top: 4,
+                                right: 4,
+                                child: Icon(
+                                  Icons.videocam_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                              ),
+                            if (isOwnerView)
+                              Positioned(
+                                bottom: 4,
+                                right: 4,
+                                child: CircleAvatar(
+                                  radius: 11,
+                                  backgroundColor:
+                                      colorScheme.surfaceContainerHighest,
+                                  backgroundImage:
+                                      post.pet.profileImageUrl.isNotEmpty
+                                      ? CachedNetworkImageProvider(
+                                          post.pet.profileImageUrl,
+                                        )
+                                      : null,
+                                  child: post.pet.profileImageUrl.isEmpty
+                                      ? Text(
+                                          post.pet.name.isNotEmpty
+                                              ? post.pet.name[0]
+                                              : '?',
+                                          style: TextStyle(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold,
+                                            color: colorScheme.primary,
+                                          ),
+                                        )
+                                      : null,
+                                ),
+                              ),
+                          ],
                         ),
-                      );
-                    },
-                    childCount: displayedPosts.length,
-                  ),
+                      ),
+                    );
+                  }, childCount: displayedPosts.length),
                 ),
               ),
 
@@ -843,15 +888,16 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
       ),
       floatingActionButton: !isVisitor && !isOwnerView && selectedPet != null
           ? Padding(
-              padding:
-                  EdgeInsets.only(bottom: bottomNavSpaceFor(context)),
+              padding: EdgeInsets.only(bottom: bottomNavSpaceFor(context)),
               child: FloatingActionButton(
                 heroTag: 'profile_fab',
                 onPressed: () =>
                     context.push('/create_post?petId=${selectedPet!.id}'),
                 backgroundColor: AppTheme.primaryAccent,
-                child: const Icon(Icons.add_a_photo_outlined,
-                    color: Colors.white),
+                child: const Icon(
+                  Icons.add_a_photo_outlined,
+                  color: Colors.white,
+                ),
               ),
             )
           : null,
@@ -868,8 +914,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
     final String? imageUrl = isOwnerView
         ? ownerForHeader?.profileImageUrl
         : selectedPet?.profileImageUrl;
-    final bool hasImage =
-        imageUrl != null && imageUrl.isNotEmpty;
+    final bool hasImage = imageUrl != null && imageUrl.isNotEmpty;
 
     return Container(
       width: 88,
@@ -902,19 +947,19 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               : null,
           child: !hasImage
               ? (isOwnerView
-                  ? Text(
-                      ownerForHeader?.initials ?? '?',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.tertiary,
-                      ),
-                    )
-                  : Icon(
-                      Icons.pets_rounded,
-                      size: 30,
-                      color: colorScheme.onSurfaceVariant,
-                    ))
+                    ? Text(
+                        ownerForHeader?.initials ?? '?',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.tertiary,
+                        ),
+                      )
+                    : Icon(
+                        Icons.pets_rounded,
+                        size: 30,
+                        color: colorScheme.onSurfaceVariant,
+                      ))
               : null,
         ),
       ),
@@ -922,7 +967,10 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
   }
 
   void showProfileShareSheet(
-      BuildContext context, String shareLink, String name) {
+    BuildContext context,
+    String shareLink,
+    String name,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
 
     showModalBottomSheet(
@@ -949,7 +997,9 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               Text(
                 'Share $name',
                 style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 18),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
               const SizedBox(height: 8),
               const Divider(),
@@ -966,7 +1016,9 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                 subtitle: Text(
                   shareLink,
                   style: TextStyle(
-                      fontSize: 12, color: colorScheme.onSurfaceVariant),
+                    fontSize: 12,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -977,8 +1029,11 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     SnackBar(
                       content: Row(
                         children: [
-                          Icon(Icons.check_circle,
-                              color: colorScheme.onPrimary, size: 16),
+                          Icon(
+                            Icons.check_circle,
+                            color: colorScheme.onPrimary,
+                            size: 16,
+                          ),
                           const SizedBox(width: 8),
                           const Text('Link copied to clipboard!'),
                         ],
@@ -987,9 +1042,9 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      backgroundColor: Theme.of(context)
-                          .snackBarTheme
-                          .backgroundColor,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).snackBarTheme.backgroundColor,
                     ),
                   );
                 },
@@ -1001,8 +1056,10 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     shape: BoxShape.circle,
                     color: colorScheme.secondary.withAlpha(26),
                   ),
-                  child: Icon(Icons.chat_bubble_outline,
-                      color: colorScheme.secondary),
+                  child: Icon(
+                    Icons.chat_bubble_outline,
+                    color: colorScheme.secondary,
+                  ),
                 ),
                 title: const Text('Send in Message'),
                 onTap: () {
@@ -1017,8 +1074,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                     shape: BoxShape.circle,
                     color: colorScheme.tertiary.withAlpha(26),
                   ),
-                  child:
-                      Icon(Icons.qr_code, color: colorScheme.tertiary),
+                  child: Icon(Icons.qr_code, color: colorScheme.tertiary),
                 ),
                 title: const Text('QR Code'),
                 onTap: () {
@@ -1042,27 +1098,25 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                           Text(
                             'Scan or copy this profile link',
                             style: TextStyle(
-                                color: colorScheme.onSurfaceVariant),
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                           ),
                           const SizedBox(height: 12),
                           SelectableText(
                             shareLink,
                             textAlign: TextAlign.center,
-                            style:
-                                TextStyle(color: colorScheme.primary),
+                            style: TextStyle(color: colorScheme.primary),
                           ),
                         ],
                       ),
                       actions: [
                         TextButton(
-                          onPressed: () =>
-                              Navigator.pop(dialogContext),
+                          onPressed: () => Navigator.pop(dialogContext),
                           child: const Text('Close'),
                         ),
                         FilledButton.icon(
                           onPressed: () {
-                            Clipboard.setData(
-                                ClipboardData(text: shareLink));
+                            Clipboard.setData(ClipboardData(text: shareLink));
                             Navigator.pop(dialogContext);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -1109,8 +1163,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Sign Out'),
         content: const Text('Are you sure you want to sign out?'),
         actions: [
@@ -1123,9 +1176,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
               Navigator.pop(ctx);
               ref.read(authProvider.notifier).logout();
             },
-            style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: colorScheme.error),
             child: const Text('Sign Out'),
           ),
         ],
@@ -1169,25 +1220,22 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
     if (otherPetId == myPet.id) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You cannot message your own pet.'),
-        ),
+        const SnackBar(content: Text('You cannot message your own pet.')),
       );
       return;
     }
 
-    final threadId =
-        await ref.read(chatProvider.notifier).createOrGetThread(otherPetId);
+    final threadId = await ref
+        .read(chatProvider.notifier)
+        .createOrGetThread(otherPetId);
     if (!mounted) return;
     if (threadId != null) {
       context.push('/chat/$threadId');
     } else {
       final err = ref.read(chatProvider).error;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(err ?? 'Could not open chat'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(err ?? 'Could not open chat')));
     }
   }
 }
@@ -1196,7 +1244,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
 // Visitor Action Row — Follow | Message | Share
 // ─────────────────────────────────────────────────────────
 class ProfileVisitorActionRow extends ConsumerWidget {
-  const ProfileVisitorActionRow({super.key, 
+  const ProfileVisitorActionRow({
+    super.key,
     required this.isOwnerView,
     required this.visitHostUser,
     required this.selectedPet,
@@ -1227,8 +1276,11 @@ class ProfileVisitorActionRow extends ConsumerWidget {
         Expanded(
           child: FilledButton.icon(
             icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16),
-            label: const Text('Message',
-                maxLines: 1, overflow: TextOverflow.ellipsis),
+            label: const Text(
+              'Message',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             onPressed: onMessage,
             style: FilledButton.styleFrom(
               backgroundColor: colorScheme.secondaryContainer,
@@ -1236,8 +1288,7 @@ class ProfileVisitorActionRow extends ConsumerWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(999),
               ),
-              padding:
-                  const EdgeInsets.symmetric(vertical: 13, horizontal: 12),
+              padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 12),
               minimumSize: const Size(0, 44),
             ),
           ),
@@ -1255,8 +1306,11 @@ class ProfileVisitorActionRow extends ConsumerWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: colorScheme.outline),
               ),
-              child: Icon(Icons.ios_share_rounded,
-                  size: 20, color: colorScheme.onSurface),
+              child: Icon(
+                Icons.ios_share_rounded,
+                size: 20,
+                color: colorScheme.onSurface,
+              ),
             ),
           ),
         ),
@@ -1269,63 +1323,69 @@ class ProfileVisitorActionRow extends ConsumerWidget {
     WidgetRef ref,
     String ownerId,
   ) {
-    return ref.watch(isFollowingOwnerProvider(ownerId)).when(
-      loading: () => const SizedBox(
-        height: 44,
-        child: Center(
-          child: SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
+    return ref
+        .watch(isFollowingOwnerProvider(ownerId))
+        .when(
+          loading: () => const SizedBox(
+            height: 44,
+            child: Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
           ),
-        ),
-      ),
-      error: (_, _) => ElevatedButton.icon(
-        icon: const Icon(Icons.person_add_rounded, size: 15),
-        label: const Text('Follow'),
-        onPressed: () {
-          ref
-              .read(followControllerProvider.notifier)
-              .toggleFollowOwner(ownerId);
-        },
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(999)),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-        ),
-      ),
-      data: (follows) {
-        final colorScheme = Theme.of(context).colorScheme;
-        return ElevatedButton.icon(
-          icon: Icon(
-            follows
-                ? Icons.person_remove_outlined
-                : Icons.person_add_rounded,
-            size: 15,
+          error: (_, _) => ElevatedButton.icon(
+            icon: const Icon(Icons.person_add_rounded, size: 15),
+            label: const Text('Follow'),
+            onPressed: () {
+              ref
+                  .read(followControllerProvider.notifier)
+                  .toggleFollowOwner(ownerId);
+            },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
           ),
-          label: Text(
-            follows ? 'Unfollow' : 'Follow',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor:
-                follows ? colorScheme.surfaceContainer : colorScheme.primary,
-            foregroundColor:
-                follows ? colorScheme.onSurface : colorScheme.onPrimary,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999)),
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            elevation: 0,
-          ),
-          onPressed: () {
-            ref
-                .read(followControllerProvider.notifier)
-                .toggleFollowOwner(ownerId);
+          data: (follows) {
+            final colorScheme = Theme.of(context).colorScheme;
+            return ElevatedButton.icon(
+              icon: Icon(
+                follows
+                    ? Icons.person_remove_outlined
+                    : Icons.person_add_rounded,
+                size: 15,
+              ),
+              label: Text(
+                follows ? 'Unfollow' : 'Follow',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: follows
+                    ? colorScheme.surfaceContainer
+                    : colorScheme.primary,
+                foregroundColor: follows
+                    ? colorScheme.onSurface
+                    : colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                elevation: 0,
+              ),
+              onPressed: () {
+                ref
+                    .read(followControllerProvider.notifier)
+                    .toggleFollowOwner(ownerId);
+              },
+            );
           },
         );
-      },
-    );
   }
 
   static Widget _visitFollowForPet(
@@ -1333,63 +1393,69 @@ class ProfileVisitorActionRow extends ConsumerWidget {
     WidgetRef ref,
     String petId,
   ) {
-    return ref.watch(isFollowingPetProvider(petId)).when(
-      loading: () => const SizedBox(
-        height: 44,
-        child: Center(
-          child: SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
+    return ref
+        .watch(isFollowingPetProvider(petId))
+        .when(
+          loading: () => const SizedBox(
+            height: 44,
+            child: Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
           ),
-        ),
-      ),
-      error: (_, _) => ElevatedButton.icon(
-        icon: const Icon(Icons.person_add_rounded, size: 15),
-        label: const Text('Follow'),
-        onPressed: () {
-          ref
-              .read(followControllerProvider.notifier)
-              .toggleFollowPet(petId);
-        },
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(999)),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-        ),
-      ),
-      data: (follows) {
-        final colorScheme = Theme.of(context).colorScheme;
-        return ElevatedButton.icon(
-          icon: Icon(
-            follows
-                ? Icons.person_remove_outlined
-                : Icons.person_add_rounded,
-            size: 15,
+          error: (_, _) => ElevatedButton.icon(
+            icon: const Icon(Icons.person_add_rounded, size: 15),
+            label: const Text('Follow'),
+            onPressed: () {
+              ref
+                  .read(followControllerProvider.notifier)
+                  .toggleFollowPet(petId);
+            },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
           ),
-          label: Text(
-            follows ? 'Unfollow' : 'Follow',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor:
-                follows ? colorScheme.surfaceContainer : colorScheme.primary,
-            foregroundColor:
-                follows ? colorScheme.onSurface : colorScheme.onPrimary,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999)),
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            elevation: 0,
-          ),
-          onPressed: () {
-            ref
-                .read(followControllerProvider.notifier)
-                .toggleFollowPet(petId);
+          data: (follows) {
+            final colorScheme = Theme.of(context).colorScheme;
+            return ElevatedButton.icon(
+              icon: Icon(
+                follows
+                    ? Icons.person_remove_outlined
+                    : Icons.person_add_rounded,
+                size: 15,
+              ),
+              label: Text(
+                follows ? 'Unfollow' : 'Follow',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: follows
+                    ? colorScheme.surfaceContainer
+                    : colorScheme.primary,
+                foregroundColor: follows
+                    ? colorScheme.onSurface
+                    : colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                elevation: 0,
+              ),
+              onPressed: () {
+                ref
+                    .read(followControllerProvider.notifier)
+                    .toggleFollowPet(petId);
+              },
+            );
           },
         );
-      },
-    );
   }
 }
 
@@ -1417,8 +1483,9 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
     super.initState();
     _nameController = TextEditingController(text: widget.user.name ?? '');
     _bioController = TextEditingController(text: widget.user.bio ?? '');
-    _locationController =
-        TextEditingController(text: widget.user.location ?? '');
+    _locationController = TextEditingController(
+      text: widget.user.location ?? '',
+    );
   }
 
   @override
@@ -1477,7 +1544,8 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
                 behavior: SnackBarBehavior.floating,
                 duration: const Duration(seconds: 5),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             );
           }
@@ -1490,8 +1558,9 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
       }
 
       debugPrint('Updating profile with fields: $fields');
-      final success =
-          await ref.read(authProvider.notifier).updateProfile(fields);
+      final success = await ref
+          .read(authProvider.notifier)
+          .updateProfile(fields);
 
       if (mounted) {
         final colorScheme = Theme.of(context).colorScheme;
@@ -1501,8 +1570,11 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
             SnackBar(
               content: Row(
                 children: [
-                  Icon(Icons.check_circle,
-                      color: colorScheme.onPrimary, size: 18),
+                  Icon(
+                    Icons.check_circle,
+                    color: colorScheme.onPrimary,
+                    size: 18,
+                  ),
                   const SizedBox(width: 8),
                   const Text('Profile updated!'),
                 ],
@@ -1510,7 +1582,8 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
               backgroundColor: colorScheme.primary,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         } else {
@@ -1521,16 +1594,17 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
               backgroundColor: colorScheme.error,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -1547,8 +1621,7 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
       margin: const EdgeInsets.only(top: 60),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
         padding: EdgeInsets.only(
@@ -1588,9 +1661,9 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
                       backgroundImage: _newAvatar != null
                           ? FileImage(_newAvatar!) as ImageProvider
                           : (hasAvatar
-                              ? CachedNetworkImageProvider(currentAvatarUrl)
-                                  as ImageProvider
-                              : null),
+                                ? CachedNetworkImageProvider(currentAvatarUrl)
+                                      as ImageProvider
+                                : null),
                       child: (_newAvatar == null && !hasAvatar)
                           ? Text(
                               widget.user.initials,
@@ -1611,10 +1684,15 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
                           color: colorScheme.tertiary,
                           shape: BoxShape.circle,
                           border: Border.all(
-                              color: colorScheme.onTertiary, width: 2),
+                            color: colorScheme.onTertiary,
+                            width: 2,
+                          ),
                         ),
-                        child: Icon(Icons.camera_alt,
-                            size: 16, color: colorScheme.onTertiary),
+                        child: Icon(
+                          Icons.camera_alt,
+                          size: 16,
+                          color: colorScheme.onTertiary,
+                        ),
                       ),
                     ),
                   ],
@@ -1626,14 +1704,17 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
               child: Text(
                 'Tap to change photo',
                 style: TextStyle(
-                    color: colorScheme.onSurfaceVariant, fontSize: 13),
+                  color: colorScheme.onSurfaceVariant,
+                  fontSize: 13,
+                ),
               ),
             ),
             const SizedBox(height: 24),
             SheetFieldLabel(
-                icon: Icons.badge_outlined,
-                label: 'Display Name',
-                colorScheme: colorScheme),
+              icon: Icons.badge_outlined,
+              label: 'Display Name',
+              colorScheme: colorScheme,
+            ),
             const SizedBox(height: 6),
             TextField(
               controller: _nameController,
@@ -1642,9 +1723,10 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
             ),
             const SizedBox(height: 20),
             SheetFieldLabel(
-                icon: Icons.description_outlined,
-                label: 'Bio',
-                colorScheme: colorScheme),
+              icon: Icons.description_outlined,
+              label: 'Bio',
+              colorScheme: colorScheme,
+            ),
             const SizedBox(height: 6),
             TextField(
               controller: _bioController,
@@ -1652,19 +1734,24 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
               maxLength: 300,
               textCapitalization: TextCapitalization.sentences,
               decoration: _sheetInputDecoration(
-                  'Tell others about yourself...', colorScheme),
+                'Tell others about yourself...',
+                colorScheme,
+              ),
             ),
             const SizedBox(height: 20),
             SheetFieldLabel(
-                icon: Icons.location_on_outlined,
-                label: 'Location',
-                colorScheme: colorScheme),
+              icon: Icons.location_on_outlined,
+              label: 'Location',
+              colorScheme: colorScheme,
+            ),
             const SizedBox(height: 6),
             TextField(
               controller: _locationController,
               textCapitalization: TextCapitalization.words,
-              decoration:
-                  _sheetInputDecoration('e.g. New York, NY', colorScheme),
+              decoration: _sheetInputDecoration(
+                'e.g. New York, NY',
+                colorScheme,
+              ),
             ),
             const SizedBox(height: 28),
             SizedBox(
@@ -1703,12 +1790,10 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
     );
   }
 
-  InputDecoration _sheetInputDecoration(
-      String hint, ColorScheme colorScheme) {
+  InputDecoration _sheetInputDecoration(String hint, ColorScheme colorScheme) {
     return InputDecoration(
       hintText: hint,
-      hintStyle:
-          TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
+      hintStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
       filled: true,
       fillColor: colorScheme.surfaceContainerLowest,
       border: OutlineInputBorder(
@@ -1723,8 +1808,7 @@ class EditOwnerSheetState extends ConsumerState<EditOwnerSheet> {
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(color: colorScheme.tertiary, width: 2),
       ),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 }
@@ -1819,11 +1903,15 @@ class EditPetSheetState extends ConsumerState<EditPetSheet> {
                   color: colorScheme.tertiary.withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.photo_library_rounded,
-                    color: colorScheme.tertiary),
+                child: Icon(
+                  Icons.photo_library_rounded,
+                  color: colorScheme.tertiary,
+                ),
               ),
-              title: const Text('Choose from Gallery',
-                  style: TextStyle(fontWeight: FontWeight.w600)),
+              title: const Text(
+                'Choose from Gallery',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               subtitle: const Text('Select an existing photo'),
               onTap: () {
                 Navigator.pop(ctx);
@@ -1837,11 +1925,15 @@ class EditPetSheetState extends ConsumerState<EditPetSheet> {
                   color: colorScheme.secondary.withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.camera_alt_rounded,
-                    color: colorScheme.secondary),
+                child: Icon(
+                  Icons.camera_alt_rounded,
+                  color: colorScheme.secondary,
+                ),
               ),
-              title: const Text('Take a Photo',
-                  style: TextStyle(fontWeight: FontWeight.w600)),
+              title: const Text(
+                'Take a Photo',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               subtitle: const Text('Use your camera'),
               onTap: () {
                 Navigator.pop(ctx);
@@ -1894,7 +1986,8 @@ class EditPetSheetState extends ConsumerState<EditPetSheet> {
                 behavior: SnackBarBehavior.floating,
                 duration: const Duration(seconds: 5),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             );
           }
@@ -1918,8 +2011,11 @@ class EditPetSheetState extends ConsumerState<EditPetSheet> {
             SnackBar(
               content: Row(
                 children: [
-                  Icon(Icons.check_circle,
-                      color: successColorScheme.onPrimary, size: 18),
+                  Icon(
+                    Icons.check_circle,
+                    color: successColorScheme.onPrimary,
+                    size: 18,
+                  ),
                   const SizedBox(width: 8),
                   const Text('Profile updated!'),
                 ],
@@ -1927,7 +2023,8 @@ class EditPetSheetState extends ConsumerState<EditPetSheet> {
               backgroundColor: successColorScheme.primary,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         } else {
@@ -1935,21 +2032,21 @@ class EditPetSheetState extends ConsumerState<EditPetSheet> {
           final failureColorScheme = Theme.of(context).colorScheme;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                  'Update failed: ${petError ?? 'Unknown error'}'),
+              content: Text('Update failed: ${petError ?? 'Unknown error'}'),
               backgroundColor: failureColorScheme.error,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -1963,8 +2060,7 @@ class EditPetSheetState extends ConsumerState<EditPetSheet> {
       margin: const EdgeInsets.only(top: 80),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
         padding: EdgeInsets.only(
@@ -2004,15 +2100,19 @@ class EditPetSheetState extends ConsumerState<EditPetSheet> {
                       backgroundImage: _newAvatar != null
                           ? FileImage(_newAvatar!) as ImageProvider
                           : (widget.pet.profileImageUrl.isNotEmpty
-                              ? CachedNetworkImageProvider(
-                                  widget.pet.profileImageUrl)
-                                  as ImageProvider
-                              : null),
-                      child: (_newAvatar == null &&
+                                ? CachedNetworkImageProvider(
+                                        widget.pet.profileImageUrl,
+                                      )
+                                      as ImageProvider
+                                : null),
+                      child:
+                          (_newAvatar == null &&
                               widget.pet.profileImageUrl.isEmpty)
-                          ? Icon(Icons.pets,
+                          ? Icon(
+                              Icons.pets,
                               size: 32,
-                              color: colorScheme.onSurfaceVariant)
+                              color: colorScheme.onSurfaceVariant,
+                            )
                           : null,
                     ),
                     Positioned(
@@ -2024,10 +2124,15 @@ class EditPetSheetState extends ConsumerState<EditPetSheet> {
                           color: colorScheme.tertiary,
                           shape: BoxShape.circle,
                           border: Border.all(
-                              color: colorScheme.onTertiary, width: 2),
+                            color: colorScheme.onTertiary,
+                            width: 2,
+                          ),
                         ),
-                        child: Icon(Icons.camera_alt,
-                            size: 16, color: colorScheme.onTertiary),
+                        child: Icon(
+                          Icons.camera_alt,
+                          size: 16,
+                          color: colorScheme.onTertiary,
+                        ),
                       ),
                     ),
                   ],
@@ -2039,13 +2144,16 @@ class EditPetSheetState extends ConsumerState<EditPetSheet> {
               child: Text(
                 'Tap to change photo',
                 style: TextStyle(
-                    color: colorScheme.onSurfaceVariant, fontSize: 13),
+                  color: colorScheme.onSurfaceVariant,
+                  fontSize: 13,
+                ),
               ),
             ),
             const SizedBox(height: 24),
-            const Text('Name',
-                style:
-                    TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+            const Text(
+              'Name',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            ),
             const SizedBox(height: 6),
             TextField(
               controller: _nameController,
@@ -2063,9 +2171,10 @@ class EditPetSheetState extends ConsumerState<EditPetSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Breed',
-                style:
-                    TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+            const Text(
+              'Breed',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            ),
             const SizedBox(height: 6),
             TextField(
               controller: _breedController,
@@ -2083,9 +2192,10 @@ class EditPetSheetState extends ConsumerState<EditPetSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Bio',
-                style:
-                    TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+            const Text(
+              'Bio',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            ),
             const SizedBox(height: 6),
             TextField(
               controller: _bioController,
@@ -2150,7 +2260,8 @@ class SheetFieldLabel extends StatelessWidget {
   final String label;
   final ColorScheme colorScheme;
 
-  const SheetFieldLabel({super.key, 
+  const SheetFieldLabel({
+    super.key,
     required this.icon,
     required this.label,
     required this.colorScheme,
@@ -2182,7 +2293,8 @@ class InfoChip extends StatelessWidget {
   final String text;
   final ColorScheme colorScheme;
 
-  const InfoChip({super.key, 
+  const InfoChip({
+    super.key,
     this.icon,
     this.useBrandIcon = false,
     required this.text,
@@ -2244,8 +2356,7 @@ class EmptyPetsCta extends StatelessWidget {
                 end: Alignment.bottomRight,
               ),
             ),
-            child:
-                BrandLogo(customSize: 48, color: colorScheme.tertiary),
+            child: BrandLogo(customSize: 48, color: colorScheme.tertiary),
           ),
           const SizedBox(height: 20),
           Text(
@@ -2277,8 +2388,7 @@ class EmptyPetsCta extends StatelessWidget {
             style: FilledButton.styleFrom(
               backgroundColor: colorScheme.tertiary,
               foregroundColor: colorScheme.onTertiary,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -2294,8 +2404,11 @@ class OwnerCarouselAvatar extends StatelessWidget {
   final UserModel? user;
   final bool isSelected;
 
-  const OwnerCarouselAvatar(
-      {super.key, required this.user, required this.isSelected});
+  const OwnerCarouselAvatar({
+    super.key,
+    required this.user,
+    required this.isSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -2314,8 +2427,7 @@ class OwnerCarouselAvatar extends StatelessWidget {
               : colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color:
-                isSelected ? colorScheme.primary : colorScheme.outline,
+            color: isSelected ? colorScheme.primary : colorScheme.outline,
             width: 1.5,
           ),
         ),
@@ -2325,17 +2437,17 @@ class OwnerCarouselAvatar extends StatelessWidget {
             CircleAvatar(
               radius: 14,
               backgroundColor: colorScheme.primary.withAlpha(51),
-              backgroundImage:
-                  hasImage
-                      ? CachedNetworkImageProvider(user!.profileImageUrl!)
-                      : null,
+              backgroundImage: hasImage
+                  ? CachedNetworkImageProvider(user!.profileImageUrl!)
+                  : null,
               child: !hasImage
                   ? Text(
                       user?.initials ?? '?',
                       style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                          color: colorScheme.primary),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                        color: colorScheme.primary,
+                      ),
                     )
                   : null,
             ),
@@ -2344,8 +2456,7 @@ class OwnerCarouselAvatar extends StatelessWidget {
               'All',
               style: TextStyle(
                 fontSize: 13,
-                fontWeight:
-                    isSelected ? FontWeight.bold : FontWeight.normal,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
@@ -2360,8 +2471,11 @@ class PetCarouselAvatar extends StatelessWidget {
   final PetModel pet;
   final bool isSelected;
 
-  const PetCarouselAvatar(
-      {super.key, required this.pet, required this.isSelected});
+  const PetCarouselAvatar({
+    super.key,
+    required this.pet,
+    required this.isSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -2378,8 +2492,7 @@ class PetCarouselAvatar extends StatelessWidget {
               : colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color:
-                isSelected ? colorScheme.primary : colorScheme.outline,
+            color: isSelected ? colorScheme.primary : colorScheme.outline,
             width: 1.5,
           ),
         ),
@@ -2403,8 +2516,7 @@ class PetCarouselAvatar extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 13,
-                fontWeight:
-                    isSelected ? FontWeight.bold : FontWeight.normal,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
@@ -2440,8 +2552,11 @@ class AddPetAvatar extends StatelessWidget {
             CircleAvatar(
               radius: 14,
               backgroundColor: colorScheme.primary.withAlpha(26),
-              child: Icon(Icons.add_rounded,
-                  color: colorScheme.primary, size: 16),
+              child: Icon(
+                Icons.add_rounded,
+                color: colorScheme.primary,
+                size: 16,
+              ),
             ),
             const SizedBox(width: 8),
             Text(

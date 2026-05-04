@@ -40,99 +40,85 @@ class PetfolioShadows extends ThemeExtension<PetfolioShadows> {
 class AppTheme {
   const AppTheme._();
 
-  // Instagram blue as primary for the modern social feel
-  static const primary = Color(0xFF0095F6);
-  static const primaryLight = Color(0xFF47B4FF);
-  static const amber = Color(0xFFFFA726);
-  static const deepNavy = Color(0xFF1D1D1F);
-  static const midNavy = Color(0xFF737373);
-  static const bgLight = Color(0xFFFFFFFF);
-  static const bgSoft = Color(0xFFF5F5F5);
-  static const glassWhite = Color(0x99FFFFFF);
-  static const glassBorder = Color(0x1A000000);
+  // Brand color: PetFolio Blue (#4A7DF7)
+  static const primary = Color(0xFF4A7DF7);
+  static const secondary = Color(0xFF47B4FF); // Sky Blue Accent
+  static const bgLight = Color(0xFFFCFAF8); // Off-white/cream
+  static const bgDark = Color(0xFF121212); // Deep black
+
+  // Semantic Colors (Restored to PetFolio Blue System)
+  static const primaryAccent = Color(0xFF4A7DF7); // Brand Primary
+  static const secondaryAccent = Color(
+    0xFF47B4FF,
+  ); // Light Blue (for active/given statuses)
+  static const alertAccent = Color(
+    0xFFFF5252,
+  ); // Material Red Accent (for overdue/alerts)
+  static const textPrimary = Color(0xFF1C1C2E); // Deep Navy/Black from logo
+  static const textSecondary = Color(0xFF737373);
+
   static const white = Colors.white;
 
-  // Backward-compatible aliases for existing visual helper getters.
-  static const primaryAccent = primary;
-  static const secondaryAccent = amber;
-  static const textPrimary = deepNavy;
-  static const textSecondary = midNavy;
+  // Layout Constants
+  static const double xs = 4.0;
+  static const double sm = 8.0;
+  static const double md = 16.0;
+  static const double lg = 24.0;
+  static const double xl = 32.0;
+  static const double xxl = 48.0;
 
-  // Instagram-inspired dark palette
-  static const darkBackground = Color(0xFF000000);   // Pure black (IG bg)
-  static const darkSurface = Color(0xFF121212);       // Cards / sheets
-  static const darkSoft = Color(0xFF1C1C1C);          // Elevated containers
-  static const darkInput = Color(0xFF262626);         // Input fields
-  static const darkBorder = Color(0xFF262626);        // Dividers / borders
-  static const darkText = Color(0xFFF5F5F5);          // Primary text
-  static const darkMuted = Color(0xFFA8A8A8);         // Secondary / muted text
-
-  static const xs = 4.0;
-  static const sm = 8.0;
-  static const md = 16.0;
-  static const lg = 24.0;
-  static const xl = 32.0;
-  static const xxl = 48.0;
-
-  static const cardRadius = 16.0;
-  static const pillRadius = 100.0;
-  static const inputRadius = 12.0;
-
-  static const cardShadow = [
-    BoxShadow(color: Color(0x0A000000), blurRadius: 24, offset: Offset(0, 8)),
-  ];
-  static const buttonShadow = [
-    BoxShadow(color: Color(0x1A000000), blurRadius: 16, offset: Offset(0, 4)),
-  ];
-  static const hoverLiftShadow = [
-    BoxShadow(color: Color(0x26000000), blurRadius: 24, offset: Offset(0, 8)),
-  ];
+  static const double cardRadius = 24.0;
+  static const double inputRadius = 12.0;
+  static const double pillRadius = 100.0;
 
   static ThemeData get lightTheme => _buildTheme(Brightness.light);
   static ThemeData get darkTheme => _buildTheme(Brightness.dark);
 
   static ThemeData _buildTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
-    final scheme = ColorScheme(
-      brightness: brightness,
-      primary: primary,
-      onPrimary: white,
-      primaryContainer: primary.withValues(alpha: isDark ? 0.18 : 0.10),
-      onPrimaryContainer: isDark ? darkText : deepNavy,
-      secondary: amber,
-      onSecondary: isDark ? deepNavy : white,
-      secondaryContainer: amber.withValues(alpha: isDark ? 0.18 : 0.14),
-      onSecondaryContainer: isDark ? darkText : deepNavy,
-      tertiary: primaryLight,
-      onTertiary: white,
-      tertiaryContainer: primaryLight.withValues(alpha: isDark ? 0.16 : 0.12),
-      onTertiaryContainer: isDark ? darkText : deepNavy,
-      error: const Color(0xFFED4956),  // Instagram red
-      onError: white,
-      errorContainer: const Color(0xFFED4956).withValues(alpha: 0.15),
-      onErrorContainer: isDark ? darkText : deepNavy,
-      surface: isDark ? darkSurface : white,
-      onSurface: isDark ? darkText : deepNavy,
-      surfaceContainerLowest: isDark ? darkBackground : white,
-      surfaceContainerLow: isDark ? darkSurface : bgLight,
-      surfaceContainer: isDark ? darkSoft : glassWhite,
-      surfaceContainerHigh: isDark ? darkSoft : bgSoft,
-      surfaceContainerHighest: isDark ? darkSoft : bgSoft,
-      onSurfaceVariant: isDark ? darkMuted : midNavy,
-      outline: isDark ? const Color(0xFF363636) : glassBorder,
-      outlineVariant: isDark ? const Color(0xFF262626) : glassBorder,
-      shadow: Colors.black,
-      scrim: Colors.black,
-      inverseSurface: isDark ? bgLight : deepNavy,
-      onInverseSurface: isDark ? deepNavy : bgLight,
-      inversePrimary: primaryLight,
-      surfaceTint: Colors.transparent,
-    );
+
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: primary,
+          brightness: brightness,
+          primary: primary,
+          onPrimary: white,
+          secondary: secondary,
+          onSecondary: white,
+          surface: isDark ? const Color(0xFF1A1A1A) : bgLight,
+          surfaceContainerLowest: isDark ? bgDark : white,
+          surfaceContainerHighest: isDark
+              ? const Color(0xFF252525)
+              : const Color(0xFFF0F4F8),
+        ).copyWith(
+          outline: isDark ? const Color(0xFF333333) : const Color(0xFFE1E8F0),
+        );
 
     final display = GoogleFonts.playfairDisplayTextTheme();
     final body = GoogleFonts.dmSansTextTheme();
-    final textColor = isDark ? darkText : deepNavy;
-    final mutedColor = isDark ? darkMuted : midNavy;
+    final textColor = isDark ? const Color(0xFFF5F5F5) : textPrimary;
+    final mutedColor = isDark
+        ? const Color(0xFFA8A8A8)
+        : const Color(0xFF737373);
+
+    final cardShadow = [
+      BoxShadow(
+        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+        blurRadius: 24,
+        offset: const Offset(0, 8),
+      ),
+    ];
+    final buttonShadow = [
+      BoxShadow(
+        color: primary.withValues(alpha: 0.2),
+        blurRadius: 16,
+        offset: const Offset(0, 4),
+      ),
+    ];
+    const hoverLiftShadow = [
+      BoxShadow(color: Color(0x26000000), blurRadius: 24, offset: Offset(0, 8)),
+    ];
+
     final textTheme = body.copyWith(
       displayLarge: display.displayLarge?.copyWith(
         color: textColor,
@@ -225,7 +211,7 @@ class AppTheme {
     );
 
     final inputBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(inputRadius),
+      borderRadius: BorderRadius.circular(AppTheme.inputRadius),
       borderSide: BorderSide.none,
     );
 
@@ -233,11 +219,12 @@ class AppTheme {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: scheme,
-      scaffoldBackgroundColor: isDark ? darkBackground : bgLight,
-      canvasColor: isDark ? darkBackground : bgLight,
+      scaffoldBackgroundColor: isDark ? bgDark : bgLight,
+      canvasColor: isDark ? bgDark : bgLight,
+      cardColor: isDark ? const Color(0xFF1E1E1E) : white,
       primaryColor: primary,
       textTheme: textTheme,
-      extensions: const [
+      extensions: [
         PetfolioShadows(
           card: cardShadow,
           button: buttonShadow,
@@ -255,14 +242,14 @@ class AppTheme {
       ),
       appBarTheme: AppBarThemeData(
         backgroundColor: isDark
-            ? darkBackground.withValues(alpha: 0.85)
+            ? bgDark.withValues(alpha: 0.85)
             : bgLight.withValues(alpha: 0.85),
-        foregroundColor: isDark ? darkText : deepNavy,
+        foregroundColor: isDark ? textColor : textPrimary,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         surfaceTintColor: Colors.transparent,
-        iconTheme: IconThemeData(color: isDark ? darkText : deepNavy),
+        iconTheme: IconThemeData(color: isDark ? textColor : textPrimary),
         titleTextStyle: textTheme.titleLarge,
       ),
       cardTheme: CardThemeData(
@@ -272,7 +259,7 @@ class AppTheme {
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(cardRadius),
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
           side: BorderSide(color: scheme.outline, width: 1),
         ),
       ),
@@ -317,19 +304,19 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? darkInput : bgSoft,
+        fillColor: isDark ? const Color(0xFF262626) : const Color(0xFFF5F5F5),
         border: inputBorder,
         enabledBorder: inputBorder,
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(inputRadius),
+          borderRadius: BorderRadius.circular(AppTheme.inputRadius),
           borderSide: const BorderSide(color: primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(inputRadius),
+          borderRadius: BorderRadius.circular(AppTheme.inputRadius),
           borderSide: BorderSide(color: scheme.error, width: 1.5),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(inputRadius),
+          borderRadius: BorderRadius.circular(AppTheme.inputRadius),
           borderSide: BorderSide(color: scheme.error, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(
@@ -345,16 +332,16 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: isDark
-            ? darkBackground.withValues(alpha: 0.96)
+            ? bgDark.withValues(alpha: 0.96)
             : bgLight.withValues(alpha: 0.96),
         selectedItemColor: primary,
-        unselectedItemColor: isDark ? darkMuted : midNavy,
+        unselectedItemColor: isDark ? mutedColor : const Color(0xFF737373),
         elevation: 0,
         type: BottomNavigationBarType.fixed,
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: isDark
-            ? darkBackground.withValues(alpha: 0.96)
+            ? bgDark.withValues(alpha: 0.96)
             : bgLight.withValues(alpha: 0.96),
         elevation: 0,
         indicatorColor: primary.withValues(alpha: 0.10),
@@ -373,8 +360,12 @@ class AppTheme {
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: primary,
-        linearTrackColor: isDark ? darkSoft : bgSoft,
-        circularTrackColor: isDark ? darkSoft : bgSoft,
+        linearTrackColor: isDark
+            ? const Color(0xFF1C1C1C)
+            : const Color(0xFFF5F5F5),
+        circularTrackColor: isDark
+            ? const Color(0xFF1C1C1C)
+            : const Color(0xFFF5F5F5),
       ),
       dividerTheme: DividerThemeData(
         color: scheme.outlineVariant,
@@ -390,9 +381,11 @@ class AppTheme {
         shape: CircleBorder(),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: isDark ? darkSoft : deepNavy,
+        backgroundColor: isDark
+            ? const Color(0xFF1C1C1C)
+            : const Color(0xFF1D1D1F),
         contentTextStyle: textTheme.bodySmall?.copyWith(color: white),
-        actionTextColor: primaryLight,
+        actionTextColor: primary,
         elevation: 0,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -400,14 +393,14 @@ class AppTheme {
         ),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: isDark ? darkSurface : white,
+        backgroundColor: isDark ? const Color(0xFF121212) : white,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(cardRadius),
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: isDark ? darkSurface : white,
+        backgroundColor: isDark ? const Color(0xFF121212) : white,
         elevation: 0,
         modalElevation: 0,
         surfaceTintColor: Colors.transparent,

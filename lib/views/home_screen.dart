@@ -59,10 +59,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
         titleSpacing: 16,
-        title: BrandLogo(
-          size: BrandLogoSize.small,
-          withText: true,
-        ),
+        title: BrandLogo(size: BrandLogoSize.small, withText: true),
         actions: [
           IconButton(
             tooltip: 'Search',
@@ -281,17 +278,20 @@ class HomeScreen extends ConsumerWidget {
                             ref.read(activePetProvider)?.name ?? 'Unknown',
                           );
                         },
-                        onShareIconTap: () => _showShareSheet(context, ref, post),
+                        onShareIconTap: () =>
+                            _showShareSheet(context, ref, post),
                         onPetTap: () => openPetProfile(
                           context,
                           ref,
                           petId: post.pet.id,
                           petUserId: post.pet.userId,
                         ),
-                        onEdit: post.pet.userId == ref.read(authProvider).user?.id
+                        onEdit:
+                            post.pet.userId == ref.read(authProvider).user?.id
                             ? () => showEditPostDialog(context, ref, post)
                             : null,
-                        onDelete: post.pet.userId == ref.read(authProvider).user?.id
+                        onDelete:
+                            post.pet.userId == ref.read(authProvider).user?.id
                             ? () => showDeletePostDialog(context, ref, post)
                             : null,
                       ),
@@ -452,7 +452,9 @@ class HomeScreen extends ConsumerWidget {
                                           colorScheme.surfaceContainerHighest,
                                       backgroundImage:
                                           pet.profileImageUrl.isNotEmpty
-                                          ? CachedNetworkImageProvider(pet.profileImageUrl)
+                                          ? CachedNetworkImageProvider(
+                                              pet.profileImageUrl,
+                                            )
                                           : null,
                                       child: pet.profileImageUrl.isEmpty
                                           ? Text(
@@ -968,7 +970,9 @@ class _StoryItem extends StatelessWidget {
     Widget avatar = CircleAvatar(
       radius: innerRadius,
       backgroundColor: colorScheme.surfaceContainerHighest,
-      backgroundImage: imageUrl.isNotEmpty ? CachedNetworkImageProvider(imageUrl) : null,
+      backgroundImage: imageUrl.isNotEmpty
+          ? CachedNetworkImageProvider(imageUrl)
+          : null,
       child: imageUrl.isEmpty
           ? BrandLogo(
               customSize: innerRadius * 0.8,
