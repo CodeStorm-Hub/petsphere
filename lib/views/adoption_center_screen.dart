@@ -94,61 +94,7 @@ class _AdoptionCenterScreenState extends ConsumerState<AdoptionCenterScreen> {
             ),
           ),
 
-          // ── Verified Shelters (Multi-Vendor) ───────────────────────────
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
-              decoration: BoxDecoration(
-                color: cs.surface.withAlpha(230),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(20),
-                    blurRadius: 20,
-                    offset: const Offset(0, -10),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Verified Shelters',
-                        style: GoogleFonts.playfairDisplay(
-                          textStyle: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text('Nearby'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 80,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _mockShelters.length,
-                      itemBuilder: (context, index) {
-                        final shelter = _mockShelters[index];
-                        return _ShelterAvatar(shelter: shelter);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+
         ],
       ),
     );
@@ -349,31 +295,7 @@ class _SwipeStamp extends StatelessWidget {
   }
 }
 
-class _ShelterAvatar extends StatelessWidget {
-  final Map<String, String> shelter;
-  const _ShelterAvatar({required this.shelter});
 
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(right: 16),
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundImage: CachedNetworkImageProvider(shelter['image']!),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            shelter['name']!,
-            style: TextStyle(fontSize: 10, color: cs.onSurface, fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 final _mockPets = [
   {
@@ -399,9 +321,4 @@ final _mockPets = [
   },
 ];
 
-final _mockShelters = [
-  {'name': 'Happy Tails', 'image': 'https://images.unsplash.com/photo-1583512676605-934d23a65ee3?w=100'},
-  {'name': 'Downtown', 'image': 'https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=100'},
-  {'name': 'Paws Sanctuary', 'image': 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=100'},
-  {'name': 'Rescued!', 'image': 'https://images.unsplash.com/photo-1513245535761-07742dd136ff?w=100'},
-];
+

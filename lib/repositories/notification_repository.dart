@@ -69,11 +69,11 @@ class NotificationRepository {
       await supabase.from('notifications').insert({
         'user_id': targetUserId,
         'title': title,
-        'body': ?body,
-        'type': ?type,
-        'entity_type': ?entityType,
-        'entity_id': ?entityId,
-        'actor_pet_id': ?actorPetId,
+        'body': body,
+        'type': type,
+        'entity_type': entityType,
+        'entity_id': entityId,
+        'actor_pet_id': actorPetId,
       });
     } catch (e, st) {
       developer.log(

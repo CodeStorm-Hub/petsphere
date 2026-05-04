@@ -23,146 +23,99 @@ class MarketplaceScreen extends ConsumerWidget {
     final navSpace = bottomNavSpaceFor(context);
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: RefreshIndicator(
         onRefresh: () => ref.read(marketplaceProvider.notifier).refresh(),
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // ── Premium Sliver App Bar ─────────────────────────────────────
+            // ── Personalized Greeting Header ────────────────────────────────
             SliverAppBar(
               floating: true,
-              pinned: true,
-              expandedHeight: 120,
+              pinned: false,
               backgroundColor: theme.scaffoldBackgroundColor,
               elevation: 0,
               surfaceTintColor: Colors.transparent,
-              flexibleSpace: FlexibleSpaceBar(
-                centerTitle: false,
-                titlePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                title: Text(
-                  'Pet Shop',
-                  style: GoogleFonts.playfairDisplay(
-                    textStyle: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                ),
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.receipt_long_outlined),
-                  onPressed: () => context.push('/orders'),
-                ),
-                _CartButton(count: cartState.totalItemCount),
-                const SizedBox(width: 8),
-              ],
-            ),
-
-            // ── Search & Greeting ──────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              toolbarHeight: 80,
+              title: Padding(
+                padding: const EdgeInsets.only(top: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Curated for your companion',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurfaceVariant,
+                      'Good Morning,',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 14,
+                        color: Colors.grey,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    _MarketSearchBar(onTap: () => context.push('/search')),
+                    Text(
+                      user?.name?.split(' ').first ?? 'Pet Parent',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: _CartButton(count: cartState.totalItemCount),
+                ),
+                const SizedBox(width: 16),
+              ],
+            ),
+
+            // ── Search & Filter ───────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _MarketSearchBar(onTap: () => context.push('/search')),
+                    ),
+                    const SizedBox(width: 12),
+                    // Filter Button
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: cs.primary, // Brand color instead of green
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.tune_rounded, color: Colors.white, size: 24),
+                    ),
                   ],
                 ),
               ),
             ),
 
-            // ── Verified Shops (Multi-Vendor) ──────────────────────────────
+            // ── Minimalist Categories ──────────────────────────────────────
             SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Verified Shops',
-                          style: GoogleFonts.playfairDisplay(
-                            textStyle: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {},
-                          child: const Text('View All'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 110,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: _mockVendors.length,
-                      itemBuilder: (context, index) {
-                        final vendor = _mockVendors[index];
-                        return _VendorCircle(vendor: vendor);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // ── Promotional Banner ──────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: _PromoBanner(
-                  title: 'Premium Nutrition',
-                  subtitle: 'Up to 30% off selected diets',
-                  color: cs.secondaryContainer,
-                  onTap: () => ref.read(marketplaceProvider.notifier).setFilter('Food'),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    _CategoryChip(label: 'All Items', value: null, current: marketState.filterCategory),
+                    const SizedBox(width: 12),
+                    _CategoryChip(label: 'Food', value: 'Food', current: marketState.filterCategory),
+                    const SizedBox(width: 12),
+                    _CategoryChip(label: 'Toys', value: 'Toys', current: marketState.filterCategory),
+                    const SizedBox(width: 12),
+                    _CategoryChip(label: 'Bedding', value: 'Bedding', current: marketState.filterCategory),
+                    const SizedBox(width: 12),
+                    _CategoryChip(label: 'Accessories', value: 'Accessories', current: marketState.filterCategory),
+                  ],
                 ),
               ),
             ),
 
-            // ── Sticky Categories ───────────────────────────────────────────
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _SliverCategoryDelegate(
-                child: Container(
-                  color: theme.scaffoldBackgroundColor,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        _CategoryChip(label: 'All', value: null, current: marketState.filterCategory),
-                        const SizedBox(width: 8),
-                        _CategoryChip(label: 'Food', value: 'Food', current: marketState.filterCategory),
-                        const SizedBox(width: 8),
-                        _CategoryChip(label: 'Toys', value: 'Toys', current: marketState.filterCategory),
-                        const SizedBox(width: 8),
-                        _CategoryChip(label: 'Beds', value: 'Bedding', current: marketState.filterCategory),
-                        const SizedBox(width: 8),
-                        _CategoryChip(label: 'Style', value: 'Accessories', current: marketState.filterCategory),
-                        const SizedBox(width: 8),
-                        _CategoryChip(label: 'Treats', value: 'Treats', current: marketState.filterCategory),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
             // ── Product Grid ────────────────────────────────────────────────
             if (marketState.products.isEmpty && !marketState.isLoading)
@@ -175,9 +128,9 @@ class MarketplaceScreen extends ConsumerWidget {
                 sliver: SliverGrid(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.68,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -251,23 +204,33 @@ class _MarketSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final brightness = Theme.of(context).brightness;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: cs.outline.withAlpha(40)),
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(brightness == Brightness.dark ? 40 : 8),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            Icon(Icons.search, color: cs.onSurfaceVariant, size: 20),
+            const Icon(Icons.search_rounded, color: Colors.grey, size: 22),
             const SizedBox(width: 12),
             Text(
-              'Search treats, toys, and more...',
-              style: TextStyle(color: cs.onSurfaceVariant.withAlpha(150), fontSize: 14),
+              'Search Products',
+              style: GoogleFonts.dmSans(
+                color: Colors.grey,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
@@ -276,40 +239,7 @@ class _MarketSearchBar extends StatelessWidget {
   }
 }
 
-class _VendorCircle extends StatelessWidget {
-  final Map<String, String> vendor;
-  const _VendorCircle({required this.vendor});
 
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: cs.primary.withAlpha(100), width: 1.5),
-            ),
-            child: CircleAvatar(
-              radius: 32,
-              backgroundColor: cs.surfaceContainerHighest,
-              backgroundImage: CachedNetworkImageProvider(vendor['image']!),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            vendor['name']!,
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _PromoBanner extends StatelessWidget {
   final String title;
@@ -380,18 +310,27 @@ class _CategoryChip extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isSelected = current == value;
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => ref.read(marketplaceProvider.notifier).setFilter(value),
-      backgroundColor: Colors.transparent,
-      selectedColor: cs.primary,
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : cs.onSurfaceVariant,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      backgroundColor: theme.cardColor,
+      selectedColor: cs.primary, // Brand color instead of green
+      labelStyle: GoogleFonts.dmSans(
+        color: isSelected ? Colors.white : cs.onSurface,
+        fontSize: 14,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
       ),
-      side: BorderSide(color: isSelected ? Colors.transparent : cs.outline.withAlpha(60)),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? Colors.transparent : cs.outline.withAlpha(40),
+        ),
+      ),
       showCheckmark: false,
     );
   }
@@ -415,10 +354,4 @@ class _SliverCategoryDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(_SliverCategoryDelegate oldDelegate) => false;
 }
 
-final _mockVendors = [
-  {'name': 'Paw Pantry', 'image': 'https://images.unsplash.com/photo-1583512676605-934d23a65ee3?w=200'},
-  {'name': 'Fetch & Co', 'image': 'https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=200'},
-  {'name': 'Whisker Way', 'image': 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=200'},
-  {'name': 'Bark Boutique', 'image': 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=200'},
-  {'name': 'Cat Cave', 'image': 'https://images.unsplash.com/photo-1513245535761-07742dd136ff?w=200'},
-];
+
