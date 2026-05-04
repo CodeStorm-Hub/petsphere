@@ -9,6 +9,22 @@ import 'chat_controller.dart';
 import 'pet_controller.dart';
 
 // ---------------------------------------------------------------------------
+// Discovery tab: which of the user's pets is browsing (null = active pet)
+// ---------------------------------------------------------------------------
+
+class DiscoveryPetIdNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void select(String? petId) => state = petId;
+}
+
+final discoveryActivePetIdProvider =
+    NotifierProvider<DiscoveryPetIdNotifier, String?>(
+  DiscoveryPetIdNotifier.new,
+);
+
+// ---------------------------------------------------------------------------
 // State
 // ---------------------------------------------------------------------------
 class MatchState {
@@ -74,21 +90,51 @@ class MatchController extends Notifier<MatchState> {
   @override
   MatchState build() {
     final activePet = ref.watch(activePetProvider);
-    if (activePet == null) {
+    final myPets = ref.watch(petProvider.select((s) => s.myPets));
+
+    if (myPets.isEmpty) {
       _lastLoadedPetId = null;
+      Future.microtask(
+        () => ref.read(discoveryActivePetIdProvider.notifier).select(null),
+      );
       return MatchState();
     }
 
-    // Do not return a fresh [MatchState(isLoading: true)] on every rebuild —
-    // that wipes discovery data whenever [activePetProvider] notifies with the
-    // same pet id (new model instance). Only reset loading when the pet id changes.
-    if (_lastLoadedPetId != activePet.id) {
-      _lastLoadedPetId = activePet.id;
-      Future.microtask(() => _load(activePet.id));
-      return MatchState(isLoading: true);
+    final browsingId = ref.watch(discoveryActivePetIdProvider);
+    String? targetId = browsingId ?? activePet?.id;
+    if (targetId != null && !myPets.any((p) => p.id == targetId)) {
+      targetId = activePet?.id ?? myPets.first.id;
+      Future.microtask(
+        () => ref.read(discoveryActivePetIdProvider.notifier).select(targetId),
+      );
+    }
+    targetId ??= activePet?.id ?? myPets.first.id;
+
+    if (_lastLoadedPetId != targetId) {
+      final hadPriorLoad = _lastLoadedPetId != null;
+      _lastLoadedPetId = targetId;
+      Future.microtask(() => _load(targetId!));
+      if (!hadPriorLoad) {
+        return MatchState(isLoading: true);
+      }
+      return MatchState(
+        isLoading: true,
+        filterAnimal: state.filterAnimal,
+        filterBreed: state.filterBreed,
+        searchQuery: state.searchQuery,
+        discoveryPets: const [],
+        allDiscoveryPets: const [],
+        myRequests: state.myRequests,
+        sentRequests: state.sentRequests,
+      );
     }
 
     return state;
+  }
+
+  String? _resolveDiscoveryTargetPetId() {
+    return ref.read(discoveryActivePetIdProvider) ??
+        ref.read(activePetProvider)?.id;
   }
 
   // When [silent] is true the loading flag is NOT set, so the UI avoids a
@@ -105,13 +151,27 @@ class MatchController extends Notifier<MatchState> {
 
     _currentDiscoveryPetId = myPetId;
 
+    final myPets = ref.read(petProvider).myPets;
+    PetModel? viewerPet;
+    for (final p in myPets) {
+      if (p.id == myPetId) {
+        viewerPet = p;
+        break;
+      }
+    }
+    final viewerAnimalType = viewerPet?.animalType.trim();
+
     try {
       final futures = await Future.wait([
         matchRepository.fetchDiscoveryPets(
           myPetId: myPetId,
           userId: userId,
-          filterAnimal: state.filterAnimal,
+          allMyPetIds: myPets.map((p) => p.id).toList(),
           filterBreed: state.filterBreed,
+          viewerAnimalType:
+              (viewerAnimalType != null && viewerAnimalType.isNotEmpty)
+                  ? viewerAnimalType
+                  : null,
         ),
         matchRepository.fetchMyRequests(myPetId),
         matchRepository.fetchSentRequests(myPetId),
@@ -136,9 +196,9 @@ class MatchController extends Notifier<MatchState> {
   }
 
   Future<void> refresh() async {
-    final activePet = ref.read(activePetProvider);
-    if (activePet != null) {
-      await _load(activePet.id);
+    final target = _resolveDiscoveryTargetPetId();
+    if (target != null) {
+      await _load(target);
     }
   }
 
@@ -154,12 +214,12 @@ class MatchController extends Notifier<MatchState> {
   String? _currentDiscoveryPetId;
 
   void setFilterBreed(String? breed) {
-    final activePet = ref.read(activePetProvider);
+    final target = _resolveDiscoveryTargetPetId();
     debugPrint(
-        '[MatchController] setFilterBreed($breed) — activePet=${activePet?.name}');
-    if (activePet == null) {
+        '[MatchController] setFilterBreed($breed) — targetPetId=$target');
+    if (target == null) {
       debugPrint(
-          '[MatchController] ⚠️ activePet is NULL — filter change ignored!');
+          '[MatchController] ⚠️ No discovery target pet — filter change ignored!');
       return;
     }
     if (breed == null || breed.isEmpty) {
@@ -169,16 +229,16 @@ class MatchController extends Notifier<MatchState> {
     }
     debugPrint(
         '[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
-    _load(activePet.id);
+    _load(target);
   }
 
   void setFilterAnimal(String? animal) {
-    final activePet = ref.read(activePetProvider);
+    final target = _resolveDiscoveryTargetPetId();
     debugPrint(
-        '[MatchController] setFilterAnimal($animal) — activePet=${activePet?.name}');
-    if (activePet == null) {
+        '[MatchController] setFilterAnimal($animal) — targetPetId=$target');
+    if (target == null) {
       debugPrint(
-          '[MatchController] ⚠️ activePet is NULL — filter change ignored!');
+          '[MatchController] ⚠️ No discovery target pet — filter change ignored!');
       return;
     }
     if (animal == null || animal.isEmpty) {
@@ -188,7 +248,7 @@ class MatchController extends Notifier<MatchState> {
     }
     debugPrint(
         '[MatchController] State updated: animal=${state.filterAnimal}, breed=${state.filterBreed}');
-    _load(activePet.id);
+    _load(target);
   }
 
   void setSearchQuery(String query) {
@@ -250,7 +310,7 @@ class MatchController extends Notifier<MatchState> {
     }
 
     try {
-      await matchRepository.sendLikeRequest(
+      final matchRequestId = await matchRepository.sendLikeRequest(
         senderPetId: senderPet.id,
         receiverPetId: receiverPetId,
       );
@@ -274,7 +334,7 @@ class MatchController extends Notifier<MatchState> {
               '${senderPet.name} is interested in breeding with ${receiverPet.name}.',
           type: 'match_request',
           entityType: 'match_request',
-          entityId: senderPet.id,
+          entityId: matchRequestId,
           actorPetId: senderPet.id,
         );
       }
@@ -283,6 +343,15 @@ class MatchController extends Notifier<MatchState> {
       // does NOT show a loading spinner, so the UI transition is seamless.
       _load(senderPet.id, silent: true);
       return true;
+    } on StateError catch (e) {
+      if (e.message == 'duplicate_match_request') {
+        state = state.copyWith(
+          error: 'You have already sent a request for this pet.',
+        );
+      } else {
+        state = state.copyWith(error: e.toString());
+      }
+      return false;
     } catch (e) {
       state = state.copyWith(error: 'Could not send request: $e');
       return false;

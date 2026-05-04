@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../theme/app_theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 enum BrandLogoSize {
   small(24),
@@ -12,8 +14,7 @@ enum BrandLogoSize {
 
 enum BrandLogoVariant {
   icon('assets/icon.svg'),
-  full('assets/logo_without_slogan.svg'),
-  blue('assets/petfolio_logo_blue.svg');
+  full('assets/logo_without_slogan.svg');
 
   final String assetPath;
   const BrandLogoVariant(this.assetPath);
@@ -41,14 +42,15 @@ class BrandLogo extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final effectiveSize = customSize ?? size?.size ?? BrandLogoSize.medium.size;
     final effectiveColor = color ?? colorScheme.primary;
+    final isDark = theme.brightness == Brightness.dark;
+    final textPrimary = AppTheme.textPrimary;
+    final textColor = isDark ? const Color(0xFFF5F5F5) : textPrimary;
 
     final svg = SvgPicture.asset(
       variant.assetPath,
       width: effectiveSize,
       height: effectiveSize,
-      colorFilter: variant == BrandLogoVariant.blue 
-          ? null // Keep original blue colors
-          : ColorFilter.mode(effectiveColor, BlendMode.srcIn),
+      colorFilter: ColorFilter.mode(effectiveColor, BlendMode.srcIn),
     );
 
     if (withText && variant == BrandLogoVariant.icon) {
@@ -57,13 +59,28 @@ class BrandLogo extends StatelessWidget {
         children: [
           svg,
           const SizedBox(width: 10),
-          Text(
-            'PetFolio',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: colorScheme.onSurface,
-              letterSpacing: -0.5,
-              fontSize: effectiveSize * 0.8, // Scale text with logo
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Pet ',
+                  style: GoogleFonts.playfairDisplay(
+                    fontWeight: FontWeight.w900,
+                    color: isDark ? textColor : textPrimary,
+                    fontSize: effectiveSize * 0.7,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                TextSpan(
+                  text: 'Folio',
+                  style: GoogleFonts.playfairDisplay(
+                    fontWeight: FontWeight.w900,
+                    color: effectiveColor,
+                    fontSize: effectiveSize * 0.7,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

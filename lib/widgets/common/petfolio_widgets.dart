@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
@@ -356,7 +355,8 @@ class PetfolioGradientBackground extends StatefulWidget {
       PetfolioGradientBackgroundState();
 }
 
-class PetfolioGradientBackgroundState extends State<PetfolioGradientBackground> {
+class PetfolioGradientBackgroundState
+    extends State<PetfolioGradientBackground> {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
@@ -365,7 +365,6 @@ class PetfolioGradientBackgroundState extends State<PetfolioGradientBackground> 
     );
   }
 }
-
 
 class FadeSlideInState extends State<FadeSlideIn> {
   bool visible = false;
