@@ -64,7 +64,7 @@ jobs:
 
       - name: Archive coverage reports
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage/
@@ -99,7 +99,7 @@ jobs:
         continue-on-error: false
 
       - name: Archive APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-apk
           path: build/app/outputs/apk/debug/app-debug.apk
