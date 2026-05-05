@@ -90,19 +90,6 @@ PetFolio is a pet social and marketplace platform that allows users to connect w
 - Mark all as read on open
 - Tap notification → navigate to relevant entity (post, order, messages)
 
-#### Push notifications (FCM, Android)
-When the app is in the background or killed, **in-app** Supabase Realtime updates stop; **Firebase Cloud Messaging** delivers system notifications instead.
-
-**Client (this repo)**  
-- After login, the app registers an FCM device token and upserts it into Supabase `user_fcm_tokens` (`lib/services/push_notification_service.dart`, `lib/repositories/push_token_repository.dart`).  
-- Android 13+ uses the existing `POST_NOTIFICATIONS` permission plus a runtime prompt via `permission_handler`.  
-- Firebase is wired for **PetFolio** (`petfolio-197e6`): `firebase.json`, `android/app/google-services.json`, and `lib/firebase_options.dart` are generated via [FlutterFire CLI](https://firebase.flutter.dev/docs/cli/configure) (`flutterfire configure --project=petfolio-197e6 …`). Re-run that command if you clone on a new machine or add iOS/Web. `google-services.json.example` remains as a template reference only.
-
-**Server (Supabase)**  
-1. Apply migration `supabase/migrations/20260505140000_user_fcm_tokens.sql` (`supabase db push` or Dashboard SQL).  
-2. Set Edge secret `FIREBASE_SERVICE_ACCOUNT_JSON` to the **minified** JSON from Firebase Console → Project settings → Service accounts → Generate new private key.  
-3. Deploy `supabase functions deploy push-fcm` and create a **Database Webhook** on `public.notifications` **INSERT** targeting that function (same pattern as [Supabase FCM guide](https://supabase.com/docs/guides/functions/examples/push-notifications?platform=fcm)).
-
 ---
 
 ### 🐕 Pet Care Diary (Core Feature)

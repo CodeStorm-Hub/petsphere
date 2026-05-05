@@ -20,7 +20,7 @@ import '../utils/post_actions.dart';
 import '../utils/pet_navigation.dart';
 import '../widgets/common/petfolio_widgets.dart';
 import 'components/post_card.dart';
-import 'main_layout.dart' show bottomNavSpaceFor;
+import '../utils/layout_utils.dart';
 
 // Maximum feed column width on wide screens (tablets, foldables, web).
 // Below this, the feed is full-width edge-to-edge like the Instagram phone app.

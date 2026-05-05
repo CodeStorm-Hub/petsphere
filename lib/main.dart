@@ -6,7 +6,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/bootstrap_controller.dart';
+import 'controllers/push_notification_coordinator.dart';
 import 'controllers/theme_controller.dart';
+import 'services/push_notification_service.dart';
 import 'utils/routes.dart';
 import 'utils/supabase_config.dart';
 import 'utils/theme_bootstrap.dart';
@@ -25,6 +27,11 @@ const bool _kFlutterDriverTest = bool.fromEnvironment(
   defaultValue: true,
 );
 
+const bool _kFcmLogToken = bool.fromEnvironment(
+  'FCM_LOG_TOKEN',
+  defaultValue: false,
+);
+
 Future<void> main() async {
   if (!_kIntegrationTest) {
     if (kDebugMode && !_kFlutterDriverTest) {
@@ -32,6 +39,7 @@ Future<void> main() async {
     } else {
       WidgetsFlutterBinding.ensureInitialized();
     }
+    PushNotificationService.registerBackgroundHandler();
   }
 
   assertValidReleaseSupabaseConfig();
@@ -39,6 +47,10 @@ Future<void> main() async {
     url: supabaseInitUrl,
     anonKey: supabaseInitAnonKey,
   );
+
+  if (_kFcmLogToken) {
+    await PushNotificationService.debugEmitFcmTokenForConsoleTest();
+  }
 
   final prefs = await SharedPreferences.getInstance();
   pendingBootstrapThemeMode =
@@ -59,6 +71,7 @@ class PetFolioApp extends ConsumerWidget {
     // login / user change / cold start, and exposes syncAllData(force: true)
     // from settings. Watching keeps the notifier alive.
     ref.watch(bootstrapProvider);
+    ref.watch(pushNotificationCoordinatorProvider);
 
     final themeMode = ref.watch(themeProvider);
 

@@ -16,7 +16,7 @@ import '../utils/image_upload_helper.dart';
 import '../utils/media_utils.dart';
 import '../utils/supabase_config.dart';
 import '../theme/app_theme.dart';
-import 'main_layout.dart' show bottomNavSpaceFor;
+import '../utils/layout_utils.dart';
 import '../repositories/pet_repository.dart';
 import '../controllers/chat_controller.dart';
 import '../controllers/match_controller.dart';
@@ -306,40 +306,41 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                 value: '${displayedPosts.length}',
                               ),
                               if (isOwnerView) ...[
-                                ref
-                                    .watch(
-                                      ownerFollowerCountProvider(statsUserId),
-                                    )
-                                    .when(
-                                      data: (c) => StatColumn(
-                                        label: 'followers',
-                                        value: '$c',
+                                // Tappable owner stats
+                                GestureDetector(
+                                  onTap: () => context
+                                      .push('/user/$statsUserId/followers'),
+                                  child: ref
+                                      .watch(ownerFollowerCountProvider(
+                                          statsUserId))
+                                      .when(
+                                        data: (c) => StatColumn(
+                                            label: 'followers',
+                                            value: '$c',
+                                            tappable: true),
+                                        loading: () => const StatColumn(
+                                            label: 'followers', value: '···'),
+                                        error: (_, _) => const StatColumn(
+                                            label: 'followers', value: '0'),
                                       ),
-                                      loading: () => const StatColumn(
-                                        label: 'followers',
-                                        value: '···',
+                                ),
+                                GestureDetector(
+                                  onTap: () => context
+                                      .push('/user/$statsUserId/following'),
+                                  child: ref
+                                      .watch(followingCountProvider(
+                                          statsUserId))
+                                      .when(
+                                        data: (c) => StatColumn(
+                                            label: 'following',
+                                            value: '$c',
+                                            tappable: true),
+                                        loading: () => const StatColumn(
+                                            label: 'following', value: '···'),
+                                        error: (_, _) => const StatColumn(
+                                            label: 'following', value: '0'),
                                       ),
-                                      error: (_, _) => const StatColumn(
-                                        label: 'followers',
-                                        value: '0',
-                                      ),
-                                    ),
-                                ref
-                                    .watch(followingCountProvider(statsUserId))
-                                    .when(
-                                      data: (c) => StatColumn(
-                                        label: 'following',
-                                        value: '$c',
-                                      ),
-                                      loading: () => const StatColumn(
-                                        label: 'following',
-                                        value: '···',
-                                      ),
-                                      error: (_, _) => const StatColumn(
-                                        label: 'following',
-                                        value: '0',
-                                      ),
-                                    ),
+                                ),
                               ] else if (selectedPet != null) ...[
                                 // Tappable follower count → opens followers list
                                 GestureDetector(
@@ -368,11 +369,11 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen> {
                                         ),
                                       ),
                                 ),
-                                StatColumn(
-                                  label: 'pets',
-                                  value: '${profilePets.length}',
-                                ),
-                              ],
+                                  StatColumn(
+                                    label: 'pets',
+                                    value: '${profilePets.length}',
+                                  ),
+                                ],
                             ],
                           ),
                         ),

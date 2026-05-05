@@ -3,25 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/pet_controller.dart';
+import '../utils/layout_utils.dart';
 
 import 'home_screen.dart';
 import 'pet_profile_screen.dart';
 import 'discovery_screen.dart';
 import 'marketplace_screen.dart';
 
-// ── Bottom nav layout tokens ───────────────────────────────────────────────
-/// Visual height of the bottom nav bar (excluding the system safe-area inset).
-const double kBottomNavBarHeight = 60.0;
-
-/// Extra breathing room between in-screen content and the nav bar top edge.
-const double kBottomNavBarGap = 8.0;
-
-/// Total bottom padding screens hosted in [MainLayout] should reserve so
-/// scrollable content stays fully visible above the nav bar on every device.
-double bottomNavSpaceFor(BuildContext context) {
-  final inset = MediaQuery.viewPaddingOf(context).bottom;
-  return kBottomNavBarHeight + kBottomNavBarGap + inset;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MainLayout
@@ -49,6 +37,13 @@ class MainLayoutState extends ConsumerState<MainLayout> {
     // Navigate to profile tab when a pet is tapped from another screen
     ref.listen<String?>(profilePetNavigationProvider, (prev, next) {
       if (next != null) setState(() => currentIndex = 4);
+    });
+
+    ref.listen<int?>(mainLayoutTabRequestProvider, (prev, next) {
+      if (next == null) return;
+      final idx = next.clamp(0, screens.length - 1);
+      if (idx != 2) setState(() => currentIndex = idx);
+      ref.read(mainLayoutTabRequestProvider.notifier).clear();
     });
 
     final activePet = ref.watch(activePetProvider);

@@ -6,7 +6,7 @@ import '../controllers/marketplace_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/auth_controller.dart';
 import 'components/product_card.dart';
-import 'main_layout.dart' show bottomNavSpaceFor;
+import '../utils/layout_utils.dart';
 
 class MarketplaceScreen extends ConsumerWidget {
   const MarketplaceScreen({super.key});

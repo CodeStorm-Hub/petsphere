@@ -10,7 +10,7 @@ import '../models/pet_model.dart';
 import '../theme/app_theme.dart';
 import '../widgets/brand_logo.dart';
 
-import 'main_layout.dart' show bottomNavSpaceFor;
+import '../utils/layout_utils.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Discovery Screen (tab host)

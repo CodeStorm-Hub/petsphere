@@ -2,23 +2,66 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
-import '../controllers/follow_controller.dart';
+import '../utils/pet_navigation.dart';
 import '../controllers/pet_controller.dart';
+import '../controllers/follow_controller.dart';
+
+enum FollowListType { petFollowers, ownerFollowers, following }
+
+String _loadErrorMessage(FollowListType type) {
+  switch (type) {
+    case FollowListType.petFollowers:
+      return 'Could not load pet followers';
+    case FollowListType.ownerFollowers:
+      return 'Could not load followers';
+    case FollowListType.following:
+      return 'Could not load following';
+  }
+}
 
 class PetFollowersScreen extends ConsumerWidget {
-  final String petId;
+  final String? petId;
+  final String? userId;
+  final FollowListType type;
 
-  const PetFollowersScreen({super.key, required this.petId});
+  PetFollowersScreen({
+    super.key,
+    this.petId,
+    this.userId,
+    required this.type,
+  }) : assert(
+          type == FollowListType.petFollowers
+              ? (petId != null && petId.isNotEmpty)
+              : (userId != null && userId.isNotEmpty),
+          'PetFollowersScreen: use petId for petFollowers and userId for ownerFollowers/following.',
+        );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final followersAsync = ref.watch(petFollowersListProvider(petId));
-    final petState = ref.watch(petProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
-    final petName = petState.myPets.any((p) => p.id == petId)
-        ? petState.myPets.firstWhere((p) => p.id == petId).name
-        : '';
+    AsyncValue<List<Map<String, dynamic>>> listAsync;
+    String title = 'Followers';
+    String? subtitle;
+
+    switch (type) {
+      case FollowListType.petFollowers:
+        listAsync = ref.watch(petFollowersListProvider(petId!));
+        title = 'Pet Followers';
+        final petState = ref.watch(petProvider);
+        if (petState.myPets.any((p) => p.id == petId)) {
+          subtitle = petState.myPets.firstWhere((p) => p.id == petId).name;
+        }
+        break;
+      case FollowListType.ownerFollowers:
+        listAsync = ref.watch(ownerFollowersListProvider(userId!));
+        title = 'Followers';
+        break;
+      case FollowListType.following:
+        listAsync = ref.watch(followingListProvider(userId!));
+        title = 'Following';
+        break;
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -26,16 +69,16 @@ class PetFollowersScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Followers',
+              title,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 18,
                 color: colorScheme.onSurface,
               ),
             ),
-            if (petName.isNotEmpty)
+            if (subtitle != null)
               Text(
-                petName,
+                subtitle,
                 style: TextStyle(
                   fontSize: 12,
                   color: colorScheme.onSurfaceVariant,
@@ -48,7 +91,7 @@ class PetFollowersScreen extends ConsumerWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),
-      body: followersAsync.when(
+      body: listAsync.when(
         loading: () => _buildShimmer(colorScheme),
         error: (e, _) => Center(
           child: Column(
@@ -57,38 +100,81 @@ class PetFollowersScreen extends ConsumerWidget {
               Icon(Icons.error_outline, size: 48, color: colorScheme.error),
               const SizedBox(height: 12),
               Text(
-                'Could not load followers',
+                _loadErrorMessage(type),
+                textAlign: TextAlign.center,
                 style: TextStyle(color: colorScheme.onSurface, fontSize: 16),
               ),
               const SizedBox(height: 8),
               TextButton.icon(
-                onPressed: () => ref.invalidate(petFollowersListProvider(petId)),
+                onPressed: () {
+                  switch (type) {
+                    case FollowListType.petFollowers:
+                      ref.invalidate(petFollowersListProvider(petId!));
+                      break;
+                    case FollowListType.ownerFollowers:
+                      ref.invalidate(ownerFollowersListProvider(userId!));
+                      break;
+                    case FollowListType.following:
+                      ref.invalidate(followingListProvider(userId!));
+                      break;
+                  }
+                },
                 icon: const Icon(Icons.refresh),
                 label: const Text('Retry'),
               ),
             ],
           ),
         ),
-        data: (followers) => followers.isEmpty
+        data: (list) => list.isEmpty
             ? _buildEmpty(context, colorScheme)
             : RefreshIndicator(
-                onRefresh: () async =>
-                    ref.invalidate(petFollowersListProvider(petId)),
+                onRefresh: () async {
+                  switch (type) {
+                    case FollowListType.petFollowers:
+                      ref.invalidate(petFollowersListProvider(petId!));
+                      break;
+                    case FollowListType.ownerFollowers:
+                      ref.invalidate(ownerFollowersListProvider(userId!));
+                      break;
+                    case FollowListType.following:
+                      ref.invalidate(followingListProvider(userId!));
+                      break;
+                  }
+                },
                 child: ListView.separated(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: followers.length,
+                  itemCount: list.length,
                   separatorBuilder: (_, _) => Divider(
                     height: 1,
                     color: colorScheme.outlineVariant.withAlpha(60),
                   ),
                   itemBuilder: (context, index) {
-                    final follower = followers[index];
-                    return _FollowerTile(
-                      name: follower['name'] as String,
-                      imageUrl: follower['profile_image_url'] as String,
-                      followedAt: follower['created_at'] as String?,
+                    final item = list[index];
+                    // The following list and follower list have slightly different structures
+                    final String name = item['name'] ?? 'Unknown';
+                    final String imageUrl =
+                        (item['profile_image_url'] ?? item['image_url']) ?? '';
+                    final String? date = item['created_at'] as String?;
+                    final String? typeLabel = item['type'] as String?;
+
+                    final String targetId =
+                        (item['user_id'] ?? item['id']) as String;
+                    final bool isPet = typeLabel == 'pet';
+
+                    return _FollowTile(
+                      name: name,
+                      imageUrl: imageUrl,
+                      date: date,
+                      typeLabel: typeLabel,
                       colorScheme: colorScheme,
+                      onTap: () {
+                        if (isPet) {
+                          openPetProfile(context, ref, petId: targetId);
+                        } else {
+                          openUserProfile(context, ref, userId: targetId);
+                        }
+                      },
                     );
                   },
                 ),
@@ -110,14 +196,18 @@ class PetFollowersScreen extends ConsumerWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.people_outline_rounded,
+              type == FollowListType.following
+                  ? Icons.person_add_outlined
+                  : Icons.people_outline_rounded,
               size: 36,
               color: colorScheme.primary,
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            'No followers yet',
+            type == FollowListType.following
+                ? 'Not following anyone yet'
+                : 'No followers yet',
             style: TextStyle(
               color: colorScheme.onSurface,
               fontSize: 18,
@@ -126,7 +216,9 @@ class PetFollowersScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Share your pet profile to attract followers!',
+            type == FollowListType.following
+                ? 'Follow pets and owners to see them here!'
+                : 'Share profile to attract followers!',
             style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
             textAlign: TextAlign.center,
           ),
@@ -182,17 +274,21 @@ class PetFollowersScreen extends ConsumerWidget {
   }
 }
 
-class _FollowerTile extends StatelessWidget {
+class _FollowTile extends StatelessWidget {
   final String name;
   final String imageUrl;
-  final String? followedAt;
+  final String? date;
+  final String? typeLabel;
   final ColorScheme colorScheme;
+  final VoidCallback? onTap;
 
-  const _FollowerTile({
+  const _FollowTile({
     required this.name,
     required this.imageUrl,
-    required this.followedAt,
+    required this.date,
+    this.typeLabel,
     required this.colorScheme,
+    this.onTap,
   });
 
   String _formatDate(String? isoString) {
@@ -212,9 +308,10 @@ class _FollowerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateLabel = _formatDate(followedAt);
+    final dateLabel = _formatDate(date);
 
     return ListTile(
+      onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       leading: CircleAvatar(
         radius: 23,
@@ -240,17 +337,38 @@ class _FollowerTile extends StatelessWidget {
           color: colorScheme.onSurface,
         ),
       ),
-      subtitle: dateLabel.isNotEmpty
-          ? Text(
-              'Followed $dateLabel',
+      subtitle: Row(
+        children: [
+          if (typeLabel != null) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: colorScheme.secondaryContainer,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                typeLabel!.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSecondaryContainer,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+          if (dateLabel.isNotEmpty)
+            Text(
+              'Since $dateLabel',
               style: TextStyle(
                 fontSize: 12,
                 color: colorScheme.onSurfaceVariant,
               ),
-            )
-          : null,
+            ),
+        ],
+      ),
       trailing: Icon(
-        Icons.person_outline_rounded,
+        typeLabel == 'pet' ? Icons.pets_rounded : Icons.person_outline_rounded,
         color: colorScheme.onSurfaceVariant,
         size: 20,
       ),

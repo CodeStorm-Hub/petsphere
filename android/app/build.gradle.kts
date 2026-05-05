@@ -42,3 +42,10 @@ android {
 flutter {
     source = "../.."
 }
+
+// FCM: add `android/app/google-services.json` from Firebase Console (Android app
+// with package `com.example.pet_dating_app`). Without it, the app builds but
+// Firebase.initializeApp / device tokens will not work.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}

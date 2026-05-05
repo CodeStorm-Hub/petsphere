@@ -81,7 +81,9 @@ class FollowController extends Notifier<void> {
       // Invalidate related providers so the UI refreshes
       ref.invalidate(isFollowingOwnerProvider(ownerId));
       ref.invalidate(ownerFollowerCountProvider(ownerId));
+      ref.invalidate(ownerFollowersListProvider(ownerId));
       ref.invalidate(followingCountProvider(userId));
+      ref.invalidate(followingListProvider(userId));
     } catch (e) {
       debugPrint('toggleFollowOwner error: $e');
     }
@@ -127,7 +129,9 @@ class FollowController extends Notifier<void> {
       // Invalidate related providers
       ref.invalidate(isFollowingPetProvider(petId));
       ref.invalidate(petFollowerCountProvider(petId));
+      ref.invalidate(petFollowersListProvider(petId));
       ref.invalidate(followingCountProvider(userId));
+      ref.invalidate(followingListProvider(userId));
     } catch (e) {
       debugPrint('toggleFollowPet error: $e');
     }
@@ -142,3 +146,16 @@ final petFollowersListProvider = FutureProvider.family<
     List<Map<String, dynamic>>, String>((ref, petId) async {
   return followRepository.fetchPetFollowersList(petId);
 });
+
+/// Follower list (user profiles) for a specific owner.
+final ownerFollowersListProvider = FutureProvider.family<
+    List<Map<String, dynamic>>, String>((ref, ownerId) async {
+  return followRepository.fetchOwnerFollowersList(ownerId);
+});
+
+/// List of entities a user is following.
+final followingListProvider = FutureProvider.family<
+    List<Map<String, dynamic>>, String>((ref, userId) async {
+  return followRepository.fetchFollowingList(userId);
+});
+

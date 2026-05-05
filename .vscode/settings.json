@@ -1,4 +1,8 @@
 {
+    "files.encoding": "utf8",
+    "[markdown]": {
+        "files.encoding": "utf8"
+    },
     "java.configuration.updateBuildConfiguration": "automatic",
     "workbench.browser.openLocalhostLinks": true,
     "workbench.browser.enableChatTools": true,

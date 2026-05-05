@@ -1,3 +1,4 @@
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,4 +38,23 @@ void openPetProfile(
   }
 
   context.push('/pet/$petId');
+}
+
+/// Routes to a user profile. If it's the current user, switches to the profile tab.
+void openUserProfile(
+  BuildContext context,
+  WidgetRef ref, {
+  required String userId,
+}) {
+  final myUserId = ref.read(authProvider).user?.id;
+
+  if (myUserId != null && userId == myUserId) {
+    context.go('/home');
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      ref.read(mainLayoutTabRequestProvider.notifier).request(4);
+    });
+    return;
+  }
+
+  context.push('/user/$userId');
 }
