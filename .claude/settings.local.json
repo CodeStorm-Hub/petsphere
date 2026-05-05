@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(flutter analyze *)",
-      "mcp__claude_ai_Supabase__list_tables"
+      "mcp__claude_ai_Supabase__list_tables",
+      "Bash(gh issue *)",
+      "Bash(flutter test *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Implement Epic #58: Foundation & Release Blockers \\(build, routing, schema, tests\\) *)"
     ]
   }
 }

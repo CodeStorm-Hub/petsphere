@@ -269,9 +269,11 @@ class FeedRepository {
   }) async {
     final payload = {
       'caption': caption,
-      'location': ?location,
-      'tagged_pet_ids': ?taggedPetIds,
-      'tagged_pet_names': ?taggedPetNames,
+      if (location != null && location.isNotEmpty) 'location': location,
+      if (taggedPetIds != null && taggedPetIds.isNotEmpty)
+        'tagged_pet_ids': taggedPetIds,
+      if (taggedPetNames != null && taggedPetNames.isNotEmpty)
+        'tagged_pet_names': taggedPetNames,
     };
 
     final data = await supabase

@@ -1,0 +1,34 @@
+# Supabase local files and secrets (DO NOT COMMIT)
+
+# Environment variables with secrets
+.env.local
+.env.production.local
+.env.*.local
+
+# Docker volumes and temporary files
+.temp/
+.supabase/
+postgres_data/
+
+# Local IDE/editor files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Node modules (if using Node.js Edge functions)
+functions/node_modules/
+functions/.env
+functions/.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+Thumbs.db
+.DS_Store
