@@ -1,0 +1,3456 @@
+{
+    "tables": [
+        {
+            "name": "public.profiles",
+            "rls_enabled": true,
+            "rows": 5,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "name",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "email",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "profile_image_url",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "bio",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "location",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "public_care_badge_slugs",
+                    "data_type": "ARRAY",
+                    "format": "_text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'{}'::text[]",
+                    "comment": "Badges to display on public profile; must be subset of unlocked slugs."
+                },
+                {
+                    "name": "show_care_badges_on_profile",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "true"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "profiles_id_fkey",
+                    "source": "public.profiles.id",
+                    "target": "auth.users.id"
+                },
+                {
+                    "name": "pets_user_id_fkey",
+                    "source": "public.pets.user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "follows_followed_user_id_fkey",
+                    "source": "public.follows.followed_user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "follows_follower_user_id_fkey",
+                    "source": "public.follows.follower_user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "pet_care_ai_plans_user_id_fkey",
+                    "source": "public.pet_care_ai_plans.user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "notifications_user_id_fkey",
+                    "source": "public.notifications.user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "matches_created_by_user_id_fkey",
+                    "source": "public.matches.created_by_user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "pet_listings_listed_by_user_id_fkey",
+                    "source": "public.pet_listings.listed_by_user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "orders_user_id_fkey",
+                    "source": "public.orders.user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "products_vendor_id_fkey",
+                    "source": "public.products.vendor_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "pet_care_badge_unlocks_user_id_fkey",
+                    "source": "public.pet_care_badge_unlocks.user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "pet_care_gamification_user_id_fkey",
+                    "source": "public.pet_care_gamification.user_id",
+                    "target": "public.profiles.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pets",
+            "rls_enabled": true,
+            "rows": 16,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "user_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "name",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "breed",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "animal_type",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "age",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "bio",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "profile_image_url",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "images",
+                    "data_type": "ARRAY",
+                    "format": "_text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "'{}'::text[]"
+                },
+                {
+                    "name": "is_public_owner",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "true"
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "is_breeding_listed",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "false"
+                },
+                {
+                    "name": "is_verified",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "false"
+                },
+                {
+                    "name": "daily_calorie_goal",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "daily_water_goal_cups",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "weight_lbs",
+                    "data_type": "numeric",
+                    "format": "numeric",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "is_vaccinated",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "false"
+                },
+                {
+                    "name": "is_care_listed",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "false"
+                },
+                {
+                    "name": "monthly_budget",
+                    "data_type": "numeric",
+                    "format": "numeric",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "1000.0"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "matches_pet_id_1_fkey",
+                    "source": "public.matches.pet_id_1",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pets_user_id_fkey",
+                    "source": "public.pets.user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "posts_pet_id_fkey",
+                    "source": "public.posts.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "post_likes_pet_id_fkey",
+                    "source": "public.post_likes.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "comments_pet_id_fkey",
+                    "source": "public.comments.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "match_requests_sender_pet_id_fkey",
+                    "source": "public.match_requests.sender_pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "match_requests_receiver_pet_id_fkey",
+                    "source": "public.match_requests.receiver_pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_care_gamification_pet_id_fkey",
+                    "source": "public.pet_care_gamification.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_care_badge_unlocks_pet_id_fkey",
+                    "source": "public.pet_care_badge_unlocks.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "chat_threads_pet_id_1_fkey",
+                    "source": "public.chat_threads.pet_id_1",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "chat_threads_pet_id_2_fkey",
+                    "source": "public.chat_threads.pet_id_2",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "messages_sender_pet_id_fkey",
+                    "source": "public.messages.sender_pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_listings_pet_id_fkey",
+                    "source": "public.pet_listings.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "matches_pet_id_2_fkey",
+                    "source": "public.matches.pet_id_2",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "notifications_actor_pet_id_fkey",
+                    "source": "public.notifications.actor_pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_care_logs_pet_id_fkey",
+                    "source": "public.pet_care_logs.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_weight_logs_pet_id_fkey",
+                    "source": "public.pet_weight_logs.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_vet_appointments_pet_id_fkey",
+                    "source": "public.pet_vet_appointments.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_vaccinations_pet_id_fkey",
+                    "source": "public.pet_vaccinations.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_symptoms_pet_id_fkey",
+                    "source": "public.pet_symptoms.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_medications_pet_id_fkey",
+                    "source": "public.pet_medications.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_medication_doses_pet_id_fkey",
+                    "source": "public.pet_medication_doses.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_allergies_pet_id_fkey",
+                    "source": "public.pet_allergies.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_parasite_prevention_pet_id_fkey",
+                    "source": "public.pet_parasite_prevention.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_dental_logs_pet_id_fkey",
+                    "source": "public.pet_dental_logs.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "stories_pet_id_fkey",
+                    "source": "public.stories.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_care_onboarding_pet_id_fkey",
+                    "source": "public.pet_care_onboarding.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_care_ai_plans_pet_id_fkey",
+                    "source": "public.pet_care_ai_plans.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_expenses_pet_id_fkey",
+                    "source": "public.pet_expenses.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "follows_followed_pet_id_fkey",
+                    "source": "public.follows.followed_pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.posts",
+            "rls_enabled": true,
+            "rows": 12,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "media_url",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "caption",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "comments_post_id_fkey",
+                    "source": "public.comments.post_id",
+                    "target": "public.posts.id"
+                },
+                {
+                    "name": "posts_pet_id_fkey",
+                    "source": "public.posts.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "post_likes_post_id_fkey",
+                    "source": "public.post_likes.post_id",
+                    "target": "public.posts.id"
+                }
+            ]
+        },
+        {
+            "name": "public.post_likes",
+            "rls_enabled": true,
+            "rows": 14,
+            "columns": [
+                {
+                    "name": "post_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                }
+            ],
+            "primary_keys": [
+                "post_id",
+                "pet_id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "post_likes_pet_id_fkey",
+                    "source": "public.post_likes.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "post_likes_post_id_fkey",
+                    "source": "public.post_likes.post_id",
+                    "target": "public.posts.id"
+                }
+            ]
+        },
+        {
+            "name": "public.comments",
+            "rls_enabled": true,
+            "rows": 16,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "post_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "text",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "comments_post_id_fkey",
+                    "source": "public.comments.post_id",
+                    "target": "public.posts.id"
+                },
+                {
+                    "name": "comments_pet_id_fkey",
+                    "source": "public.comments.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.match_requests",
+            "rls_enabled": true,
+            "rows": 39,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "sender_pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "receiver_pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "status",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "'pending'::text",
+                    "check": "status = ANY (ARRAY['pending'::text, 'matched'::text, 'rejected'::text])"
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "rejected_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "match_requests_receiver_pet_id_fkey",
+                    "source": "public.match_requests.receiver_pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "match_requests_sender_pet_id_fkey",
+                    "source": "public.match_requests.sender_pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "matches_request_id_fkey",
+                    "source": "public.matches.request_id",
+                    "target": "public.match_requests.id"
+                }
+            ]
+        },
+        {
+            "name": "public.chat_threads",
+            "rls_enabled": true,
+            "rows": 13,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id_1",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "pet_id_2",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "updated_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "chat_threads_pet_id_1_fkey",
+                    "source": "public.chat_threads.pet_id_1",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "chat_threads_pet_id_2_fkey",
+                    "source": "public.chat_threads.pet_id_2",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "messages_thread_id_fkey",
+                    "source": "public.messages.thread_id",
+                    "target": "public.chat_threads.id"
+                }
+            ]
+        },
+        {
+            "name": "public.messages",
+            "rls_enabled": true,
+            "rows": 29,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "thread_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "sender_pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "text",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "is_read",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "false"
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "message_type",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "'text'::text",
+                    "check": "message_type = ANY (ARRAY['text'::text, 'image'::text, 'system'::text])"
+                },
+                {
+                    "name": "media_url",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "edited_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "delivered_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "messages_sender_pet_id_fkey",
+                    "source": "public.messages.sender_pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "messages_thread_id_fkey",
+                    "source": "public.messages.thread_id",
+                    "target": "public.chat_threads.id"
+                }
+            ]
+        },
+        {
+            "name": "public.products",
+            "rls_enabled": true,
+            "rows": 15,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "vendor_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "name",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "price",
+                    "data_type": "numeric",
+                    "format": "numeric",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "description",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "images",
+                    "data_type": "ARRAY",
+                    "format": "_text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "'{}'::text[]"
+                },
+                {
+                    "name": "stock",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "0"
+                },
+                {
+                    "name": "category",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "rating",
+                    "data_type": "numeric",
+                    "format": "numeric",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "0"
+                },
+                {
+                    "name": "review_count",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "0"
+                },
+                {
+                    "name": "tags",
+                    "data_type": "ARRAY",
+                    "format": "_text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'{}'::text[]"
+                },
+                {
+                    "name": "is_bestseller",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "false"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "order_items_product_id_fkey",
+                    "source": "public.order_items.product_id",
+                    "target": "public.products.id"
+                },
+                {
+                    "name": "products_vendor_id_fkey",
+                    "source": "public.products.vendor_id",
+                    "target": "public.profiles.id"
+                }
+            ]
+        },
+        {
+            "name": "public.orders",
+            "rls_enabled": true,
+            "rows": 6,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "user_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "items",
+                    "data_type": "jsonb",
+                    "format": "jsonb",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "total",
+                    "data_type": "numeric",
+                    "format": "numeric",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "status",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "'pending'::text",
+                    "check": "status = ANY (ARRAY['pending'::text, 'confirmed'::text, 'shipped'::text, 'delivered'::text, 'cancelled'::text])"
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "updated_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "order_items_order_id_fkey",
+                    "source": "public.order_items.order_id",
+                    "target": "public.orders.id"
+                },
+                {
+                    "name": "orders_user_id_fkey",
+                    "source": "public.orders.user_id",
+                    "target": "public.profiles.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_listings",
+            "rls_enabled": true,
+            "rows": 0,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable",
+                        "unique"
+                    ]
+                },
+                {
+                    "name": "listed_by_user_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "status",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'active'::text",
+                    "check": "status = ANY (ARRAY['active'::text, 'paused'::text, 'closed'::text])"
+                },
+                {
+                    "name": "title",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "description",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "preferred_animal_type",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "preferred_breed",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "min_age",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "max_age",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "location_text",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "updated_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_listings_listed_by_user_id_fkey",
+                    "source": "public.pet_listings.listed_by_user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "pet_listings_pet_id_fkey",
+                    "source": "public.pet_listings.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.matches",
+            "rls_enabled": true,
+            "rows": 6,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "request_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "nullable",
+                        "updatable",
+                        "unique"
+                    ]
+                },
+                {
+                    "name": "pet_id_1",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "pet_id_2",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "status",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'active'::text",
+                    "check": "status = ANY (ARRAY['active'::text, 'archived'::text, 'blocked'::text])"
+                },
+                {
+                    "name": "created_by_user_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "matched_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "updated_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "matches_created_by_user_id_fkey",
+                    "source": "public.matches.created_by_user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "matches_request_id_fkey",
+                    "source": "public.matches.request_id",
+                    "target": "public.match_requests.id"
+                },
+                {
+                    "name": "matches_pet_id_1_fkey",
+                    "source": "public.matches.pet_id_1",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "matches_pet_id_2_fkey",
+                    "source": "public.matches.pet_id_2",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.notifications",
+            "rls_enabled": true,
+            "rows": 60,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "user_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "actor_pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "type",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "check": "type = ANY (ARRAY['match_request'::text, 'match_accepted'::text, 'message'::text, 'order_status'::text, 'system'::text, 'post_like'::text, 'post_comment'::text, 'profile_follow'::text, 'pet_follow'::text])"
+                },
+                {
+                    "name": "title",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "body",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "entity_type",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "entity_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "is_read",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "false"
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "notifications_user_id_fkey",
+                    "source": "public.notifications.user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "notifications_actor_pet_id_fkey",
+                    "source": "public.notifications.actor_pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.order_items",
+            "rls_enabled": true,
+            "rows": 0,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "order_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "product_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "product_name",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "unit_price",
+                    "data_type": "numeric",
+                    "format": "numeric",
+                    "options": [
+                        "updatable"
+                    ],
+                    "check": "unit_price >= 0::numeric"
+                },
+                {
+                    "name": "quantity",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "updatable"
+                    ],
+                    "check": "quantity > 0"
+                },
+                {
+                    "name": "line_total",
+                    "data_type": "numeric",
+                    "format": "numeric",
+                    "options": [
+                        "generated",
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "(unit_price * (quantity)::numeric)"
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "order_items_order_id_fkey",
+                    "source": "public.order_items.order_id",
+                    "target": "public.orders.id"
+                },
+                {
+                    "name": "order_items_product_id_fkey",
+                    "source": "public.order_items.product_id",
+                    "target": "public.products.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_care_logs",
+            "rls_enabled": true,
+            "rows": 15,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "log_date",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "CURRENT_DATE"
+                },
+                {
+                    "name": "breakfast_fed",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "false"
+                },
+                {
+                    "name": "dinner_fed",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "false"
+                },
+                {
+                    "name": "breakfast_kcal",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "250"
+                },
+                {
+                    "name": "dinner_kcal",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "250"
+                },
+                {
+                    "name": "breakfast_food",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'Dry Kibble - 1 cup'::text"
+                },
+                {
+                    "name": "dinner_food",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'Wet Food - 1/2 can'::text"
+                },
+                {
+                    "name": "water_cups",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "0"
+                },
+                {
+                    "name": "tasks",
+                    "data_type": "jsonb",
+                    "format": "jsonb",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'[{\"key\": \"walk\", \"done\": false, \"icon\": \"pets\", \"title\": \"Morning Walk\", \"subtitle\": \"30 minutes\"}, {\"key\": \"med\", \"done\": false, \"icon\": \"medical_services\", \"title\": \"Give Medication\", \"subtitle\": \"Heartworm pill\"}, {\"key\": \"brush\", \"done\": false, \"icon\": \"brush\", \"title\": \"Brush Coat\", \"subtitle\": \"Keep it shiny\"}]'::jsonb"
+                },
+                {
+                    "name": "mood",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "daily_calorie_goal",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "500"
+                },
+                {
+                    "name": "daily_water_goal_cups",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "8"
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "updated_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "daily_exercise_goal_minutes",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "30"
+                },
+                {
+                    "name": "snack_fed",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "false"
+                },
+                {
+                    "name": "snack_kcal",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "0"
+                },
+                {
+                    "name": "snack_food",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "''::text"
+                },
+                {
+                    "name": "treats_count",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "0"
+                },
+                {
+                    "name": "treats_kcal",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "0"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_care_logs_pet_id_fkey",
+                    "source": "public.pet_care_logs.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_weight_logs",
+            "rls_enabled": true,
+            "rows": 9,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "log_date",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "CURRENT_DATE"
+                },
+                {
+                    "name": "weight_lbs",
+                    "data_type": "numeric",
+                    "format": "numeric",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "notes",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "bcs_score",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "check": "bcs_score >= 1 AND bcs_score <= 9"
+                },
+                {
+                    "name": "unit",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'lbs'::text",
+                    "check": "unit = ANY (ARRAY['lbs'::text, 'kg'::text])"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_weight_logs_pet_id_fkey",
+                    "source": "public.pet_weight_logs.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_vet_appointments",
+            "rls_enabled": true,
+            "rows": 1,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "title",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "doctor",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "scheduled_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "notes",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "status",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'scheduled'::text",
+                    "check": "status = ANY (ARRAY['scheduled'::text, 'completed'::text, 'cancelled'::text])"
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "appointment_type",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "'routine'::text",
+                    "check": "appointment_type = ANY (ARRAY['routine'::text, 'emergency'::text, 'specialist'::text, 'dental'::text, 'surgery'::text, 'follow_up'::text])"
+                },
+                {
+                    "name": "location",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "cost",
+                    "data_type": "numeric",
+                    "format": "numeric",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_vet_appointments_pet_id_fkey",
+                    "source": "public.pet_vet_appointments.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_vaccinations",
+            "rls_enabled": true,
+            "rows": 2,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "vaccine_name",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "status",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'scheduled'::text",
+                    "check": "status = ANY (ARRAY['scheduled'::text, 'completed'::text])"
+                },
+                {
+                    "name": "scheduled_for",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "completed_on",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "notes",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "next_due_date",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "administered_by",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "batch_number",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_vaccinations_pet_id_fkey",
+                    "source": "public.pet_vaccinations.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_symptoms",
+            "rls_enabled": true,
+            "rows": 0,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "observed_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "symptom_type",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "severity",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'mild'::text",
+                    "check": "severity = ANY (ARRAY['mild'::text, 'moderate'::text, 'severe'::text])"
+                },
+                {
+                    "name": "notes",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "resolved_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_symptoms_pet_id_fkey",
+                    "source": "public.pet_symptoms.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_medications",
+            "rls_enabled": true,
+            "rows": 2,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "name",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "dose",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "frequency",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'once_daily'::text",
+                    "check": "frequency = ANY (ARRAY['once_daily'::text, 'twice_daily'::text, 'three_times_daily'::text, 'weekly'::text, 'monthly'::text, 'as_needed'::text, 'other'::text])"
+                },
+                {
+                    "name": "times_of_day",
+                    "data_type": "ARRAY",
+                    "format": "_text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "'{}'::text[]"
+                },
+                {
+                    "name": "start_date",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "CURRENT_DATE"
+                },
+                {
+                    "name": "end_date",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "purpose",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "notes",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "status",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'active'::text",
+                    "check": "status = ANY (ARRAY['active'::text, 'paused'::text, 'completed'::text])"
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "updated_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_medication_doses_medication_id_fkey",
+                    "source": "public.pet_medication_doses.medication_id",
+                    "target": "public.pet_medications.id"
+                },
+                {
+                    "name": "pet_medications_pet_id_fkey",
+                    "source": "public.pet_medications.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_medication_doses",
+            "rls_enabled": true,
+            "rows": 1,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "medication_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "scheduled_for",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "given_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "skipped",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "false"
+                },
+                {
+                    "name": "notes",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_medication_doses_pet_id_fkey",
+                    "source": "public.pet_medication_doses.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_medication_doses_medication_id_fkey",
+                    "source": "public.pet_medication_doses.medication_id",
+                    "target": "public.pet_medications.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_allergies",
+            "rls_enabled": true,
+            "rows": 2,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "allergen",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "allergen_type",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'food'::text",
+                    "check": "allergen_type = ANY (ARRAY['food'::text, 'environmental'::text, 'drug'::text, 'insect'::text, 'other'::text])"
+                },
+                {
+                    "name": "severity",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'mild'::text",
+                    "check": "severity = ANY (ARRAY['mild'::text, 'moderate'::text, 'severe'::text, 'life_threatening'::text])"
+                },
+                {
+                    "name": "reaction",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "diagnosed_on",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "is_active",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "true"
+                },
+                {
+                    "name": "notes",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_allergies_pet_id_fkey",
+                    "source": "public.pet_allergies.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_parasite_prevention",
+            "rls_enabled": true,
+            "rows": 2,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "product_name",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "product_type",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "check": "product_type = ANY (ARRAY['flea'::text, 'tick'::text, 'flea_tick'::text, 'heartworm'::text, 'dewormer'::text, 'other'::text])"
+                },
+                {
+                    "name": "administered_on",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "CURRENT_DATE"
+                },
+                {
+                    "name": "next_due_date",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "notes",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_parasite_prevention_pet_id_fkey",
+                    "source": "public.pet_parasite_prevention.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_dental_logs",
+            "rls_enabled": true,
+            "rows": 2,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "log_date",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "CURRENT_DATE"
+                },
+                {
+                    "name": "cleaning_type",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "check": "cleaning_type = ANY (ARRAY['home_brushing'::text, 'dental_chew'::text, 'professional_cleaning'::text, 'water_additive'::text])"
+                },
+                {
+                    "name": "notes",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_dental_logs_pet_id_fkey",
+                    "source": "public.pet_dental_logs.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.stories",
+            "rls_enabled": true,
+            "rows": 5,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "media_url",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "caption",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "''::text"
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "expires_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "(now() + '24:00:00'::interval)"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "stories_pet_id_fkey",
+                    "source": "public.stories.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_care_onboarding",
+            "rls_enabled": true,
+            "rows": 5,
+            "comment": "Per-pet care questionnaire; private to owner (pets table is public-read).",
+            "columns": [
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "data",
+                    "data_type": "jsonb",
+                    "format": "jsonb",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'{}'::jsonb"
+                },
+                {
+                    "name": "completed_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "updated_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "pet_id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_care_onboarding_pet_id_fkey",
+                    "source": "public.pet_care_onboarding.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.care_badge_definitions",
+            "rls_enabled": true,
+            "rows": 6,
+            "columns": [
+                {
+                    "name": "slug",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "title",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "description",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "icon_emoji",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'🏅'::text"
+                },
+                {
+                    "name": "sort_order",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "0"
+                }
+            ],
+            "primary_keys": [
+                "slug"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_care_badge_unlocks_badge_slug_fkey",
+                    "source": "public.pet_care_badge_unlocks.badge_slug",
+                    "target": "public.care_badge_definitions.slug"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_care_gamification",
+            "rls_enabled": true,
+            "rows": 12,
+            "columns": [
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "user_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "total_care_points",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "0"
+                },
+                {
+                    "name": "best_streak_days",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "0"
+                },
+                {
+                    "name": "week_start_monday",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "week_completed_mask",
+                    "data_type": "smallint",
+                    "format": "int2",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "0"
+                },
+                {
+                    "name": "challenge_30d_started_on",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "challenge_30d_progress",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "0",
+                    "check": "challenge_30d_progress >= 0 AND challenge_30d_progress <= 30"
+                },
+                {
+                    "name": "updated_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "last_care_point_awarded_on",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "comment": "Calendar day we last added daily care points (idempotent +10)."
+                },
+                {
+                    "name": "last_30d_increment_on",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "daily_point_award_date",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "comment": "Calendar day for which daily_point_award_accrued is valid; client resets on date change."
+                },
+                {
+                    "name": "daily_point_award_accrued",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "0",
+                    "comment": "Points already applied toward total for that day (idempotent cap; no clawback on uncheck)."
+                },
+                {
+                    "name": "streak_freezes_available",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "2"
+                },
+                {
+                    "name": "streak_freezes_used_this_week",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "0"
+                },
+                {
+                    "name": "streak_freeze_reset_on",
+                    "data_type": "date",
+                    "format": "date",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                }
+            ],
+            "primary_keys": [
+                "pet_id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_care_gamification_user_id_fkey",
+                    "source": "public.pet_care_gamification.user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "pet_care_gamification_pet_id_fkey",
+                    "source": "public.pet_care_gamification.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_care_badge_unlocks",
+            "rls_enabled": true,
+            "rows": 1,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "user_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "badge_slug",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "unlocked_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_care_badge_unlocks_badge_slug_fkey",
+                    "source": "public.pet_care_badge_unlocks.badge_slug",
+                    "target": "public.care_badge_definitions.slug"
+                },
+                {
+                    "name": "pet_care_badge_unlocks_user_id_fkey",
+                    "source": "public.pet_care_badge_unlocks.user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "pet_care_badge_unlocks_pet_id_fkey",
+                    "source": "public.pet_care_badge_unlocks.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_care_ai_plans",
+            "rls_enabled": true,
+            "rows": 0,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "user_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "animal_type",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "breed",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "weight_lbs",
+                    "data_type": "numeric",
+                    "format": "numeric",
+                    "options": [
+                        "updatable"
+                    ],
+                    "check": "weight_lbs > 0::numeric"
+                },
+                {
+                    "name": "age_years",
+                    "data_type": "integer",
+                    "format": "int4",
+                    "options": [
+                        "updatable"
+                    ],
+                    "check": "age_years >= 0"
+                },
+                {
+                    "name": "is_vaccinated",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "false"
+                },
+                {
+                    "name": "ai_plan",
+                    "data_type": "jsonb",
+                    "format": "jsonb",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "'{}'::jsonb"
+                },
+                {
+                    "name": "is_active",
+                    "data_type": "boolean",
+                    "format": "bool",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "true"
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "updated_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_care_ai_plans_pet_id_fkey",
+                    "source": "public.pet_care_ai_plans.pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "pet_care_ai_plans_user_id_fkey",
+                    "source": "public.pet_care_ai_plans.user_id",
+                    "target": "public.profiles.id"
+                }
+            ]
+        },
+        {
+            "name": "public.pet_expenses",
+            "rls_enabled": true,
+            "rows": 0,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "extensions.uuid_generate_v4()"
+                },
+                {
+                    "name": "pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "user_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "title",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "amount",
+                    "data_type": "numeric",
+                    "format": "numeric",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "date",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                },
+                {
+                    "name": "category",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "notes",
+                    "data_type": "text",
+                    "format": "text",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "pet_expenses_user_id_fkey",
+                    "source": "public.pet_expenses.user_id",
+                    "target": "auth.users.id"
+                },
+                {
+                    "name": "pet_expenses_pet_id_fkey",
+                    "source": "public.pet_expenses.pet_id",
+                    "target": "public.pets.id"
+                }
+            ]
+        },
+        {
+            "name": "public.follows",
+            "rls_enabled": true,
+            "rows": 11,
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ],
+                    "default_value": "gen_random_uuid()"
+                },
+                {
+                    "name": "follower_user_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "followed_user_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "followed_pet_id",
+                    "data_type": "uuid",
+                    "format": "uuid",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "data_type": "timestamp with time zone",
+                    "format": "timestamptz",
+                    "options": [
+                        "nullable",
+                        "updatable"
+                    ],
+                    "default_value": "now()"
+                }
+            ],
+            "primary_keys": [
+                "id"
+            ],
+            "foreign_key_constraints": [
+                {
+                    "name": "follows_followed_pet_id_fkey",
+                    "source": "public.follows.followed_pet_id",
+                    "target": "public.pets.id"
+                },
+                {
+                    "name": "follows_followed_user_id_fkey",
+                    "source": "public.follows.followed_user_id",
+                    "target": "public.profiles.id"
+                },
+                {
+                    "name": "follows_follower_user_id_fkey",
+                    "source": "public.follows.follower_user_id",
+                    "target": "public.profiles.id"
+                }
+            ]
+        }
+    ]
+}
