@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import '../utils/supabase_config.dart';
 
 class FollowRepository {
@@ -261,25 +263,20 @@ class FollowRepository {
 
     final results = await Future.wait([
       if (ownerIds.isNotEmpty)
-        supabase
-            .from('profiles')
-            .select('id, name, profile_image_url')
-            .inFilter('id', ownerIds)
+        _fetchProfilesByIds(ownerIds)
       else
-        Future.value([]),
+        Future.value(<Map<String, dynamic>>[]),
       if (petIds.isNotEmpty)
-        supabase.from('pets').select('id, name, image_url').inFilter('id', petIds)
+        _fetchPetsByIdsForFollowing(petIds)
       else
-        Future.value([]),
+        Future.value(<Map<String, dynamic>>[]),
     ]);
 
     final profileMap = {
-      for (final p in results[0])
-        (p as Map<String, dynamic>)['id'] as String: p,
+      for (final p in results[0]) p['id'] as String: p,
     };
     final petMap = {
-      for (final p in results[1])
-        (p as Map<String, dynamic>)['id'] as String: p,
+      for (final p in results[1]) p['id'] as String: p,
     };
 
     return list.map((e) {
@@ -295,12 +292,13 @@ class FollowRepository {
           'created_at': e['created_at'],
         };
       } else {
-        final p = petMap[id] ?? {'id': id, 'name': 'Unknown Pet', 'image_url': ''};
+        final p = petMap[id] ??
+            {'id': id, 'name': 'Unknown Pet', 'profile_image_url': ''};
         return {
           'id': id,
           'type': 'pet',
           'name': p['name'] ?? 'Unknown',
-          'image_url': p['image_url'] ?? '',
+          'image_url': (p['profile_image_url'] ?? p['image_url'] ?? '') as String,
           'created_at': e['created_at'],
         };
       }
@@ -316,14 +314,10 @@ class FollowRepository {
 
     final followerIds =
         followersWithDates.map((r) => r['user_id'] as String).toList();
-    final profiles = await supabase
-        .from('profiles')
-        .select('id, name, profile_image_url')
-        .inFilter('id', followerIds);
+    final profiles = await _fetchProfilesByIds(followerIds);
 
     final profileMap = {
-      for (final p in profiles as List<dynamic>)
-        (p as Map<String, dynamic>)['id'] as String: p,
+      for (final p in profiles) p['id'] as String: p,
     };
 
     return followersWithDates.map((r) {
@@ -337,6 +331,42 @@ class FollowRepository {
         'created_at': r['created_at'],
       };
     }).toList();
+  }
+
+  static const int _inFilterChunkSize = 100;
+
+  Future<List<Map<String, dynamic>>> _fetchProfilesByIds(
+      List<String> ids) async {
+    if (ids.isEmpty) return [];
+    final out = <Map<String, dynamic>>[];
+    for (var i = 0; i < ids.length; i += _inFilterChunkSize) {
+      final chunk = ids.sublist(i, min(i + _inFilterChunkSize, ids.length));
+      final rows = await supabase
+          .from('profiles')
+          .select('id, name, profile_image_url')
+          .inFilter('id', chunk);
+      for (final p in rows as List<dynamic>) {
+        out.add(Map<String, dynamic>.from(p as Map));
+      }
+    }
+    return out;
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchPetsByIdsForFollowing(
+      List<String> ids) async {
+    if (ids.isEmpty) return [];
+    final out = <Map<String, dynamic>>[];
+    for (var i = 0; i < ids.length; i += _inFilterChunkSize) {
+      final chunk = ids.sublist(i, min(i + _inFilterChunkSize, ids.length));
+      final rows = await supabase
+          .from('pets')
+          .select('id, name, profile_image_url')
+          .inFilter('id', chunk);
+      for (final p in rows as List<dynamic>) {
+        out.add(Map<String, dynamic>.from(p as Map));
+      }
+    }
+    return out;
   }
 }
 

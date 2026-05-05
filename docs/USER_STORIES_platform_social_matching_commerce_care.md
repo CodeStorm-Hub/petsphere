@@ -334,7 +334,7 @@ flowchart TB
 1. **Prioritize epics** E1 → E2 → E4 (or E3 first if matching is the wedge).  
 2. **Attach metrics** per epic (activation, D7 retention, GMV, care log completion rate, report rate).  
 3. **Decompose** each US into technical tasks (API, RLS policies, UI, analytics).  
-4. **Compliance review** for E5/E8 before promising clinical workflows.
+4. **Compliance review** for E5/E7 before promising clinical workflows.
 
 ---
 

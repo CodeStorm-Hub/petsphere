@@ -8,17 +8,33 @@ import '../controllers/follow_controller.dart';
 
 enum FollowListType { petFollowers, ownerFollowers, following }
 
+String _loadErrorMessage(FollowListType type) {
+  switch (type) {
+    case FollowListType.petFollowers:
+      return 'Could not load pet followers';
+    case FollowListType.ownerFollowers:
+      return 'Could not load followers';
+    case FollowListType.following:
+      return 'Could not load following';
+  }
+}
+
 class PetFollowersScreen extends ConsumerWidget {
   final String? petId;
   final String? userId;
   final FollowListType type;
 
-  const PetFollowersScreen({
+  PetFollowersScreen({
     super.key,
     this.petId,
     this.userId,
     required this.type,
-  });
+  }) : assert(
+          type == FollowListType.petFollowers
+              ? (petId != null && petId.isNotEmpty)
+              : (userId != null && userId.isNotEmpty),
+          'PetFollowersScreen: use petId for petFollowers and userId for ownerFollowers/following.',
+        );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -84,7 +100,8 @@ class PetFollowersScreen extends ConsumerWidget {
               Icon(Icons.error_outline, size: 48, color: colorScheme.error),
               const SizedBox(height: 12),
               Text(
-                'Could not load list',
+                _loadErrorMessage(type),
+                textAlign: TextAlign.center,
                 style: TextStyle(color: colorScheme.onSurface, fontSize: 16),
               ),
               const SizedBox(height: 8),

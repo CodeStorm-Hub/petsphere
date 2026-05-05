@@ -208,3 +208,17 @@ class ProfilePetNavigation extends Notifier<String?> {
 final profilePetNavigationProvider =
     NotifierProvider<ProfilePetNavigation, String?>(
         () => ProfilePetNavigation());
+
+/// [MainLayout] listens and switches its bottom tab to the requested index
+/// (e.g. 4 for Profile), then clears the value.
+class MainLayoutTabRequest extends Notifier<int?> {
+  @override
+  int? build() => null;
+
+  void request(int index) => state = index;
+
+  void clear() => state = null;
+}
+
+final mainLayoutTabRequestProvider =
+    NotifierProvider<MainLayoutTabRequest, int?>(MainLayoutTabRequest.new);

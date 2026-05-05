@@ -1,3 +1,4 @@
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -48,13 +49,11 @@ void openUserProfile(
   final myUserId = ref.read(authProvider).user?.id;
 
   if (myUserId != null && userId == myUserId) {
-    // Navigate to the profile tab (index 4 in MainLayout)
-    // We don't have a direct "switchToTab" method here, but we can potentially
-    // use a provider or just context.go('/home') if the home route handles tab state,
-    // or specifically context.push if we want it on the stack.
-    // However, most apps just switch tabs.
-    // For now, let's push the visitor profile even for self, or just go to /user/:id
-    // because /user/:id is handled by PetProfileScreen which handles "isVisitor" logic.
+    context.go('/home');
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      ref.read(mainLayoutTabRequestProvider.notifier).request(4);
+    });
+    return;
   }
 
   context.push('/user/$userId');

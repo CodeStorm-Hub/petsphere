@@ -81,7 +81,9 @@ class FollowController extends Notifier<void> {
       // Invalidate related providers so the UI refreshes
       ref.invalidate(isFollowingOwnerProvider(ownerId));
       ref.invalidate(ownerFollowerCountProvider(ownerId));
+      ref.invalidate(ownerFollowersListProvider(ownerId));
       ref.invalidate(followingCountProvider(userId));
+      ref.invalidate(followingListProvider(userId));
     } catch (e) {
       debugPrint('toggleFollowOwner error: $e');
     }
@@ -127,7 +129,9 @@ class FollowController extends Notifier<void> {
       // Invalidate related providers
       ref.invalidate(isFollowingPetProvider(petId));
       ref.invalidate(petFollowerCountProvider(petId));
+      ref.invalidate(petFollowersListProvider(petId));
       ref.invalidate(followingCountProvider(userId));
+      ref.invalidate(followingListProvider(userId));
     } catch (e) {
       debugPrint('toggleFollowPet error: $e');
     }

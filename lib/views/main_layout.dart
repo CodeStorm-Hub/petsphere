@@ -39,6 +39,13 @@ class MainLayoutState extends ConsumerState<MainLayout> {
       if (next != null) setState(() => currentIndex = 4);
     });
 
+    ref.listen<int?>(mainLayoutTabRequestProvider, (prev, next) {
+      if (next == null) return;
+      final idx = next.clamp(0, screens.length - 1);
+      if (idx != 2) setState(() => currentIndex = idx);
+      ref.read(mainLayoutTabRequestProvider.notifier).clear();
+    });
+
     final activePet = ref.watch(activePetProvider);
 
     return Scaffold(
