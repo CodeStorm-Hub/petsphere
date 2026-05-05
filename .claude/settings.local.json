@@ -10,7 +10,12 @@
       "mcp__plugin_supabase_supabase__list_projects",
       "mcp__plugin_supabase_supabase__list_migrations",
       "mcp__plugin_supabase_supabase__apply_migration",
-      "mcp__plugin_supabase_supabase__list_tables"
+      "mcp__plugin_supabase_supabase__list_tables",
+      "Bash(gh pr *)",
+      "Bash(gh run *)",
+      "Bash(git restore *)",
+      "Bash(git commit -m 'Fix: Update deprecated actions/upload-artifact from v3 to v4 *)",
+      "Bash(git push *)"
     ]
   }
 }
