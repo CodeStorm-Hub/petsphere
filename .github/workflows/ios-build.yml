@@ -37,6 +37,9 @@ jobs:
   build:
     runs-on: macos-latest
     timeout-minutes: 30
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
     steps:
       - name: Checkout repository
@@ -195,7 +198,9 @@ jobs:
               flutter build ios --no-codesign --simulator
             else
               echo "Building Flutter iOS Release..."
-              flutter build ios --release --no-codesign
+              flutter build ios --release --no-codesign \
+                --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+                --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
             fi
             cd "$IOS_PATH"
           elif [ "$PROJECT_TYPE" = "reactnative" ] || [ "$PROJECT_TYPE" = "expo" ]; then

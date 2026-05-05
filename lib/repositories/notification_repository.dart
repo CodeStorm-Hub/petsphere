@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/notification_model.dart';
 import '../utils/supabase_config.dart';
@@ -32,12 +34,55 @@ class NotificationRepository {
         .update({'is_read': true}).eq('id', notificationId);
   }
 
-  Future<void> markAllAsRead(String userId) async {
-    await supabase
+  Future<void> markAllAsRead(String userId, {String? excludeType}) async {
+    var query = supabase
         .from('notifications')
         .update({'is_read': true})
         .eq('user_id', userId)
         .eq('is_read', false);
+
+    if (excludeType != null) {
+      query = query.neq('type', excludeType);
+    }
+    await query;
+  }
+
+  Future<void> markMessagesAsRead(String userId) async {
+    await supabase
+        .from('notifications')
+        .update({'is_read': true})
+        .eq('user_id', userId)
+        .eq('type', 'message')
+        .eq('is_read', false);
+  }
+
+  Future<void> sendNotification({
+    required String targetUserId,
+    required String title,
+    String? body,
+    String? type,
+    String? entityType,
+    String? entityId,
+    String? actorPetId,
+  }) async {
+    try {
+      await supabase.from('notifications').insert({
+        'user_id': targetUserId,
+        'title': title,
+        'body': body,
+        'type': type,
+        'entity_type': entityType,
+        'entity_id': entityId,
+        'actor_pet_id': actorPetId,
+      });
+    } catch (e, st) {
+      developer.log(
+        'sendNotification insert failed',
+        name: 'NotificationRepository',
+        error: e,
+        stackTrace: st,
+      );
+    }
   }
 
   /// Real-time INSERT subscription for a specific user.
@@ -60,7 +105,14 @@ class NotificationRepository {
             try {
               final model = NotificationModel.fromJson(payload.newRecord);
               onNew(model);
-            } catch (_) {}
+            } catch (e, st) {
+              developer.log(
+                'Notification realtime parse failed',
+                name: 'NotificationRepository',
+                error: e,
+                stackTrace: st,
+              );
+            }
           },
         )
         .subscribe();

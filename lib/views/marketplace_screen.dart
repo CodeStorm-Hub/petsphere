@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../controllers/marketplace_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/auth_controller.dart';
 import 'components/product_card.dart';
+import '../utils/layout_utils.dart';
 
 class MarketplaceScreen extends ConsumerWidget {
   const MarketplaceScreen({super.key});
@@ -14,246 +16,335 @@ class MarketplaceScreen extends ConsumerWidget {
     final marketState = ref.watch(marketplaceProvider);
     final cartState = ref.watch(cartProvider);
     final user = ref.watch(authProvider).user;
-    final firstName = (user?.name ?? '').split(' ').first;
-    final greeting = firstName.isNotEmpty ? 'Welcome back, $firstName' : 'Pet Marketplace';
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final navSpace = bottomNavSpaceFor(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pet Shop'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.receipt_long_outlined),
-            tooltip: 'Order History',
-            onPressed: () => context.push('/orders'),
-          ),
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart_outlined),
-                onPressed: () => context.push('/cart'),
-              ),
-              if (cartState.totalItemCount > 0)
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      '${cartState.totalItemCount}',
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Personalized greeting
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  greeting,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                Text(
-                  'Discover curated items for your companions',
-                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                ),
-              ],
-            ),
-          ),
-          // Member Exclusive promo banner
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: GestureDetector(
-              onTap: () => ref.read(marketplaceProvider.notifier).setFilter('Grooming'),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFD67657), Color(0xFFFFAD93)],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Row(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(marketplaceProvider.notifier).refresh(),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            // ── Personalized Greeting Header ────────────────────────────────
+            SliverAppBar(
+              floating: true,
+              pinned: false,
+              backgroundColor: theme.scaffoldBackgroundColor,
+              elevation: 0,
+              surfaceTintColor: Colors.transparent,
+              toolbarHeight: 80,
+              title: Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 28),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Member Exclusive', style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
-                          Text('Summer Grooming Kit — Now 20% Off', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w800)),
-                        ],
+                    Text(
+                      'Good Morning,',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 14,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    Icon(Icons.chevron_right, color: Colors.white),
+                    Text(
+                      user?.name?.split(' ').first ?? 'Pet Parent',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.receipt_long_outlined),
+                        tooltip: 'Order History',
+                        onPressed: () => context.push('/orders'),
+                      ),
+                      _CartButton(count: cartState.totalItemCount),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+              ],
+            ),
+
+            // ── Search & Filter ───────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _MarketSearchBar(onTap: () => context.push('/search')),
+                    ),
+                    const SizedBox(width: 12),
+                    // Filter Button
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: cs.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.tune_rounded, color: Colors.white, size: 24),
+                    ),
                   ],
                 ),
               ),
             ),
-          ),
-          // Category filter chips — includes Bedding
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Row(
-              children: [
-                _CategoryChip(label: 'All', value: null, current: marketState.filterCategory),
-                const SizedBox(width: 8),
-                _CategoryChip(label: 'Food', value: 'Food', current: marketState.filterCategory),
-                const SizedBox(width: 8),
-                _CategoryChip(label: 'Toys', value: 'Toys', current: marketState.filterCategory),
-                const SizedBox(width: 8),
-                _CategoryChip(label: 'Accessories', value: 'Accessories', current: marketState.filterCategory),
-                const SizedBox(width: 8),
-                _CategoryChip(label: 'Bedding', value: 'Bedding', current: marketState.filterCategory),
-                const SizedBox(width: 8),
-                _CategoryChip(label: 'Grooming', value: 'Grooming', current: marketState.filterCategory),
-                const SizedBox(width: 8),
-                _CategoryChip(label: 'Treats', value: 'Treats', current: marketState.filterCategory),
-              ],
+
+            // ── Member Exclusive Promo Banner ──────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Semantics(
+                  button: true,
+                  label: 'Member Exclusive: Summer Grooming Kit — Now 20% Off. Tap to browse Grooming.',
+                  child: GestureDetector(
+                    onTap: () => ref.read(marketplaceProvider.notifier).setFilter('Grooming'),
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [cs.primary, cs.secondary],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: cs.primary.withAlpha(40),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.workspace_premium_rounded, color: cs.onPrimary, size: 32),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'MEMBER EXCLUSIVE',
+                                  style: GoogleFonts.dmSans(
+                                    color: cs.onPrimary.withAlpha(200),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Summer Grooming Kit — Now 20% Off',
+                                  style: GoogleFonts.dmSans(
+                                    color: cs.onPrimary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.chevron_right_rounded, color: cs.onPrimary),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
-          Expanded(child: _buildBody(context, ref, marketState)),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildBody(
-      BuildContext context, WidgetRef ref, MarketplaceState marketState) {
-    if (marketState.isLoading && marketState.products.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
+            // ── Minimalist Categories ──────────────────────────────────────
+            SliverToBoxAdapter(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    _CategoryChip(label: 'All Items', value: null, current: marketState.filterCategory),
+                    const SizedBox(width: 12),
+                    _CategoryChip(label: 'Food', value: 'Food', current: marketState.filterCategory),
+                    const SizedBox(width: 12),
+                    _CategoryChip(label: 'Toys', value: 'Toys', current: marketState.filterCategory),
+                    const SizedBox(width: 12),
+                    _CategoryChip(label: 'Bedding', value: 'Bedding', current: marketState.filterCategory),
+                    const SizedBox(width: 12),
+                    _CategoryChip(label: 'Grooming', value: 'Grooming', current: marketState.filterCategory),
+                    const SizedBox(width: 12),
+                    _CategoryChip(label: 'Treats', value: 'Treats', current: marketState.filterCategory),
+                    const SizedBox(width: 12),
+                    _CategoryChip(label: 'Accessories', value: 'Accessories', current: marketState.filterCategory),
+                  ],
+                ),
+              ),
+            ),
 
-    if (marketState.error != null && marketState.products.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 64, color: Colors.grey.shade400),
-              const SizedBox(height: 16),
-              Text(
-                'Failed to load products',
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade600),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                marketState.error!,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
-              ),
-              const SizedBox(height: 24),
-              OutlinedButton.icon(
-                onPressed: () => ref.read(marketplaceProvider.notifier).refresh(),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
-    if (marketState.products.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.storefront_outlined, size: 64, color: Colors.grey.shade300),
-            const SizedBox(height: 16),
-            Text('No products found',
-                style: TextStyle(fontSize: 16, color: Colors.grey.shade500)),
+            // ── Product Grid ────────────────────────────────────────────────
+            if (marketState.products.isEmpty && !marketState.isLoading)
+              const SliverFillRemaining(
+                child: Center(child: Text('No items found in this category')),
+              )
+            else
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + navSpace),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (index >= marketState.products.length) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final product = marketState.products[index];
+                      return ProductCard(
+                        product: product,
+                        onTap: () => context.push('/product/${product.id}'),
+                        onAdd: () {
+                          ref.read(cartProvider.notifier).addProduct(product);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${product.name} added to cart'),
+                              behavior: SnackBarBehavior.floating,
+                              duration: const Duration(seconds: 1),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    childCount: marketState.products.length,
+                  ),
+                ),
+              ),
           ],
         ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: () => ref.read(marketplaceProvider.notifier).refresh(),
-      child: GridView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.75,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-        ),
-        itemCount: marketState.products.length,
-        itemBuilder: (context, index) {
-          final product = marketState.products[index];
-          return ProductCard(
-            product: product,
-            onTap: () => context.push('/product/${product.id}'),
-            onAdd: () {
-              ref.read(cartProvider.notifier).addProduct(product);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(Icons.check, color: Colors.white, size: 16),
-                      const SizedBox(width: 8),
-                      Text('${product.name} added to cart'),
-                    ],
-                  ),
-                  duration: const Duration(seconds: 1),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              );
-            },
-          );
-        },
       ),
     );
   }
 }
 
+// ── Components ─────────────────────────────────────────────────────────────
+
+class _CartButton extends StatelessWidget {
+  final int count;
+  const _CartButton({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.shopping_bag_outlined),
+          onPressed: () => context.push('/cart'),
+        ),
+        if (count > 0)
+          Positioned(
+            right: 8,
+            top: 8,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(color: cs.primary, shape: BoxShape.circle),
+              child: Text(
+                '$count',
+                style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _MarketSearchBar extends StatelessWidget {
+  final VoidCallback onTap;
+  const _MarketSearchBar({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(brightness == Brightness.dark ? 40 : 8),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.search_rounded, color: Colors.grey, size: 22),
+            const SizedBox(width: 12),
+            Text(
+              'Search Products',
+              style: GoogleFonts.dmSans(
+                color: Colors.grey,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 class _CategoryChip extends ConsumerWidget {
   final String label;
   final String? value;
   final String? current;
 
-  const _CategoryChip(
-      {required this.label, required this.value, required this.current});
+  const _CategoryChip({required this.label, required this.value, required this.current});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isSelected = current == value;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
-      onSelected: (_) {
-        ref.read(marketplaceProvider.notifier).setFilter(value);
-      },
+      onSelected: (_) => ref.read(marketplaceProvider.notifier).setFilter(value),
+      backgroundColor: theme.cardColor,
+      selectedColor: cs.primary,
+      labelStyle: GoogleFonts.dmSans(
+        color: isSelected ? Colors.white : cs.onSurface,
+        fontSize: 14,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? Colors.transparent : cs.outline.withAlpha(40),
+        ),
+      ),
+      showCheckmark: false,
     );
   }
 }

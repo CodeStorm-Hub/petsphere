@@ -14,6 +14,7 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final timeStr = DateFormat('h:mm a').format(message.createdAt.toLocal());
 
     return Align(
@@ -31,16 +32,16 @@ class MessageBubble extends StatelessWidget {
           ),
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           decoration: BoxDecoration(
-            // Sent: gradient from primary to primary-dim (Stitch spec)
+            // Sent: gradient from primary to primaryContainer (blue theme)
             gradient: isMe
-                ? const LinearGradient(
-                    colors: [Color(0xFF99472C), Color(0xFF8A3B21)],
+                ? LinearGradient(
+                    colors: [colorScheme.primary, colorScheme.primaryContainer],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   )
                 : null,
             // Received: surface-container-highest
-            color: isMe ? null : const Color(0xFFE8E1DA),
+            color: isMe ? null : colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(18),
               topRight: const Radius.circular(18),
@@ -48,17 +49,23 @@ class MessageBubble extends StatelessWidget {
               bottomRight: Radius.circular(isMe ? 4 : 18),
             ),
             boxShadow: isMe
-                ? [BoxShadow(color: const Color(0xFF99472C).withAlpha(25), blurRadius: 10, offset: const Offset(0, 4))]
+                ? [
+                    BoxShadow(
+                        color: colorScheme.primary.withAlpha(25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4))
+                  ]
                 : null,
           ),
           child: Column(
-            crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            crossAxisAlignment:
+                isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 message.text,
                 style: TextStyle(
-                  color: isMe ? const Color(0xFFFFF7F5) : const Color(0xFF35322D),
+                  color: isMe ? colorScheme.onPrimary : colorScheme.onSurface,
                   fontSize: 15,
                   height: 1.4,
                 ),
@@ -71,7 +78,9 @@ class MessageBubble extends StatelessWidget {
                     timeStr,
                     style: TextStyle(
                       fontSize: 10,
-                      color: isMe ? Colors.white.withAlpha(180) : const Color(0xFF625E59),
+                      color: isMe
+                          ? colorScheme.onPrimary.withAlpha(180)
+                          : colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -80,7 +89,9 @@ class MessageBubble extends StatelessWidget {
                     Icon(
                       message.isRead ? Icons.done_all : Icons.done,
                       size: 13,
-                      color: message.isRead ? const Color(0xFF4FC3F7) : Colors.white.withAlpha(180),
+                      color: message.isRead
+                          ? colorScheme.tertiary
+                          : colorScheme.onPrimary.withAlpha(180),
                     ),
                   ],
                 ],
@@ -100,6 +111,7 @@ class DateSeparator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final msgDay = DateTime(date.year, date.month, date.day);
@@ -115,15 +127,15 @@ class DateSeparator extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFFF3EDE6),
+            color: colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
             label.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF625E59),
+              color: colorScheme.onSurfaceVariant,
               letterSpacing: 1.5,
             ),
           ),

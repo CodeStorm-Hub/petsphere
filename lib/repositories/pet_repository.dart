@@ -6,11 +6,13 @@ class PetRepository {
   // -------------------------------------------------------------------------
   // Fetch all pets (for discovery / feed)
   // -------------------------------------------------------------------------
-  Future<List<PetModel>> fetchAllPets() async {
+  /// Bounded list for discovery/admin-style views — not every pet in the system at scale.
+  Future<List<PetModel>> fetchAllPets({int limit = 500}) async {
     final data = await supabase
         .from('pets')
         .select()
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .limit(limit);
 
     return (data as List<dynamic>)
         .map((e) => PetModel.fromJson(e as Map<String, dynamic>))
@@ -36,11 +38,8 @@ class PetRepository {
   // Fetch a single pet by id
   // -------------------------------------------------------------------------
   Future<PetModel?> fetchPetById(String petId) async {
-    final data = await supabase
-        .from('pets')
-        .select()
-        .eq('id', petId)
-        .maybeSingle();
+    final data =
+        await supabase.from('pets').select().eq('id', petId).maybeSingle();
 
     if (data == null) return null;
     return PetModel.fromJson(data);
@@ -50,11 +49,8 @@ class PetRepository {
   // Create a new pet
   // -------------------------------------------------------------------------
   Future<PetModel> createPet(PetModel pet) async {
-    final data = await supabase
-        .from('pets')
-        .insert(pet.toJson())
-        .select()
-        .single();
+    final data =
+        await supabase.from('pets').insert(pet.toJson()).select().single();
 
     return PetModel.fromJson(data);
   }
@@ -80,9 +76,7 @@ class PetRepository {
     final ext = imageFile.path.split('.').last;
     final path = '$petId/${DateTime.now().millisecondsSinceEpoch}.$ext';
 
-    await supabase.storage
-        .from(kBucketPetImages)
-        .upload(path, imageFile);
+    await supabase.storage.from(kBucketPetImages).upload(path, imageFile);
 
     return supabase.storage.from(kBucketPetImages).getPublicUrl(path);
   }

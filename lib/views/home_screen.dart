@@ -1,24 +1,44 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import '../widgets/brand_logo.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import '../controllers/chat_controller.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/notification_controller.dart';
+import '../repositories/notification_repository.dart';
+import '../models/pet_model.dart';
+import '../models/post_model.dart';
+import '../models/story_model.dart';
+import '../theme/app_theme.dart';
+import '../utils/post_actions.dart';
+import '../utils/pet_navigation.dart';
+import '../widgets/common/petfolio_widgets.dart';
 import 'components/post_card.dart';
+import '../utils/layout_utils.dart';
+
+// Maximum feed column width on wide screens (tablets, foldables, web).
+// Below this, the feed is full-width edge-to-edge like the Instagram phone app.
+const double _kFeedMaxWidth = 560.0;
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final feedState = ref.watch(feedProvider);
-    final activePet = ref.watch(activePetProvider);
-    final currentPetId = activePet?.id ?? '';
+    final activePetId = ref.watch(activePetProvider.select((p) => p?.id ?? ''));
     final authState = ref.watch(authProvider);
     final userName = authState.user?.name ?? 'Pet Lover';
-    final myPets = ref.watch(petProvider).myPets;
+    final myPets = ref.watch(petProvider.select((s) => s.myPets));
+    final feedPosts = ref.watch(feedProvider.select((s) => s.posts));
+    final feedLoading = ref.watch(feedProvider.select((s) => s.isLoading));
+    final feedError = ref.watch(feedProvider.select((s) => s.error));
+    final feedStories = ref.watch(feedProvider.select((s) => s.stories));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -26,330 +46,575 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 16,
-        title: Row(
-          children: [
-            const Icon(Icons.pets, size: 22, color: Color(0xFF99472C)),
-            const SizedBox(width: 8),
-            Text(
-              'The Nurtured Atelier',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
-                color: colorScheme.onSurface,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: ClipRect(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: colorScheme.outlineVariant),
               ),
             ),
-          ],
+          ),
         ),
+        titleSpacing: 16,
+        title: BrandLogo(size: BrandLogoSize.small, withText: true),
         actions: [
-          _NotificationIconButton(
-            onTap: () => context.push('/notifications'),
+          IconButton(
+            tooltip: 'Search',
+            icon: const Icon(Icons.search),
+            onPressed: () => context.push('/search'),
           ),
           IconButton(
-            tooltip: 'Messages',
-            icon: const Icon(Icons.chat_bubble_outline),
-            onPressed: () => context.push('/messages'),
+            tooltip: 'New Post',
+            icon: const Icon(Icons.add_box_outlined),
+            onPressed: () => context.push('/create_post'),
           ),
+          _NotificationIconButton(onTap: () => context.push('/notifications')),
+          _MessageIconButton(onTap: () => context.push('/messages')),
+          const SizedBox(width: 4),
         ],
       ),
-      body: _buildBody(context, ref, feedState, currentPetId, firstName, myPets),
+      body: PetfolioGradientBackground(
+        child: _buildBody(
+          context,
+          ref,
+          feedPosts,
+          feedLoading,
+          feedError,
+          feedStories,
+          activePetId,
+          firstName,
+          myPets,
+        ),
+      ),
     );
   }
 
   Widget _buildBody(
     BuildContext context,
     WidgetRef ref,
-    FeedState feedState,
+    List<PostModel> posts,
+    bool isLoading,
+    String? error,
+    List<StoryModel> stories,
     String currentPetId,
     String userName,
-    List myPets,
+    List<PetModel> myPets,
   ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final navSpace = bottomNavSpaceFor(context);
 
-    if (feedState.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+    Widget centerWrap(Widget child) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final width = math.min(constraints.maxWidth, _kFeedMaxWidth);
+          return Center(
+            child: SizedBox(width: width, child: child),
+          );
+        },
+      );
     }
 
-    if (feedState.error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: colorScheme.error),
-            const SizedBox(height: 12),
-            Text(feedState.error!, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: () => ref.read(feedProvider.notifier).refresh(),
-              icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('Retry'),
+    if (isLoading) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: navSpace),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _kFeedMaxWidth),
+            child: const Padding(
+              padding: EdgeInsets.all(AppTheme.md),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ShimmerLoader(height: 86),
+                  SizedBox(height: AppTheme.md),
+                  ShimmerLoader(height: 360),
+                ],
+              ),
             ),
-          ],
+          ),
+        ),
+      );
+    }
+
+    if (error != null) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: navSpace),
+        child: Center(
+          child: GlassCard(
+            margin: const EdgeInsets.all(AppTheme.lg),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: colorScheme.error),
+                const SizedBox(height: AppTheme.md),
+                Text(
+                  error,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: AppTheme.md),
+                FilledButton.icon(
+                  onPressed: () => ref.read(feedProvider.notifier).refresh(),
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
         ),
       );
     }
 
     return RefreshIndicator(
       onRefresh: () => ref.read(feedProvider.notifier).refresh(),
-      child: CustomScrollView(
-        slivers: [
-          // ── Personalized greeting + search ─────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Hello, $userName!',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: colorScheme.onSurface,
-                      letterSpacing: -0.5,
+      child: centerWrap(
+        CustomScrollView(
+          slivers: [
+            // ── Stories row (Instagram-style) ────────────────────────
+            if (myPets.isNotEmpty)
+              SliverToBoxAdapter(
+                child: RepaintBoundary(
+                  child: _StoriesRow(
+                    pets: myPets,
+                    stories: stories,
+                    currentPetId: currentPetId,
+                    onCreateStory: () => _openCreateStoryForPet(
+                      context,
+                      myPets,
+                      currentPetId: currentPetId,
+                    ),
+                    onStoryTap: (petId) => context.push('/story/$petId'),
+                    onYourStoryTap: (petId) => _onYourStoryTap(
+                      context,
+                      myPets,
+                      currentPetId: currentPetId,
+                      storyPetId: petId,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Discover your next furry friend or share a tail-wagging moment.',
-                    style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Search bar
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8E1DA),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: TextField(
-                      readOnly: true,
-                      onTap: () {},
-                      decoration: InputDecoration(
-                        hintText: 'Search breeds, moments, or friends...',
-                        hintStyle: TextStyle(
-                          color: colorScheme.onSurfaceVariant.withAlpha(160),
-                          fontSize: 14,
-                        ),
-                        prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant, size: 20),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
-                        fillColor: Colors.transparent,
-                        filled: true,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
 
-          // ── Category chips ──────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: _CategoryChipsRow(),
-          ),
+            // ── Hairline separator under stories ─────────────────────
+            if (myPets.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Divider(
+                  height: 1,
+                  thickness: 0.5,
+                  color: colorScheme.outline.withAlpha(40),
+                ),
+              ),
 
-          // Pet avatars row
-          if (myPets.isNotEmpty)
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: 100,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  itemCount: myPets.length + 1, // +1 for "Add" button
-                  itemBuilder: (context, index) {
-                    if (index == myPets.length) {
-                      // "Add Pet" button
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: GestureDetector(
-                          onTap: () => context.push('/add_pet'),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 56,
-                                height: 56,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: colorScheme.outline.withAlpha(60),
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.add,
-                                  color: colorScheme.primary,
-                                  size: 24,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Add Pet',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
+            // ── Empty state ──────────────────────────────────────────
+            if (posts.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: navSpace),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.photo_camera_outlined,
+                          size: 56,
+                          color: colorScheme.outline.withAlpha(120),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No posts yet',
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      );
-                    }
-
-                    final pet = myPets[index];
-                    final isActive = pet.id == currentPetId;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: GestureDetector(
-                        onTap: () {
-                          ref.read(profilePetNavigationProvider.notifier).navigateTo(pet.id);
+                        const SizedBox(height: 4),
+                        Text(
+                          'Share your first moment.',
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        FilledButton.icon(
+                          onPressed: () => context.push('/create_post'),
+                          icon: const Icon(
+                            Icons.add_a_photo_outlined,
+                            size: 18,
+                          ),
+                          label: const Text('Create Post'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: EdgeInsets.only(bottom: navSpace),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final post = posts[index];
+                    return RepaintBoundary(
+                      child: PostCard(
+                        post: post,
+                        currentPetId: currentPetId,
+                        onLikeToggle: () {
+                          ref
+                              .read(feedProvider.notifier)
+                              .toggleLike(post.id, currentPetId);
                         },
+                        onCommentIconTap: () {
+                          _showCommentSheet(
+                            context,
+                            post.id,
+                            currentPetId,
+                            ref.read(activePetProvider)?.name ?? 'Unknown',
+                          );
+                        },
+                        onShareIconTap: () =>
+                            _showShareSheet(context, ref, post),
+                        onPetTap: () => openPetProfile(
+                          context,
+                          ref,
+                          petId: post.pet.id,
+                          petUserId: post.pet.userId,
+                        ),
+                        onEdit:
+                            post.pet.userId == ref.read(authProvider).user?.id
+                            ? () => showEditPostDialog(context, ref, post)
+                            : null,
+                        onDelete:
+                            post.pet.userId == ref.read(authProvider).user?.id
+                            ? () => showDeletePostDialog(context, ref, post)
+                            : null,
+                      ),
+                    );
+                  }, childCount: posts.length),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showShareSheet(
+    BuildContext context,
+    WidgetRef ref,
+    PostModel post,
+  ) async {
+    final shareLink = 'https://petfolio.app/post/${post.id}';
+
+    final result = await SharePlus.instance.share(
+      ShareParams(
+        text: 'Check out this pet on PetFolio!\n$shareLink',
+        subject: 'PetFolio',
+      ),
+    );
+
+    if (result.status == ShareResultStatus.success) {
+      try {
+        final authedUser = ref.read(authProvider).user;
+        if (authedUser != null && post.pet.userId != authedUser.id) {
+          notificationRepository.sendNotification(
+            targetUserId: post.pet.userId,
+            title: 'Post Shared',
+            body: 'Someone shared your post!',
+            type: 'post_share',
+            entityType: 'post',
+            entityId: post.id,
+          );
+        }
+      } catch (_) {}
+    }
+  }
+
+  Future<void> _openCreateStoryForPet(
+    BuildContext context,
+    List<PetModel> myPets, {
+    required String currentPetId,
+  }) async {
+    if (myPets.isEmpty) {
+      context.push('/add_pet');
+      return;
+    }
+
+    if (myPets.length == 1) {
+      context.push('/create_story?petId=${myPets.first.id}');
+      return;
+    }
+
+    final selectedPetId = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        final mediaQuery = MediaQuery.of(sheetContext);
+        final maxSheetHeight = mediaQuery.size.height * 0.78;
+
+        return Padding(
+          padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Builder(
+                builder: (context) {
+                  final colorScheme = Theme.of(context).colorScheme;
+                  return Container(
+                    margin: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(
+                        color: colorScheme.outline.withAlpha(80),
+                      ),
+                    ),
+                    child: SafeArea(
+                      top: false,
+                      child: SizedBox(
+                        height: maxSheetHeight,
                         child: Column(
-                          mainAxisSize: MainAxisSize.min,
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: isActive
-                                    ? LinearGradient(
-                                        colors: [
-                                          colorScheme.primary,
-                                          colorScheme.tertiary,
-                                        ],
-                                      )
-                                    : null,
-                                border: !isActive
-                                    ? Border.all(
-                                        color: colorScheme.outline.withAlpha(60),
-                                        width: 1.5,
-                                      )
-                                    : null,
-                              ),
-                              child: CircleAvatar(
-                                radius: 26,
-                                backgroundColor: colorScheme.surface,
-                                backgroundImage: pet.profileImageUrl.isNotEmpty
-                                    ? NetworkImage(pet.profileImageUrl)
-                                    : null,
-                                child: pet.profileImageUrl.isEmpty
-                                    ? Icon(Icons.pets,
-                                        size: 20,
-                                        color: colorScheme.onSurfaceVariant)
-                                    : null,
+                            Center(
+                              child: Builder(
+                                builder: (context) {
+                                  final colorScheme = Theme.of(
+                                    context,
+                                  ).colorScheme;
+                                  return Container(
+                                    width: 44,
+                                    height: 5,
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.outline.withAlpha(100),
+                                      borderRadius: BorderRadius.circular(99),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            SizedBox(
-                              width: 60,
-                              child: Text(
-                                pet.name,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-                                  color: isActive
-                                      ? colorScheme.primary
-                                      : colorScheme.onSurfaceVariant,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
+                            const SizedBox(height: 16),
+                            Builder(
+                              builder: (context) {
+                                final colorScheme = Theme.of(
+                                  context,
+                                ).colorScheme;
+                                return Text(
+                                  'Post story as',
+                                  style: TextStyle(
+                                    color: colorScheme.onSurface,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 6),
+                            Builder(
+                              builder: (context) {
+                                final colorScheme = Theme.of(
+                                  context,
+                                ).colorScheme;
+                                return Text(
+                                  'Choose which pet should post this story.',
+                                  style: TextStyle(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: myPets.length,
+                                itemBuilder: (context, index) {
+                                  final pet = myPets[index];
+                                  final isCurrent = pet.id == currentPetId;
+                                  final colorScheme = Theme.of(
+                                    context,
+                                  ).colorScheme;
+                                  return ListTile(
+                                    contentPadding: EdgeInsets.zero,
+                                    onTap: () =>
+                                        Navigator.pop(sheetContext, pet.id),
+                                    leading: CircleAvatar(
+                                      backgroundColor:
+                                          colorScheme.surfaceContainerHighest,
+                                      backgroundImage:
+                                          pet.profileImageUrl.isNotEmpty
+                                          ? CachedNetworkImageProvider(
+                                              pet.profileImageUrl,
+                                            )
+                                          : null,
+                                      child: pet.profileImageUrl.isEmpty
+                                          ? Text(
+                                              pet.name.isNotEmpty
+                                                  ? pet.name[0].toUpperCase()
+                                                  : '?',
+                                            )
+                                          : null,
+                                    ),
+                                    title: Text(
+                                      pet.name,
+                                      style: TextStyle(
+                                        color: colorScheme.onSurface,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      pet.breed,
+                                      style: TextStyle(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    trailing: isCurrent
+                                        ? Icon(
+                                            Icons.check_circle,
+                                            color: colorScheme.primary,
+                                          )
+                                        : Icon(
+                                            Icons.chevron_right,
+                                            color: colorScheme.outline
+                                                .withAlpha(100),
+                                          ),
+                                  );
+                                },
                               ),
                             ),
                           ],
                         ),
                       ),
-                    );
-                  },
-                ),
-              ),
-            ),
-
-          // Divider
-          if (myPets.isNotEmpty)
-            SliverToBoxAdapter(
-              child: Divider(
-                height: 1,
-                color: colorScheme.outline.withAlpha(30),
-              ),
-            ),
-
-          // Empty state
-          if (feedState.posts.isEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.pets, size: 64, color: colorScheme.outline.withAlpha(80)),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No posts yet!\nBe the first to share.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 16,
-                      ),
                     ),
-                    const SizedBox(height: 20),
-                    FilledButton.icon(
-                      onPressed: () => context.push('/create_post'),
-                      icon: const Icon(Icons.add_a_photo_outlined, size: 18),
-                      label: const Text('Create Post'),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final post = feedState.posts[index];
-                  return PostCard(
-                    post: post,
-                    currentPetId: currentPetId,
-                    onLikeToggle: () {
-                      ref.read(feedProvider.notifier).toggleLike(post.id, currentPetId);
-                    },
-                    onCommentIconTap: () {
-                      _showCommentSheet(
-                        context,
-                        post.id,
-                        currentPetId,
-                        ref.read(activePetProvider)?.name ?? 'Unknown',
-                      );
-                    },
-                    onShareIconTap: () => _showShareSheet(context, post.id),
-                    onPetTap: () {
-                      ref.read(profilePetNavigationProvider.notifier).navigateTo(post.pet.id);
-                    },
                   );
                 },
-                childCount: feedState.posts.length,
               ),
             ),
-        ],
-      ),
+          ),
+        );
+      },
     );
+
+    if (!context.mounted || selectedPetId == null) return;
+    context.push('/create_story?petId=$selectedPetId');
   }
 
-  void _showShareSheet(BuildContext context, String postId) {
-    final shareLink = 'https://petsphere.app/post/$postId';
-    Share.share(
-      'Check out this pet on PetSphere!\n$shareLink',
-      subject: 'PetSphere',
+  Future<void> _onYourStoryTap(
+    BuildContext context,
+    List<PetModel> myPets, {
+    required String currentPetId,
+    required String? storyPetId,
+  }) async {
+    if (storyPetId == null) {
+      await _openCreateStoryForPet(context, myPets, currentPetId: currentPetId);
+      return;
+    }
+
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        final colorScheme = Theme.of(sheetContext).colorScheme;
+        return Container(
+          margin: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: colorScheme.outline.withAlpha(80)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: colorScheme.outline.withAlpha(100),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Your story',
+                  style: TextStyle(
+                    color: colorScheme.onSurface,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Choose what you want to do.',
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 12),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    Icons.visibility_outlined,
+                    color: colorScheme.primary,
+                  ),
+                  title: Text(
+                    'View story',
+                    style: TextStyle(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  onTap: () => Navigator.pop(sheetContext, 'view'),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    Icons.add_circle_outline,
+                    color: colorScheme.primary,
+                  ),
+                  title: Text(
+                    'Post story',
+                    style: TextStyle(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  onTap: () => Navigator.pop(sheetContext, 'post'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
+
+    if (!context.mounted || action == null) return;
+    if (action == 'view') {
+      context.push('/story/$storyPetId');
+      return;
+    }
+
+    await _openCreateStoryForPet(context, myPets, currentPetId: currentPetId);
   }
 
   void _showCommentSheet(
-      BuildContext context, String postId, String currentPetId, String petName) {
+    BuildContext context,
+    String postId,
+    String currentPetId,
+    String petName,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -397,12 +662,9 @@ class _CommentBottomSheetWidgetState
   void _submitComment() {
     final text = _commentController.text.trim();
     if (text.isNotEmpty) {
-      ref.read(feedProvider.notifier).addComment(
-            widget.postId,
-            widget.currentPetId,
-            widget.petName,
-            text,
-          );
+      ref
+          .read(feedProvider.notifier)
+          .addComment(widget.postId, widget.currentPetId, widget.petName, text);
       _commentController.clear();
       FocusScope.of(context).unfocus();
     }
@@ -433,8 +695,10 @@ class _CommentBottomSheetWidgetState
           children: [
             Icon(Icons.error_outline, size: 48, color: colorScheme.outline),
             const SizedBox(height: 12),
-            Text('Post not found',
-                style: TextStyle(color: colorScheme.onSurfaceVariant)),
+            Text(
+              'Post not found',
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
+            ),
           ],
         ),
       );
@@ -460,8 +724,10 @@ class _CommentBottomSheetWidgetState
             ),
           ),
           const SizedBox(height: 12),
-          const Text('Comments',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          const Text(
+            'Comments',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
           Divider(color: colorScheme.outline.withAlpha(40)),
           SizedBox(
             height: 300,
@@ -470,8 +736,11 @@ class _CommentBottomSheetWidgetState
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.chat_bubble_outline,
-                            size: 40, color: colorScheme.outline.withAlpha(80)),
+                        Icon(
+                          Icons.chat_bubble_outline,
+                          size: 40,
+                          color: colorScheme.outline.withAlpha(80),
+                        ),
                         const SizedBox(height: 8),
                         Text(
                           'No comments yet.\nStart the conversation!',
@@ -485,45 +754,67 @@ class _CommentBottomSheetWidgetState
                     itemCount: post.comments.length,
                     itemBuilder: (context, index) {
                       final comment = post.comments[index];
+                      final commentColorScheme = Theme.of(context).colorScheme;
                       final colors = [
-                        const Color(0xFFE57373),
-                        const Color(0xFF4FC3F7),
-                        const Color(0xFF81C784),
-                        const Color(0xFFFF8A65),
-                        const Color(0xFFBA68C8),
+                        commentColorScheme.primary,
+                        commentColorScheme.secondary,
+                        commentColorScheme.tertiary,
+                        commentColorScheme.primary.withAlpha(200),
+                        commentColorScheme.secondary.withAlpha(200),
                       ];
                       final bg = colors[comment.petName.length % colors.length];
 
+                      void openCommenter() {
+                        Navigator.pop(context);
+                        openPetProfile(context, ref, petId: comment.petId);
+                      }
+
                       return ListTile(
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 4),
-                        leading: CircleAvatar(
-                          backgroundColor: bg.withAlpha(40),
-                          child: Text(
-                            comment.petName[0].toUpperCase(),
-                            style: TextStyle(
-                                color: bg, fontWeight: FontWeight.bold),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                        leading: GestureDetector(
+                          onTap: openCommenter,
+                          child: CircleAvatar(
+                            backgroundColor: bg.withAlpha(40),
+                            child: Text(
+                              comment.petName[0].toUpperCase(),
+                              style: TextStyle(
+                                color: bg,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
                         title: Row(
                           children: [
-                            Text(comment.petName,
+                            GestureDetector(
+                              onTap: openCommenter,
+                              child: Text(
+                                comment.petName,
                                 style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 13)),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
                             const Spacer(),
                             Text(
                               _formatTimeAgo(comment.createdAt),
                               style: TextStyle(
-                                  color: colorScheme.onSurfaceVariant,
-                                  fontSize: 11),
+                                color: colorScheme.onSurfaceVariant,
+                                fontSize: 11,
+                              ),
                             ),
                           ],
                         ),
                         subtitle: Padding(
                           padding: const EdgeInsets.only(top: 4.0),
-                          child: Text(comment.text,
-                              style: TextStyle(
-                                  color: colorScheme.onSurface, fontSize: 14)),
+                          child: Text(
+                            comment.text,
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
+                              fontSize: 14,
+                            ),
+                          ),
                         ),
                       );
                     },
@@ -539,12 +830,17 @@ class _CommentBottomSheetWidgetState
                     decoration: InputDecoration(
                       hintText: 'Add a comment...',
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30)),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       suffixIcon: IconButton(
-                        icon: Icon(Icons.send_rounded,
-                            color: colorScheme.primary),
+                        icon: Icon(
+                          Icons.send_rounded,
+                          color: colorScheme.primary,
+                        ),
                         onPressed: _submitComment,
                       ),
                     ),
@@ -561,59 +857,278 @@ class _CommentBottomSheetWidgetState
   }
 }
 
-// ── Category chip filter row ───────────────────────────────────────────────
-class _CategoryChipsRow extends StatefulWidget {
-  @override
-  State<_CategoryChipsRow> createState() => _CategoryChipsRowState();
-}
+// ── Instagram-style stories row ────────────────────────────────────────────
+//
+// Renders active 24-hour stories plus the user's pets as horizontally scrolling
+// story bubbles. The active pet is shown first as "Your story" with a + overlay.
+// Sized intrinsically so it never overflows on any device or text scale.
+class _StoriesRow extends StatelessWidget {
+  final List<PetModel> pets;
+  final List<StoryModel> stories;
+  final String currentPetId;
+  final VoidCallback onCreateStory;
+  final ValueChanged<String> onStoryTap;
+  final ValueChanged<String?> onYourStoryTap;
 
-class _CategoryChipsRowState extends State<_CategoryChipsRow> {
-  String? _selected; // null = All Stories
-
-  static const _chips = [
-    (label: 'All Stories', value: null as String?),
-    (label: 'Dogs', value: 'Dog' as String?),
-    (label: 'Cats', value: 'Cat' as String?),
-    (label: 'Exotic', value: 'Exotic' as String?),
-  ];
+  const _StoriesRow({
+    required this.pets,
+    required this.stories,
+    required this.currentPetId,
+    required this.onCreateStory,
+    required this.onStoryTap,
+    required this.onYourStoryTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final activePet = pets.firstWhere(
+      (p) => p.id == currentPetId,
+      orElse: () => pets.first,
+    );
+    final storyPetIds = stories.map((story) => story.pet.id).toSet();
+    final myPetIds = pets.map((pet) => pet.id).toSet();
+    final myStoryPets = <PetModel>[
+      ...pets.where((pet) => storyPetIds.contains(pet.id)),
+    ];
+    final externalStoryPetsById = <String, PetModel>{};
+    for (final story in stories) {
+      if (!myPetIds.contains(story.pet.id)) {
+        externalStoryPetsById[story.pet.id] = story.pet;
+      }
+    }
+    final activePetHasStory = storyPetIds.contains(activePet.id);
+    final primaryMyStoryPet = activePetHasStory
+        ? activePet
+        : (myStoryPets.isNotEmpty ? myStoryPets.first : null);
+    final additionalMyStoryPets = myStoryPets
+        .where((pet) => pet.id != primaryMyStoryPet?.id)
+        .toList();
+    final followedStoryPets = externalStoryPetsById.values.toList();
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
       child: Row(
-        children: _chips.map((chip) {
-          final isSelected = _selected == chip.value;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () => setState(() => _selected = chip.value),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF506453) : const Color(0xFFE5FDE6),
-                  borderRadius: BorderRadius.circular(999),
-                  boxShadow: isSelected
-                      ? [BoxShadow(color: const Color(0xFF506453).withAlpha(40), blurRadius: 8, offset: const Offset(0, 2))]
-                      : null,
-                ),
-                child: Text(
-                  chip.label,
-                  style: TextStyle(
-                    color: isSelected ? const Color(0xFFE8FFE8) : const Color(0xFF4E6251),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _StoryItem(
+            imageUrl: (primaryMyStoryPet ?? activePet).profileImageUrl,
+            label: 'Your story',
+            ringStyle: primaryMyStoryPet != null
+                ? _RingStyle.gradient
+                : _RingStyle.none,
+            badge: _StoryBadge.plus,
+            onBadgeTap: onCreateStory,
+            onTap: () => onYourStoryTap(primaryMyStoryPet?.id),
+          ),
+          for (final pet in additionalMyStoryPets)
+            _StoryItem(
+              imageUrl: pet.profileImageUrl,
+              label: pet.name,
+              ringStyle: _RingStyle.gradient,
+              onTap: () => onStoryTap(pet.id),
             ),
-          );
-        }).toList(),
+          for (final pet in followedStoryPets)
+            _StoryItem(
+              imageUrl: pet.profileImageUrl,
+              label: pet.name,
+              ringStyle: _RingStyle.gradient,
+              onTap: () => onStoryTap(pet.id),
+            ),
+        ],
       ),
     );
   }
+}
+
+enum _RingStyle { none, gradient, dashed }
+
+enum _StoryBadge { none, plus }
+
+class _StoryItem extends StatelessWidget {
+  final String imageUrl;
+  final String label;
+  final _RingStyle ringStyle;
+  final _StoryBadge badge;
+  final VoidCallback onTap;
+  final VoidCallback? onBadgeTap;
+
+  const _StoryItem({
+    required this.imageUrl,
+    required this.label,
+    required this.ringStyle,
+    this.badge = _StoryBadge.none,
+    required this.onTap,
+    this.onBadgeTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    const innerRadius = 30.0;
+
+    Widget avatar = CircleAvatar(
+      radius: innerRadius,
+      backgroundColor: colorScheme.surfaceContainerHighest,
+      backgroundImage: imageUrl.isNotEmpty
+          ? CachedNetworkImageProvider(imageUrl)
+          : null,
+      child: imageUrl.isEmpty
+          ? BrandLogo(
+              customSize: innerRadius * 0.8,
+              color: colorScheme.onSurfaceVariant,
+            )
+          : null,
+    );
+
+    Widget ringed;
+    switch (ringStyle) {
+      case _RingStyle.gradient:
+        ringed = Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: [
+                colorScheme.primary,
+                colorScheme.primary.withAlpha(180),
+                colorScheme.secondary,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          padding: const EdgeInsets.all(2.5),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
+            padding: const EdgeInsets.all(2),
+            child: avatar,
+          ),
+        );
+        break;
+      case _RingStyle.dashed:
+        ringed = DottedCircle(
+          color: colorScheme.outline.withAlpha(140),
+          padding: 4,
+          child: avatar,
+        );
+        break;
+      case _RingStyle.none:
+        ringed = Padding(padding: const EdgeInsets.all(4.5), child: avatar);
+    }
+
+    if (badge == _StoryBadge.plus) {
+      ringed = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          ringed,
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: GestureDetector(
+              onTap: onBadgeTap,
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    width: 2,
+                  ),
+                ),
+                child: Icon(Icons.add, size: 14, color: colorScheme.onPrimary),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ringed,
+            const SizedBox(height: 6),
+            SizedBox(
+              width: 72,
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: colorScheme.onSurface),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Simple dashed circular border for the "Add Pet" story bubble.
+class DottedCircle extends StatelessWidget {
+  final Widget child;
+  final Color color;
+  final double padding;
+
+  const DottedCircle({
+    super.key,
+    required this.child,
+    required this.color,
+    this.padding = 4,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _DashedCirclePainter(color: color),
+      child: Padding(padding: EdgeInsets.all(padding), child: child),
+    );
+  }
+}
+
+class _DashedCirclePainter extends CustomPainter {
+  final Color color;
+  _DashedCirclePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    final radius = math.min(size.width, size.height) / 2;
+    final center = Offset(size.width / 2, size.height / 2);
+    const dashes = 28;
+    const gapFraction = 0.45;
+    final segment = (2 * math.pi) / dashes;
+    final stroke = segment * (1 - gapFraction);
+
+    for (var i = 0; i < dashes; i++) {
+      final start = i * segment;
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius - 1),
+        start,
+        stroke,
+        false,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedCirclePainter old) => old.color != color;
 }
 
 class _NotificationIconButton extends ConsumerWidget {
@@ -622,8 +1137,7 @@ class _NotificationIconButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final unread =
-        ref.watch(notificationProvider.select((s) => s.unreadCount));
+    final unread = ref.watch(notificationProvider.select((s) => s.unreadCount));
 
     return IconButton(
       tooltip: unread > 0 ? 'Notifications ($unread unread)' : 'Notifications',
@@ -635,26 +1149,27 @@ class _NotificationIconButton extends ConsumerWidget {
             Positioned(
               right: -4,
               top: -4,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.surface,
-                    width: 1.5,
+              child: ExcludeSemantics(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.surface,
+                      width: 1.5,
+                    ),
                   ),
-                ),
-                constraints:
-                    const BoxConstraints(minWidth: 16, minHeight: 16),
-                child: Text(
-                  unread > 99 ? '99+' : '$unread',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                  child: Text(
+                    unread > 99 ? '99+' : '$unread',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ),
             ),
@@ -665,3 +1180,51 @@ class _NotificationIconButton extends ConsumerWidget {
   }
 }
 
+class _MessageIconButton extends ConsumerWidget {
+  final VoidCallback onTap;
+  const _MessageIconButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unread = ref.watch(chatProvider.select((s) => s.totalUnread));
+
+    return IconButton(
+      tooltip: unread > 0 ? 'Messages ($unread unread)' : 'Messages',
+      icon: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          const Icon(Icons.send_outlined),
+          if (unread > 0)
+            Positioned(
+              right: -4,
+              top: -4,
+              child: ExcludeSemantics(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.surface,
+                      width: 1.5,
+                    ),
+                  ),
+                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                  child: Text(
+                    unread > 99 ? '99+' : '$unread',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+      onPressed: onTap,
+    );
+  }
+}

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../utils/pet_navigation.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/chat_controller.dart';
 import '../controllers/match_controller.dart';
 import '../controllers/notification_controller.dart';
 import '../models/notification_model.dart';
 import 'components/pet_avatar.dart';
+import '../widgets/brand_logo.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -23,6 +26,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+
+    // Mark notifications as read automatically upon viewing the page
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(notificationProvider.notifier).markAllAsRead();
+      }
+    });
   }
 
   @override
@@ -34,7 +44,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   @override
   Widget build(BuildContext context) {
     final notifState = ref.watch(notificationProvider);
-    final matchState = ref.watch(matchProvider);
+    final allRequestsAsync = ref.watch(allMatchRequestsProvider);
+    final requestCount = allRequestsAsync.maybeWhen(
+      data: (list) => list.length,
+      orElse: () => 0,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -48,21 +62,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                   : 'Activity',
             ),
             Tab(
-              text: matchState.myRequests.isNotEmpty
-                  ? 'Requests (${matchState.myRequests.length})'
+              text: requestCount > 0
+                  ? 'Requests ($requestCount)'
                   : 'Requests',
             ),
           ],
         ),
-        actions: [
-          if (notifState.unreadCount > 0)
-            IconButton(
-              tooltip: 'Mark all as read',
-              icon: const Icon(Icons.done_all),
-              onPressed: () =>
-                  ref.read(notificationProvider.notifier).markAllAsRead(),
-            ),
-        ],
       ),
       body: TabBarView(
         controller: _tabController,
@@ -80,26 +85,35 @@ class _ActivityTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(notificationProvider);
 
-    if (state.isLoading && state.items.isEmpty) {
+    final items = state.items
+        .where((n) => n.type != 'message' && n.type != 'match_request')
+        .toList();
+
+    if (state.isLoading && items.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
     return RefreshIndicator(
       onRefresh: () => ref.read(notificationProvider.notifier).refresh(),
-      child: state.items.isEmpty
-          ? ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: const [
-                SizedBox(height: 120),
-                Center(child: Text('No activity yet.')),
-              ],
-            )
+      child: items.isEmpty
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  const SizedBox(height: 120),
+                  BrandLogo(
+                    customSize: 64,
+                    color: Theme.of(context).colorScheme.outline.withAlpha(100),
+                  ),
+                  const SizedBox(height: 16),
+                  const Center(child: Text('No activity yet.')),
+                ],
+              )
           : ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: state.items.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemCount: items.length,
+              separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (context, index) {
-                final n = state.items[index];
+                final n = items[index];
                 return _NotificationTile(notification: n);
               },
             ),
@@ -113,6 +127,7 @@ class _NotificationTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     IconData icon;
@@ -131,6 +146,23 @@ class _NotificationTile extends ConsumerWidget {
       case 'order_status':
         icon = Icons.shopping_bag_rounded;
         bg = colors.tertiary;
+        break;
+      case 'post_like':
+        icon = Icons.favorite;
+        bg = colorScheme.error;
+        break;
+      case 'post_comment':
+        icon = Icons.comment;
+        bg = colors.secondary;
+        break;
+      case 'post_share':
+        icon = Icons.share;
+        bg = colorScheme.secondary;
+        break;
+      case 'profile_follow':
+      case 'pet_follow':
+        icon = Icons.person_add;
+        bg = colors.primary;
         break;
       default:
         icon = Icons.notifications;
@@ -170,8 +202,7 @@ class _NotificationTile extends ConsumerWidget {
       title: Text(
         notification.title,
         style: TextStyle(
-          fontWeight:
-              notification.isRead ? FontWeight.w500 : FontWeight.w700,
+          fontWeight: notification.isRead ? FontWeight.w500 : FontWeight.w700,
         ),
       ),
       subtitle: notification.body != null
@@ -186,8 +217,7 @@ class _NotificationTile extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(_timeAgo(notification.createdAt),
-              style: TextStyle(
-                  color: colors.onSurfaceVariant, fontSize: 11)),
+              style: TextStyle(color: colors.onSurfaceVariant, fontSize: 11)),
           if (!notification.isRead) ...[
             const SizedBox(height: 4),
             Container(
@@ -215,39 +245,49 @@ class _NotificationTile extends ConsumerWidget {
 class _RequestsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final matchState = ref.watch(matchProvider);
-    final myRequests = matchState.myRequests;
+    final colorScheme = Theme.of(context).colorScheme;
+    final allRequestsAsync = ref.watch(allMatchRequestsProvider);
 
-    return RefreshIndicator(
-      onRefresh: () => ref.read(matchProvider.notifier).refresh(),
-      child: myRequests.isEmpty
-          ? ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: const [
-                SizedBox(height: 120),
-                Center(child: Text('No new requests.')),
-              ],
-            )
-          : ListView.separated(
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: myRequests.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final req = myRequests[index];
+    return allRequestsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error loading requests: $e')),
+      data: (myRequests) => RefreshIndicator(
+        onRefresh: () async => ref.invalidate(allMatchRequestsProvider),
+        child: myRequests.isEmpty
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(height: 120),
+                  Center(child: Text('No new requests.')),
+                ],
+              )
+            : ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: myRequests.length,
+                separatorBuilder: (_, _) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final req = myRequests[index];
                 final senderPet = req.senderPet;
                 if (senderPet == null) return const SizedBox.shrink();
 
                 return ListTile(
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  leading:
-                      PetAvatar(imageUrl: senderPet.profileImageUrl, radius: 24),
+                  leading: PetAvatar(
+                      imageUrl: senderPet.profileImageUrl, radius: 24),
                   title: Text.rich(
                     TextSpan(
                       children: [
                         TextSpan(
                           text: senderPet.name,
                           style: const TextStyle(fontWeight: FontWeight.bold),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => openPetProfile(
+                                  context,
+                                  ref,
+                                  petId: senderPet.id,
+                                  petUserId: senderPet.userId,
+                                ),
                         ),
                         const TextSpan(text: ' liked your pet for breeding.'),
                       ],
@@ -263,6 +303,7 @@ class _RequestsTab extends ConsumerWidget {
                                   await ref
                                       .read(matchProvider.notifier)
                                       .acceptRequest(req.id);
+                                  ref.invalidate(allMatchRequestsProvider);
                                   if (!context.mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
@@ -285,6 +326,7 @@ class _RequestsTab extends ConsumerWidget {
                                   ref
                                       .read(matchProvider.notifier)
                                       .declineRequest(req.id);
+                                  ref.invalidate(allMatchRequestsProvider);
                                 },
                                 style: OutlinedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(
@@ -298,13 +340,13 @@ class _RequestsTab extends ConsumerWidget {
                         : req.status == 'matched'
                             ? Row(
                                 children: [
-                                  const Icon(Icons.check_circle,
-                                      color: Colors.green, size: 16),
+                                  Icon(Icons.check_circle,
+                                      color: colorScheme.secondary, size: 16),
                                   const SizedBox(width: 6),
-                                  const Text(
+                                  Text(
                                     'You matched!',
                                     style: TextStyle(
-                                      color: Colors.green,
+                                      color: colorScheme.secondary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -328,10 +370,10 @@ class _RequestsTab extends ConsumerWidget {
                                   ),
                                 ],
                               )
-                            : const Text(
+                            : Text(
                                 'Declined',
                                 style: TextStyle(
-                                  color: Colors.red,
+                                  color: colorScheme.error,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -340,6 +382,7 @@ class _RequestsTab extends ConsumerWidget {
                 );
               },
             ),
+      ),
     );
   }
 }

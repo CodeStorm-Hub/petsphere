@@ -5,6 +5,8 @@ import '../controllers/feed_controller.dart';
 import '../controllers/pet_controller.dart';
 import '../controllers/auth_controller.dart';
 import '../models/post_model.dart';
+import '../utils/pet_navigation.dart';
+import '../utils/post_actions.dart';
 import 'components/post_card.dart';
 
 class PostDetailScreen extends ConsumerWidget {
@@ -14,6 +16,7 @@ class PostDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final async = ref.watch(postByIdProvider(postId));
 
     return async.when(
@@ -29,14 +32,17 @@ class PostDetailScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+                Icon(Icons.error_outline,
+                    size: 48, color: colorScheme.error),
                 const SizedBox(height: 12),
-                Text('Could not load post', style: Theme.of(context).textTheme.titleMedium),
+                Text('Could not load post',
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 Text(
                   err.toString(),
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 16),
                 FilledButton.icon(
@@ -69,6 +75,7 @@ class _PostDetailContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final activePet = ref.watch(activePetProvider);
     final currentPetId = activePet?.id ?? '';
     final userId = ref.watch(authProvider).user?.id ?? '';
@@ -78,12 +85,18 @@ class _PostDetailContent extends ConsumerWidget {
       appBar: AppBar(
         title: Text(post.pet.name),
         actions: [
-          if (isOwnPost)
+          if (isOwnPost) ...[
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              icon: Icon(Icons.edit_outlined, color: colorScheme.primary),
+              tooltip: 'Edit Post',
+              onPressed: () => _showEditDialog(context, ref, post),
+            ),
+            IconButton(
+              icon: Icon(Icons.delete_outline, color: colorScheme.error),
               tooltip: 'Delete Post',
               onPressed: () => _confirmDelete(context, ref, post),
             ),
+          ],
         ],
       ),
       body: RefreshIndicator(
@@ -99,15 +112,33 @@ class _PostDetailContent extends ConsumerWidget {
                 post: post,
                 currentPetId: currentPetId,
                 onLikeToggle: () {
-                  ref.read(feedProvider.notifier).toggleLike(post.id, currentPetId);
+                  ref
+                      .read(feedProvider.notifier)
+                      .toggleLike(post.id, currentPetId);
                 },
-                onCommentIconTap: () =>
-                    _showCommentSheet(context, post.id, currentPetId, activePet?.name ?? ''),
+                onCommentIconTap: () => _showCommentSheet(
+                    context, post.id, currentPetId, activePet?.name ?? ''),
                 onShareIconTap: () => _sharePost(context, post),
                 onPetTap: () {
-                  ref.read(profilePetNavigationProvider.notifier).navigateTo(post.pet.id);
                   Navigator.pop(context);
+                  openPetProfile(
+                    context,
+                    ref,
+                    petId: post.pet.id,
+                    petUserId: post.pet.userId,
+                  );
                 },
+                onEdit: post.pet.userId == ref.read(authProvider).user?.id
+                    ? () => showEditPostDialog(context, ref, post)
+                    : null,
+                onDelete: post.pet.userId == ref.read(authProvider).user?.id
+                    ? () => showDeletePostDialog(
+                          context,
+                          ref,
+                          post,
+                          onDeleteSuccess: () => Navigator.pop(context),
+                        )
+                    : null,
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -124,7 +155,7 @@ class _PostDetailContent extends ConsumerWidget {
                         Text(
                           '${post.comments.length}',
                           style: TextStyle(
-                            color: Colors.grey.shade500,
+                            color: colorScheme.onSurfaceVariant,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -138,7 +169,7 @@ class _PostDetailContent extends ConsumerWidget {
                         child: Center(
                           child: Text(
                             'No comments yet. Start the conversation!',
-                            style: TextStyle(color: Colors.grey.shade400),
+                            style: TextStyle(color: colorScheme.onSurfaceVariant),
                           ),
                         ),
                       )
@@ -146,26 +177,38 @@ class _PostDetailContent extends ConsumerWidget {
                       ...post.comments.map((comment) {
                         final ago = _timeAgo(comment.createdAt);
                         final colors = [
-                          Colors.red, Colors.blue, Colors.green,
-                          Colors.orange, Colors.purple,
+                          colorScheme.error,
+                          colorScheme.primary,
+                          colorScheme.secondary,
+                          colorScheme.tertiary,
+                          colorScheme.primaryContainer,
                         ];
-                        final bg = colors[comment.petName.length % colors.length];
+                        final bg =
+                            colors[comment.petName.length % colors.length];
+                        void openCommenter() => openPetProfile(
+                              context,
+                              ref,
+                              petId: comment.petId,
+                            );
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundColor: bg.withAlpha(38),
-                                child: Text(
-                                  comment.petName.isNotEmpty
-                                      ? comment.petName[0].toUpperCase()
-                                      : '?',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                      color: bg),
+                              GestureDetector(
+                                onTap: openCommenter,
+                                child: CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: bg.withAlpha(38),
+                                  child: Text(
+                                    comment.petName.isNotEmpty
+                                        ? comment.petName[0].toUpperCase()
+                                        : '?',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                        color: bg),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -175,14 +218,17 @@ class _PostDetailContent extends ConsumerWidget {
                                   children: [
                                     Row(
                                       children: [
-                                        Text(comment.petName,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13)),
+                                        GestureDetector(
+                                          onTap: openCommenter,
+                                          child: Text(comment.petName,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13)),
+                                        ),
                                         const SizedBox(width: 8),
                                         Text(ago,
                                             style: TextStyle(
-                                                color: Colors.grey.shade500,
+                                                color: colorScheme.onSurfaceVariant,
                                                 fontSize: 11)),
                                       ],
                                     ),
@@ -203,6 +249,49 @@ class _PostDetailContent extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context, WidgetRef ref, PostModel post) {
+    final controller = TextEditingController(text: post.caption);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Edit Caption'),
+        content: TextField(
+          controller: controller,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: 'Enter new caption...',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final newCaption = controller.text.trim();
+              if (newCaption == post.caption) {
+                Navigator.pop(ctx);
+                return;
+              }
+              final success = await ref
+                  .read(feedProvider.notifier)
+                  .updatePost(postId: post.id, caption: newCaption);
+              if (ctx.mounted) Navigator.pop(ctx);
+              if (context.mounted && success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Post updated')),
+                );
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
       ),
     );
   }
@@ -240,7 +329,7 @@ class _PostDetailContent extends ConsumerWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: const Text('Post deleted'),
-                      backgroundColor: const Color(0xFF81C784),
+                      backgroundColor: Theme.of(context).colorScheme.tertiary,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -250,7 +339,7 @@ class _PostDetailContent extends ConsumerWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: const Text('Failed to delete post'),
-                      backgroundColor: Colors.redAccent,
+                      backgroundColor: Theme.of(context).colorScheme.error,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -259,7 +348,7 @@ class _PostDetailContent extends ConsumerWidget {
                 }
               }
             },
-            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Delete'),
           ),
         ],
@@ -268,22 +357,23 @@ class _PostDetailContent extends ConsumerWidget {
   }
 
   void _sharePost(BuildContext context, PostModel post) {
-    final link = 'https://petsphere.app/post/${post.id}';
-    final caption = post.caption.isNotEmpty
-        ? '"${post.caption}"\n\n'
-        : '';
-    Share.share(
-      'Check out ${post.pet.name} on PetSphere! $caption$link',
-      subject: 'PetSphere — ${post.pet.name}',
+    final link = 'https://petfolio.app/post/${post.id}';
+    final caption = post.caption.isNotEmpty ? '"${post.caption}"\n\n' : '';
+    SharePlus.instance.share(
+      ShareParams(
+        text: 'Check out ${post.pet.name} on PetFolio! $caption$link',
+        subject: 'PetFolio — ${post.pet.name}',
+      ),
     );
   }
 
-  void _showCommentSheet(
-      BuildContext context, String postId, String currentPetId, String petName) {
+  void _showCommentSheet(BuildContext context, String postId,
+      String currentPetId, String petName) {
+    final colorScheme = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.onPrimary,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -364,10 +454,10 @@ class _CommentSheetState extends ConsumerState<_CommentSheet> {
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
                     suffixIcon: IconButton(
-                      icon: const Icon(Icons.send_rounded,
-                          color: Color(0xFFFF8A65)),
-                      onPressed: _submit,
-                    ),
+                       icon: Icon(Icons.send_rounded,
+                          color: Theme.of(context).colorScheme.primary),
+                       onPressed: _submit,
+                     ),
                   ),
                   onSubmitted: (_) => _submit(),
                 ),

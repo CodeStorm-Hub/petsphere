@@ -32,6 +32,7 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+config/dart_define.json
 
 # Symbolication related
 app.*.symbols
@@ -47,3 +48,7 @@ app.*.map.json
 builder.exe
 dist/petsphere-217fd880.ipa
 dist/petsphere-e6d8abd0.ipa
+.env.local
+/android/gradle.properties
+/scratch
+/.kiro

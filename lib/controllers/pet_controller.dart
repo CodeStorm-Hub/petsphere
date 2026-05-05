@@ -59,11 +59,12 @@ class PetNotifier extends Notifier<PetState> {
     });
 
     final authState = ref.read(authProvider);
-    if (authState.status == AuthStatus.authenticated && authState.user != null) {
-      _loadMyPets(authState.user!.id);
+    if (authState.status == AuthStatus.authenticated &&
+        authState.user != null) {
+      Future.microtask(() => _loadMyPets(authState.user!.id));
     }
 
-    return PetState();
+    return PetState(isLoading: true);
   }
 
   Future<void> _loadMyPets(String userId) async {
@@ -205,4 +206,19 @@ class ProfilePetNavigation extends Notifier<String?> {
 }
 
 final profilePetNavigationProvider =
-    NotifierProvider<ProfilePetNavigation, String?>(() => ProfilePetNavigation());
+    NotifierProvider<ProfilePetNavigation, String?>(
+        () => ProfilePetNavigation());
+
+/// [MainLayout] listens and switches its bottom tab to the requested index
+/// (e.g. 4 for Profile), then clears the value.
+class MainLayoutTabRequest extends Notifier<int?> {
+  @override
+  int? build() => null;
+
+  void request(int index) => state = index;
+
+  void clear() => state = null;
+}
+
+final mainLayoutTabRequestProvider =
+    NotifierProvider<MainLayoutTabRequest, int?>(MainLayoutTabRequest.new);

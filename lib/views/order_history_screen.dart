@@ -5,7 +5,8 @@ import '../controllers/auth_controller.dart';
 import '../models/order_model.dart';
 import '../repositories/marketplace_repository.dart';
 
-final _ordersProvider = FutureProvider.autoDispose<List<OrderModel>>((ref) async {
+final _ordersProvider =
+    FutureProvider.autoDispose<List<OrderModel>>((ref) async {
   final userId = ref.watch(authProvider).user?.id;
   if (userId == null) return [];
   return marketplaceRepository.fetchOrders(userId);
@@ -16,6 +17,7 @@ class OrderHistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final ordersAsync = ref.watch(_ordersProvider);
     final currencyFormat = NumberFormat.currency(symbol: '\$');
     final dateFormat = DateFormat('MMM d, yyyy · h:mm a');
@@ -32,14 +34,17 @@ class OrderHistoryScreen extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 64, color: Colors.grey.shade400),
+                Icon(Icons.error_outline,
+                    size: 64, color: colorScheme.onSurfaceVariant),
                 const SizedBox(height: 16),
                 const Text('Failed to load orders',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 Text(err.toString(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey.shade500, fontSize: 13)),
+                    style:
+                        TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
                 const SizedBox(height: 24),
                 OutlinedButton.icon(
                   onPressed: () => ref.invalidate(_ordersProvider),
@@ -62,16 +67,16 @@ class OrderHistoryScreen extends ConsumerWidget {
                         child: Column(
                           children: [
                             Icon(Icons.receipt_long_outlined,
-                                size: 80, color: Colors.grey.shade300),
+                                size: 80, color: colorScheme.onSurfaceVariant),
                             const SizedBox(height: 16),
-                            const Text('No orders yet',
+                            Text('No orders yet',
                                 style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.grey)),
+                                    color: colorScheme.onSurfaceVariant)),
                             const SizedBox(height: 8),
                             Text('Your order history will appear here',
-                                style: TextStyle(color: Colors.grey.shade400)),
+                                style: TextStyle(color: colorScheme.onSurfaceVariant)),
                           ],
                         ),
                       ),
@@ -110,13 +115,14 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final statusColor = switch (order.status) {
-      'pending' => const Color(0xFFFFB74D),
-      'confirmed' => const Color(0xFF4FC3F7),
-      'shipped' => const Color(0xFF64B5F6),
-      'delivered' => const Color(0xFF81C784),
-      'cancelled' => Colors.red,
-      _ => Colors.grey,
+      'pending' => colorScheme.secondary,
+      'confirmed' => colorScheme.primary,
+      'shipped' => colorScheme.primary,
+      'delivered' => colorScheme.tertiary,
+      'cancelled' => colorScheme.error,
+      _ => colorScheme.onSurfaceVariant,
     };
 
     return Card(
@@ -161,7 +167,7 @@ class _OrderCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               dateFormat.format(order.createdAt.toLocal()),
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+              style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
             ),
             const SizedBox(height: 12),
             const Divider(height: 1),
@@ -179,7 +185,7 @@ class _OrderCard extends StatelessWidget {
                       Text(
                         currencyFormat.format(item.subtotal),
                         style: TextStyle(
-                            color: Colors.grey.shade600, fontSize: 14),
+                            color: colorScheme.onSurfaceVariant, fontSize: 14),
                       ),
                     ],
                   ),

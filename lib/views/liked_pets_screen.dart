@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/match_controller.dart';
+import '../widgets/brand_logo.dart';
 import 'components/pet_avatar.dart';
 
 class LikedPetsScreen extends ConsumerWidget {
@@ -9,6 +10,7 @@ class LikedPetsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final sentRequests = ref.watch(matchProvider).sentRequests;
 
     return Scaffold(
@@ -27,20 +29,20 @@ class LikedPetsScreen extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.favorite_border,
-                            size: 64, color: Colors.grey.shade400),
+                            size: 64, color: colorScheme.onSurfaceVariant),
                         const SizedBox(height: 16),
                         Text(
                           'No likes yet',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade600,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Pets you like will appear here.',
-                          style: TextStyle(color: Colors.grey.shade500),
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -51,60 +53,61 @@ class LikedPetsScreen extends ConsumerWidget {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemCount: sentRequests.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (context, index) {
-                final req = sentRequests[index];
-                final pet = req.receiverPet;
+                  final req = sentRequests[index];
+                  final pet = req.receiverPet;
 
-                if (pet == null) {
+                  if (pet == null) {
+                    return ListTile(
+                      leading: const CircleAvatar(child: BrandLogo(size: BrandLogoSize.small)),
+                      title: const Text('Unknown pet'),
+                      subtitle: _statusLabel(context, req.status),
+                    );
+                  }
+
                   return ListTile(
-                    leading: const CircleAvatar(child: Icon(Icons.pets)),
-                    title: const Text('Unknown pet'),
-                    subtitle: _statusLabel(req.status),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    leading:
+                        PetAvatar(imageUrl: pet.profileImageUrl, radius: 24),
+                    title: Text(
+                      pet.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${pet.breed} · ${pet.age} yrs'),
+                        const SizedBox(height: 4),
+                        _statusLabel(context, req.status),
+                      ],
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/pet/${pet.id}'),
                   );
-                }
-
-                return ListTile(
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  leading: PetAvatar(
-                      imageUrl: pet.profileImageUrl, radius: 24),
-                  title: Text(
-                    pet.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('${pet.breed} · ${pet.age} yrs'),
-                      const SizedBox(height: 4),
-                      _statusLabel(req.status),
-                    ],
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/pet/${pet.id}'),
-                );
-              },
-            ),
+                },
+              ),
       ),
     );
   }
 
-  Widget _statusLabel(String status) {
+  Widget _statusLabel(BuildContext context, String status) {
+    final colorScheme = Theme.of(context).colorScheme;
     final Color color;
     final String label;
     switch (status) {
       case 'matched':
-        color = Colors.green;
+        color = colorScheme.secondary;
         label = 'Matched';
       case 'rejected':
-        color = Colors.red;
+        color = colorScheme.error;
         label = 'Declined';
       case 'pending':
-        color = Colors.orange;
+        color = colorScheme.tertiary;
         label = 'Pending';
       default:
-        color = Colors.grey;
+        color = colorScheme.onSurfaceVariant;
         label = status;
     }
     return Container(

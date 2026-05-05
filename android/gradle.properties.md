@@ -1,0 +1,14 @@
+org.gradle.jvmargs=-Xmx2G -XX:MaxMetaspaceSize=1G -XX:ReservedCodeCacheSize=512m -XX:+HeapDumpOnOutOfMemoryError
+android.useAndroidX=true
+# Android Gradle Plugin / Gradle do not run on JDK 26; without a JDK 17–21 toolchain the build fails with "26.0.2" as the only message.
+org.gradle.java.home=C:\\Program Files\\Android\\Android Studio\\jbr
+# Enable parallel build to speed up the build process
+org.gradle.parallel=true
+# Enable the Gradle build cache to reuse outputs from previous builds
+org.gradle.caching=true
+# Enable configuration on demand to reduce configuration time
+org.gradle.configureondemand=true
+# Enable the Gradle daemon to keep it running in the background for faster builds
+org.gradle.daemon=true
+# Enable Gradle's build scan plugin for better insights into build performance
+# org.gradle.scan=true

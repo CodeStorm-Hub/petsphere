@@ -1,0 +1,280 @@
+# Research: Flutter + Supabase for Mobile-First Social, Dating/Breeding, Marketplace, and Fitness/Healthcare Apps
+
+**Date:** 2026-05-04  
+**Scope:** Android, iOS, and Web; stack patterns aligned with PetSphere-style apps (social feed, matching, commerce, care/health).  
+**Research methods:** Context7 MCP (`resolve-library-id`, `query-docs`), Supabase MCP (`search_docs`), official Supabase docs via `WebFetch`, Cursor IDE Browser verification of live documentation, project architecture skills (Flutter layered architecture, responsive layout, declarative routing), Supabase + Postgres best-practices skills, and targeted web search.
+
+---
+
+## 1. Executive summary
+
+For a **mobile-first** product on **Flutter + Supabase (Postgres, Auth, Storage, Realtime, Edge Functions)**, industry and vendor guidance converge on:
+
+- **Architecture:** Layered UI → application state (Riverpod `Notifier`s) → repositories → Supabase client; optional clean-architecture “feature slices” as the codebase grows.
+- **Security:** Treat the database as the source of truth for authorization via **Row Level Security (RLS)** on every table in exposed schemas; never rely on the client alone.
+- **Auth + navigation:** Persist sessions with `supabase_flutter`, listen to `onAuthStateChange`, wire **deep links / universal links** for magic links and OAuth, and drive route guards with **go_router** `redirect` + a **refreshListenable** tied to auth state.
+- **Cross-platform UX:** Base breakpoints on **window constraints** (`LayoutBuilder`, `MediaQuery.sizeOf`), not device type or orientation alone; use **path URL strategy** on web for shareable URLs.
+- **Push:** Use **FCM** (and APNs via Firebase on iOS) or **Expo Push** with **Edge Functions** + **Database Webhooks** for server-triggered sends—never ship service-role keys to clients.
+- **Refactors:** Prefer incremental extraction (repository per feature, thin widgets, mock repositories in tests) over big-bang rewrites.
+
+This document expands each area for **social (Tinder-like discovery)**, **dating/breeding flows**, **shop**, and **fitness/health (Apple Fitness–style)** concerns.
+
+---
+
+## 2. Recommended software architecture for this stack
+
+### 2.1 Pattern name and shape
+
+Common labels:
+
+| Pattern | Role in Flutter + Supabase |
+|--------|------------------------------|
+| **Layered / hexagonal ports** | UI depends on abstractions; Supabase sits in the infrastructure layer. |
+| **Repository** | Single place for queries, uploads, and realtime channel setup; maps JSON ↔ domain models. |
+| **MVVM / presentation model** | Screens are “dumb”; Riverpod notifiers (or view models) hold UI state and call repositories. |
+| **Feature modules** (optional) | Group `controllers`, `repositories`, `views` per feature when boundaries are clear (PetSphere already leans this way). |
+
+The **flutter-apply-architecture-best-practices** skill emphasizes **strict separation**: no Supabase calls inside large `build()` methods; repositories as the boundary to remote data.
+
+**Riverpod (Context7: `/rrousselgit/riverpod`):**
+
+- Prefer **`Notifier` + `NotifierProvider`** for mutable feature state with explicit methods.
+- Invoke logic with `ref.read(provider.notifier).method()` from widgets.
+- **Testing:** Avoid mocking notifiers directly; mock **repositories** or other dependencies the notifier uses (`ProviderContainer.test()` for isolation).
+
+### 2.2 How this maps to PetSphere’s current style
+
+The project’s documented approach (see `CLAUDE.md`)—**Riverpod notifiers**, **repositories**, **immutable models with `copyWith`**, **go_router**—matches vendor and community guidance. Refactors should **preserve** that shape while tightening boundaries (e.g. ensuring no repository takes `WidgetRef`).
+
+### 2.3 Realtime, chat, and “Tinder-like” feeds
+
+- Use **Supabase Realtime** for threads, match notifications, and live counters; **subscribe narrowly** (per channel/table) and **dispose** subscriptions when screens pop.
+- For swipe decks and feeds, **paginate** (cursor/keyset pagination) to avoid loading entire candidate pools (aligns with Postgres skill category `data-pagination`).
+
+### 2.4 Marketplace and payments
+
+- **Client:** cart UI, optimistic UI with rollback on error.
+- **Server:** price validation, inventory holds, and payment confirmation should run in **Edge Functions** or a trusted backend using the **secret** key—never trust client-submitted prices or stock.
+- **Postgres:** constraints and foreign keys for `orders` → `order_items` → `products` (see `schema-constraints`, `schema-foreign-key-indexes` in supabase-postgres-best-practices references).
+
+### 2.5 Fitness / healthcare data
+
+- Treat health logs as **user-owned** or **pet-owned** rows with RLS; consider **retention policies** and regional compliance (HIPAA-style apps usually need BAA and architecture beyond vanilla Supabase—call out as a product/legal decision).
+- For high-volume time-series (steps, heart rate), plan **indexes**, **partitioning** if needed, and **batch inserts** (`data-batch-inserts` reference).
+
+---
+
+## 3. Authentication and session user flow
+
+### 3.1 Client lifecycle (`supabase_flutter`, Context7 `/supabase/supabase-flutter`)
+
+- **Initialize** `Supabase.initialize(...)` in `main()` before `runApp`, with project URL and **publishable/anon** key (never service role).
+- **Persistence:** `supabase_flutter` persists sessions (e.g. SharedPreferences on mobile, localStorage on web). Optional **`MigrationLocalStorage`** migrates session storage when changing persistence backends.
+- **Listen:** `supabase.auth.onAuthStateChange` for `initialSession`, `signedIn`, `signedOut`, `tokenRefreshed`, `userUpdated`, `passwordRecovery`, MFA events.
+- **Sign-in methods:** `signUp`, `signInWithPassword`, `signInWithOtp` (magic link), `signInWithOAuth` with `redirectTo` for mobile/web.
+- **Session access:** `currentSession`, `currentUser`; refresh via `refreshSession()` when needed.
+- **Sign out:** local vs `SignOutScope.global` depending on “log out everywhere” product requirements.
+
+Tokens are injected for REST/Realtime via the client’s auth layer (**AuthHttpClient**).
+
+### 3.2 Deep linking and OAuth (official docs summary)
+
+Sources: [Native Mobile Deep Linking](https://supabase.com/docs/guides/auth/native-mobile-deep-linking), [Flutter user management tutorial](https://supabase.com/docs/guides/getting-started/tutorials/with-flutter) (verified in browser: title *Build a User Management App with Flutter*).
+
+**Practices:**
+
+1. Register a **custom URL scheme** `[scheme]://[host]` (often reverse-DNS); add the same URL under **Auth → URL Configuration → Additional Redirect URLs** in the Supabase dashboard.
+2. **Android:** `intent-filter` on `VIEW` / `DEFAULT` / `BROWSABLE` with `android:scheme` (and optional `android:host`).
+3. **iOS:** `CFBundleURLTypes` in `Info.plist`; prefer **Universal Links** + hosted **AASA** for production (Supabase does not host AASA—you host it on your domain).
+4. **Web:** `flutter_web_plugins` **path URL strategy** removes `#/` fragments for cleaner OAuth return URLs and SEO-friendly routes (see flutter-setup-declarative-routing skill).
+5. **Windows/macOS:** `supabase_flutter` supports deep links; Windows may need extra protocol registration (e.g. via `app_links` / installer).
+
+### 3.3 Binding auth to navigation (go_router)
+
+Sources: go_router changelog via Context7 (`/websites/pub_dev_packages_go_router`)—**redirect** at route level, **`refreshListenable`**, **`refresh`**, shell route redirects in recent versions.
+
+**Recommended flow:**
+
+1. A small **`AuthListenable`** (e.g. `ChangeNotifier`) updates when `onAuthStateChange` fires.
+2. `GoRouter(redirect: ..., refreshListenable: authListenable)` sends unauthenticated users to `/login` and authenticated users away from auth-only routes.
+3. Avoid navigation logic duplicated in every screen; centralize in **one** redirect policy with clear rules for onboarding vs main shell.
+
+### 3.4 Security notes (Supabase skill checklist)
+
+- **Do not** use `raw_user_meta_data` / `user_metadata` for authorization in RLS (user-editable).
+- Prefer **`app_metadata`** or server-side roles for elevated permissions.
+- Remember **JWT claims may be stale** until refresh—sensitive operations may need server verification.
+
+---
+
+## 4. UI / UX implementation (mobile-first + web)
+
+### 4.1 Responsive layout (flutter-build-responsive-layout skill)
+
+- Use **`MediaQuery.sizeOf(context)`** for full window size and **`LayoutBuilder`** for subtree constraints.
+- **Avoid** choosing layout purely from `OrientationBuilder` at the root—window size on foldables and desktop embedding does not always track orientation.
+- **Do not** “detect tablet by user agent”; use **width breakpoints** (e.g. `600` for two-pane layouts).
+- Use **`Expanded` / `Flexible`**, **`ListView.builder` / `GridView.builder`**, and **`ConstrainedBox(maxWidth: …)` + `Center`** for readable forms and grids on large screens.
+
+### 4.2 Social / dating UX patterns
+
+- **Discovery:** card stacks with performant images (`cached_network_image`), prefetch next page, skeleton loaders.
+- **Safety:** report/block flows should be **one tap** from profile and chat; reflect blocks in **queries** (RLS or filtered views) so blocked users never appear in feeds.
+- **Messaging:** typing indicators and read receipts via **Realtime** or periodic fetch; debounce updates to reduce churn.
+
+### 4.3 Shop UX
+
+- Clear **cart** state, **empty states**, and **error retry** on checkout.
+- **Web:** maintain cart in URL or session; handle **back** navigation with `go_router` stack vs `go` deliberately.
+
+### 4.4 Fitness / Apple Fitness–style UX
+
+- **Rings / progress:** prefer declarative progress models updated from notifier, not imperative animation loops tied to network.
+- **Large motion / accessibility:** respect reduced motion; expose semantics for charts (Flutter accessibility guidelines).
+
+### 4.5 Theming
+
+- Central **ThemeData** / extensions (PetSphere uses Material 3 + design tokens)—keeps social, shop, and health areas visually consistent while allowing feature accents.
+
+---
+
+## 5. Refactoring an existing codebase (practical playbook)
+
+1. **Stabilize boundaries:** Ensure each feature’s Supabase access goes through a **repository**; move stray `supabase.from` calls out of widgets and notifiers over time.
+2. **State shape:** Keep **immutable state classes** with `copyWith`; avoid growing “god” notifiers—split by feature (`auth`, `match`, `marketplace`, `health`).
+3. **Routing:** Consolidate auth redirects in **go_router**; remove duplicate `Navigator.push` paths where `context.push`/`go` can express the same tree.
+4. **Tests:** Introduce **repository fakes** first; then notifier tests with `ProviderContainer.test()` (Riverpod docs).
+5. **Realtime:** Extract channel subscription helpers so screens do not own raw `SupabaseChannel` lifecycle.
+6. **Incremental delivery:** Vertical slices (e.g. “match list end-to-end”) beat horizontal layers-only refactors that leave features half-migrated.
+
+---
+
+## 6. Database schema and security
+
+### 6.1 RLS first (Supabase docs + postgres skill)
+
+From [Row Level Security](https://supabase.com/docs/guides/auth/row-level-security):
+
+- **Enable RLS** on all tables in **`public`** (or any API-exposed schema).
+- With RLS on and **no policies**, the Data API returns **no rows** for anon/authenticated keys—policies are mandatory for access.
+- Model policies as implicit **`WHERE`** clauses on `SELECT` / `INSERT` / `UPDATE` / `DELETE`.
+- **Postgres note:** For `UPDATE`, ensure policies allow the necessary **`SELECT`** phase of the update where relevant (Supabase security skill: updates can affect zero rows without obvious errors if policies omit `SELECT`).
+
+**supabase-postgres-best-practices (`security-rls-basics.md`):** enable RLS, scope policies to `authenticated`, use `auth.uid()` (or equivalent) for tenant isolation, and consider **`FORCE ROW LEVEL SECURITY`** for defense in depth when appropriate.
+
+### 6.2 Schema sketch by domain (illustrative, not migration SQL)
+
+| Domain | Example tables | RLS idea |
+|--------|----------------|----------|
+| Profiles | `profiles` (`id` = `auth.users.id`) | User updates own row; selective public read for discovery fields via policy or materialized public profile. |
+| Social | `posts`, `comments`, `likes`, `stories` | Author-based insert; read based on follow graph or public flag. |
+| Dating / breeding | `swipes`, `match_requests`, `matches`, `blocks` | Participants-only read; inserts scoped to `auth.uid()`; blocks enforced in policies or RPC. |
+| Shop | `products`, `carts`, `cart_items`, `orders` | Public read products; cart/order rows owner-only; writes validated server-side for prices. |
+| Health | `care_logs`, `vitals`, `medications` | Owner or vet role; strict least privilege. |
+
+Use **foreign keys**, **check constraints**, and **indexes on filter columns** (see `schema-foreign-key-indexes`, `query-missing-indexes`).
+
+### 6.3 Views and functions (Supabase security skill)
+
+- **Views** may bypass RLS depending on Postgres configuration—use **`security_invoker`** on Postgres 15+ where appropriate, or restrict roles.
+- Avoid **`SECURITY DEFINER`** functions in exposed schemas unless tightly reviewed; prefer **`security invoker`** patterns and private schemas for privileged logic.
+
+### 6.4 Storage
+
+- **Public vs private buckets** by asset type (avatars may be public URLs; health documents private).
+- **Upsert** requires appropriate **INSERT + SELECT + UPDATE** policies or replacements fail silently—per Supabase storage guidance in the project skill.
+
+### 6.5 Performance categories (supabase-postgres-best-practices skill overview)
+
+Prioritize: **query performance**, **connection management**, **security/RLS**, **schema design**, then concurrency, data access patterns, monitoring, advanced features. Use **`EXPLAIN (ANALYZE, BUFFERS)`** for hot paths (`monitor-explain-analyze` reference).
+
+### 6.6 API keys
+
+Supabase is transitioning to **publishable** vs **legacy anon** keys (noted on the Flutter tutorial page). Client apps should use **publishable/anon** only; **secret/service_role** stays in Edge Functions or trusted servers.
+
+---
+
+## 7. In-app permissions (device)
+
+Cross-platform:
+
+- Declare **Android manifest** permissions and **iOS Info.plist usage strings** for every sensitive capability (camera, mic, photo library, location, Bluetooth for wearables, health kit–style sensors where applicable).
+- At runtime, use a single **permission coordinator** (commonly `permission_handler` on mobile) that:
+  - **Checks** status before requesting.
+  - **Requests after user intent** (button tap), not on cold start.
+  - Handles **`permanentlyDenied`** with deep link to **app settings** and in-app explanation.
+  - Supports **`limited`** photo access on iOS.
+
+**Feature mapping:**
+
+| Feature | Typical permissions |
+|---------|---------------------|
+| Social photos / stories | Camera, photos/microphone for video. |
+| Dating / meetups | Location (when-in-use vs always—minimize). |
+| Shop | Optional camera for barcode; notifications for shipment updates. |
+| Fitness | Motion, Bluetooth, background fetch—platform-specific and often stricter on iOS. |
+
+---
+
+## 8. In-app and device notifications
+
+### 8.1 In-app (data-driven)
+
+- Store notifications in a **`notifications`** table; RLS: `user_id = auth.uid()`.
+- Drive UI via **Realtime** `postgres_changes` on that table or periodic fetch + cursor.
+
+### 8.2 Push (FCM / APNs / Expo)
+
+Source: [Sending Push Notifications](https://supabase.com/docs/guides/functions/examples/push-notifications).
+
+**Patterns:**
+
+1. Store **`fcm_token`** or **Expo push token** on `profiles` (or a dedicated table keyed by `user_id`).
+2. On **`INSERT` into `notifications`**, fire a **Database Webhook** → **Edge Function** that:
+   - Uses **service role** only inside the function (from secrets env).
+   - Calls **FCM HTTP v1** with a **service account JWT**, **or** Expo’s HTTP API with an access token.
+3. **Never** embed service credentials in the Flutter app.
+4. **Web push:** FCM supports web clients; configure VAPID keys and service worker per Firebase docs.
+
+**Operational notes:**
+
+- Rotate tokens on login/logout; handle invalid token responses by clearing stored tokens.
+- Rate-limit and validate webhook payloads inside Edge Functions.
+
+---
+
+## 9. Offline, reliability, and sync (brief)
+
+Community articles emphasize **offline-first** with local persistence (Drift/Hive/Isar) + **sync queues** for writes when building resilient field apps. For social/dating, partial offline (cached feed, queued posts) is often enough; healthcare may demand stronger guarantees—treat as a product decision.
+
+---
+
+## 10. Suggested reading order for engineers
+
+1. [Build a User Management App with Flutter](https://supabase.com/docs/guides/getting-started/tutorials/with-flutter)  
+2. [Flutter Authorization with RLS](https://supabase.com/blog/flutter-authorization-with-rls) (companion deep-dive; also see [Auth deep dive: Row Level Security](https://supabase.com/docs/guides/auth/auth-deep-dive/auth-row-level-security))  
+3. [Row Level Security](https://supabase.com/docs/guides/auth/row-level-security)  
+4. [Native Mobile Deep Linking](https://supabase.com/docs/guides/auth/native-mobile-deep-linking)  
+5. [Push notifications via Edge Functions](https://supabase.com/docs/guides/functions/examples/push-notifications)  
+6. [Supabase product security](https://supabase.com/docs/guides/security/product-security) (for expanded checklist)  
+7. Riverpod testing + Notifier docs (`/rrousselgit/riverpod` on Context7)  
+8. go_router package docs / changelog for redirect APIs (`/websites/pub_dev_packages_go_router`)
+
+---
+
+## 11. Research artifacts log
+
+| Source type | What was consulted |
+|-------------|-------------------|
+| **Context7** | `resolve-library-id` / `query-docs` for `/supabase/supabase-flutter`, `/rrousselgit/riverpod`, `/websites/pub_dev_packages_go_router` |
+| **Supabase MCP** | `search_docs` GraphQL for Flutter auth tutorial and push notification guide hits |
+| **WebFetch** | Native mobile deep linking; push notifications guide; Row Level Security doc (markdown) |
+| **Browser MCP** | Live page `https://supabase.com/docs/guides/getting-started/tutorials/with-flutter` (snapshot confirms structure: DB, RLS, Auth, Storage, deep links, web run) |
+| **Web search** | Flutter + Supabase architecture articles; permission_handler guidance |
+| **Repo skills** | `flutter-apply-architecture-best-practices`, `flutter-build-responsive-layout`, `flutter-setup-declarative-routing`, `supabase` skill (security + CLI notes), `supabase-postgres-best-practices` (`security-rls-basics.md`, category table) |
+
+---
+
+## 12. Disclaimer
+
+This document synthesizes **public documentation and general patterns**. **Healthcare compliance**, **payment card industry (PCI)**, and **breeding/animal commerce regulations** are jurisdiction-specific and require legal and security review beyond a technical survey.

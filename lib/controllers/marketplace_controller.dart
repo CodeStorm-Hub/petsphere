@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/product_model.dart';
 import '../repositories/marketplace_repository.dart';
+import 'auth_controller.dart';
 
 // ---------------------------------------------------------------------------
 // State
@@ -40,9 +41,24 @@ class MarketplaceState {
 // Notifier
 // ---------------------------------------------------------------------------
 class MarketplaceController extends Notifier<MarketplaceState> {
+  String? _lastFetchedForUserId;
+
   @override
   MarketplaceState build() {
-    _fetchProducts();
+    ref.listen<AuthState>(authProvider, (prev, next) {
+      if (next.status == AuthStatus.authenticated &&
+          next.user != null &&
+          _lastFetchedForUserId != next.user!.id) {
+        _lastFetchedForUserId = next.user!.id;
+        _fetchProducts(category: state.filterCategory);
+      } else if (next.status == AuthStatus.unauthenticated) {
+        _lastFetchedForUserId = null;
+      }
+    });
+
+    Future.microtask(() => _fetchProducts());
+    final authedUser = ref.read(authProvider).user;
+    if (authedUser != null) _lastFetchedForUserId = authedUser.id;
     return MarketplaceState(isLoading: true);
   }
 
