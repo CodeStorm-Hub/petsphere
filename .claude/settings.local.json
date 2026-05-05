@@ -6,7 +6,11 @@
       "Bash(gh issue *)",
       "Bash(flutter test *)",
       "Bash(git add *)",
-      "Bash(git commit -m 'Implement Epic #58: Foundation & Release Blockers \\(build, routing, schema, tests\\) *)"
+      "Bash(git commit -m 'Implement Epic #58: Foundation & Release Blockers \\(build, routing, schema, tests\\) *)",
+      "mcp__plugin_supabase_supabase__list_projects",
+      "mcp__plugin_supabase_supabase__list_migrations",
+      "mcp__plugin_supabase_supabase__apply_migration",
+      "mcp__plugin_supabase_supabase__list_tables"
     ]
   }
 }
