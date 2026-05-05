@@ -11,6 +11,10 @@ on:
       - main
       - develop
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   # Job 1: Analyze code and run tests
   test:
