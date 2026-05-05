@@ -1,0 +1,39 @@
+{
+  "hooks": [
+    {
+      "trigger": "PostToolUse",
+      "tool": "Edit",
+      "description": "Auto-format and lint Dart files after editing",
+      "commands": ["dart format {filePath}", "flutter analyze --no-pub {filePath}"]
+    }
+  ],
+  "permissions": {
+    "preToolUse": [
+      {
+        "tool": "Edit",
+        "blockedPaths": [
+          "pubspec.lock",
+          ".env*",
+          "lib/utils/supabase_config.dart",
+          "android/local.properties",
+          "ios/local.properties"
+        ],
+        "message": "This file is protected to prevent accidental modifications. Use version control or ask the user before making changes."
+      }
+    ]
+  },
+  "mcp": {
+    "servers": [
+      {
+        "type": "plugin",
+        "name": "supabase",
+        "description": "Direct Supabase database access for schema inspection and migrations"
+      },
+      {
+        "type": "plugin",
+        "name": "context7",
+        "description": "Real-time Flutter/Dart/Riverpod documentation lookup"
+      }
+    ]
+  }
+}
