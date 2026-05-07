@@ -17,6 +17,7 @@ jobs:
       contents: read
       checks: write
       pull-requests: write
+      security-events: write
     
     steps:
       - name: Checkout Code
@@ -32,7 +33,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.16.0
         with:
-          flutter-version: '3.24.3'
+          flutter-version: '3.41.9'
           channel: 'stable'
           cache: true
 
@@ -83,7 +84,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.16.0
         with:
-          flutter-version: '3.24.3'
+          flutter-version: '3.41.9'
           channel: 'stable'
           cache: true
 
@@ -94,7 +95,7 @@ jobs:
         run: flutter build apk --debug --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Upload APK
-        uses: actions/upload-artifact@c7d193f32ed247398f1ef51e04acc37d996a730c # v4.1.0
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.4.3
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
@@ -114,7 +115,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.16.0
         with:
-          flutter-version: '3.24.3'
+          flutter-version: '3.41.9'
           channel: 'stable'
           cache: true
 
@@ -125,7 +126,7 @@ jobs:
         run: flutter build ios --no-codesign --debug --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Upload Runner
-        uses: actions/upload-artifact@c7d193f32ed247398f1ef51e04acc37d996a730c # v4.1.0
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.4.3
         with:
           name: ios-build
           path: build/ios/iphoneos/Runner.app

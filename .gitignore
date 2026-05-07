@@ -52,3 +52,5 @@ dist/petsphere-e6d8abd0.ipa
 /android/gradle.properties
 /scratch
 /.kiro
+.claude/settings.local.json
+

@@ -36,6 +36,10 @@ class CommentModel {
         'pet_id': petId,
         'text': text,
         'created_at': createdAt.toIso8601String(),
+        'pets': {
+          'name': petName,
+          'profile_image_url': petProfileImageUrl,
+        },
       };
 }
 

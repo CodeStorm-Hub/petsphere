@@ -35,7 +35,7 @@ class OfflineFeedRepository {
     if (_connectivity.isOffline) {
       final cached = _cache.getCachedFeedPosts();
       if (cached != null && cached.isNotEmpty) {
-        return cached.map((json) => PostModel.fromJson(json)).toList();
+        return cached.map((json) => PostModel.fromJson(json as Map<String, dynamic>)).toList();
       }
       // If offline and no cache, throw error
       throw Exception('No cached posts available and device is offline');
@@ -45,21 +45,21 @@ class OfflineFeedRepository {
     if (_cache.isFeedPostsFresh(_postsCacheTTL)) {
       final cached = _cache.getCachedFeedPosts();
       if (cached != null) {
-        return cached.map((json) => PostModel.fromJson(json)).toList();
+        return cached.map((json) => PostModel.fromJson(json as Map<String, dynamic>)).toList();
       }
     }
 
     // Cache is stale or missing, fetch from network
     try {
       final posts = await _feedRepository.fetchPosts();
-      // Note: We cache the model objects; they'll be JSON-serialized by saveJson
-      await _cache.cacheFeedPosts(posts);
+      // Convert models to JSON maps for persistence
+      await _cache.cacheFeedPosts(posts.map((p) => p.toJson()).toList());
       return posts;
     } catch (e) {
       // Network error - try returning cached data if available
       final cached = _cache.getCachedFeedPosts();
       if (cached != null && cached.isNotEmpty) {
-        return cached.map((json) => PostModel.fromJson(json)).toList();
+        return cached.map((json) => PostModel.fromJson(json as Map<String, dynamic>)).toList();
       }
       rethrow;
     }
@@ -76,7 +76,7 @@ class OfflineFeedRepository {
       if (cached != null) {
         for (final json in cached) {
           if (json['id'] == postId) {
-            return PostModel.fromJson(json);
+            return PostModel.fromJson(json as Map<String, dynamic>);
           }
         }
       }
@@ -91,7 +91,7 @@ class OfflineFeedRepository {
       if (cached != null) {
         for (final json in cached) {
           if (json['id'] == postId) {
-            return PostModel.fromJson(json);
+            return PostModel.fromJson(json as Map<String, dynamic>);
           }
         }
       }

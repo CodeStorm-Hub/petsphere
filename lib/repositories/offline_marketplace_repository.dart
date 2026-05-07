@@ -35,7 +35,7 @@ class OfflineMarketplaceRepository {
     if (_connectivity.isOffline) {
       final cached = _cache.getCachedProducts();
       if (cached != null && cached.isNotEmpty) {
-        return cached.map((json) => ProductModel.fromJson(json)).toList();
+        return cached.map((json) => ProductModel.fromJson(json as Map<String, dynamic>)).toList();
       }
       throw Exception('No cached products available and device is offline');
     }
@@ -44,7 +44,7 @@ class OfflineMarketplaceRepository {
     if (_cache.isProductsFresh(_productsCacheTTL)) {
       final cached = _cache.getCachedProducts();
       if (cached != null) {
-        return cached.map((json) => ProductModel.fromJson(json)).toList();
+        return cached.map((json) => ProductModel.fromJson(json as Map<String, dynamic>)).toList();
       }
     }
 
@@ -62,7 +62,7 @@ class OfflineMarketplaceRepository {
       // Network error - try cache as fallback
       final cached = _cache.getCachedProducts();
       if (cached != null && cached.isNotEmpty) {
-        return cached.map((json) => ProductModel.fromJson(json)).toList();
+        return cached.map((json) => ProductModel.fromJson(json as Map<String, dynamic>)).toList();
       }
       rethrow;
     }
@@ -79,7 +79,7 @@ class OfflineMarketplaceRepository {
       if (cached != null) {
         for (final json in cached) {
           if (json['id'] == id) {
-            return ProductModel.fromJson(json);
+            return ProductModel.fromJson(json as Map<String, dynamic>);
           }
         }
       }
@@ -94,7 +94,7 @@ class OfflineMarketplaceRepository {
       if (cached != null) {
         for (final json in cached) {
           if (json['id'] == id) {
-            return ProductModel.fromJson(json);
+            return ProductModel.fromJson(json as Map<String, dynamic>);
           }
         }
       }
