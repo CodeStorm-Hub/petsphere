@@ -118,13 +118,15 @@ bool areMedicationDosesLow(
   return coveredDays.length < daysThreshold;
 }
 
-/// Get overdue medication doses
+/// Get overdue medication doses (past scheduled time + 1 hour grace period)
 List<MedicationDose> getOverdueDoses(
-  List<MedicationDose> doses,
-) {
+  List<MedicationDose> doses, {
+  Duration grace = const Duration(hours: 1),
+}) {
   final now = DateTime.now();
   return doses.where((d) {
-    return d.givenAt == null && d.scheduledFor.isBefore(now);
+    // Only overdue if not given AND now is past (scheduled time + grace)
+    return d.givenAt == null && now.isAfter(d.scheduledFor.add(grace));
   }).toList();
 }
 

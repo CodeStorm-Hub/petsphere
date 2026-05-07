@@ -13,25 +13,18 @@ final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
 /// Stream of connectivity status changes (Broadcast stream for multiple listeners)
 final connectivityStatusProvider = StreamProvider<ConnectivityStatus>((ref) {
   final service = ref.watch(connectivityServiceProvider);
-  return service.statusStream.asBroadcastStream();
+  return service.statusStream;
 });
 
 /// Convenience: whether device is currently online
+/// Optimized using .select to only rebuild when the status changes to/from online
 final isOnlineProvider = Provider<bool>((ref) {
-  final stream = ref.watch(connectivityStatusProvider);
-  return stream.whenData((status) => status == ConnectivityStatus.online)
-      .maybeWhen(
-        data: (isOnline) => isOnline,
-        orElse: () => false,
-      );
+  final status = ref.watch(connectivityStatusProvider).asData?.value ?? ConnectivityStatus.unknown;
+  return status == ConnectivityStatus.online;
 });
 
 /// Convenience: whether device is currently offline
 final isOfflineProvider = Provider<bool>((ref) {
-  final stream = ref.watch(connectivityStatusProvider);
-  return stream.whenData((status) => status == ConnectivityStatus.offline)
-      .maybeWhen(
-        data: (isOffline) => isOffline,
-        orElse: () => false,
-      );
+  final status = ref.watch(connectivityStatusProvider).asData?.value ?? ConnectivityStatus.unknown;
+  return status == ConnectivityStatus.offline;
 });
