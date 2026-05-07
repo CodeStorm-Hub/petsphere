@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../controllers/knowledge_base_controller.dart';
+import '../models/knowledge_base_models.dart';
 
 class PetKnowledgeBaseScreen extends ConsumerStatefulWidget {
   const PetKnowledgeBaseScreen({super.key});
@@ -12,10 +14,23 @@ class _PetKnowledgeBaseScreenState extends ConsumerState<PetKnowledgeBaseScreen>
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
 
+  final List<String> _tabs = [
+    'All Topics',
+    'Health',
+    'Nutrition',
+    'Behavior',
+    'Expert Guides',
+  ];
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        ref.read(knowledgeBaseCategoryProvider.notifier).set(_tabs[_tabController.index]);
+      }
+    });
   }
 
   @override
@@ -27,6 +42,9 @@ class _PetKnowledgeBaseScreenState extends ConsumerState<PetKnowledgeBaseScreen>
 
   @override
   Widget build(BuildContext context) {
+    final featuredAsync = ref.watch(featuredArticlesProvider);
+    final articlesAsync = ref.watch(knowledgeBaseArticlesProvider);
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -43,9 +61,17 @@ class _PetKnowledgeBaseScreenState extends ConsumerState<PetKnowledgeBaseScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _KnowledgeSearch(controller: _searchController),
+                  _KnowledgeSearch(
+                    controller: _searchController,
+                    onChanged: (val) => ref.read(knowledgeBaseSearchQueryProvider.notifier).set(val),
+                  ),
                   const SizedBox(height: 28),
-                  _CategorySection(),
+                  _CategorySection(
+                    onCategoryTap: (cat) {
+                      final index = _tabs.indexOf(cat);
+                      if (index != -1) _tabController.animateTo(index);
+                    },
+                  ),
                   const SizedBox(height: 36),
                 ],
               ),
@@ -59,47 +85,44 @@ class _PetKnowledgeBaseScreenState extends ConsumerState<PetKnowledgeBaseScreen>
                 isScrollable: true,
                 tabAlignment: TabAlignment.start,
                 dividerColor: Colors.transparent,
-                tabs: const [
-                  Tab(text: 'All Topics'),
-                  Tab(text: 'Health & Wellness'),
-                  Tab(text: 'Behavioral Tips'),
-                  Tab(text: 'Expert Guides'),
-                ],
+                tabs: _tabs.map((t) => Tab(text: t)).toList(),
               ),
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.all(20),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                _FeaturedArticle(),
-                const SizedBox(height: 24),
-                Text('Popular This Week', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-                _ArticleTile(
-                  title: 'Understanding Your Dog\'s Body Language',
-                  readTime: '5 min',
-                  category: 'Behavior',
-                  image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b',
-                  isExpertVerified: true,
+          featuredAsync.when(
+            data: (featured) => featured.isEmpty 
+              ? const SliverToBoxAdapter(child: SizedBox.shrink())
+              : SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  sliver: SliverToBoxAdapter(child: _FeaturedArticle(article: featured.first)),
                 ),
-                _ArticleTile(
-                  title: 'The Best Superfoods for Senior Cats',
-                  readTime: '8 min',
-                  category: 'Nutrition',
-                  image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba',
-                ),
-                _ArticleTile(
-                  title: 'How to Prepare for Your First Vet Visit',
-                  readTime: '12 min',
-                  category: 'Health',
-                  image: 'https://images.unsplash.com/photo-1530281700549-e82e7bf110d6',
-                  isExpertVerified: true,
-                ),
-                const SizedBox(height: 40),
-              ]),
-            ),
+            loading: () => const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator())),
+            error: (e, _) => SliverToBoxAdapter(child: Text('Error: $e')),
           ),
+          articlesAsync.when(
+            data: (articles) => SliverPadding(
+              padding: const EdgeInsets.all(20),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == 0) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Text('Recent Articles', 
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      );
+                    }
+                    final article = articles[index - 1];
+                    return _ArticleTile(article: article);
+                  },
+                  childCount: articles.isEmpty ? 0 : articles.length + 1,
+                ),
+              ),
+            ),
+            loading: () => const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator())),
+            error: (e, _) => SliverToBoxAdapter(child: Text('Error: $e')),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 40)),
         ],
       ),
     );
@@ -132,12 +155,14 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
 class _KnowledgeSearch extends StatelessWidget {
   final TextEditingController controller;
-  const _KnowledgeSearch({required this.controller});
+  final ValueChanged<String> onChanged;
+  const _KnowledgeSearch({required this.controller, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     return SearchBar(
       controller: controller,
+      onChanged: onChanged,
       hintText: 'Search for tips, health advice...',
       leading: const Icon(Icons.search_rounded),
       padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16)),
@@ -149,13 +174,16 @@ class _KnowledgeSearch extends StatelessWidget {
 }
 
 class _CategorySection extends StatelessWidget {
+  final ValueChanged<String> onCategoryTap;
+  const _CategorySection({required this.onCategoryTap});
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final categories = [
       {'label': 'Health', 'icon': Icons.medical_services_rounded, 'color': colorScheme.primary},
       {'label': 'Nutrition', 'icon': Icons.restaurant_rounded, 'color': colorScheme.tertiary},
-      {'label': 'Training', 'icon': Icons.psychology_rounded, 'color': colorScheme.secondary},
+      {'label': 'Behavior', 'icon': Icons.psychology_rounded, 'color': colorScheme.secondary},
       {'label': 'First Aid', 'icon': Icons.healing_rounded, 'color': colorScheme.error},
     ];
 
@@ -165,6 +193,7 @@ class _CategorySection extends StatelessWidget {
         label: cat['label'] as String,
         icon: cat['icon'] as IconData,
         color: cat['color'] as Color,
+        onTap: () => onCategoryTap(cat['label'] as String),
       )).toList(),
     );
   }
@@ -174,32 +203,40 @@ class _CategoryItem extends StatelessWidget {
   final String label;
   final IconData icon;
   final Color color;
+  final VoidCallback onTap;
 
-  const _CategoryItem({required this.label, required this.icon, required this.color});
+  const _CategoryItem({required this.label, required this.icon, required this.color, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 76,
-          height: 76,
-          decoration: BoxDecoration(
-            color: color.withAlpha(25),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: color.withAlpha(40)),
-            boxShadow: [BoxShadow(color: color.withAlpha(10), blurRadius: 12, offset: const Offset(0, 4))],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Column(
+        children: [
+          Container(
+            width: 76,
+            height: 76,
+            decoration: BoxDecoration(
+              color: color.withAlpha(25),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: color.withAlpha(40)),
+              boxShadow: [BoxShadow(color: color.withAlpha(10), blurRadius: 12, offset: const Offset(0, 4))],
+            ),
+            child: Icon(icon, color: color, size: 30),
           ),
-          child: Icon(icon, color: color, size: 30),
-        ),
-        const SizedBox(height: 10),
-        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: -0.2)),
-      ],
+          const SizedBox(height: 10),
+          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: -0.2)),
+        ],
+      ),
     );
   }
 }
 
 class _FeaturedArticle extends StatelessWidget {
+  final KnowledgeArticle article;
+  const _FeaturedArticle({required this.article});
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -207,8 +244,8 @@ class _FeaturedArticle extends StatelessWidget {
       height: 220,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(32),
-        image: const DecorationImage(
-          image: NetworkImage('https://images.unsplash.com/photo-1544568100-847a948585b9'),
+        image: DecorationImage(
+          image: NetworkImage(article.imageUrl ?? 'https://images.unsplash.com/photo-1544568100-847a948585b9'),
           fit: BoxFit.cover,
         ),
         boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 20, offset: const Offset(0, 8))],
@@ -234,9 +271,9 @@ class _FeaturedArticle extends StatelessWidget {
               child: const Text('NEW GUIDE', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Summer Pet Safety: Essential Tips for Hot Days',
-              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, height: 1.1, letterSpacing: -0.5),
+            Text(
+              article.title,
+              style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, height: 1.1, letterSpacing: -0.5),
             ),
           ],
         ),
@@ -246,19 +283,9 @@ class _FeaturedArticle extends StatelessWidget {
 }
 
 class _ArticleTile extends StatelessWidget {
-  final String title;
-  final String readTime;
-  final String category;
-  final String image;
-  final bool isExpertVerified;
+  final KnowledgeArticle article;
 
-  const _ArticleTile({
-    required this.title,
-    required this.readTime,
-    required this.category,
-    required this.image,
-    this.isExpertVerified = false,
-  });
+  const _ArticleTile({required this.article});
 
   @override
   Widget build(BuildContext context) {
@@ -272,7 +299,12 @@ class _ArticleTile extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(24),
-              child: Image.network(image, width: 110, height: 110, fit: BoxFit.cover),
+              child: Image.network(
+                article.imageUrl ?? 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b',
+                width: 110,
+                height: 110,
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(width: 18),
             Expanded(
@@ -281,15 +313,15 @@ class _ArticleTile extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text(category.toUpperCase(), style: TextStyle(color: colorScheme.primary, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
-                      if (isExpertVerified) ...[
+                      Text(article.category.toUpperCase(), style: TextStyle(color: colorScheme.primary, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+                      if (article.isExpertVerified) ...[
                         const SizedBox(width: 8),
                         Icon(Icons.verified_rounded, color: colorScheme.secondary, size: 14),
                       ],
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, height: 1.2, letterSpacing: -0.3)),
+                  Text(article.title, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, height: 1.2, letterSpacing: -0.3)),
                   const SizedBox(height: 10),
                   Row(
                     children: [
@@ -299,7 +331,7 @@ class _ArticleTile extends StatelessWidget {
                         child: Icon(Icons.access_time_rounded, size: 12, color: colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(width: 6),
-                      Text('$readTime read', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12, fontWeight: FontWeight.w600)),
+                      Text('${article.readTime ?? '5 min'} read', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ],

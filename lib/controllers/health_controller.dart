@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,6 +20,8 @@ class HealthState {
   final List<PetAllergy> allergies;
   final List<ParasitePrevention> parasitePrevention;
   final List<DentalLog> dentalLogs;
+  /// Upcoming/overdue vet appointments (scheduled status only).
+  final List<PetVetAppointment> upcomingAppointments;
   final bool isLoading;
   final String? error;
   final String? activePetId;
@@ -28,6 +32,7 @@ class HealthState {
     this.allergies = const [],
     this.parasitePrevention = const [],
     this.dentalLogs = const [],
+    this.upcomingAppointments = const [],
     this.isLoading = false,
     this.error,
     this.activePetId,
@@ -71,11 +76,17 @@ class HealthState {
     return matches.first;
   }
 
-  /// Number of active health alerts (overdue medications, parasite, etc.)
+  /// Appointments past their scheduled_at that are still 'scheduled' → overdue.
+  List<PetVetAppointment> get overdueAppointments => upcomingAppointments
+      .where((a) => a.status == 'scheduled' && a.scheduledAt.isBefore(DateTime.now()))
+      .toList();
+
+  /// Number of active health alerts (overdue medications, parasite, overdue appts).
   int get alertCount {
     int count = 0;
     count += overdueParasite.length;
     count += todayDoses.where((d) => d.isOverdue).length;
+    count += overdueAppointments.length;
     return count;
   }
 
@@ -94,6 +105,7 @@ class HealthState {
     List<PetAllergy>? allergies,
     List<ParasitePrevention>? parasitePrevention,
     List<DentalLog>? dentalLogs,
+    List<PetVetAppointment>? upcomingAppointments,
     bool? isLoading,
     String? error,
     bool clearError = false,
@@ -105,6 +117,7 @@ class HealthState {
         allergies: allergies ?? this.allergies,
         parasitePrevention: parasitePrevention ?? this.parasitePrevention,
         dentalLogs: dentalLogs ?? this.dentalLogs,
+        upcomingAppointments: upcomingAppointments ?? this.upcomingAppointments,
         isLoading: isLoading ?? this.isLoading,
         error: clearError ? null : (error ?? this.error),
         activePetId: activePetId ?? this.activePetId,
@@ -142,6 +155,7 @@ class HealthNotifier extends Notifier<HealthState> {
         _repo.fetchAllergies(petId),
         _repo.fetchParasitePrevention(petId),
         _repo.fetchDentalLogs(petId),
+        _repo.fetchUpcomingAppointments(petId),
       ]);
       if (!ref.mounted) return;
       state = state.copyWith(
@@ -150,6 +164,7 @@ class HealthNotifier extends Notifier<HealthState> {
         allergies: results[2] as List<PetAllergy>,
         parasitePrevention: results[3] as List<ParasitePrevention>,
         dentalLogs: results[4] as List<DentalLog>,
+        upcomingAppointments: results[5] as List<PetVetAppointment>,
         isLoading: false,
       );
     } catch (e) {
@@ -171,6 +186,8 @@ class HealthNotifier extends Notifier<HealthState> {
       state = state.copyWith(
         medications: [saved, ...state.medications],
       );
+      // Generate dose schedule for the next 30 days (#44).
+      await _generateUpcomingDoses(saved);
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
@@ -183,6 +200,8 @@ class HealthNotifier extends Notifier<HealthState> {
         medications:
             state.medications.map((m) => m.id == saved.id ? saved : m).toList(),
       );
+      // Regenerate future doses when frequency/schedule changes (#44).
+      await _generateUpcomingDoses(saved);
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
@@ -348,6 +367,78 @@ class HealthNotifier extends Notifier<HealthState> {
       await _repo.markVaccinationComplete(id, DateTime.now());
     } catch (e) {
       state = state.copyWith(error: e.toString());
+    }
+  }
+
+  // ── Dose generation (#44) ────────────────────────────────────────────────
+
+  /// Generates scheduled dose rows for [med] for the next 30 days.
+  /// Idempotent: existing doses for a time slot are not duplicated.
+  Future<void> _generateUpcomingDoses(PetMedication med) async {
+    if (!med.isActive) return;
+    if (med.frequency == 'as_needed') return;
+
+    final now = DateTime.now();
+    final end = now.add(const Duration(days: 30));
+    final doses = <MedicationDose>[];
+
+    DateTime cursor = med.startDate.isAfter(now) ? med.startDate : now;
+    cursor = DateTime(cursor.year, cursor.month, cursor.day);
+
+    while (cursor.isBefore(end)) {
+      if (med.endDate != null && cursor.isAfter(med.endDate!)) break;
+
+      final timesForDay = _timesForFrequency(med);
+      for (final hour in timesForDay) {
+        final scheduled = cursor.add(Duration(hours: hour));
+        if (scheduled.isBefore(now.subtract(const Duration(hours: 1)))) continue;
+        doses.add(MedicationDose(
+          id: '',
+          medicationId: med.id,
+          petId: med.petId,
+          scheduledFor: scheduled,
+          skipped: false,
+        ));
+      }
+      cursor = _nextCursor(med.frequency, cursor);
+    }
+
+    if (doses.isEmpty) return;
+    try {
+      await _repo.generateDosesIdempotent(doses);
+      // Refresh today's doses so UI stays in sync.
+      if (!ref.mounted) return;
+      final today = await _repo.fetchTodayDoses(med.petId);
+      state = state.copyWith(todayDoses: today);
+    } catch (e) {
+      log('Dose generation failed: $e', name: 'HealthNotifier');
+    }
+  }
+
+  List<int> _timesForFrequency(PetMedication med) {
+    if (med.timesOfDay.isNotEmpty) {
+      return med.timesOfDay.map((t) {
+        switch (t) {
+          case 'morning': return 8;
+          case 'noon': return 12;
+          case 'evening': return 18;
+          case 'night': return 21;
+          default: return 8;
+        }
+      }).toList();
+    }
+    switch (med.frequency) {
+      case 'twice_daily': return [8, 20];
+      case 'three_times_daily': return [8, 14, 20];
+      default: return [8];
+    }
+  }
+
+  DateTime _nextCursor(String frequency, DateTime from) {
+    switch (frequency) {
+      case 'weekly': return from.add(const Duration(days: 7));
+      case 'monthly': return DateTime(from.year, from.month + 1, from.day);
+      default: return from.add(const Duration(days: 1)); // daily variants
     }
   }
 }

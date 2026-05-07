@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import '../controllers/pet_events_controller.dart';
+import '../models/pet_event_models.dart';
 
-class PetEventDiscoveryScreen extends StatelessWidget {
+class PetEventDiscoveryScreen extends ConsumerWidget {
   const PetEventDiscoveryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final eventsAsync = ref.watch(petEventsProvider);
+    final currentFilter = ref.watch(petEventTypeFilterProvider);
 
     return Scaffold(
       body: CustomScrollView(
@@ -25,7 +31,15 @@ class PetEventDiscoveryScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _EventFeaturedCard(),
+                  eventsAsync.when(
+                    data: (events) {
+                      final featured = events.where((e) => e.isActive).firstOrNull;
+                      if (featured == null) return const SizedBox.shrink();
+                      return _EventFeaturedCard(event: featured);
+                    },
+                    loading: () => const _FeaturedPlaceholder(),
+                    error: (_, _) => const SizedBox.shrink(),
+                  ),
                   const SizedBox(height: 32),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -37,10 +51,7 @@ class PetEventDiscoveryScreen extends StatelessWidget {
                               letterSpacing: -0.5,
                             ),
                       ),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text('Filters'),
-                      ),
+                      _CategoryFilters(currentFilter: currentFilter, ref: ref),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -48,59 +59,82 @@ class PetEventDiscoveryScreen extends StatelessWidget {
               ),
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                _EventItem(
-                  title: 'Bark in the Park',
-                  date: 'Nov 12',
-                  time: '10:00 AM',
-                  location: 'Central Park',
-                  image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b',
-                  category: 'Meetup',
-                  attendees: 42,
+          eventsAsync.when(
+            data: (events) => SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final event = events[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _EventItem(event: event),
+                    );
+                  },
+                  childCount: events.length,
                 ),
-                const SizedBox(height: 16),
-                _EventItem(
-                  title: 'Pet Adoption Fair',
-                  date: 'Nov 15',
-                  time: '01:00 PM',
-                  location: 'City Square',
-                  image: 'https://images.unsplash.com/photo-1530281700549-e82e7bf110d6',
-                  category: 'Adoption',
-                  attendees: 120,
-                ),
-                const SizedBox(height: 16),
-                _EventItem(
-                  title: 'Puppy Training Workshop',
-                  date: 'Nov 20',
-                  time: '09:00 AM',
-                  location: 'Community Center',
-                  image: 'https://images.unsplash.com/photo-1541599540903-21b1297967ee',
-                  category: 'Education',
-                  attendees: 15,
-                ),
-                const SizedBox(height: 40),
-              ]),
+              ),
+            ),
+            loading: () => const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (err, stack) => SliverFillRemaining(
+              child: Center(child: Text('Error: $err')),
             ),
           ),
+          const SliverToBoxAdapter(child: SizedBox(height: 40)),
         ],
       ),
     );
   }
 }
 
-class _EventFeaturedCard extends StatelessWidget {
+class _CategoryFilters extends StatelessWidget {
+  final String currentFilter;
+  final WidgetRef ref;
+
+  const _CategoryFilters({required this.currentFilter, required this.ref});
+
   @override
   Widget build(BuildContext context) {
+    final categories = ['All', 'Meetup', 'Workshop', 'Show', 'Charity'];
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: categories.map((cat) {
+          final isSelected = currentFilter == cat;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              label: Text(cat),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) {
+                  ref.read(petEventTypeFilterProvider.notifier).set(cat);
+                }
+              },
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _EventFeaturedCard extends StatelessWidget {
+  final PetEvent event;
+  const _EventFeaturedCard({required this.event});
+
+  @override
+  Widget build(BuildContext context) {
+    final dateStr = DateFormat('MMM d').format(event.eventDate);
     return Container(
       height: 260,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(32),
-        image: const DecorationImage(
+        image: DecorationImage(
           image: NetworkImage(
-            'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&q=80&w=800',
+            event.imageUrl ?? 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&q=80&w=800',
           ),
           fit: BoxFit.cover,
         ),
@@ -147,9 +181,9 @@ class _EventFeaturedCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'National Dog Show 2024',
-              style: TextStyle(
+            Text(
+              event.title,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -161,9 +195,9 @@ class _EventFeaturedCard extends StatelessWidget {
               children: [
                 const Icon(Icons.location_on_rounded, color: Colors.white70, size: 16),
                 const SizedBox(width: 4),
-                const Text(
-                  'Madison Square Garden · Nov 24',
-                  style: TextStyle(
+                Text(
+                  '${event.location ?? "TBA"} · $dateStr',
+                  style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -178,28 +212,31 @@ class _EventFeaturedCard extends StatelessWidget {
   }
 }
 
-class _EventItem extends StatelessWidget {
-  final String title;
-  final String date;
-  final String time;
-  final String location;
-  final String image;
-  final String category;
-  final int attendees;
+class _FeaturedPlaceholder extends StatelessWidget {
+  const _FeaturedPlaceholder();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 260,
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(32),
+      ),
+    );
+  }
+}
 
-  const _EventItem({
-    required this.title,
-    required this.date,
-    required this.time,
-    required this.location,
-    required this.image,
-    required this.category,
-    required this.attendees,
-  });
+class _EventItem extends StatelessWidget {
+  final PetEvent event;
+
+  const _EventItem({required this.event});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final dateStr = DateFormat('MMM d').format(event.eventDate);
+    final timeStr = DateFormat('hh:mm a').format(event.eventDate);
+
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -220,11 +257,14 @@ class _EventItem extends StatelessWidget {
           children: [
             Stack(
               children: [
-                Image.network(
-                  image,
-                  width: 120,
-                  fit: BoxFit.cover,
-                ),
+                if (event.imageUrl != null)
+                  Image.network(
+                    event.imageUrl!,
+                    width: 120,
+                    fit: BoxFit.cover,
+                  )
+                else
+                  Container(width: 120, color: Colors.grey[300]),
                 Positioned(
                   top: 12,
                   left: 12,
@@ -235,7 +275,7 @@ class _EventItem extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      category.toUpperCase(),
+                      event.eventType.toUpperCase(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 9,
@@ -254,7 +294,7 @@ class _EventItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      event.title,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -268,7 +308,7 @@ class _EventItem extends StatelessWidget {
                             size: 14, color: colorScheme.primary),
                         const SizedBox(width: 6),
                         Text(
-                          '$date · $time',
+                          '$dateStr · $timeStr',
                           style: TextStyle(
                             color: colorScheme.onSurfaceVariant,
                             fontSize: 12,
@@ -284,7 +324,7 @@ class _EventItem extends StatelessWidget {
                             size: 14, color: colorScheme.secondary),
                         const SizedBox(width: 6),
                         Text(
-                          location,
+                          event.location ?? 'TBA',
                           style: TextStyle(
                             color: colorScheme.onSurfaceVariant,
                             fontSize: 12,
@@ -294,21 +334,22 @@ class _EventItem extends StatelessWidget {
                       ],
                     ),
                     const Spacer(),
-                    Row(
-                      children: [
-                        Icon(Icons.people_alt_rounded,
-                            size: 14, color: colorScheme.tertiary),
-                        const SizedBox(width: 6),
-                        Text(
-                          '$attendees attending',
-                          style: TextStyle(
-                            color: colorScheme.onSurfaceVariant,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
+                    if (event.maxAttendees != null)
+                      Row(
+                        children: [
+                          Icon(Icons.people_alt_rounded,
+                              size: 14, color: colorScheme.tertiary),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Max ${event.maxAttendees} attendees',
+                            style: TextStyle(
+                              color: colorScheme.onSurfaceVariant,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
                   ],
                 ),
               ),

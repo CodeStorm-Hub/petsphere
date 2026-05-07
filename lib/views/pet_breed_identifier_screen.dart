@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../controllers/pet_breed_controller.dart';
+import '../repositories/feature_repositories.dart';
 
 class PetBreedIdentifierScreen extends ConsumerStatefulWidget {
   const PetBreedIdentifierScreen({super.key});
@@ -9,28 +11,36 @@ class PetBreedIdentifierScreen extends ConsumerStatefulWidget {
 }
 
 class _PetBreedIdentifierScreenState extends ConsumerState<PetBreedIdentifierScreen> {
-  bool _isScanning = false;
-
   void _startScan() async {
-    setState(() => _isScanning = true);
-    await Future.delayed(const Duration(seconds: 4));
+    // In a real app, we would use image_picker here.
+    // For this demo, we'll use a dummy path.
+    await ref.read(breedIdentifierControllerProvider.notifier).identifyBreed('dummy_path.jpg');
     if (!mounted) return;
-    setState(() => _isScanning = false);
-    _showResults();
+    
+    final state = ref.read(breedIdentifierControllerProvider);
+    if (state.hasValue && state.value != null) {
+      _showResults(state.value!);
+    } else if (state.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${state.error}')),
+      );
+    }
   }
 
-  void _showResults() {
+  void _showResults(BreedScan result) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const _BreedResultsSheet(),
+      builder: (context) => _BreedResultsSheet(result: result),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final scanState = ref.watch(breedIdentifierControllerProvider);
+    final isScanning = scanState.isLoading;
 
     return Scaffold(
       appBar: AppBar(
@@ -44,7 +54,7 @@ class _PetBreedIdentifierScreenState extends ConsumerState<PetBreedIdentifierScr
         physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
-            _ScannerPreview(isScanning: _isScanning),
+            _ScannerPreview(isScanning: isScanning),
             const SizedBox(height: 32),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -53,8 +63,8 @@ class _PetBreedIdentifierScreenState extends ConsumerState<PetBreedIdentifierScr
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: Text(
-                      _isScanning ? 'Analyzing Biological Features...' : 'Identify Any Breed',
-                      key: ValueKey(_isScanning),
+                      isScanning ? 'Analyzing Biological Features...' : 'Identify Any Breed',
+                      key: ValueKey(isScanning),
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
@@ -66,9 +76,9 @@ class _PetBreedIdentifierScreenState extends ConsumerState<PetBreedIdentifierScr
                     style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14, height: 1.5),
                   ),
                   const SizedBox(height: 48),
-                  _ScannerActions(onCameraTap: _startScan, isScanning: _isScanning),
+                  _ScannerActions(onCameraTap: _startScan, isScanning: isScanning),
                   const SizedBox(height: 48),
-                  _ScanHistory(),
+                  const _ScanHistory(),
                   const SizedBox(height: 40),
                 ],
               ),
@@ -277,7 +287,8 @@ class _ScannerActions extends StatelessWidget {
 }
 
 class _BreedResultsSheet extends StatelessWidget {
-  const _BreedResultsSheet();
+  final BreedScan result;
+  const _BreedResultsSheet({required this.result});
 
   @override
   Widget build(BuildContext context) {
@@ -305,17 +316,10 @@ class _BreedResultsSheet extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             _MatchResultCard(
-              breed: 'Golden Retriever',
-              confidence: 0.98,
-              image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=400',
+              breed: result.breedName,
+              confidence: result.confidence,
+              image: result.imageUrl ?? 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=400',
               isPrimary: true,
-            ),
-            const SizedBox(height: 16),
-            _MatchResultCard(
-              breed: 'Labrador Retriever',
-              confidence: 0.12,
-              image: 'https://images.unsplash.com/photo-1591769225440-811ad7d62ca2?auto=format&fit=crop&q=80&w=400',
-              isPrimary: false,
             ),
             const SizedBox(height: 32),
             Text('Breed Characteristics', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
@@ -328,19 +332,20 @@ class _BreedResultsSheet extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  const Text(
-                    'The Golden Retriever is famous for the dense, lustrous coat of gold. They are friendly, reliable, and trustworthy family companions.',
-                    style: TextStyle(fontSize: 14, height: 1.6),
+                  Text(
+                    result.description ?? 'No description available.',
+                    style: const TextStyle(fontSize: 14, height: 1.6),
                   ),
                   const SizedBox(height: 20),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _StatItem(label: 'Lifespan', value: '10-12 yrs', icon: Icons.favorite_rounded),
-                      _StatItem(label: 'Weight', value: '55-75 lbs', icon: Icons.monitor_weight_rounded),
-                      _StatItem(label: 'Group', value: 'Sporting', icon: Icons.groups),
-                    ],
-                  ),
+                  if (result.characteristics != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: result.characteristics!.entries.map((e) => _StatItem(
+                        label: e.key,
+                        value: e.value,
+                        icon: _getIconForStat(e.key),
+                      )).toList(),
+                    ),
                 ],
               ),
             ),
@@ -363,6 +368,15 @@ class _BreedResultsSheet extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  IconData _getIconForStat(String key) {
+    switch (key.toLowerCase()) {
+      case 'lifespan': return Icons.favorite_rounded;
+      case 'weight': return Icons.monitor_weight_rounded;
+      case 'group': return Icons.groups;
+      default: return Icons.info_outline;
+    }
   }
 }
 
@@ -435,9 +449,13 @@ class _StatItem extends StatelessWidget {
   }
 }
 
-class _ScanHistory extends StatelessWidget {
+class _ScanHistory extends ConsumerWidget {
+  const _ScanHistory();
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final historyAsync = ref.watch(breedScanHistoryProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -451,33 +469,42 @@ class _ScanHistory extends StatelessWidget {
         const SizedBox(height: 12),
         SizedBox(
           height: 120,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 5,
-            itemBuilder: (context, index) => Container(
-              width: 100,
-              margin: const EdgeInsets.only(right: 16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 10, offset: const Offset(0, 4))],
-                image: DecorationImage(
-                  image: NetworkImage('https://images.unsplash.com/photo-1543466835-00a732f3b043?auto=format&fit=crop&q=80&w=200&sig=$index'),
-                  fit: BoxFit.cover,
+          child: historyAsync.when(
+            data: (history) => history.isEmpty 
+              ? const Center(child: Text('No history yet'))
+              : ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: history.length,
+                  itemBuilder: (context, index) {
+                    final scan = history[index];
+                    return Container(
+                      width: 100,
+                      margin: const EdgeInsets.only(right: 16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 10, offset: const Offset(0, 4))],
+                        image: DecorationImage(
+                          image: NetworkImage(scan.imageUrl ?? 'https://images.unsplash.com/photo-1543466835-00a732f3b043?auto=format&fit=crop&q=80&w=200'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          decoration: const BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+                          ),
+                          child: Text(scan.breedName, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              ),
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  decoration: const BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
-                  ),
-                  child: const Text('Golden', textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text('Error: $e')),
           ),
         ),
       ],

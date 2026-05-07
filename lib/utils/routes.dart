@@ -35,6 +35,7 @@ import '../views/pet_insurance_hub_screen.dart';
 import '../views/pet_expense_tracker_screen.dart';
 import '../views/pet_growth_chart_screen.dart';
 import '../views/pet_memorial_screen.dart';
+import '../views/pet_memorial_detail_screen.dart';
 import '../views/pet_friendly_places_screen.dart';
 import '../views/pet_event_discovery_screen.dart';
 import '../views/pet_health_record_export_screen.dart';
@@ -300,6 +301,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/memorial',
         builder: (context, state) => const PetMemorialScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) {
+              final id = safePathParam(state, 'id');
+              if (id == null) {
+                return const InvalidRouteErrorScreen(missingParam: 'memorial ID');
+              }
+              return PetMemorialDetailScreen(memorialId: id);
+            },
+          ),
+        ],
       ),
       GoRoute(
         path: '/pet_friendly_places',
