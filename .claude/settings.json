@@ -5,6 +5,13 @@
       "tool": "Edit",
       "description": "Auto-format and lint Dart files after editing",
       "commands": ["dart format {filePath}", "flutter analyze --no-pub {filePath}"]
+    },
+    {
+      "trigger": "PostToolUse",
+      "tool": "Edit",
+      "pathPattern": "lib/(controllers|models)/.*\\.dart$",
+      "description": "Run tests for edited controllers/models to catch regressions",
+      "commands": ["flutter test --reporter=compact test/ 2>&1 | head -100"]
     }
   ],
   "permissions": {
@@ -33,6 +40,11 @@
         "type": "plugin",
         "name": "context7",
         "description": "Real-time Flutter/Dart/Riverpod documentation lookup"
+      },
+      {
+        "type": "plugin",
+        "name": "github",
+        "description": "GitHub repository access for issues, PRs, and actions"
       }
     ]
   }

@@ -22,6 +22,67 @@ This document provides comprehensive guidance for AI assistants working on the P
 
 ---
 
+## Quick Start
+
+### Prerequisites
+- **Flutter**: 3.24.3+ ([Download](https://flutter.dev))
+- **Dart**: 3.8+ (included with Flutter)
+- **Git**: Version control
+- **Platform-specific**:
+  - **iOS**: Xcode 13+, CocoaPods
+  - **Android**: Android SDK 21+, Gradle
+  - **Web**: Chrome/Edge (no additional setup)
+
+### Get the App Running (5 Minutes)
+
+```bash
+# 1. Clone and install dependencies
+git clone <repo>
+cd petsphere
+flutter pub get
+
+# 2. Set up environment (optional, for Supabase/Firebase secrets)
+cp .env.example .env
+# Edit .env with your Supabase URL and anon key
+
+# 3. Run on connected device/emulator
+flutter devices  # List available devices
+flutter run -d <device_id>
+
+# 4. Or run on multiple platforms
+flutter run -d chrome      # Web
+flutter run -d emulator-5554  # Android Emulator
+flutter run -d iPhone      # iOS Simulator
+```
+
+### Environment Setup
+
+The app uses Supabase and Firebase credentials from GitHub Actions secrets or local `.env` files:
+
+```bash
+# .env file (gitignored - create locally if needed)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=eyJhbGc...
+```
+
+**Tip**: For local development, these are typically passed via `--dart-define` flags in CI/CD.
+
+### Build Commands
+
+```bash
+# Development builds
+flutter build apk --debug          # Android APK (debug)
+flutter build ios --debug          # iOS (requires macOS)
+flutter build web                  # Web (outputs to build/web/)
+
+# Release builds (requires signing)
+flutter build apk --release        # Android APK (production)
+flutter build appbundle            # Android App Bundle (for Play Store)
+flutter build ipa                  # iOS (requires provisioning profile)
+```
+
+---
+
 ## Architecture Overview
 
 PetSphere follows a **layered, feature-based architecture** with clear separation of concerns:
@@ -84,6 +145,176 @@ lib/
 - **video_player** (2.11.1): Video playback
 - **share_plus** (13.1.0): Share functionality
 - **intl** (0.20.2): Internationalization & formatting
+
+### Third-Party Integrations
+- **Firebase Core** (4.7.0): Backend infrastructure
+  - **Firebase Messaging** (16.2.0): Push notifications via FCM
+  - **firebase_options.dart**: Auto-generated configuration
+- **Flutter Stripe** (11.0.0): Payment processing
+  - In-app payment UI, subscription handling
+  - Integrated with `marketplace_controller.dart`
+- **Permission Handler** (12.0.1): Requesting device permissions
+  - Camera, location, notifications (platform-specific)
+- **UUID** (4.5.3): Generating unique identifiers
+
+---
+
+## Firebase & Push Notifications
+
+### Configuration
+- **Firebase Project**: Configured in `lib/firebase_options.dart` (auto-generated via `flutterfire_cli`)
+- **Push Notification Service**: Firebase Cloud Messaging (FCM)
+- **Controller**: `lib/controllers/push_notification_coordinator.dart`
+
+### How Push Notifications Work
+
+```
+1. Backend sends notification via Firebase Admin SDK
+2. Firebase Cloud Messaging (FCM) routes to device
+3. Device receives notification (app in foreground or background)
+4. PushNotificationCoordinator catches and handles
+5. App displays in-app notification or badge update
+```
+
+### Receiving Notifications in Code
+
+```dart
+// In bootstrap_controller.dart (app startup)
+ref.listen<NotificationState>(notificationProvider, (prev, next) {
+  if (next.hasNewNotification) {
+    // Show snackbar, update badge, etc.
+    showNotificationToast(context, next.notification!);
+  }
+});
+
+// Listen to notification taps
+FirebaseMessaging.instance.onMessageOpenedApp.listen((message) {
+  // User tapped notification from background
+  // Route to relevant screen
+  context.go('/chat/${message.data['thread_id']}');
+});
+```
+
+### Testing Notifications Locally
+
+```bash
+# Run on a real device with Firebase emulator (optional)
+firebase emulators:start
+
+# Or send test notifications via Firebase Console
+# Project Settings → Cloud Messaging → Send Test Message
+```
+
+---
+
+## Stripe Payment Integration
+
+### Configuration
+- **Stripe API Key**: From GitHub Actions secrets (passed via `--dart-define`)
+- **Implementation**: `flutter_stripe` (11.0.0)
+- **Payment Controller**: `lib/controllers/marketplace_controller.dart`
+
+### Payment Flow
+
+```
+1. User adds items to cart (CartModel stored in cartProvider)
+2. User taps "Checkout"
+3. App creates Stripe PaymentIntent (server-side)
+4. flutter_stripe presents payment UI
+5. On success: Update order status, clear cart
+6. On failure: Show error, allow retry
+```
+
+### Example: Processing a Payment
+
+```dart
+// In marketplace_controller.dart
+Future<bool> processPayment(double amount, String currency) async {
+  try {
+    // 1. Create PaymentIntent on backend
+    final clientSecret = await _createPaymentIntent(amount, currency);
+    
+    // 2. Present Stripe payment sheet
+    await Stripe.instance.confirmPaymentSheetPayment();
+    
+    // 3. Update order in Supabase
+    await marketplaceRepository.createOrder(OrderModel(...));
+    
+    // 4. Update state
+    state = state.copyWith(cartItems: [], orderStatus: OrderStatus.completed);
+    return true;
+  } on StripeException catch (e) {
+    state = state.copyWith(error: 'Payment failed: ${e.error.message}');
+    return false;
+  }
+}
+```
+
+### Testing Payments
+
+Use Stripe test cards:
+- **Success**: `4242 4242 4242 4242`, any future expiry, any CVC
+- **Decline**: `4000 0000 0000 0002`, any future expiry, any CVC
+- **3D Secure**: `4000 0025 0000 3155`, any future expiry, any CVC
+
+**Important**: Never use real credit cards in development.
+
+---
+
+## Web Platform Considerations
+
+### Building for Web
+
+```bash
+flutter build web  # Outputs to build/web/
+flutter run -d chrome  # Test locally
+```
+
+### Platform-Specific Code
+
+```dart
+// Check platform at runtime
+import 'dart:io' show Platform;
+
+if (!kIsWeb && Platform.isAndroid) {
+  // Android-only code
+} else if (!kIsWeb && Platform.isIOS) {
+  // iOS-only code
+} else if (kIsWeb) {
+  // Web-only code
+}
+```
+
+### Responsive Design for Web
+
+Use `LayoutBuilder` and `MediaQuery` for responsive layouts:
+
+```dart
+class ResponsiveScreen extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+    final isTablet = screenWidth >= 600 && screenWidth < 1200;
+    final isDesktop = screenWidth >= 1200;
+    
+    if (isMobile) {
+      return MobileLayout();
+    } else if (isTablet) {
+      return TabletLayout();
+    } else {
+      return DesktopLayout();
+    }
+  }
+}
+```
+
+### Web Build Considerations
+
+- **Bundle Size**: Web builds are larger; consider code splitting and lazy loading
+- **Images**: Use `cached_network_image` with proper caching headers
+- **Storage**: `shared_preferences` uses browser localStorage (limited to 5-10MB)
+- **Permissions**: Browser-based; camera/location require HTTPS and user consent
 
 ---
 
@@ -377,6 +608,144 @@ ref.listen<PetState>(petProvider, (prev, next) {
 - **`FutureProvider`**: Async single-value (not for long-running)
 - **`Provider`**: Read-only computed values
 - **`FamilyModifier`**: Parameterized providers (e.g., `fetchPetById(id)`)
+
+### Advanced Riverpod Patterns
+
+#### 1. **Family Modifier** — Parameterized Providers
+
+Use `.family` to create providers that accept arguments:
+
+```dart
+// Define a family provider
+final petByIdProvider = FutureProvider.family<PetModel, String>((ref, petId) async {
+  return petRepository.fetchPetById(petId);
+});
+
+// Or with Notifier (for mutable state per pet)
+final petDetailProvider = NotifierProvider.family<PetDetailNotifier, PetDetailState, String>(
+  (ref, petId) => PetDetailNotifier(petId),
+);
+
+class PetDetailNotifier extends Family Notifier<PetDetailState, String> {
+  late String petId;
+  
+  @override
+  PetDetailState build(String petId) {
+    this.petId = petId;
+    return PetDetailState();
+  }
+  
+  Future<void> updatePetName(String newName) async {
+    // Use this.petId or arg to identify which pet
+  }
+}
+
+// Watch in widget
+final petDetail = ref.watch(petDetailProvider('pet-123'));
+```
+
+#### 2. **Auto-Dispose** — Memory Management
+
+Use `.autoDispose` to clean up providers when no longer watched:
+
+```dart
+final petProvider = NotifierProvider.autoDispose<PetNotifier, PetState>(
+  PetNotifier.new,
+); // Provider disposes when no widgets watch it
+
+// Useful for expensive operations or temporary state:
+final petSearchProvider = FutureProvider.autoDispose<List<PetModel>, String>(
+  (ref, query) async {
+    // Only runs while someone is watching
+    return petRepository.searchPets(query);
+  },
+);
+```
+
+#### 3. **Combining Multiple Providers**
+
+Watch and combine state from multiple providers:
+
+```dart
+// Computed provider combining multiple sources
+final userPetCountProvider = Provider<int>((ref) {
+  final authState = ref.watch(authProvider);
+  final petState = ref.watch(petProvider);
+  
+  if (authState.status != AuthStatus.authenticated) return 0;
+  return petState.myPets.length;
+});
+
+// Or in a notifier, listen to changes
+class DashboardNotifier extends Notifier<DashboardState> {
+  @override
+  DashboardState build() {
+    // Listen to auth and pet state
+    ref.listen<AuthState>(authProvider, (prev, next) {
+      if (next.status == AuthStatus.unauthenticated) {
+        state = DashboardState.loggedOut();
+      }
+    });
+    
+    final petState = ref.watch(petProvider);
+    state = state.copyWith(petCount: petState.myPets.length);
+    
+    return DashboardState();
+  }
+}
+```
+
+#### 4. **Async Operations & Error Handling**
+
+Use `FutureProvider` for one-shot async operations:
+
+```dart
+// For single-value async operations
+final userProfileProvider = FutureProvider<UserModel>((ref) async {
+  final userId = ref.watch(authProvider).userId!;
+  return userRepository.fetchUserProfile(userId);
+});
+
+// Watch in widget (handles loading/error automatically)
+final asyncValue = ref.watch(userProfileProvider);
+asyncValue.when(
+  loading: () => LoadingWidget(),
+  error: (err, stack) => ErrorWidget(err),
+  data: (user) => UserProfileView(user),
+);
+```
+
+#### 5. **Watch Selectively** — Performance
+
+Only watch the state you need:
+
+```dart
+// ❌ DON'T — watches entire state
+final petState = ref.watch(petProvider);
+final petName = petState.myPets.first.name;
+
+// ✅ DO — watch only the specific value
+final petName = ref.watch(
+  petProvider.select((state) => state.myPets.firstOrNull?.name ?? 'Unknown'),
+);
+```
+
+#### 6. **ref.listen vs ref.watch**
+
+- **`ref.watch()`**: Rebuilds widget when state changes (use in build)
+- **`ref.listen()`**: Triggers callback without rebuilding (use for side-effects)
+
+```dart
+// Watch: updates UI
+final cartCount = ref.watch(cartProvider.select((s) => s.items.length));
+
+// Listen: trigger action (e.g., show toast)
+ref.listen<NotificationState>(notificationProvider, (prev, next) {
+  if (next.hasError && (prev?.hasError != true)) {
+    ScaffoldMessenger.of(context).showSnackBar(...);
+  }
+});
+```
 
 ---
 
@@ -815,6 +1184,113 @@ git push origin feature/pet-health-tracking
 
 ---
 
+## CI/CD & GitHub Actions
+
+### Workflow Overview
+
+PetSphere uses GitHub Actions to automate testing and building across all platforms.
+
+**File**: `.github/workflows/test-and-build.yml`
+
+### Workflow Stages
+
+#### 1. **Test & Analyze** (Runs on all PRs)
+```bash
+✓ Checkout code
+✓ Setup Flutter (3.24.3)
+✓ Get dependencies (flutter pub get)
+✓ Check formatting (dart format --set-exit-if-changed .)
+✓ Analyze code (flutter analyze)
+✓ Run unit tests (flutter test --coverage)
+✓ Upload coverage to Codecov
+✓ Archive coverage reports
+```
+
+**Status**: Must pass before merging to main/develop
+
+#### 2. **Build Android** (Runs on main/develop pushes)
+```bash
+✓ Checkout code
+✓ Setup Java (Zulu 17)
+✓ Setup Flutter
+✓ Get dependencies
+✓ Build APK: flutter build apk --debug \
+    --dart-define=SUPABASE_URL=$SUPABASE_URL \
+    --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+✓ Upload artifact (app-debug.apk)
+```
+
+**Artifacts**: Available in GitHub Actions for 90 days
+
+#### 3. **Build iOS** (Runs on main pushes only)
+```bash
+✓ Runs on macOS runner
+✓ Builds unsigned iOS app (Runner.app)
+✓ Upload artifact
+```
+
+**Note**: Requires provisioning profile and codesign for real deployment
+
+#### 4. **Security Scan** (CodeQL analysis)
+```bash
+✓ Initialize CodeQL (JavaScript, Python)
+✓ Run security analysis
+✓ Report to GitHub Security tab
+```
+
+### Running Locally Before Pushing
+
+```bash
+# Format and lint (same as CI)
+dart format .
+flutter analyze
+
+# Run tests with coverage
+flutter test --coverage
+
+# Build APK (same as CI build step)
+flutter build apk --debug \
+  --dart-define=SUPABASE_URL=$SUPABASE_URL \
+  --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+```
+
+### Secrets & Environment Variables
+
+GitHub Actions secrets used in workflows:
+- `SUPABASE_URL`: Supabase project URL
+- `SUPABASE_ANON_KEY`: Supabase anonymous key
+- `CODECOV_TOKEN`: Codecov integration token
+
+These are passed to build commands via `--dart-define` flags.
+
+### Pre-Commit Checklist
+
+Before pushing, ensure:
+- [ ] `flutter analyze` passes (no errors)
+- [ ] `dart format` is run on changed files
+- [ ] `flutter test` passes locally
+- [ ] No new linting warnings
+- [ ] No unresolved TODOs in code
+
+### Debugging Failed Builds
+
+1. **Check GitHub Actions logs**: Actions tab → workflow run → logs
+2. **Reproduce locally**: Run the same commands on your machine
+3. **Common issues**:
+   - Missing `flutter pub get`
+   - Outdated Gradle/Java
+   - Dart formatting issues
+   - Lint rule violations
+
+### Coverage Reports
+
+After tests run, coverage reports are uploaded to Codecov:
+- **View coverage**: Codecov dashboard
+- **Local coverage**: `coverage/lcov.info` after `flutter test --coverage`
+- **Coverage badge**: Added to README if configured
+
+---
+
 ## Known Patterns & Anti-Patterns
 
 ### ✅ DO
@@ -835,6 +1311,118 @@ git push origin feature/pet-health-tracking
 - Don't ignore Null Safety warnings
 - Don't hardcode colors/strings; use `AppTheme` and i18n
 - Don't perform async operations directly in `build()`
+
+---
+
+## Debugging & DevTools
+
+### Flutter DevTools
+
+Open DevTools to inspect widgets, state, logs, and network:
+
+```bash
+flutter pub global activate devtools
+devtools  # Opens at localhost:9100
+
+# Or integrated in IDE (VS Code: Run → Open DevTools)
+```
+
+**Useful tabs**:
+- **Inspector**: View widget tree, inspect element properties
+- **Console**: View logs and errors
+- **Network**: Monitor API calls and Supabase queries
+- **Performance**: Check frame rates, CPU/memory usage
+- **Memory**: Track memory leaks
+
+### Web-Specific Debugging
+
+For Web builds, use Chrome DevTools:
+
+```bash
+flutter run -d chrome
+
+# Then open Chrome DevTools (F12)
+# - Inspect HTML/CSS
+# - Check Network requests
+# - Monitor console for errors
+# - Debug JavaScript (if using web_view plugins)
+```
+
+### Logging Best Practices
+
+Use `developer.log()` instead of `print()`:
+
+```dart
+import 'dart:developer' as developer;
+
+// Good
+developer.log('Loaded ${pets.length} pets', name: 'PetController');
+
+// Bad
+print('Pets: $pets');  // Avoid in production
+```
+
+### Common Debugging Commands
+
+```bash
+# Verbose logging (shows all framework logs)
+flutter run -v
+
+# Debug build (slower, full debug info)
+flutter build apk --debug
+
+# Profile build (performance optimized, debuggable)
+flutter build apk --profile
+
+# Profile app performance
+flutter run --profile  # Then use DevTools Performance tab
+```
+
+---
+
+## Performance Optimization
+
+### Image Optimization
+
+- **Use `cached_network_image`**: Caches images locally
+- **Specify image dimensions**: Prevents layout thrashing
+- **Use WebP format**: Better compression than JPEG/PNG
+
+```dart
+CachedNetworkImage(
+  imageUrl: imageUrl,
+  width: 200,
+  height: 200,
+  fit: BoxFit.cover,
+  placeholder: (context, url) => SkeletonLoader(),
+  errorWidget: (context, url, error) => BrokenImageIcon(),
+)
+```
+
+### Riverpod Performance Tips
+
+- **Use `.select()`**: Only rebuild when specific value changes
+- **Use `.autoDispose`**: Free up memory for unused providers
+- **Avoid watching entire state**: `ref.watch(provider.select((s) => s.value))`
+
+### Build Size Optimization
+
+```bash
+# Analyze APK size
+flutter build apk --analyze-size
+
+# Strip symbols (smaller APK, no stack traces)
+flutter build apk --split-per-abi
+
+# Web: Enable compression
+flutter build web --release  # Uses code minification
+```
+
+### Memory Management
+
+- **Dispose controllers**: Override `dispose()` in StatefulWidgets
+- **Cancel subscriptions**: Unsubscribe from streams
+- **Unload images**: Remove from cache after use
 
 ---
 

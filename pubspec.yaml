@@ -57,6 +57,19 @@ dependencies:
   flutter_stripe: ^11.0.0
   uuid: ^4.5.3
 
+  # Image/Video Compression
+  flutter_image_compress: ^2.3.0
+  video_thumbnail: ^0.5.3
+
+  # Responsive Design
+  flutter_adaptive_scaffold: ^0.3.3+1
+
+  # Animations
+  flutter_animate: ^4.5.2
+
+  # Dynamic Color (Material You)
+  dynamic_color: ^1.7.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -69,6 +82,7 @@ dev_dependencies:
     sdk: flutter
   mocktail: ^1.0.4
   test: any
+  device_preview: ^1.2.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
