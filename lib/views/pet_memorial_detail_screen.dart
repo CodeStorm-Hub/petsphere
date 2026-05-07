@@ -45,10 +45,6 @@ class PetMemorialDetailScreen extends ConsumerWidget {
                           _MemorialProfile(entry: entry),
                           const SizedBox(height: 40),
                           _MemorialQuote(quote: entry.message),
-                          /*if (entry.galleryUrls != null && entry.galleryUrls!.isNotEmpty) ...[
-                            const SizedBox(height: 48),
-                            _MemorialGallery(images: entry.galleryUrls!),
-                          ],*/
                           const SizedBox(height: 48),
                           _MemorialMessageBoard(),
                           const SizedBox(height: 60),
@@ -213,54 +209,7 @@ class _MemorialQuote extends StatelessWidget {
   }
 }
 
-class _MemorialGallery extends StatelessWidget {
-  final List<String> images;
-  const _MemorialGallery({required this.images});
 
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.auto_awesome_rounded, color: colorScheme.tertiary, size: 20),
-            const SizedBox(width: 12),
-            const Text(
-              'Treasured Moments',
-              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1,
-          ),
-          itemCount: images.length,
-          itemBuilder: (context, index) {
-            return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 15)],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Image.network(images[index], fit: BoxFit.cover),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
 
 class _MemorialMessageBoard extends StatelessWidget {
   @override

@@ -41,7 +41,11 @@ class AuthRepository {
         'name': name,
       });
     } catch (e) {
-      // Clean up by signing out the user since profile creation failed
+      // Clean up by signing out the user since profile creation failed.
+      // NOTE: Ideally, we would delete the auth user here to allow re-signup with the same email.
+      // However, deleting a user requires admin privileges (Service Role key), which should 
+      // NOT be embedded in the client app.
+      // TODO: Implement a Supabase Edge Function 'delete-self' or similar to handle this rollback.
       await supabase.auth.signOut();
       throw Exception(
           'Failed to create your profile. Please try signing up again. If the problem persists, contact support.');

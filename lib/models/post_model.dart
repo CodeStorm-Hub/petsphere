@@ -120,4 +120,17 @@ class PostModel {
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'pets': pet.toJson(),
+        'media_url': mediaUrl,
+        'caption': caption,
+        'location': location,
+        'tagged_pet_ids': taggedPetIds,
+        'tagged_pet_names': taggedPetNames,
+        'post_likes': likedByPetIds.map((id) => {'pet_id': id}).toList(),
+        'comments': comments.map((c) => c.toJson()).toList(),
+        'created_at': createdAt.toIso8601String(),
+      };
 }

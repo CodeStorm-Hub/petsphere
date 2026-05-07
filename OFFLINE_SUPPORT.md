@@ -215,10 +215,13 @@ class FeedNotifier extends Notifier<FeedState> {
         switch (op['operation']) {
           case 'create':
             await _syncCreate(op);
+            break;
           case 'update':
             await _syncUpdate(op);
+            break;
           case 'delete':
             await _syncDelete(op);
+            break;
         }
         await OfflineCache().removeSyncOperation(i);
       } catch (e) {

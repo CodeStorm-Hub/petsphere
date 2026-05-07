@@ -15,6 +15,7 @@ import 'services/push_notification_service.dart';
 import 'utils/routes.dart';
 import 'utils/supabase_config.dart';
 import 'utils/theme_bootstrap.dart';
+import 'utils/offline_cache.dart';
 import 'theme/app_theme.dart';
 
 /// Set via `flutter test integration_test/... --dart-define=INTEGRATION_TEST=true`
@@ -75,6 +76,11 @@ Future<void> main() async {
   }
 
   final prefs = await SharedPreferences.getInstance();
+  
+  // Initialize OfflineCache for persistence
+  final offlineCache = OfflineCache();
+  await offlineCache.initialize();
+
   pendingBootstrapThemeMode =
       prefs.getString('theme_mode') == 'dark' ? ThemeMode.dark : ThemeMode.light;
 

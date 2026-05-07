@@ -106,26 +106,25 @@ bool areMedicationDosesLow(
   if (doses.isEmpty) return true;
 
   final now = DateTime.now();
-  final threshold = now.add(Duration(days: daysThreshold));
+  
+  // Get all pending future doses
+  final futureDoses = doses.where((d) => d.givenAt == null && d.scheduledFor.isAfter(now));
+  
+  // Count how many unique upcoming days have at least one dose scheduled
+  final coveredDays = futureDoses
+      .map((d) => DateTime(d.scheduledFor.year, d.scheduledFor.month, d.scheduledFor.day))
+      .toSet();
 
-  // Count doses that are still pending and within threshold
-  final remainingDoses = doses
-      .where((d) => d.givenAt == null && d.scheduledFor.isBefore(threshold))
-      .length;
-
-  return remainingDoses < daysThreshold;
+  return coveredDays.length < daysThreshold;
 }
 
 /// Get overdue medication doses
 List<MedicationDose> getOverdueDoses(
-  List<MedicationDose> doses, {
-  Duration grace = const Duration(hours: 4),
-}) {
+  List<MedicationDose> doses,
+) {
   final now = DateTime.now();
   return doses.where((d) {
-    return d.givenAt == null &&
-           d.scheduledFor.isBefore(now) &&
-           d.scheduledFor.add(grace).isAfter(now);
+    return d.givenAt == null && d.scheduledFor.isBefore(now);
   }).toList();
 }
 
