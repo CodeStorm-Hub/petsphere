@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/match_request_model.dart';
 import '../models/pet_model.dart';
+import '../repositories/follow_repository.dart';
 import '../repositories/match_repository.dart';
 import '../repositories/notification_repository.dart';
 import 'auth_controller.dart';
@@ -32,6 +33,8 @@ class MatchState {
   final List<PetModel> _allDiscoveryPets; // unfiltered set for search
   final List<MatchRequestModel> myRequests;
   final List<MatchRequestModel> sentRequests;
+  /// Batched follower counts for pets on the discovery feed (Issue #29).
+  final Map<String, int> discoveryFollowerCounts;
   final bool isLoading;
   final String? filterAnimal;
   final String? filterBreed;
@@ -43,6 +46,7 @@ class MatchState {
     List<PetModel>? allDiscoveryPets,
     this.myRequests = const [],
     this.sentRequests = const [],
+    this.discoveryFollowerCounts = const {},
     this.isLoading = false,
     this.filterAnimal,
     this.filterBreed,
@@ -57,6 +61,7 @@ class MatchState {
     List<PetModel>? allDiscoveryPets,
     List<MatchRequestModel>? myRequests,
     List<MatchRequestModel>? sentRequests,
+    Map<String, int>? discoveryFollowerCounts,
     bool? isLoading,
     String? filterAnimal,
     String? filterBreed,
@@ -71,6 +76,8 @@ class MatchState {
       allDiscoveryPets: allDiscoveryPets ?? _allDiscoveryPets,
       myRequests: myRequests ?? this.myRequests,
       sentRequests: sentRequests ?? this.sentRequests,
+      discoveryFollowerCounts:
+          discoveryFollowerCounts ?? this.discoveryFollowerCounts,
       isLoading: isLoading ?? this.isLoading,
       filterAnimal: clearAnimal ? null : (filterAnimal ?? this.filterAnimal),
       filterBreed: clearBreed ? null : (filterBreed ?? this.filterBreed),
@@ -122,6 +129,7 @@ class MatchController extends Notifier<MatchState> {
         filterAnimal: state.filterAnimal,
         filterBreed: state.filterBreed,
         searchQuery: state.searchQuery,
+        discoveryFollowerCounts: state.discoveryFollowerCounts,
         discoveryPets: const [],
         allDiscoveryPets: const [],
         myRequests: state.myRequests,
@@ -182,11 +190,24 @@ class MatchController extends Notifier<MatchState> {
       final allPets = futures[0] as List<PetModel>;
       final filtered = _applySearchFilter(allPets, state.searchQuery);
 
+      Map<String, int> followerCounts = {};
+      try {
+        if (allPets.isNotEmpty) {
+          followerCounts =
+              await followRepository.fetchPetFollowerCounts(allPets.map((p) => p.id));
+        }
+      } catch (e, st) {
+        debugPrint('[MatchController] follower counts batch skipped: $e\n$st');
+      }
+
+      if (gen != _loadGeneration) return;
+
       state = state.copyWith(
         discoveryPets: filtered,
         allDiscoveryPets: allPets,
         myRequests: futures[1] as List<MatchRequestModel>,
         sentRequests: futures[2] as List<MatchRequestModel>,
+        discoveryFollowerCounts: followerCounts,
         isLoading: false,
       );
     } catch (e) {
@@ -323,6 +344,10 @@ class MatchController extends Notifier<MatchState> {
       state = state.copyWith(
         discoveryPets: discoveryPets,
         allDiscoveryPets: allDiscoveryPets,
+        discoveryFollowerCounts: {
+          for (final e in state.discoveryFollowerCounts.entries)
+            if (e.key != receiverPetId) e.key: e.value,
+        },
       );
 
       // Notify the receiver pet's owner

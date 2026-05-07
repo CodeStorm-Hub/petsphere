@@ -5,6 +5,10 @@ import '../models/story_model.dart';
 import '../utils/supabase_config.dart';
 
 class FeedRepository {
+  /// Comment rows join commenter pet for name + avatar (post detail UX).
+  static const String commentPetEmbed =
+      'pets!comments_pet_id_fkey(name, id, profile_image_url)';
+
   // -------------------------------------------------------------------------
   // Fetch posts with nested pet, likes, and comments data
   // -------------------------------------------------------------------------
@@ -12,7 +16,7 @@ class FeedRepository {
     final data = await supabase
         .from('posts')
         .select(
-            '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
+            '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, $commentPetEmbed)')
         .order('created_at', ascending: false)
         .limit(50);
 
@@ -87,7 +91,7 @@ class FeedRepository {
     final data = await supabase
         .from('posts')
         .select(
-            '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
+            '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, $commentPetEmbed)')
         .eq('id', postId)
         .maybeSingle();
 
@@ -120,7 +124,7 @@ class FeedRepository {
           .from('posts')
           .insert(payload)
           .select(
-              '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
+              '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, $commentPetEmbed)')
           .single();
 
       return PostModel.fromJson(data);
@@ -134,7 +138,7 @@ class FeedRepository {
             'caption': caption,
           })
           .select(
-              '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
+              '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, $commentPetEmbed)')
           .single();
       return PostModel.fromJson(fallbackData);
     }
@@ -269,9 +273,11 @@ class FeedRepository {
   }) async {
     final payload = {
       'caption': caption,
-      'location': ?location,
-      'tagged_pet_ids': ?taggedPetIds,
-      'tagged_pet_names': ?taggedPetNames,
+      if (location != null && location.isNotEmpty) 'location': location,
+      if (taggedPetIds != null && taggedPetIds.isNotEmpty)
+        'tagged_pet_ids': taggedPetIds,
+      if (taggedPetNames != null && taggedPetNames.isNotEmpty)
+        'tagged_pet_names': taggedPetNames,
     };
 
     final data = await supabase
@@ -279,7 +285,7 @@ class FeedRepository {
         .update(payload)
         .eq('id', postId)
         .select(
-            '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, pets!comments_pet_id_fkey(name, id))')
+            '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, $commentPetEmbed)')
         .single();
 
     return PostModel.fromJson(data);
@@ -307,7 +313,7 @@ class FeedRepository {
           'pet_id': petId,
           'text': text,
         })
-        .select('*, pets!comments_pet_id_fkey(name, id)')
+        .select('*, $commentPetEmbed')
         .single();
 
     return CommentModel.fromJson(data);
@@ -319,7 +325,7 @@ class FeedRepository {
   Future<CommentModel> fetchComment(String commentId) async {
     final data = await supabase
         .from('comments')
-        .select('*, pets!comments_pet_id_fkey(name, id)')
+        .select('*, $commentPetEmbed')
         .eq('id', commentId)
         .single();
     return CommentModel.fromJson(data);

@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/pet_friendly_place_model.dart';
+import '../repositories/feature_repositories.dart';
+
+final petFriendlyPlacesProvider = FutureProvider.family<List<PetFriendlyPlace>, String>((ref, category) async {
+  return await petFriendlyPlacesRepository.fetchPetFriendlyPlaces(category);
+});
 
 class PetFriendlyPlacesScreen extends ConsumerStatefulWidget {
   const PetFriendlyPlacesScreen({super.key});
@@ -30,12 +36,12 @@ class _PetFriendlyPlacesScreenState extends ConsumerState<PetFriendlyPlacesScree
       ),
       body: Stack(
         children: [
-          _isMapView ? _MockMap() : _PlacesListView(),
+          _isMapView ? _MockMap() : _PlacesListView(category: _selectedCategory),
           _SearchOverlay(
             selectedCategory: _selectedCategory,
             onCategorySelected: (cat) => setState(() => _selectedCategory = cat),
           ),
-          if (_isMapView) _PlacesCarousel(),
+          if (_isMapView) _PlacesCarousel(category: _selectedCategory),
         ],
       ),
       floatingActionButton: _isMapView
@@ -152,27 +158,42 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-class _PlacesCarousel extends StatelessWidget {
+class _PlacesCarousel extends ConsumerWidget {
+  final String category;
+  const _PlacesCarousel({required this.category});
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final placesAsync = ref.watch(petFriendlyPlacesProvider(category));
+
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
         height: 240,
         padding: const EdgeInsets.only(bottom: 24),
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: 3,
-          itemBuilder: (context, index) => _PlaceCard(
-            name: index == 0 ? 'Central Dog Park' : index == 1 ? 'Bark & Brew Cafe' : 'Pet Care Hospital',
-            image: index == 0 
-                ? 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b'
-                : index == 1 ? 'https://images.unsplash.com/photo-1554123168-b400f9c8466b' : 'https://images.unsplash.com/photo-1583511655826-05700d52f4d9',
-            rating: 4.8 - (index * 0.1),
-            distance: '${0.4 + (index * 0.3)} mi',
-            status: 'Open Now',
-          ),
+        child: placesAsync.when(
+          data: (places) {
+            if (places.isEmpty) {
+              return const Center(child: Text('No places found nearby.'));
+            }
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: places.length,
+              itemBuilder: (context, index) {
+                final place = places[index];
+                return _PlaceCard(
+                  name: place.name,
+                  image: place.imageUrl ?? 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b',
+                  rating: place.rating,
+                  distance: '${place.distanceMiles} mi',
+                  status: place.status ?? 'Unknown',
+                );
+              },
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, _) => Center(child: Text('Error: $err')),
         ),
       ),
     );
@@ -261,20 +282,34 @@ class _PlaceCard extends StatelessWidget {
   }
 }
 
-class _PlacesListView extends StatelessWidget {
+class _PlacesListView extends ConsumerWidget {
+  final String category;
+  const _PlacesListView({required this.category});
+
   @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 220, left: 20, right: 20, bottom: 40),
-      itemCount: 10,
-      itemBuilder: (context, index) => _ListPlaceItem(index: index),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final placesAsync = ref.watch(petFriendlyPlacesProvider(category));
+
+    return placesAsync.when(
+      data: (places) {
+        if (places.isEmpty) {
+          return const Center(child: Text('No places found.'));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.only(top: 220, left: 20, right: 20, bottom: 40),
+          itemCount: places.length,
+          itemBuilder: (context, index) => _ListPlaceItem(place: places[index]),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, _) => Center(child: Text('Error: $err')),
     );
   }
 }
 
 class _ListPlaceItem extends StatelessWidget {
-  final int index;
-  const _ListPlaceItem({required this.index});
+  final PetFriendlyPlace place;
+  const _ListPlaceItem({required this.place});
 
   @override
   Widget build(BuildContext context) {
@@ -293,9 +328,7 @@ class _ListPlaceItem extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Image.network(
-              index % 2 == 0 
-                ? 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b'
-                : 'https://images.unsplash.com/photo-1583511655826-05700d52f4d9',
+              place.imageUrl ?? 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b',
               width: 80, 
               height: 80, 
               fit: BoxFit.cover,
@@ -306,20 +339,20 @@ class _ListPlaceItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(index % 2 == 0 ? 'Wagging Tails Park' : 'VetCare Central', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(place.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     Icon(Icons.star_rounded, color: colorScheme.tertiary, size: 14),
                     const SizedBox(width: 4),
-                    const Text('4.9 (120+ reviews)', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    Text('${place.rating} (${place.reviewCount} reviews)', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(color: colorScheme.tertiary.withAlpha(20), borderRadius: BorderRadius.circular(8)),
-                  child: Text('Open until 8:00 PM', style: TextStyle(color: colorScheme.tertiary, fontSize: 11, fontWeight: FontWeight.bold)),
+                  child: Text(place.status ?? 'Open', style: TextStyle(color: colorScheme.tertiary, fontSize: 11, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
@@ -327,7 +360,7 @@ class _ListPlaceItem extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('${0.8 + index * 0.2} mi', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              Text('${place.distanceMiles} mi', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
               const SizedBox(height: 12),
               IconButton.filledTonal(
                 onPressed: () {},

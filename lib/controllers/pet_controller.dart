@@ -180,6 +180,26 @@ class PetNotifier extends Notifier<PetState> {
   void setActivePet(PetModel pet) {
     state = state.copyWith(activePet: pet);
   }
+
+  // ── Photo management (#45) ────────────────────────────────────────────────
+
+  /// Removes [photoUrl] from storage and clears it from the pet record.
+  Future<bool> removePhoto(String petId, String photoUrl) async {
+    try {
+      // Delete from Supabase Storage first; ignore if not a storage URL.
+      await petRepository.deletePhotoFromUrl(photoUrl);
+      // Clear the profileImageUrl on the DB row if it matches.
+      final pet = state.myPets.firstWhere((p) => p.id == petId,
+          orElse: () => state.activePet!);
+      if (pet.profileImageUrl == photoUrl) {
+        return updatePet(petId, {'profile_image_url': null});
+      }
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return false;
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -222,3 +242,11 @@ class MainLayoutTabRequest extends Notifier<int?> {
 
 final mainLayoutTabRequestProvider =
     NotifierProvider<MainLayoutTabRequest, int?>(MainLayoutTabRequest.new);
+
+/// Breed autocomplete provider (#46).
+/// Usage: ref.watch(breedSuggestionsProvider('retriev'))
+final breedSuggestionsProvider =
+    FutureProvider.family<List<String>, String>((ref, query) async {
+  if (query.trim().length < 2) return [];
+  return petRepository.fetchBreedSuggestions(query.trim());
+});

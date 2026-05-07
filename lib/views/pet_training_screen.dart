@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/pet_controller.dart';
+import '../controllers/pet_training_controller.dart';
 import '../widgets/brand_logo.dart';
 
 class PetTrainingScreen extends ConsumerWidget {
@@ -11,6 +12,7 @@ class PetTrainingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activePet = ref.watch(activePetProvider);
+    final trainingAsync = ref.watch(petTrainingProgressProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
 
@@ -57,126 +59,144 @@ class PetTrainingScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-            title: Text(
-              'Training',
-              style: GoogleFonts.playfairDisplay(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            actions: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.stars_rounded),
-                tooltip: 'Training Medals',
-              ),
-            ],
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                _TrainingHeroCard(
-                  petName: activePet.name,
-                  level: 5,
-                  progress: 0.65,
-                ),
-                const SizedBox(height: 32),
-                Text(
-                  'Skill Categories',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+      body: trainingAsync.when(
+        data: (progressList) {
+          final masteredCount = progressList.where((p) => p.mastered).length;
+          final level = (masteredCount / 5).floor() + 1;
+          final levelProgress = (masteredCount % 5) / 5.0;
+
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar.large(
+                title: Text(
+                  'Training',
+                  style: GoogleFonts.playfairDisplay(
                     fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 16),
-                GridView.count(
-                  padding: EdgeInsets.zero,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 1.3,
-                  children: [
-                    _SkillCard(
-                      label: 'Obedience',
-                      icon: Icons.gavel_rounded,
-                      color: colorScheme.primary,
-                      skillsCount: 12,
-                      completed: 8,
+                actions: [
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.stars_rounded),
+                    tooltip: 'Training Medals',
+                  ),
+                ],
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    _TrainingHeroCard(
+                      petName: activePet.name,
+                      level: level,
+                      progress: levelProgress,
+                      masteredCount: masteredCount,
                     ),
-                    _SkillCard(
-                      label: 'Agility',
-                      icon: Icons.run_circle_outlined,
-                      color: colorScheme.tertiary,
-                      skillsCount: 8,
-                      completed: 2,
-                    ),
-                    _SkillCard(
-                      label: 'Social',
-                      icon: Icons.diversity_3_rounded,
-                      color: colorScheme.secondary,
-                      skillsCount: 10,
-                      completed: 5,
-                    ),
-                    _SkillCard(
-                      label: 'Tricks',
-                      icon: Icons.auto_awesome_rounded,
-                      color: colorScheme.primaryContainer,
-                      skillsCount: 15,
-                      completed: 4,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+                    const SizedBox(height: 32),
                     Text(
-                      'Daily Exercises',
+                      'Skill Categories',
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontFamily: GoogleFonts.playfairDisplay().fontFamily,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text('View All'),
+                    const SizedBox(height: 16),
+                    GridView.count(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 1.3,
+                      children: [
+                        _SkillCard(
+                          label: 'Obedience',
+                          icon: Icons.gavel_rounded,
+                          color: colorScheme.primary,
+                          skillsCount: 12,
+                          completed: progressList.where((p) => ['Sit', 'Stay', 'Come', 'Heel', 'Down', 'Leave it'].contains(p.command) && p.mastered).length,
+                        ),
+                        _SkillCard(
+                          label: 'Agility',
+                          icon: Icons.run_circle_outlined,
+                          color: colorScheme.tertiary,
+                          skillsCount: 8,
+                          completed: progressList.where((p) => ['Jump', 'Tunnel', 'Weave', 'A-Frame'].contains(p.command) && p.mastered).length,
+                        ),
+                        _SkillCard(
+                          label: 'Social',
+                          icon: Icons.diversity_3_rounded,
+                          color: colorScheme.secondary,
+                          skillsCount: 10,
+                          completed: progressList.where((p) => ['Wait at Door', 'Greeting', 'No Barking'].contains(p.command) && p.mastered).length,
+                        ),
+                        _SkillCard(
+                          label: 'Tricks',
+                          icon: Icons.auto_awesome_rounded,
+                          color: colorScheme.primaryContainer,
+                          skillsCount: 15,
+                          completed: progressList.where((p) => ['Shake', 'Roll Over', 'Play Dead', 'Spin', 'High Five'].contains(p.command) && p.mastered).length,
+                        ),
+                      ],
                     ),
-                  ],
+                    const SizedBox(height: 32),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Daily Exercises',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: const Text('View All'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _ExerciseItem(
+                      title: 'Perfect Recall',
+                      subtitle: '5 minutes • Basic',
+                      icon: Icons.settings_voice_rounded,
+                      isMastered: progressList.any((p) => p.command == 'Come' && p.mastered),
+                    ),
+                    _ExerciseItem(
+                      title: 'Stay with Distractions',
+                      subtitle: '3 minutes • Advanced',
+                      icon: Icons.pause_circle_filled_rounded,
+                      isMastered: progressList.any((p) => p.command == 'Stay' && p.mastered),
+                    ),
+                    const SizedBox(height: 32),
+                    const _TrainerPromotionCard(),
+                    const SizedBox(height: 100),
+                  ]),
                 ),
-                const SizedBox(height: 12),
-                const _ExerciseItem(
-                  title: 'Perfect Recall',
-                  subtitle: '5 minutes • Basic',
-                  icon: Icons.settings_voice_rounded,
-                ),
-                const _ExerciseItem(
-                  title: 'Loose Leash Walking',
-                  subtitle: '10 minutes • Intermediate',
-                  icon: Icons.linear_scale_rounded,
-                ),
-                const _ExerciseItem(
-                  title: 'Stay with Distractions',
-                  subtitle: '3 minutes • Advanced',
-                  icon: Icons.pause_circle_filled_rounded,
-                ),
-                const SizedBox(height: 32),
-                const _TrainerPromotionCard(),
-                const SizedBox(height: 100),
-              ]),
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, st) => Center(child: Text('Error: $e')),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => _LogSessionSheet(
+              petId: activePet.id,
+              onLogged: () => ref.invalidate(petTrainingProgressProvider),
+            ),
+          );
+        },
         icon: const Icon(Icons.add_rounded),
-        label: const Text('New Session'),
+        label: const Text('Log Session'),
       ),
     );
   }
@@ -187,11 +207,13 @@ class _TrainingHeroCard extends StatelessWidget {
     required this.petName,
     required this.level,
     required this.progress,
+    required this.masteredCount,
   });
 
   final String petName;
   final int level;
   final double progress;
+  final int masteredCount;
 
   @override
   Widget build(BuildContext context) {
@@ -251,9 +273,11 @@ class _TrainingHeroCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          const Text(
-            'You\'re making great progress! Complete 2 more sessions to reach Level 6.',
-            style: TextStyle(
+          Text(
+            masteredCount == 0 
+              ? 'Start your training journey! Master 5 skills to reach Level 2.'
+              : 'You\'ve mastered $masteredCount skills! Keep going to reach the next level.',
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 14,
               height: 1.4,
@@ -271,7 +295,7 @@ class _TrainingHeroCard extends StatelessWidget {
                 ),
               ),
               FractionallySizedBox(
-                widthFactor: progress,
+                widthFactor: progress.clamp(0.05, 1.0), // Minimum width for visibility
                 child: Container(
                   height: 10,
                   decoration: BoxDecoration(
@@ -312,7 +336,7 @@ class _SkillCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final progress = completed / skillsCount;
+    final progress = (completed / skillsCount).clamp(0.0, 1.0);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -373,11 +397,13 @@ class _ExerciseItem extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.icon,
+    required this.isMastered,
   });
 
   final String title;
   final String subtitle;
   final IconData icon;
+  final bool isMastered;
 
   @override
   Widget build(BuildContext context) {
@@ -386,9 +412,9 @@ class _ExerciseItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: isMastered ? colorScheme.primaryContainer.withValues(alpha: 0.2) : colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+        border: Border.all(color: isMastered ? colorScheme.primary.withValues(alpha: 0.3) : colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Row(
         children: [
@@ -407,7 +433,11 @@ class _ExerciseItem extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold, 
+                    fontSize: 16,
+                    decoration: isMastered ? TextDecoration.lineThrough : null,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -417,7 +447,10 @@ class _ExerciseItem extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.chevron_right_rounded, color: colorScheme.onSurfaceVariant),
+          if (isMastered)
+            const Icon(Icons.check_circle_rounded, color: Colors.green)
+          else
+            Icon(Icons.chevron_right_rounded, color: colorScheme.onSurfaceVariant),
         ],
       ),
     );
@@ -473,6 +506,123 @@ class _TrainerPromotionCard extends StatelessWidget {
             Icons.school_rounded,
             size: 80,
             color: colorScheme.secondary.withValues(alpha: 0.15),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LogSessionSheet extends ConsumerStatefulWidget {
+  final String petId;
+  final VoidCallback onLogged;
+
+  const _LogSessionSheet({required this.petId, required this.onLogged});
+
+  @override
+  ConsumerState<_LogSessionSheet> createState() => _LogSessionSheetState();
+}
+
+class _LogSessionSheetState extends ConsumerState<_LogSessionSheet> {
+  final _commandCtrl = TextEditingController();
+  final _notesCtrl = TextEditingController();
+  bool _mastered = false;
+
+  @override
+  void dispose() {
+    _commandCtrl.dispose();
+    _notesCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_commandCtrl.text.trim().isEmpty) return;
+    
+    await ref.read(petTrainingControllerProvider.notifier).logSession(
+      petId: widget.petId,
+      command: _commandCtrl.text.trim(),
+      mastered: _mastered,
+      notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+    );
+    
+    if (mounted) {
+      final state = ref.read(petTrainingControllerProvider);
+      if (state.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${state.error}')));
+      } else {
+        widget.onLogged();
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final saving = ref.watch(petTrainingControllerProvider).isLoading;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      padding: EdgeInsets.fromLTRB(24, 12, 24, MediaQuery.of(context).viewInsets.bottom + 40),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Log Training Session',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 24),
+          TextField(
+            controller: _commandCtrl,
+            decoration: InputDecoration(
+              labelText: 'Command / Skill (e.g. Sit, Stay)',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _notesCtrl,
+            maxLines: 2,
+            decoration: InputDecoration(
+              labelText: 'Notes (optional)',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+          ),
+          const SizedBox(height: 16),
+          SwitchListTile(
+            title: const Text('Mastered?'),
+            subtitle: const Text('Check if pet consistently performs this command'),
+            value: _mastered,
+            onChanged: (val) => setState(() => _mastered = val),
+            contentPadding: EdgeInsets.zero,
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: saving ? null : _submit,
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              child: saving
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('Save Session'),
+            ),
           ),
         ],
       ),

@@ -4,6 +4,8 @@ class CommentModel {
   final String id;
   final String petId;
   final String petName;
+  /// From joined `pets.profile_image_url` when present (empty if unknown).
+  final String petProfileImageUrl;
   final String text;
   final DateTime createdAt;
 
@@ -11,6 +13,7 @@ class CommentModel {
     required this.id,
     required this.petId,
     required this.petName,
+    this.petProfileImageUrl = '',
     required this.text,
     required this.createdAt,
   });
@@ -22,6 +25,7 @@ class CommentModel {
       id: json['id'] as String,
       petId: json['pet_id'] as String,
       petName: petJson?['name'] as String? ?? 'Unknown',
+      petProfileImageUrl: petJson?['profile_image_url'] as String? ?? '',
       text: json['text'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
@@ -116,4 +120,17 @@ class PostModel {
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'pets': pet.toJson(),
+        'media_url': mediaUrl,
+        'caption': caption,
+        'location': location,
+        'tagged_pet_ids': taggedPetIds,
+        'tagged_pet_names': taggedPetNames,
+        'post_likes': likedByPetIds.map((id) => {'pet_id': id}).toList(),
+        'comments': comments.map((c) => c.toJson()).toList(),
+        'created_at': createdAt.toIso8601String(),
+      };
 }

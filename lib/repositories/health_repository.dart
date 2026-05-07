@@ -1,3 +1,4 @@
+import 'dart:developer';
 import '../models/pet_health_extended_models.dart';
 import '../models/pet_health_models.dart';
 import '../utils/supabase_config.dart';
@@ -228,12 +229,38 @@ class HealthRepository {
 
   Future<PetVaccination> markVaccinationComplete(
       String id, DateTime completedOn) async {
+    final existingRow = await _db
+        .from('pet_vaccinations')
+        .select('vaccine_name')
+        .eq('id', id)
+        .single();
+    
+    final vaccineName = existingRow['vaccine_name'] as String;
+    
+    final scheduleRow = await _db
+        .from('vaccination_schedules')
+        .select('interval_months')
+        .eq('vaccine_name', vaccineName)
+        .maybeSingle();
+
+    String? nextDueDateStr;
+    if (scheduleRow != null) {
+      final int months = scheduleRow['interval_months'] as int;
+      final nextDate = DateTime(completedOn.year, completedOn.month + months, completedOn.day);
+      nextDueDateStr = nextDate.toIso8601String().split('T').first;
+    }
+
+    final updateData = <String, dynamic>{
+      'status': 'completed',
+      'completed_on': completedOn.toIso8601String().split('T').first,
+    };
+    if (nextDueDateStr != null) {
+      updateData['next_due_date'] = nextDueDateStr;
+    }
+
     final row = await _db
         .from('pet_vaccinations')
-        .update({
-          'status': 'completed',
-          'completed_on': completedOn.toIso8601String().split('T').first,
-        })
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
@@ -242,6 +269,37 @@ class HealthRepository {
 
   Future<void> deleteVaccination(String id) async {
     await _db.from('pet_vaccinations').delete().eq('id', id);
+  }
+
+  Future<List<PetVetAppointment>> fetchUpcomingAppointments(String petId) async {
+    final now = DateTime.now();
+    final rows = await _db
+        .from('pet_vet_appointments')
+        .select()
+        .eq('pet_id', petId)
+        .gte('scheduled_at', now.toIso8601String())
+        .order('scheduled_at');
+    return (rows as List).map((r) => PetVetAppointment.fromJson(r)).toList();
+  }
+
+  Future<void> generateDosesIdempotent(List<MedicationDose> doses) async {
+    if (doses.isEmpty) return;
+    const chunkSize = 500;
+    for (var i = 0; i < doses.length; i += chunkSize) {
+      final chunk = doses.sublist(
+          i, i + chunkSize > doses.length ? doses.length : i + chunkSize);
+      try {
+        await _db
+            .from('pet_medication_doses')
+            .upsert(
+              chunk.map((d) => d.toUpsertJson()..remove('id')).toList(),
+              onConflict: 'medication_id,scheduled_for',
+              ignoreDuplicates: true,
+            );
+      } catch (e) {
+        log('generateDosesIdempotent chunk error: $e', name: 'HealthRepository');
+      }
+    }
   }
 }
 

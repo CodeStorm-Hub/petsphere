@@ -39,6 +39,11 @@ class FeedState {
       error: clearError ? null : (error ?? this.error),
     );
   }
+
+  /// Defensive expiry filter so long-lived sessions don’t show 24h stories past [StoryModel.expiresAt].
+  /// Network fetch already uses `expires_at > now()`; this trims stale in-memory rows.
+  List<StoryModel> get visibleStories =>
+      stories.where((s) => !s.isExpired).toList();
 }
 
 // ---------------------------------------------------------------------------
@@ -51,30 +56,54 @@ class FeedNotifier extends Notifier<FeedState> {
 
   @override
   FeedState build() {
-    // Auto-refetch the feed whenever the auth status flips to authenticated
-    // or the active user changes. This guarantees fresh content on cold
-    // start (saved session) and on fresh login without forcing the user to
-    // pull-to-refresh. Manual refresh via `refresh()` is still available.
-    ref.listen(authProvider, (prev, next) {
-      if (next.status == AuthStatus.authenticated &&
-          next.user != null &&
-          _lastFetchedForUserId != next.user!.id) {
-        _lastFetchedForUserId = next.user!.id;
-        _fetchPosts();
-      } else if (next.status == AuthStatus.unauthenticated) {
-        _lastFetchedForUserId = null;
-      }
-    });
-
-    _setupRealtimeSubscriptions();
     ref.onDispose(_disposeChannels);
-    _fetchPosts();
-    final authedUser = ref.read(authProvider).user;
-    if (authedUser != null) _lastFetchedForUserId = authedUser.id;
+
+    ref.listen<AuthState>(
+      authProvider,
+      (prev, next) {
+        if (next.status == AuthStatus.unauthenticated) {
+          _disposeChannels();
+          _likesChannel = null;
+          _commentsChannel = null;
+          _lastFetchedForUserId = null;
+          return;
+        }
+        if (next.status == AuthStatus.authenticated && next.user != null) {
+          final uid = next.user!.id;
+          if (_lastFetchedForUserId != uid) {
+            _lastFetchedForUserId = uid;
+            _fetchPosts();
+          }
+          if (_likesChannel == null || _commentsChannel == null) {
+            _ensureRealtimeSubscribed();
+          }
+        }
+      },
+      fireImmediately: true,
+    );
+
+    final auth = ref.read(authProvider);
+    if (auth.status != AuthStatus.authenticated || auth.user == null) {
+      _disposeChannels();
+      _likesChannel = null;
+      _commentsChannel = null;
+      _lastFetchedForUserId = null;
+      return FeedState(
+        isLoading: false,
+        posts: const [],
+        stories: const [],
+        error: null,
+      );
+    }
     return FeedState(isLoading: true);
   }
 
-  void _setupRealtimeSubscriptions() {
+  void _ensureRealtimeSubscribed() {
+    final authed = ref.read(authProvider).status == AuthStatus.authenticated &&
+        ref.read(authProvider).user != null;
+    if (!authed) return;
+    _likesChannel?.unsubscribe();
+    _commentsChannel?.unsubscribe();
     _likesChannel = feedRepository.subscribeToLikes(
       onLikeChange: _handleRealtimeLike,
     );

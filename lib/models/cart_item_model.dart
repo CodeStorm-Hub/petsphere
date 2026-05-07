@@ -13,6 +13,20 @@ class CartItemModel {
 
   double get subtotal => product.price * quantity;
 
+  factory CartItemModel.fromJson(Map<String, dynamic> json) {
+    return CartItemModel(
+      id: json['id'] as String,
+      product: ProductModel.fromJson(json['product'] as Map<String, dynamic>),
+      quantity: (json['quantity'] as num?)?.toInt() ?? 1,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'product': product.toJson(),
+        'quantity': quantity,
+      };
+
   CartItemModel copyWith({
     String? id,
     ProductModel? product,

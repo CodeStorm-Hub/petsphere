@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/pet_controller.dart';
+import '../controllers/pet_nutrition_controller.dart';
+import '../repositories/feature_repositories.dart';
 
 class PetNutritionPlannerScreen extends ConsumerStatefulWidget {
   const PetNutritionPlannerScreen({super.key});
@@ -10,63 +12,108 @@ class PetNutritionPlannerScreen extends ConsumerStatefulWidget {
 }
 
 class _PetNutritionPlannerScreenState extends ConsumerState<PetNutritionPlannerScreen> {
-  int _waterIntake = 450;
-  final int _waterGoal = 800;
-
-  final List<Map<String, dynamic>> _meals = [
-    {'title': 'Breakfast', 'time': '08:00 AM', 'calories': 250, 'isDone': true, 'type': 'Kibble', 'macros': {'p': 30, 'f': 15, 'c': 55}},
-    {'title': 'Lunch', 'time': '01:00 PM', 'calories': 200, 'isDone': false, 'type': 'Wet Food', 'macros': {'p': 45, 'f': 25, 'c': 30}},
-    {'title': 'Dinner', 'time': '07:00 PM', 'calories': 300, 'isDone': false, 'type': 'Raw Mix', 'macros': {'p': 50, 'f': 30, 'c': 20}},
-  ];
+  void _showAddMealSheet(String? petId) {
+    if (petId == null) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _AddMealSheet(
+        petId: petId,
+        onAdded: () => ref.invalidate(todayNutritionProvider),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final pet = ref.watch(petProvider);
-    final totalConsumed = _meals.where((m) => m['isDone']).fold<int>(0, (sum, m) => sum + (m['calories'] as int));
-    final budget = (pet.activePet?.weightLbs ?? 10) * 70; // Basic RER formula
+    final petState = ref.watch(petProvider);
+    final nutritionAsync = ref.watch(todayNutritionProvider);
+    final activePet = petState.activePet;
 
     return Scaffold(
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverAppBar.large(
-            title: const Text('Nutrition & Diet', style: TextStyle(fontWeight: FontWeight.bold)),
-            actions: [
-              IconButton.filledTonal(onPressed: () {}, icon: const Icon(Icons.analytics_outlined)),
-              const SizedBox(width: 8),
-            ],
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  _CalorieBudgetCard(consumed: totalConsumed, total: budget.toInt(), petName: pet.activePet?.name ?? 'Pet'),
-                  const SizedBox(height: 24),
-                  _HydrationTracker(current: _waterIntake, goal: _waterGoal, onAdd: () => setState(() => _waterIntake += 100)),
-                  const SizedBox(height: 32),
-                  _SafeFoodLookup(),
-                  const SizedBox(height: 32),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Meal Schedule', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                      TextButton.icon(onPressed: () {}, icon: const Icon(Icons.add_rounded), label: const Text('Add Meal')),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  ..._meals.asMap().entries.map((entry) => _MealItem(
-                        meal: entry.value,
-                        onChanged: (val) => setState(() => _meals[entry.key]['isDone'] = val),
-                      )),
-                  const SizedBox(height: 32),
-                  _DietaryProfile(),
-                  const SizedBox(height: 40),
+      body: nutritionAsync.when(
+        data: (logs) {
+          final totalConsumed = logs.fold<int>(0, (sum, log) => sum + (log.calories ?? 0));
+          final waterIntake = logs.fold<int>(0, (sum, log) => sum + (log.waterMl ?? 0));
+          final budget = (activePet?.weightLbs ?? 10) * 70; // Basic RER formula
+          final waterGoal = 800; // Hardcoded goal for now
+
+          return CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverAppBar.large(
+                title: const Text('Nutrition & Diet', style: TextStyle(fontWeight: FontWeight.bold)),
+                actions: [
+                  IconButton.filledTonal(onPressed: () {}, icon: const Icon(Icons.analytics_outlined)),
+                  const SizedBox(width: 8),
                 ],
               ),
-            ),
-          ),
-        ],
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      _CalorieBudgetCard(
+                        consumed: totalConsumed, 
+                        total: budget.toInt(), 
+                        petName: activePet?.name ?? 'Pet',
+                        logs: logs,
+                      ),
+                      const SizedBox(height: 24),
+                      _HydrationTracker(
+                        current: waterIntake, 
+                        goal: waterGoal, 
+                        onAdd: () async {
+                          if (activePet != null) {
+                            await ref.read(petNutritionControllerProvider.notifier).addMeal(
+                              petId: activePet.id,
+                              mealName: 'Water',
+                              mealType: 'Beverage',
+                              waterMl: 100,
+                            );
+                          }
+                        }
+                      ),
+                      const SizedBox(height: 32),
+                      _SafeFoodLookup(),
+                      const SizedBox(height: 32),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Meal History', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                          TextButton.icon(
+                            onPressed: () => _showAddMealSheet(activePet?.id),
+                            icon: const Icon(Icons.add_rounded),
+                            label: const Text('Add Meal'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      if (logs.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(32),
+                            child: Text(
+                              'No meals logged today yet.',
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                            ),
+                          ),
+                        )
+                      else
+                        ...logs.where((l) => l.mealName != 'Water').map((log) => _MealItem(log: log)),
+                      const SizedBox(height: 32),
+                      _DietaryProfile(),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, st) => Center(child: Text('Error: $e')),
       ),
     );
   }
@@ -76,13 +123,30 @@ class _CalorieBudgetCard extends StatelessWidget {
   final int consumed;
   final int total;
   final String petName;
+  final List<NutritionLog> logs;
 
-  const _CalorieBudgetCard({required this.consumed, required this.total, required this.petName});
+  const _CalorieBudgetCard({
+    required this.consumed, 
+    required this.total, 
+    required this.petName,
+    required this.logs,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final progress = (consumed / total).clamp(0.0, 1.0);
+
+    // Calculate averages for macros
+    int avgProtein = 0;
+    int avgFat = 0;
+    int avgCarb = 0;
+    final foodLogs = logs.where((l) => l.mealName != 'Water').toList();
+    if (foodLogs.isNotEmpty) {
+      avgProtein = foodLogs.fold<int>(0, (sum, l) => sum + (l.proteinPct ?? 0)) ~/ foodLogs.length;
+      avgFat = foodLogs.fold<int>(0, (sum, l) => sum + (l.fatPct ?? 0)) ~/ foodLogs.length;
+      avgCarb = foodLogs.fold<int>(0, (sum, l) => sum + (l.carbPct ?? 0)) ~/ foodLogs.length;
+    }
 
     return Container(
       padding: const EdgeInsets.all(28),
@@ -126,7 +190,7 @@ class _CalorieBudgetCard extends StatelessWidget {
                 decoration: BoxDecoration(color: Colors.white.withAlpha(40), borderRadius: BorderRadius.circular(6)),
               ),
               FractionallySizedBox(
-                widthFactor: progress,
+                widthFactor: progress.clamp(0.05, 1.0),
                 child: Container(
                   height: 12,
                   decoration: BoxDecoration(
@@ -142,9 +206,9 @@ class _CalorieBudgetCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _StatMini(label: 'Protein', value: '45%', color: Colors.white.withAlpha(220)),
-              _StatMini(label: 'Fats', value: '25%', color: Colors.white.withAlpha(220)),
-              _StatMini(label: 'Carbs', value: '30%', color: Colors.white.withAlpha(220)),
+              _StatMini(label: 'Protein', value: foodLogs.isEmpty ? '0%' : '$avgProtein%', color: Colors.white.withAlpha(220)),
+              _StatMini(label: 'Fats', value: foodLogs.isEmpty ? '0%' : '$avgFat%', color: Colors.white.withAlpha(220)),
+              _StatMini(label: 'Carbs', value: foodLogs.isEmpty ? '0%' : '$avgCarb%', color: Colors.white.withAlpha(220)),
             ],
           ),
         ],
@@ -266,50 +330,47 @@ class _SafeFoodLookup extends StatelessWidget {
 }
 
 class _MealItem extends StatelessWidget {
-  final Map<String, dynamic> meal;
-  final ValueChanged<bool?> onChanged;
+  final NutritionLog log;
 
-  const _MealItem({required this.meal, required this.onChanged});
+  const _MealItem({required this.log});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDone = meal['isDone'] as bool;
+    final timeStr = '${log.loggedAt.hour}:${log.loggedAt.minute.toString().padLeft(2, '0')}';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDone ? colorScheme.primary.withAlpha(20) : colorScheme.surface,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isDone ? colorScheme.primary.withAlpha(50) : colorScheme.outlineVariant),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
-          Checkbox(
-            value: isDone,
-            onChanged: onChanged,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer.withAlpha(30),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.restaurant_rounded, color: colorScheme.primary, size: 20),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(meal['title'], style: TextStyle(
-                  fontWeight: FontWeight.bold, 
-                  fontSize: 16,
-                  decoration: isDone ? TextDecoration.lineThrough : null,
-                  color: isDone ? Colors.grey : null,
-                )),
-                Text('${meal['time']} • ${meal['type']}', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
+                Text(log.mealName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text('$timeStr • ${log.mealType}', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
               ],
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('${meal['calories']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              Text('${log.calories ?? 0}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const Text('kcal', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
             ],
           ),
@@ -375,6 +436,172 @@ class _Tag extends StatelessWidget {
         border: Border.all(color: color.withAlpha(60)),
       ),
       child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
+    );
+  }
+}
+
+class _AddMealSheet extends ConsumerStatefulWidget {
+  final String petId;
+  final VoidCallback onAdded;
+
+  const _AddMealSheet({required this.petId, required this.onAdded});
+
+  @override
+  ConsumerState<_AddMealSheet> createState() => _AddMealSheetState();
+}
+
+class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
+  final _mealNameCtrl = TextEditingController();
+  final _foodTypeCtrl = TextEditingController();
+  final _calsCtrl = TextEditingController();
+  final _proteinCtrl = TextEditingController();
+  final _fatCtrl = TextEditingController();
+  final _carbCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _mealNameCtrl.dispose();
+    _foodTypeCtrl.dispose();
+    _calsCtrl.dispose();
+    _proteinCtrl.dispose();
+    _fatCtrl.dispose();
+    _carbCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_mealNameCtrl.text.isEmpty) return;
+    
+    await ref.read(petNutritionControllerProvider.notifier).addMeal(
+      petId: widget.petId,
+      mealName: _mealNameCtrl.text.trim(),
+      mealType: _foodTypeCtrl.text.trim(),
+      calories: int.tryParse(_calsCtrl.text),
+      proteinPct: int.tryParse(_proteinCtrl.text),
+      fatPct: int.tryParse(_fatCtrl.text),
+      carbPct: int.tryParse(_carbCtrl.text),
+    );
+    
+    if (mounted) {
+      final state = ref.read(petNutritionControllerProvider);
+      if (state.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${state.error}')));
+      } else {
+        widget.onAdded();
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final saving = ref.watch(petNutritionControllerProvider).isLoading;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      padding: EdgeInsets.fromLTRB(24, 12, 24, MediaQuery.of(context).viewInsets.bottom + 40),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Log a Meal',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            TextField(
+              controller: _mealNameCtrl,
+              decoration: InputDecoration(
+                labelText: 'Meal Name (e.g. Breakfast)',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _foodTypeCtrl,
+              decoration: InputDecoration(
+                labelText: 'Food Type (e.g. Kibble, Wet Food)',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _calsCtrl,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Calories (kcal)',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _proteinCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Protein %',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _fatCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Fat %',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _carbCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Carbs %',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: saving ? null : _submit,
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: saving
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Text('Add Meal'),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

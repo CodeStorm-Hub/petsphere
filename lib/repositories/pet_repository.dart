@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import '../models/pet_model.dart';
 import '../utils/supabase_config.dart';
@@ -69,9 +70,7 @@ class PetRepository {
     return PetModel.fromJson(data);
   }
 
-  // -------------------------------------------------------------------------
-  // Upload a pet image to Supabase Storage — returns the public URL
-  // -------------------------------------------------------------------------
+  /// Upload a pet image to Supabase Storage — returns the public URL
   Future<String> uploadPetImage(String petId, File imageFile) async {
     final ext = imageFile.path.split('.').last;
     final path = '$petId/${DateTime.now().millisecondsSinceEpoch}.$ext';
@@ -79,6 +78,68 @@ class PetRepository {
     await supabase.storage.from(kBucketPetImages).upload(path, imageFile);
 
     return supabase.storage.from(kBucketPetImages).getPublicUrl(path);
+  }
+
+  // -------------------------------------------------------------------------
+  // Delete a pet image from Supabase Storage (#45)
+  // -------------------------------------------------------------------------
+
+  /// Deletes a specific pet image by its [storagePath] (e.g. 'petId/12345.jpg').
+  Future<void> deletePetImage(String storagePath) async {
+    try {
+      await supabase.storage.from(kBucketPetImages).remove([storagePath]);
+    } catch (e) {
+      log('deletePetImage failed for $storagePath: $e', name: 'PetRepository');
+      rethrow;
+    }
+  }
+
+  /// Extracts the storage path from a public bucket URL and deletes the object.
+  /// Safe to call with non-storage URLs — will log and skip.
+  Future<void> deletePhotoFromUrl(String publicUrl) async {
+    try {
+      final uri = Uri.parse(publicUrl);
+      // Public URL format: .../storage/v1/object/public/<bucket>/<path>
+      final segments = uri.pathSegments;
+      final bucketIdx = segments.indexOf(kBucketPetImages);
+      if (bucketIdx == -1 || bucketIdx + 1 >= segments.length) return;
+      final storagePath = segments.sublist(bucketIdx + 1).join('/');
+      await deletePetImage(storagePath);
+    } catch (e) {
+      log('deletePhotoFromUrl error for $publicUrl: $e', name: 'PetRepository');
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Breed autocomplete (#46)
+  // -------------------------------------------------------------------------
+
+  /// Returns up to [limit] distinct breed strings matching [query].
+  /// Queries the `pets` table for diversity across user-submitted breeds.
+  Future<List<String>> fetchBreedSuggestions(String query,
+      {int limit = 10}) async {
+    if (query.trim().isEmpty) return [];
+    try {
+      final rows = await supabase
+          .from('pets')
+          .select('breed')
+          .ilike('breed', '%${query.trim()}%')
+          .not('breed', 'is', null)
+          .limit(limit * 3); // over-fetch to dedup in Dart
+      final seen = <String>{};
+      final result = <String>[];
+      for (final row in rows as List) {
+        final breed = (row['breed'] as String?)?.trim();
+        if (breed != null && breed.isNotEmpty && seen.add(breed.toLowerCase())) {
+          result.add(breed);
+          if (result.length >= limit) break;
+        }
+      }
+      return result;
+    } catch (e) {
+      log('fetchBreedSuggestions error: $e', name: 'PetRepository');
+      return [];
+    }
   }
 }
 

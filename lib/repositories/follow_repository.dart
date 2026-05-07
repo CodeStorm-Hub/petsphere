@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:supabase_flutter/supabase_flutter.dart' show CountOption;
+
 import '../utils/supabase_config.dart';
 
 class FollowRepository {
@@ -100,12 +102,11 @@ class FollowRepository {
   // Get follower count for an owner
   // -------------------------------------------------------------------------
   Future<int> getOwnerFollowerCount(String ownerId) async {
-    final data = await supabase
+    return supabase
         .from('follows')
-        .select('id')
+        .count(CountOption.exact)
         .not('followed_user_id', 'is', null)
         .eq('followed_user_id', ownerId);
-    return (data as List).length;
   }
 
   // -------------------------------------------------------------------------
@@ -113,49 +114,95 @@ class FollowRepository {
   // Deduplicates users who follow both the owner and the pet individually
   // -------------------------------------------------------------------------
   Future<int> getPetFollowerCount(String petId) async {
-    // Get the pet's owner
-    final pet = await supabase
-        .from('pets')
-        .select('user_id')
-        .eq('id', petId)
-        .maybeSingle();
+    final map = await fetchPetFollowerCounts([petId]);
+    return map[petId] ?? 0;
+  }
 
-    if (pet == null) return 0;
+  /// Batch follower counts for many pets in a small number of queries (pet direct
+  /// follows + implicit owner follows, deduplicated per pet).
+  Future<Map<String, int>> fetchPetFollowerCounts(
+      Iterable<String> petIdsRaw) async {
+    final ids = petIdsRaw.where((id) => id.isNotEmpty).toSet().toList();
+    if (ids.isEmpty) return {};
 
-    final ownerUserId = pet['user_id'] as String;
+    final petOwnerByPetId = <String, String>{};
+    for (var i = 0; i < ids.length; i += _inFilterChunkSize) {
+      final chunk = ids.sublist(i, min(i + _inFilterChunkSize, ids.length));
+      final rows = await supabase
+          .from('pets')
+          .select('id, user_id')
+          .inFilter('id', chunk);
+      for (final row in rows as List<dynamic>) {
+        final id = row['id'] as String?;
+        final uid = row['user_id'];
+        if (id != null && uid is String) petOwnerByPetId[id] = uid;
+      }
+    }
 
-    // Direct pet followers
-    final directFollowers = await supabase
-        .from('follows')
-        .select('follower_user_id')
-        .not('followed_pet_id', 'is', null)
-        .eq('followed_pet_id', petId);
+    final directByPet = <String, Set<String>>{};
+    for (final id in ids) {
+      directByPet[id] = {};
+    }
 
-    // Owner followers (they implicitly follow all pets)
-    final ownerFollowers = await supabase
-        .from('follows')
-        .select('follower_user_id')
-        .not('followed_user_id', 'is', null)
-        .eq('followed_user_id', ownerUserId);
+    for (var i = 0; i < ids.length; i += _inFilterChunkSize) {
+      final chunk = ids.sublist(i, min(i + _inFilterChunkSize, ids.length));
+      final rows = await supabase
+          .from('follows')
+          .select('followed_pet_id, follower_user_id')
+          .not('followed_pet_id', 'is', null)
+          .inFilter('followed_pet_id', chunk);
+      for (final row in rows as List<dynamic>) {
+        final pid = row['followed_pet_id'] as String?;
+        final fid = row['follower_user_id'] as String?;
+        if (pid == null || fid == null) continue;
+        directByPet.putIfAbsent(pid, () => <String>{});
+        directByPet[pid]!.add(fid);
+      }
+    }
 
-    // Deduplicate
-    final uniqueFollowers = <String>{
-      ...(directFollowers as List).map((r) => r['follower_user_id'] as String),
-      ...(ownerFollowers as List).map((r) => r['follower_user_id'] as String),
+    final ownerIds =
+        petOwnerByPetId.values.toSet().where((e) => e.isNotEmpty).toList();
+    final ownerFollowersByOwnerId = <String, Set<String>>{
+      for (final oid in ownerIds) oid: <String>{},
     };
 
-    return uniqueFollowers.length;
+    for (var i = 0; i < ownerIds.length; i += _inFilterChunkSize) {
+      final chunk =
+          ownerIds.sublist(i, min(i + _inFilterChunkSize, ownerIds.length));
+      final rows = await supabase
+          .from('follows')
+          .select('followed_user_id, follower_user_id')
+          .not('followed_user_id', 'is', null)
+          .inFilter('followed_user_id', chunk);
+      for (final row in rows as List<dynamic>) {
+        final oid = row['followed_user_id'] as String?;
+        final fid = row['follower_user_id'] as String?;
+        if (oid == null || fid == null) continue;
+        ownerFollowersByOwnerId.putIfAbsent(oid, () => <String>{});
+        ownerFollowersByOwnerId[oid]!.add(fid);
+      }
+    }
+
+    final out = <String, int>{};
+    for (final petId in ids) {
+      final ownerId = petOwnerByPetId[petId];
+      final direct = directByPet[petId] ?? const <String>{};
+      final ownerSide = ownerId == null
+          ? const <String>{}
+          : (ownerFollowersByOwnerId[ownerId] ?? const <String>{});
+      out[petId] = {...direct, ...ownerSide}.length;
+    }
+    return out;
   }
 
   // -------------------------------------------------------------------------
   // Get total following count for a user (owners + individual pets)
   // -------------------------------------------------------------------------
   Future<int> getFollowingCount(String userId) async {
-    final data = await supabase
+    return supabase
         .from('follows')
-        .select('id')
+        .count(CountOption.exact)
         .eq('follower_user_id', userId);
-    return (data as List).length;
   }
 
   // -------------------------------------------------------------------------

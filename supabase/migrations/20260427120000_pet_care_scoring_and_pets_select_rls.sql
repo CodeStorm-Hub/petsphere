@@ -31,6 +31,7 @@ REVOKE ALL ON FUNCTION public.pet_is_owned_by_auth_user(uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.pet_is_owned_by_auth_user(uuid) TO authenticated;
 
 DROP POLICY IF EXISTS "Anyone can view pets" ON public.pets;
+DROP POLICY IF EXISTS "pets_select_authenticated" ON public.pets;
 
 CREATE POLICY "pets_select_authenticated"
 ON public.pets FOR SELECT

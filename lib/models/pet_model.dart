@@ -111,6 +111,7 @@ class PetModel {
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'user_id': userId,
         'name': name,
         'breed': breed,

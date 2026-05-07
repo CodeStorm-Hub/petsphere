@@ -685,6 +685,11 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
                                             filteredPets.length],
                                         isBackground: true,
                                         dragX: 0,
+                                        followerCount: matchState
+                                            .discoveryFollowerCounts[
+                                                filteredPets[(currentIndex + 1) %
+                                                        filteredPets.length]
+                                                    .id],
                                       ),
                                     ),
                                   ),
@@ -703,6 +708,9 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
                                           pet: filteredPets[currentIndex],
                                           isBackground: false,
                                           dragX: _dragX,
+                                          followerCount: matchState
+                                              .discoveryFollowerCounts[
+                                                  filteredPets[currentIndex].id],
                                           onTap: () => context.push(
                                             '/pet/${filteredPets[currentIndex].id}',
                                           ),
@@ -782,11 +790,14 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
     );
   }
 }
-                          class PetCard extends StatelessWidget {
+
+class PetCard extends StatelessWidget {
   final PetModel pet;
   final bool isBackground;
   final double dragX;
   final VoidCallback? onTap;
+  /// When non-null (e.g. from batched discovery query), shown on-card.
+  final int? followerCount;
 
   const PetCard({
     super.key,
@@ -794,6 +805,7 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
     required this.isBackground,
     required this.dragX,
     this.onTap,
+    this.followerCount,
   });
 
   String _petVibe() {
@@ -921,15 +933,44 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
                           ],
                         ),
                       ),
-                      if (pet.isVerified)
-                        const _GlassBadge(
-                          padding: EdgeInsets.all(10),
-                          child: Icon(
-                            Icons.verified_rounded,
-                            size: 18,
-                            color: Color(0xFF4A7DF7),
-                          ),
-                        ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (followerCount != null && followerCount! >= 0) ...[
+                            _GlassBadge(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.group_rounded,
+                                    size: 14,
+                                    color: Colors.white70,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    followerCount!.toString(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          if (pet.isVerified)
+                            const _GlassBadge(
+                              padding: EdgeInsets.all(10),
+                              child: Icon(
+                                Icons.verified_rounded,
+                                size: 18,
+                                color: Color(0xFF4A7DF7),
+                              ),
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -1181,7 +1222,11 @@ class NearbyTab extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final pet = sorted[index];
                 final dist = _distanceMi(pet);
-                return _NearbyPetTile(pet: pet, distanceMi: dist);
+                return _NearbyPetTile(
+                  pet: pet,
+                  distanceMi: dist,
+                  followerCount: matchState.discoveryFollowerCounts[pet.id],
+                );
               },
             ),
     );
@@ -1193,10 +1238,12 @@ class NearbyTab extends ConsumerWidget {
 class _NearbyPetTile extends StatelessWidget {
   final PetModel pet;
   final int distanceMi;
+  final int? followerCount;
 
   const _NearbyPetTile({
     required this.pet,
     required this.distanceMi,
+    this.followerCount,
   });
 
   @override
@@ -1314,6 +1361,37 @@ class _NearbyPetTile extends StatelessWidget {
                             ],
                           ),
                         ),
+                        if (followerCount != null && followerCount! >= 0) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.group_rounded,
+                                  size: 12,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  followerCount!.toString(),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ],

@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/chat_thread_model.dart';
+import '../models/pet_model.dart';
 import '../models/message_model.dart';
 import '../repositories/chat_repository.dart';
 import 'pet_controller.dart';
@@ -145,12 +146,29 @@ class ChatController extends Notifier<ChatState> {
 
   @override
   ChatState build() {
-    ref.onDispose(() => _messagesChannel?.unsubscribe());
-    final activePet = ref.watch(activePetProvider);
-    if (activePet != null) {
-      _loadThreads(activePet.id);
-    }
-    return ChatState(isLoading: true);
+    ref.onDispose(() {
+      _messagesChannel?.unsubscribe();
+      _messagesChannel = null;
+    });
+
+    ref.listen<PetModel?>(
+      activePetProvider,
+      (previous, next) {
+        _messagesChannel?.unsubscribe();
+        _messagesChannel = null;
+        if (next == null) {
+          Future.microtask(() {
+            state = ChatState();
+          });
+          return;
+        }
+        _loadThreads(next.id);
+      },
+      fireImmediately: true,
+    );
+
+    final activePet = ref.read(activePetProvider);
+    return ChatState(isLoading: activePet != null);
   }
 
   Future<void> _loadThreads(String myPetId) async {

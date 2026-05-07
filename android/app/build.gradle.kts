@@ -43,6 +43,11 @@ flutter {
     source = "../.."
 }
 
+dependencies {
+    // Ensures Theme.MaterialComponents resources resolve; required by flutter_stripe.
+    implementation("com.google.android.material:material:1.12.0")
+}
+
 // FCM: add `android/app/google-services.json` from Firebase Console (Android app
 // with package `com.example.pet_dating_app`). Without it, the app builds but
 // Firebase.initializeApp / device tokens will not work.

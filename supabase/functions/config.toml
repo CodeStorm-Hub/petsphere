@@ -7,3 +7,6 @@ verify_jwt = false
 # Invoked by Database Webhooks on `notifications` INSERT (service role in header).
 [push-fcm]
 verify_jwt = false
+
+[create-payment-intent]
+verify_jwt = false

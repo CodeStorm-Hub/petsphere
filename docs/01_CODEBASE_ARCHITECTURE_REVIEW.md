@@ -21,12 +21,24 @@ PetSphere is a **feature-rich pet-centric social and marketplace platform** buil
 - FCM push notification integration
 
 **Critical Issues Identified:**
-- 12 screens are mock/stub implementations with no backend integration
-- In-memory cart has no persistence (data loss on app kill)
-- Missing order payment processing integration
-- No offline support except care logs
-- Database schema not version-controlled in repository
-- Cross-ownership of appointment state between controllers
+- Multiple screens remain mock/stub implementations (prioritize by product value).
+- Offline support remains limited beyond care-log paths.
+- Long-tail health/marketplace/social backlog items persist (see Issues & Gaps).
+
+### Implementation status (engineering snapshot — May 7, 2026)
+
+| Topic | Documentation / issue snapshot | Implemented in codebase |
+|--------|--------------------------------|-------------------------|
+| Cart persistence | “In-memory cart” in executive summary below | Done — SharedPreferences-backed cart serialization (`CartNotifier`). |
+| Checkout / Stripe | Payments missing in older review bullets | Done — Stripe client flow, `create-payment-intent` Edge Function, orders payment fields migration. |
+| Push / deep links | FCM wiring | Done — coordinators + `push_deeplink_routes.dart` mapping with fallback. |
+| Supabase migrations | “Not version-controlled” | Superseded — `supabase/migrations/` tracked; apply via CLI against each environment. |
+| Feed realtime lifecycle | Duplicate / leaked channels across logout | Done — likes/comments channels unsubscribed when logged out; resubscribed when session returns; avoids duplicate realtime when rebuild leaves channels intact. |
+| Follow counts (`N+1` / full-table scans) | High query cost for follower metrics | Done — HEAD `count()` where applicable; batched counts on discovery refresh; swipe + Nearby UI read `MatchState.discoveryFollowerCounts` (no per-card `FutureProvider` fan-out). |
+| Embedded Supabase fallback (debug keys in repo) | Security hygiene | Mitigated — `SUPABASE_ALLOW_EMBEDDED_DEBUG_FALLBACK` dart-define defaults to permissive behavior; set `false` + pass URL/anon key for stricter setups. |
+| Stub / placeholder screens | 12+ mocks | Partially tracked in GitHub; still open scope-by-scope. |
+
+Treat the detailed narrative later in this document as historical diagnosis unless it conflicts with this table.
 
 ---
 

@@ -13,6 +13,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 const String _fromEnvUrl = String.fromEnvironment('SUPABASE_URL');
 const String _fromEnvAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 
+/// When `false`, debug/profile builds do not use [supabaseInitUrl] / [supabaseInitAnonKey]
+/// embedded fallbacks if env defines are empty (fail fast for stricter local setup).
+const bool _allowEmbeddedDebugFallback = bool.fromEnvironment(
+  'SUPABASE_ALLOW_EMBEDDED_DEBUG_FALLBACK',
+  defaultValue: true,
+);
+
 /// Non-release fallback so local `flutter run` works without defines.
 /// Release builds must use `--dart-define` (or CI secrets) — see [assertValidReleaseSupabaseConfig].
 const String _debugFallbackUrl = 'https://foubokcqaxyqgjhtgzsx.supabase.co';
@@ -23,7 +30,13 @@ const String _debugFallbackAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
 /// URL passed to [Supabase.initialize].
 String get supabaseInitUrl {
   if (_fromEnvUrl.isNotEmpty) return _fromEnvUrl;
-  if (!kReleaseMode) return _debugFallbackUrl;
+  if (!kReleaseMode) {
+    if (_allowEmbeddedDebugFallback) return _debugFallbackUrl;
+    throw StateError(
+      'SUPABASE_URL is empty and SUPABASE_ALLOW_EMBEDDED_DEBUG_FALLBACK is false. '
+      'Pass --dart-define=SUPABASE_URL=... or enable the fallback (default true).',
+    );
+  }
   throw StateError(
     'SUPABASE_URL is missing. Pass --dart-define=SUPABASE_URL=https://<project>.supabase.co '
     'for release builds.',
@@ -33,7 +46,13 @@ String get supabaseInitUrl {
 /// Publishable (anon) key passed to [Supabase.initialize].
 String get supabaseInitAnonKey {
   if (_fromEnvAnonKey.isNotEmpty) return _fromEnvAnonKey;
-  if (!kReleaseMode) return _debugFallbackAnonKey;
+  if (!kReleaseMode) {
+    if (_allowEmbeddedDebugFallback) return _debugFallbackAnonKey;
+    throw StateError(
+      'SUPABASE_ANON_KEY is empty and SUPABASE_ALLOW_EMBEDDED_DEBUG_FALLBACK is false. '
+      'Pass --dart-define=SUPABASE_ANON_KEY=... or enable the fallback (default true).',
+    );
+  }
   throw StateError(
     'SUPABASE_ANON_KEY is missing. Pass --dart-define=SUPABASE_ANON_KEY=<publishable-key> '
     'for release builds.',

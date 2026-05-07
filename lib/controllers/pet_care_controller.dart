@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,12 @@ import '../utils/care_gamification_logic.dart';
 import '../utils/care_personalization.dart';
 export '../models/pet_health_models.dart' show PetSymptom;
 import 'pet_controller.dart';
+
+String _stableCareLogsSig(List<PetCareLog> logs) =>
+    jsonEncode(logs.map((l) => l.toUpsertJson()).toList());
+
+String _stableCareWeightsSig(List<PetWeightLog> logs) =>
+    jsonEncode(logs.map((l) => l.toUpsertJson()).toList());
 
 // ---------------------------------------------------------------------------
 // State
@@ -169,6 +176,15 @@ class PetCareNotifier extends Notifier<PetCareState> {
 
     if (gen != _loadGen) return;
 
+    final logsBaselineSig = cachedLogs.isNotEmpty
+        ? _stableCareLogsSig(cachedLogs)
+        : (state.activePetId == pet.id ? _stableCareLogsSig(state.recentLogs) : '');
+    final weightsBaselineSig = cachedWeights.isNotEmpty
+        ? _stableCareWeightsSig(cachedWeights)
+        : (state.activePetId == pet.id
+            ? _stableCareWeightsSig(state.recentWeights)
+            : '');
+
     if (cachedLogs.isNotEmpty || cachedWeights.isNotEmpty) {
       state = state.copyWith(
         activePetId: pet.id,
@@ -211,13 +227,18 @@ class PetCareNotifier extends Notifier<PetCareState> {
       final onboarding = results[5] as PetCareOnboarding?;
       freshLogs = applyOnboardingToCareLogs(freshLogs, onboarding);
 
+      final reuseLogs = logsBaselineSig.isNotEmpty &&
+          _stableCareLogsSig(freshLogs) == logsBaselineSig;
+      final reuseWeights = weightsBaselineSig.isNotEmpty &&
+          _stableCareWeightsSig(freshWeights) == weightsBaselineSig;
+
       // ── 3. Write back to cache ───────────────────────────────────────────
       unawaited(CareCache.saveLogs(pet.id, freshLogs));
       unawaited(CareCache.saveWeights(pet.id, freshWeights));
 
       state = state.copyWith(
-        recentLogs: freshLogs,
-        recentWeights: freshWeights,
+        recentLogs: reuseLogs ? state.recentLogs : freshLogs,
+        recentWeights: reuseWeights ? state.recentWeights : freshWeights,
         upcomingAppointments: results[2] as List<PetVetAppointment>,
         vaccinations: results[3] as List<PetVaccination>,
         symptoms: results[4] as List<PetSymptom>,

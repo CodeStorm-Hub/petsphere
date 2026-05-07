@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/auth_controller.dart';
+import 'safe_route_params.dart';
 import '../views/main_layout.dart';
 import '../views/create_post_screen.dart';
 import '../views/create_story_screen.dart';
@@ -34,6 +35,7 @@ import '../views/pet_insurance_hub_screen.dart';
 import '../views/pet_expense_tracker_screen.dart';
 import '../views/pet_growth_chart_screen.dart';
 import '../views/pet_memorial_screen.dart';
+import '../views/pet_memorial_detail_screen.dart';
 import '../views/pet_friendly_places_screen.dart';
 import '../views/pet_event_discovery_screen.dart';
 import '../views/pet_health_record_export_screen.dart';
@@ -140,14 +142,20 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/pet/:id',
         builder: (context, state) {
-          final petId = state.pathParameters['id']!;
+          final petId = safePathParam(state, 'id');
+          if (petId == null) {
+            return const InvalidRouteErrorScreen(missingParam: 'pet ID');
+          }
           return PetProfileScreen(visitPetId: petId);
         },
       ),
       GoRoute(
         path: '/user/:id',
         builder: (context, state) {
-          final userId = state.pathParameters['id']!;
+          final userId = safePathParam(state, 'id');
+          if (userId == null) {
+            return const InvalidRouteErrorScreen(missingParam: 'user ID');
+          }
           return PetProfileScreen(visitUserId: userId);
         },
       ),
@@ -158,21 +166,30 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/chat/:threadId',
         builder: (context, state) {
-          final threadId = state.pathParameters['threadId']!;
+          final threadId = safePathParam(state, 'threadId');
+          if (threadId == null) {
+            return const InvalidRouteErrorScreen(missingParam: 'thread ID');
+          }
           return ChatScreen(threadId: threadId);
         },
       ),
       GoRoute(
         path: '/post/:id',
         builder: (context, state) {
-          final postId = state.pathParameters['id']!;
+          final postId = safePathParam(state, 'id');
+          if (postId == null) {
+            return const InvalidRouteErrorScreen(missingParam: 'post ID');
+          }
           return PostDetailScreen(postId: postId);
         },
       ),
       GoRoute(
         path: '/story/:petId',
         builder: (context, state) {
-          final petId = state.pathParameters['petId']!;
+          final petId = safePathParam(state, 'petId');
+          if (petId == null) {
+            return const InvalidRouteErrorScreen(missingParam: 'pet ID');
+          }
           return StoryViewerScreen(petId: petId);
         },
       ),
@@ -187,7 +204,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/product/:id',
         builder: (context, state) {
-          final productId = state.pathParameters['id']!;
+          final productId = safePathParam(state, 'id');
+          if (productId == null) {
+            return const InvalidRouteErrorScreen(missingParam: 'product ID');
+          }
           return ProductDetailScreen(productId: productId);
         },
       ),
@@ -202,7 +222,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/pet/:id/followers',
         builder: (context, state) {
-          final petId = state.pathParameters['id']!;
+          final petId = safePathParam(state, 'id');
+          if (petId == null) {
+            return const InvalidRouteErrorScreen(missingParam: 'pet ID');
+          }
           return PetFollowersScreen(
             petId: petId,
             type: FollowListType.petFollowers,
@@ -212,7 +235,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/user/:id/followers',
         builder: (context, state) {
-          final userId = state.pathParameters['id']!;
+          final userId = safePathParam(state, 'id');
+          if (userId == null) {
+            return const InvalidRouteErrorScreen(missingParam: 'user ID');
+          }
           return PetFollowersScreen(
             userId: userId,
             type: FollowListType.ownerFollowers,
@@ -222,7 +248,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/user/:id/following',
         builder: (context, state) {
-          final userId = state.pathParameters['id']!;
+          final userId = safePathParam(state, 'id');
+          if (userId == null) {
+            return const InvalidRouteErrorScreen(missingParam: 'user ID');
+          }
           return PetFollowersScreen(
             userId: userId,
             type: FollowListType.following,
@@ -272,6 +301,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/memorial',
         builder: (context, state) => const PetMemorialScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) {
+              final id = safePathParam(state, 'id');
+              if (id == null) {
+                return const InvalidRouteErrorScreen(missingParam: 'memorial ID');
+              }
+              return PetMemorialDetailScreen(memorialId: id);
+            },
+          ),
+        ],
       ),
       GoRoute(
         path: '/pet_friendly_places',
