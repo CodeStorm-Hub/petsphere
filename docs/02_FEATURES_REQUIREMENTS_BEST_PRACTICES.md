@@ -1112,6 +1112,26 @@ Future<OrderModel> placeOrder(CartState cart) async {
 
 ## Implementation Issues & Fixes
 
+### Rolling implementation status (May 7, 2026)
+
+Historical issue descriptions in this section pre-date several shipped fixes. Use this subsection as the ground truth for what is done vs still open relative to GitHub/issue threads.
+
+| ID / theme | Status | Notes |
+|------------|--------|--------|
+| Cart persistence (#23-class) | **Done** | User-scoped `SharedPreferences` cart JSON; survives process death. |
+| Stock validation / batch orders | **Done** | Repository-level checks surfaced to checkout UX. |
+| Stripe / PaymentIntent (#32-class) | **Done** | Client + `create-payment-intent` Edge Function + orders payment columns migration. |
+| FCM taps / foreground (#24-class) | **Done** | Initial message + opened-app routing helpers. |
+| Story visibility / expiry (#40-class) | **Done** | `FeedState.visibleStories` + filtering. |
+| Comment avatars (#42-class) | **Done** | Join + model field wired in post detail. |
+| Appointment sync ↔ care (#25-class) | **Done** | `petCareProvider.refresh()` after upsert/cancel where applicable. |
+| Feed realtime logout/login (#41-class) | **Done** | Unsubscribelikes/comments realtime on logout; resubscribe when authenticated; clearer empty state when logged out. |
+| Follow follower `N+1` / heavy counts (#29-class) | **Done** | Repository uses `count()` where appropriate; discovery load batches counts via `fetchPetFollowerCounts` and surfaces them on swipe cards + Nearby list (`MatchState.discoveryFollowerCounts`). |
+| Embedded debug Supabase URL/key (#48-class) | **Mitigated** | `SUPABASE_ALLOW_EMBEDDED_DEBUG_FALLBACK`; release still requires dart-defines (`assertValidReleaseSupabaseConfig`). |
+| Stub screens (#33–37, #49–52, etc.) | **Open** | Implement per roadmap; docs below remain backlog narrative. |
+| Offline / caching epic (#55-class) | **Open** | No change to scope here. |
+| Care cache flicker (#39-class) | **Improved** | After network fetch, logs/weights lists reuse existing state when serialized payloads match baseline (cache or current UI), avoiding redundant rebuild churn when Supabase matches cache. |
+
 ### Critical Issues
 
 #### Issue #1: Cart Persistence
