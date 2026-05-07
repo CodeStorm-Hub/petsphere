@@ -87,7 +87,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final feedState = ref.watch(feedProvider);
-    final stories = feedState.stories
+    final stories = feedState.visibleStories
         .where((story) => story.pet.id == widget.petId)
         .toList()
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));

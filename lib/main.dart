@@ -1,9 +1,12 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/bootstrap_controller.dart';
 import 'controllers/push_notification_coordinator.dart';
@@ -32,6 +35,11 @@ const bool _kFcmLogToken = bool.fromEnvironment(
   defaultValue: false,
 );
 
+const String _kStripePublishableKey = String.fromEnvironment(
+  'STRIPE_PUBLISHABLE_KEY',
+  defaultValue: '',
+);
+
 Future<void> main() async {
   if (!_kIntegrationTest) {
     if (kDebugMode && !_kFlutterDriverTest) {
@@ -47,6 +55,20 @@ Future<void> main() async {
     url: supabaseInitUrl,
     anonKey: supabaseInitAnonKey,
   );
+
+  if (_kStripePublishableKey.isNotEmpty) {
+    try {
+      Stripe.publishableKey = _kStripePublishableKey;
+      await Stripe.instance.applySettings();
+    } catch (e, st) {
+      developer.log(
+        'Stripe init failed (checkout disabled): $e',
+        name: 'main',
+        error: e,
+        stackTrace: st,
+      );
+    }
+  }
 
   if (_kFcmLogToken) {
     await PushNotificationService.debugEmitFcmTokenForConsoleTest();

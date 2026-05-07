@@ -9,7 +9,7 @@ class SearchRepository {
 
   /// Must match [FeedRepository.fetchPosts] / [PostModel.fromJson] (embed is `comments`, not `post_comments`).
   static const _postSelect = '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), '
-      'comments(*, pets!comments_pet_id_fkey(name, id))';
+      'comments(*, pets!comments_pet_id_fkey(name, id, profile_image_url))';
 
   Future<List<PostModel>> searchPosts(String query) async {
     if (query.isEmpty) return [];

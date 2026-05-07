@@ -3,6 +3,42 @@ import '../models/cart_item_model.dart';
 import '../models/order_model.dart';
 import '../utils/supabase_config.dart';
 
+class CreatePaymentIntentResult {
+  final String clientSecret;
+  final String paymentIntentId;
+  const CreatePaymentIntentResult({
+    required this.clientSecret,
+    required this.paymentIntentId,
+  });
+}
+
+class MarketplaceOutOfStockException implements Exception {
+  final List<OutOfStockLine> lines;
+  MarketplaceOutOfStockException(this.lines);
+
+  @override
+  String toString() {
+    if (lines.isEmpty) return 'One or more items are out of stock.';
+    final joined = lines
+        .map((l) => '${l.productName} (available ${l.available}, requested ${l.requested})')
+        .join(', ');
+    return 'Some items are out of stock: $joined';
+  }
+}
+
+class OutOfStockLine {
+  final String productId;
+  final String productName;
+  final int available;
+  final int requested;
+  OutOfStockLine({
+    required this.productId,
+    required this.productName,
+    required this.available,
+    required this.requested,
+  });
+}
+
 class MarketplaceRepository {
   // -------------------------------------------------------------------------
   // Fetch products (optionally filtered by category)
@@ -39,7 +75,11 @@ class MarketplaceRepository {
   Future<void> placeOrder({
     required String userId,
     required List<CartItemModel> items,
+    String? paymentProvider,
+    String? paymentIntentId,
   }) async {
+    await _validateStockOrThrow(items);
+
     final total = items.fold<double>(0, (sum, i) => sum + i.subtotal);
 
     final orderItems = items
@@ -52,12 +92,88 @@ class MarketplaceRepository {
             })
         .toList();
 
-    await supabase.from('orders').insert({
+    final payload = <String, dynamic>{
       'user_id': userId,
       'items': orderItems,
       'total': total,
       'status': 'pending',
-    });
+      if (paymentProvider != null && paymentProvider.isNotEmpty)
+        'payment_provider': paymentProvider,
+      if (paymentIntentId != null && paymentIntentId.isNotEmpty)
+        'payment_intent_id': paymentIntentId,
+    };
+
+    await supabase.from('orders').insert(payload);
+  }
+
+  Future<CreatePaymentIntentResult> createStripePaymentIntent({
+    required int amountCents,
+    String currency = 'usd',
+    Map<String, String>? metadata,
+  }) async {
+    final res = await supabase.functions.invoke(
+      'create-payment-intent',
+      body: {
+        'amount_cents': amountCents,
+        'currency': currency,
+        'metadata': metadata ?? <String, String>{},
+      },
+    );
+
+    final data = res.data;
+    if (data is! Map) {
+      throw Exception('Payment init failed: invalid response');
+    }
+    final map = data.map((k, v) => MapEntry(k.toString(), v));
+    final clientSecret = map['client_secret'] as String?;
+    final paymentIntentId = map['payment_intent_id'] as String?;
+    if (clientSecret == null ||
+        clientSecret.isEmpty ||
+        paymentIntentId == null ||
+        paymentIntentId.isEmpty) {
+      throw Exception('Payment init failed: missing client secret');
+    }
+    return CreatePaymentIntentResult(
+      clientSecret: clientSecret,
+      paymentIntentId: paymentIntentId,
+    );
+  }
+
+  Future<void> _validateStockOrThrow(List<CartItemModel> items) async {
+    if (items.isEmpty) return;
+    final ids = items.map((i) => i.product.id).toSet().toList();
+    final data = await supabase
+        .from('products')
+        .select('id,name,stock')
+        .inFilter('id', ids);
+
+    final byId = <String, Map<String, dynamic>>{};
+    for (final row in (data as List<dynamic>)) {
+      final m = row as Map<String, dynamic>;
+      final id = m['id'] as String?;
+      if (id != null) byId[id] = m;
+    }
+
+    final missingOrInvalid = <OutOfStockLine>[];
+    for (final line in items) {
+      final row = byId[line.product.id];
+      final available = (row?['stock'] as num?)?.toInt() ?? 0;
+      final name = (row?['name'] as String?) ?? line.product.name;
+      if (available < line.quantity) {
+        missingOrInvalid.add(
+          OutOfStockLine(
+            productId: line.product.id,
+            productName: name,
+            available: available,
+            requested: line.quantity,
+          ),
+        );
+      }
+    }
+
+    if (missingOrInvalid.isNotEmpty) {
+      throw MarketplaceOutOfStockException(missingOrInvalid);
+    }
   }
 
   // -------------------------------------------------------------------------

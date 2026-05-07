@@ -39,6 +39,11 @@ class FeedState {
       error: clearError ? null : (error ?? this.error),
     );
   }
+
+  /// Defensive expiry filter so long-lived sessions don’t show 24h stories past [StoryModel.expiresAt].
+  /// Network fetch already uses `expires_at > now()`; this trims stale in-memory rows.
+  List<StoryModel> get visibleStories =>
+      stories.where((s) => !s.isExpired).toList();
 }
 
 // ---------------------------------------------------------------------------

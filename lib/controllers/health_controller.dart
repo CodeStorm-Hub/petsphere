@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/pet_health_extended_models.dart';
 import '../models/pet_health_models.dart';
 import '../repositories/health_repository.dart';
+import 'pet_care_controller.dart';
 import 'pet_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -307,8 +308,7 @@ class HealthNotifier extends Notifier<HealthState> {
   Future<void> upsertAppointment(PetVetAppointment appt) async {
     try {
       await _repo.upsertAppointment(appt);
-      // Refresh care state (appointments are owned by petCareProvider)
-      // This triggers a reload of appointments in PetCareNotifier.
+      _syncCareAppointments(appt.petId);
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
@@ -317,9 +317,20 @@ class HealthNotifier extends Notifier<HealthState> {
   Future<void> cancelAppointment(String id) async {
     try {
       await _repo.cancelAppointment(id);
+      final petId = ref.read(activePetProvider)?.id;
+      if (petId != null) _syncCareAppointments(petId);
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
+  }
+
+  void _syncCareAppointments(String appointmentPetId) {
+    final activeId = ref.read(activePetProvider)?.id;
+    if (activeId != appointmentPetId) return;
+    Future.microtask(() {
+      if (!ref.mounted) return;
+      ref.read(petCareProvider.notifier).refresh();
+    });
   }
 
   // ── Vaccination mutations ────────────────────────────────────────────────

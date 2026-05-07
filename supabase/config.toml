@@ -1,67 +1,73 @@
-# Supabase Configuration
-# Reference: https://supabase.com/docs/reference/cli/supabase-init
+# Supabase CLI Configuration
+# Reference: https://supabase.com/docs/guides/local-development/cli/config
 
-[project]
-# Project ID from Supabase dashboard
+# A string used to distinguish different Supabase projects on the same host.
 project_id = "foubokcqaxyqgjhtgzsx"
 
 [api]
-# Proxy server configuration
 enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
 
 [db]
-# Database connection pooling
 port = 54322
-shadow_database_url = "postgresql://postgres:postgres@localhost:54323/postgres"
+shadow_port = 54320
+health_timeout = "2m"
+major_version = 17
 
-[studio]
-# Studio runs on this port
+[db.migrations]
 enabled = true
-port = 54323
-
-[inbucket]
-# Email testing
-enabled = true
-smtp_port = 54324
-pop3_port = 54325
-api_port = 54326
-www_port = 54327
-
-[auth]
-# Auth configuration
-enabled = true
-email.enable_signup = true
-email.double_confirm_changes = false
-email.enable_confirmations = false
-# Use these for local testing
-jwt.exp = 3600
-external.apple.enabled = false
-external.azure.enabled = false
-external.facebook.enabled = false
-external.github.enabled = false
-external.gitlab.enabled = false
-external.google.enabled = false
-external.keycloak.enabled = false
-external.linkedin.enabled = false
-external.linkedin_oidc.enabled = false
-external.notion.enabled = false
-external.twitch.enabled = false
-external.twitter.enabled = false
-external.slack.enabled = false
-external.spotify.enabled = false
-external.workos.enabled = false
-external.zoom.enabled = false
 
 [realtime]
-# Realtime is enabled by default
 enabled = true
 ip_version = "IPv4"
 
+[studio]
+enabled = true
+port = 54323
+api_url = "http://127.0.0.1"
+
+[inbucket]
+enabled = true
+port = 54324
+
 [storage]
-# Storage is enabled by default
+enabled = true
+file_size_limit = "50MiB"
+
+[storage.s3_protocol]
 enabled = true
 
-[functions]
-# Edge functions
+[auth]
 enabled = true
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = ["https://127.0.0.1:3000"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+enable_anonymous_sign_ins = false
+enable_manual_linking = false
+minimum_password_length = 6
+password_requirements = ""
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = false
+enable_confirmations = false
+secure_password_change = false
+max_frequency = "1s"
+otp_length = 6
+otp_expiry = 3600
+
+# Function-specific JWT verification (webhooks / public endpoints)
+[functions.waitlist-signup]
+verify_jwt = false
+
+[functions.push-fcm]
+verify_jwt = false
+
+[functions.create-payment-intent]
 verify_jwt = false

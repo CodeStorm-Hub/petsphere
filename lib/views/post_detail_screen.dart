@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -200,15 +201,22 @@ class _PostDetailContent extends ConsumerWidget {
                                 child: CircleAvatar(
                                   radius: 16,
                                   backgroundColor: bg.withAlpha(38),
-                                  child: Text(
-                                    comment.petName.isNotEmpty
-                                        ? comment.petName[0].toUpperCase()
-                                        : '?',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
-                                        color: bg),
-                                  ),
+                                  backgroundImage:
+                                      comment.petProfileImageUrl.isNotEmpty
+                                          ? CachedNetworkImageProvider(
+                                              comment.petProfileImageUrl)
+                                          : null,
+                                  child: comment.petProfileImageUrl.isEmpty
+                                      ? Text(
+                                          comment.petName.isNotEmpty
+                                              ? comment.petName[0].toUpperCase()
+                                              : '?',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            color: bg),
+                                        )
+                                      : null,
                                 ),
                               ),
                               const SizedBox(width: 10),

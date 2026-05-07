@@ -38,7 +38,8 @@ class HomeScreen extends ConsumerWidget {
     final feedPosts = ref.watch(feedProvider.select((s) => s.posts));
     final feedLoading = ref.watch(feedProvider.select((s) => s.isLoading));
     final feedError = ref.watch(feedProvider.select((s) => s.error));
-    final feedStories = ref.watch(feedProvider.select((s) => s.stories));
+    final feedStories =
+        ref.watch(feedProvider.select((s) => s.visibleStories));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 

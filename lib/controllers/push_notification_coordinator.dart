@@ -4,6 +4,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/push_notification_service.dart';
+import '../utils/push_deeplink_routes.dart';
+import '../utils/routes.dart';
 import 'auth_controller.dart';
 
 class PushNotificationCoordinator extends Notifier<void> {
@@ -16,6 +18,14 @@ class PushNotificationCoordinator extends Notifier<void> {
         final userChanged = prev?.user?.id != uid;
         if (becameAuthenticated || userChanged) {
           _schedule(() => PushNotificationService.registerTokenForUser(uid));
+          _schedule(() async {
+            await PushNotificationService.registerOnNotificationOpenedHandler(
+              (message) {
+                final route = routeForPushPayload(message.data);
+                ref.read(routerProvider).go(route);
+              },
+            );
+          });
         }
       } else if (next.status == AuthStatus.unauthenticated) {
         final prevUserId = prev?.user?.id;
@@ -28,6 +38,14 @@ class PushNotificationCoordinator extends Notifier<void> {
     final auth = ref.read(authProvider);
     if (auth.status == AuthStatus.authenticated && auth.user != null) {
       _schedule(() => PushNotificationService.registerTokenForUser(auth.user!.id));
+      _schedule(() async {
+        await PushNotificationService.registerOnNotificationOpenedHandler(
+          (message) {
+            final route = routeForPushPayload(message.data);
+            ref.read(routerProvider).go(route);
+          },
+        );
+      });
     }
   }
 

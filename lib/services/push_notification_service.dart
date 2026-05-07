@@ -27,6 +27,8 @@ class PushNotificationService {
   static String? _lastRegisteredToken;
   static String? _activeUserId;
   static StreamSubscription<String>? _tokenRefreshSub;
+  static StreamSubscription<RemoteMessage>? _openedSub;
+  static bool _handledInitialMessage = false;
 
   static void registerBackgroundHandler() {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
@@ -60,6 +62,31 @@ class PushNotificationService {
       );
       return false;
     }
+  }
+
+  /// Registers a handler that runs when the user taps a push notification.
+  ///
+  /// Covers:
+  /// - Cold start: getInitialMessage()
+  /// - Background: onMessageOpenedApp
+  static Future<void> registerOnNotificationOpenedHandler(
+    void Function(RemoteMessage message) onOpened,
+  ) async {
+    if (!_initialized) {
+      final ok = await initialize();
+      if (!ok) return;
+    }
+
+    if (!_handledInitialMessage) {
+      _handledInitialMessage = true;
+      try {
+        final initial = await _messaging.getInitialMessage();
+        if (initial != null) onOpened(initial);
+      } catch (_) {}
+    }
+
+    await _openedSub?.cancel();
+    _openedSub = FirebaseMessaging.onMessageOpenedApp.listen(onOpened);
   }
 
 
@@ -146,6 +173,8 @@ class PushNotificationService {
     await _tokenRefreshSub?.cancel();
     _tokenRefreshSub = null;
     _activeUserId = null;
+    await _openedSub?.cancel();
+    _openedSub = null;
     final token = _lastRegisteredToken;
     if (token != null) {
       await pushTokenRepository.deleteToken(userId: userId, fcmToken: token);

@@ -80,6 +80,7 @@ class ProductModel {
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'name': name,
         'price': price,
         'vendor_id': vendorId,

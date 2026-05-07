@@ -1,4 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import '../models/cart_item_model.dart';
 import '../models/product_model.dart';
 import '../repositories/marketplace_repository.dart';
@@ -42,8 +46,40 @@ class CartState {
 }
 
 class CartController extends Notifier<CartState> {
+  SharedPreferences? _prefs;
+  Timer? _persistDebounce;
+  String? _loadedForUserId;
+
+  static const _cartKeyPrefix = 'cart_items_v1_';
+
   @override
   CartState build() {
+    ref.listen<AuthState>(authProvider, (prev, next) {
+      final prevUserId = prev?.user?.id;
+      final nextUserId = next.user?.id;
+
+      if (next.status == AuthStatus.authenticated && nextUserId != null) {
+        if (_loadedForUserId != nextUserId) {
+          _loadedForUserId = nextUserId;
+          Future.microtask(_loadPersistedCartForActiveUser);
+        }
+        return;
+      }
+
+      // On logout / unauthenticated: clear memory + persisted cart for prior user.
+      if (prevUserId != null) {
+        Future.microtask(() => _clearPersistedCart(prevUserId));
+      }
+      _loadedForUserId = null;
+      state = CartState(items: []);
+    });
+
+    Future.microtask(_loadPersistedCartForActiveUser);
+    ref.onDispose(() {
+      _persistDebounce?.cancel();
+      _persistDebounce = null;
+    });
+
     return CartState(items: []);
   }
 
@@ -65,11 +101,13 @@ class CartController extends Notifier<CartState> {
       );
       state = state.copyWith(items: [...state.items, newItem]);
     }
+    _schedulePersist();
   }
 
   void removeCartItem(String itemId) {
     final newItems = state.items.where((i) => i.id != itemId).toList();
     state = state.copyWith(items: newItems);
+    _schedulePersist();
   }
 
   void updateQuantity(String itemId, int newQuantity) {
@@ -86,10 +124,12 @@ class CartController extends Notifier<CartState> {
     }).toList();
 
     state = state.copyWith(items: newItems);
+    _schedulePersist();
   }
 
   void clearCart() {
     state = CartState();
+    _schedulePersist();
   }
 
   // -------------------------------------------------------------------------
@@ -102,13 +142,49 @@ class CartController extends Notifier<CartState> {
     state = state.copyWith(
         isCheckingOut: true, clearError: true, orderSuccess: false);
     try {
+      // 1) Create Stripe PaymentIntent (server-side via Edge Function)
+      final amountCents = (state.totalPrice * 100).round();
+      final intent = await marketplaceRepository.createStripePaymentIntent(
+        amountCents: amountCents,
+        currency: 'usd',
+        metadata: {
+          'user_id': userId,
+          'cart_items_count': state.items.length.toString(),
+        },
+      );
+
+      // 2) Confirm payment on-device
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: intent.clientSecret,
+          merchantDisplayName: 'PetFolio',
+        ),
+      );
+      await Stripe.instance.presentPaymentSheet();
+
+      // 3) Create order only after successful payment
       await marketplaceRepository.placeOrder(
         userId: userId,
         items: state.items,
+        paymentProvider: 'stripe',
+        paymentIntentId: intent.paymentIntentId,
       );
       // Clear cart after successful order
       state = CartState(orderSuccess: true);
+      await _clearPersistedCart(userId);
       return true;
+    } on StripeException catch (e) {
+      state = state.copyWith(
+        isCheckingOut: false,
+        error: e.error.localizedMessage ?? 'Payment failed',
+      );
+      return false;
+    } on MarketplaceOutOfStockException catch (e) {
+      state = state.copyWith(
+        isCheckingOut: false,
+        error: e.toString(),
+      );
+      return false;
     } catch (e) {
       state = state.copyWith(
         isCheckingOut: false,
@@ -116,6 +192,61 @@ class CartController extends Notifier<CartState> {
       );
       return false;
     }
+  }
+
+  String _cartStorageKey(String userId) => '$_cartKeyPrefix$userId';
+
+  Future<void> _ensurePrefs() async {
+    _prefs ??= await SharedPreferences.getInstance();
+  }
+
+  Future<void> _loadPersistedCartForActiveUser() async {
+    final auth = ref.read(authProvider);
+    final userId = auth.user?.id;
+    if (auth.status != AuthStatus.authenticated || userId == null) return;
+
+    await _ensurePrefs();
+    final key = _cartStorageKey(userId);
+    final raw = _prefs?.getString(key);
+    if (raw == null || raw.isEmpty) return;
+
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return;
+      final items = decoded
+          .whereType<Map>()
+          .map((e) => CartItemModel.fromJson(
+                e.map((k, v) => MapEntry(k.toString(), v)),
+              ))
+          .toList();
+      state = state.copyWith(items: items);
+    } catch (_) {
+      // Corrupt JSON => fail-safe to empty cart.
+      await _prefs?.remove(key);
+      state = state.copyWith(items: []);
+    }
+  }
+
+  void _schedulePersist() {
+    _persistDebounce?.cancel();
+    _persistDebounce = Timer(const Duration(milliseconds: 250), () async {
+      final auth = ref.read(authProvider);
+      final userId = auth.user?.id;
+      if (auth.status != AuthStatus.authenticated || userId == null) return;
+      await _ensurePrefs();
+      final key = _cartStorageKey(userId);
+      try {
+        final json = jsonEncode(state.items.map((e) => e.toJson()).toList());
+        await _prefs?.setString(key, json);
+      } catch (_) {
+        // Ignore persistence failure; cart remains in-memory.
+      }
+    });
+  }
+
+  Future<void> _clearPersistedCart(String userId) async {
+    await _ensurePrefs();
+    await _prefs?.remove(_cartStorageKey(userId));
   }
 }
 
