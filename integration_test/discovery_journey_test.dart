@@ -18,7 +18,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 10));
 
       // Ensure we are in the main app shell (Home/Discover)
-      final bool onHome = find.text('PetFolio').evaluate().isNotEmpty || 
+      final onHome = find.text('PetFolio').evaluate().isNotEmpty || 
                          find.text('Atelier').evaluate().isNotEmpty;
       
       if (!onHome) {
