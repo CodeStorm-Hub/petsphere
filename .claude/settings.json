@@ -1,19 +1,21 @@
 {
-  "hooks": [
-    {
-      "trigger": "PostToolUse",
-      "tool": "Edit",
-      "description": "Auto-format and lint Dart files after editing",
-      "commands": ["dart format {filePath}", "flutter analyze --no-pub {filePath}"]
-    },
-    {
-      "trigger": "PostToolUse",
-      "tool": "Edit",
-      "pathPattern": "lib/(controllers|models)/.*\\.dart$",
-      "description": "Run tests for edited controllers/models to catch regressions",
-      "commands": ["flutter test --reporter=compact test/ 2>&1 | head -100"]
-    }
-  ],
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {"type": "command", "command": "dart format {filePath}"},
+          {"type": "command", "command": "flutter analyze --no-pub {filePath}"}
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {"type": "command", "command": "flutter test --reporter=compact test/ 2>&1 | head -100"}
+        ]
+      }
+    ]
+  },
   "permissions": {
     "preToolUse": [
       {
