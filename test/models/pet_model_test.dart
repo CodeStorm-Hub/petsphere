@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pet_dating_app/models/pet_model.dart';
+import 'package:petsphere/features/pet/data/models/pet_model.dart';
 
 void main() {
   group('PetModel', () {
     test('creates instance with required parameters', () {
-      final pet = PetModel(
+      const pet = PetModel(
         id: 'pet-123',
         userId: 'user-456',
         name: 'Fluffy',
@@ -60,7 +60,7 @@ void main() {
     });
 
     test('converts to JSON correctly', () {
-      final pet = PetModel(
+      const pet = PetModel(
         id: 'pet-123',
         userId: 'user-456',
         name: 'Fluffy',
@@ -86,7 +86,7 @@ void main() {
     });
 
     test('copyWith creates new instance with updated fields', () {
-      final pet = PetModel(
+      const pet = PetModel(
         id: 'pet-123',
         userId: 'user-456',
         name: 'Fluffy',
@@ -97,10 +97,7 @@ void main() {
         profileImageUrl: 'https://example.com/image.jpg',
       );
 
-      final updated = pet.copyWith(
-        name: 'Fluffy Jr.',
-        age: 2,
-      );
+      final updated = pet.copyWith(name: 'Fluffy Jr.', age: 2);
 
       expect(updated.id, 'pet-123');
       expect(updated.userId, 'user-456');
@@ -151,8 +148,8 @@ void main() {
       expect(pet.monthlyBudget, 1000.0); // Default value
     });
 
-    test('different instances with same data are different objects', () {
-      final pet1 = PetModel(
+    test('instances with same data are equal (value equality)', () {
+      const pet1 = PetModel(
         id: 'pet-123',
         userId: 'user-456',
         name: 'Fluffy',
@@ -163,7 +160,7 @@ void main() {
         profileImageUrl: 'https://example.com/image.jpg',
       );
 
-      final pet2 = PetModel(
+      const pet2 = PetModel(
         id: 'pet-123',
         userId: 'user-456',
         name: 'Fluffy',
@@ -174,13 +171,13 @@ void main() {
         profileImageUrl: 'https://example.com/image.jpg',
       );
 
-      // PetModel uses reference equality, not value equality
-      expect(pet1, isNot(pet2));
-      expect(pet1.id, pet2.id); // But IDs match
+      // PetModel overrides == for value equality
+      expect(pet1, equals(pet2));
+      expect(identical(pet1, pet2), isTrue); // Because they are const
     });
 
     test('copyWith preserves all fields except overridden ones', () {
-      final original = PetModel(
+      const original = PetModel(
         id: 'pet-123',
         userId: 'user-456',
         name: 'Fluffy',

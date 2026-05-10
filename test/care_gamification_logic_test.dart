@@ -1,18 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:pet_dating_app/models/care_badge_model.dart';
-import 'package:pet_dating_app/models/pet_care_log_model.dart'
+import 'package:petsphere/features/care/data/models/care_badge_model.dart';
+import 'package:petsphere/features/care/data/models/pet_care_log_model.dart'
     show DailyTask, PetCareLog;
-import 'package:pet_dating_app/utils/care_gamification_logic.dart';
+import 'package:petsphere/features/care/utils/care_gamification_logic.dart';
 
 void main() {
   group('CareGamificationLogic', () {
     test('buildNext awards points when today log completes streak', () {
       final today = DateTime.now();
-      final log = PetCareLog.empty(
-        petId: 'p1',
-        logDate: today,
-      ).copyWith(
+      final log = PetCareLog.empty(petId: 'p1', logDate: today).copyWith(
         breakfastFed: true,
         dinnerFed: true,
         waterCups: 8,
@@ -38,10 +35,6 @@ void main() {
         petId: 'p1',
         logDate: today,
         tasks: t,
-        breakfastFed: false,
-        dinnerFed: false,
-        waterCups: 0,
-        dailyWaterGoalCups: 8,
       );
       final next = CareGamificationLogic.buildNext(
         current: null,
@@ -57,12 +50,11 @@ void main() {
       final logs = <PetCareLog>[
         PetCareLog.empty(petId: 'p1', logDate: DateTime.now()),
       ];
-      final g = PetCareGamification(
+      const g = PetCareGamification(
         petId: 'p1',
         userId: 'u1',
         totalCarePoints: 0,
         bestStreakDays: 7,
-        weekCompletedMask: 0,
       );
       final slugs = CareGamificationLogic.badgeSlugsToUnlock(
         recentLogs: logs,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:pet_dating_app/main.dart' as app;
+import 'package:petsphere/main.dart' as app;
 
 /// Device journey tests against the real app + Supabase.
 ///
@@ -22,8 +22,9 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 25));
 
     final onLogin = find.text('Welcome Back').evaluate().isNotEmpty;
-    final onHome = find.text('Atelier').evaluate().isNotEmpty ||
-        find.text('PetSphere').evaluate().isNotEmpty;
+    final onHome =
+        find.text('Atelier').evaluate().isNotEmpty ||
+        find.text('PetFolio').evaluate().isNotEmpty;
 
     expect(
       onLogin || onHome,
@@ -32,11 +33,8 @@ void main() {
     );
 
     if (onLogin) {
-      const email = String.fromEnvironment('E2E_EMAIL', defaultValue: '');
-      const password = String.fromEnvironment(
-        'E2E_PASSWORD',
-        defaultValue: '',
-      );
+      const email = String.fromEnvironment('E2E_EMAIL');
+      const password = String.fromEnvironment('E2E_PASSWORD');
       if (email.isNotEmpty && password.isNotEmpty) {
         await tester.enterText(
           find.byKey(const Key('login_email_field')),
@@ -57,7 +55,7 @@ void main() {
     }
 
     if (find.text('Atelier').evaluate().isEmpty &&
-        find.text('PetSphere').evaluate().isEmpty) {
+        find.text('PetFolio').evaluate().isEmpty) {
       return;
     }
 

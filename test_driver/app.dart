@@ -1,5 +1,5 @@
 import 'package:flutter_driver/driver_extension.dart';
-import 'package:pet_dating_app/main.dart' as app;
+import 'package:petfolio/main.dart' as app;
 
 void main() {
   // This line enables the extension.

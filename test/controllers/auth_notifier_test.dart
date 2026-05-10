@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pet_dating_app/controllers/auth_controller.dart';
-import 'package:pet_dating_app/models/user_model.dart';
+import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petsphere/features/auth/data/models/user_model.dart';
 
 void main() {
   group('AuthState', () {
@@ -16,7 +16,6 @@ void main() {
     test('AuthState copyWith creates new instance', () {
       final original = AuthState(
         status: AuthStatus.unauthenticated,
-        isLoading: false,
       );
 
       final updated = original.copyWith(
@@ -51,8 +50,6 @@ void main() {
       final original = AuthState(
         status: AuthStatus.authenticated,
         user: user,
-        isLoading: false,
-        error: null,
       );
 
       final updated = original.copyWith(isLoading: true);
@@ -87,8 +84,6 @@ void main() {
       final state = AuthState(
         status: AuthStatus.authenticated,
         user: user,
-        isLoading: false,
-        error: null,
       );
 
       expect(state.status, AuthStatus.authenticated);
@@ -110,16 +105,12 @@ void main() {
         name: 'User 2',
       );
 
-      final state1 = AuthState(
-        status: AuthStatus.unauthenticated,
-        user: user1,
-      );
+      final state1 = AuthState(status: AuthStatus.unauthenticated, user: user1);
 
       final state2 = state1.copyWith(
         status: AuthStatus.authenticated,
         user: user2,
         isLoading: true,
-        error: null,
       );
 
       expect(state2.status, AuthStatus.authenticated);

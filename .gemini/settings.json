@@ -1,4 +1,17 @@
 {
+  "mcp": {
+    "excluded": [
+      "datacloud_bigquery_toolbox",
+      "datacloud_spanner_toolbox",
+      "datacloud_alloydb-postgres-admin_toolbox",
+      "datacloud_alloydb-postgres_toolbox",
+      "datacloud_cloud-sql-postgresql-admin_toolbox",
+      "datacloud_cloud-sql-postgresql_toolbox",
+      "datacloud_knowledge_catalog_toolbox",
+      "datacloud_dataproc_toolbox",
+      "datacloud_serverless-spark_toolbox"
+    ]
+  },
   "mcpServers": {
     "appium-mcp": {
       "command": "npx",

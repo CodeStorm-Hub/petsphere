@@ -54,25 +54,29 @@ void main() {
       await driver.close();
     });
 
-    test('Login if needed, then main shell nav (Home, Discover)', () async {
-      await driver.runUnsynchronized(() async {
-        await driver.checkHealth();
+    test(
+      'Login if needed, then main shell nav (Home, Discover)',
+      () async {
+        await driver.runUnsynchronized(() async {
+          await driver.checkHealth();
 
-        final landing = await _waitForLanding(driver);
-        if (landing == _Landing.login) {
-          await driver.tap(find.byValueKey('login_email_field'));
-          await driver.enterText('afsanchowdhury25@gmail.com');
-          await driver.tap(find.byValueKey('login_password_field'));
-          await driver.enterText('callofduty100');
-          await driver.tap(find.text('Sign In'));
-          await _assertMainShell(driver);
-        }
+          final landing = await _waitForLanding(driver);
+          if (landing == _Landing.login) {
+            await driver.tap(find.byValueKey('login_email_field'));
+            await driver.enterText('afsanchowdhury25@gmail.com');
+            await driver.tap(find.byValueKey('login_password_field'));
+            await driver.enterText('callofduty100');
+            await driver.tap(find.text('Sign In'));
+            await _assertMainShell(driver);
+          }
 
-        await driver.waitFor(
-          find.byValueKey('bottom_nav_1'),
-          timeout: const Duration(seconds: 30),
-        );
-      }, timeout: const Duration(minutes: 7));
-    }, timeout: const Timeout(Duration(minutes: 8)));
+          await driver.waitFor(
+            find.byValueKey('bottom_nav_1'),
+            timeout: const Duration(seconds: 30),
+          );
+        }, timeout: const Duration(minutes: 7));
+      },
+      timeout: const Timeout(Duration(minutes: 8)),
+    );
   });
 }

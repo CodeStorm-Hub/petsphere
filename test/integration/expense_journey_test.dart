@@ -2,42 +2,59 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pet_dating_app/models/pet_model.dart';
-import 'package:pet_dating_app/models/pet_expense_model.dart';
-import 'package:pet_dating_app/models/user_model.dart';
-import 'package:pet_dating_app/repositories/pet_expense_repository.dart';
-import 'package:pet_dating_app/controllers/pet_controller.dart';
-import 'package:pet_dating_app/controllers/auth_controller.dart';
-import 'package:pet_dating_app/views/pet_expense_tracker_screen.dart';
+import 'package:petsphere/features/pet/data/models/pet_model.dart';
+import 'package:petsphere/features/care/data/models/pet_expense_model.dart';
+import 'package:petsphere/features/auth/data/models/user_model.dart';
+import 'package:petsphere/features/care/data/pet_expense_repository.dart';
+import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petsphere/features/care/presentation/screens/pet_expense_tracker_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:petsphere/features/pet/data/pet_repository.dart';
+
 
 class MockPetExpenseRepository extends Mock implements PetExpenseRepository {}
+
+class MockPetRepository extends Mock implements PetRepository {}
+
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Pet Expense Journey Test', () {
     late MockPetExpenseRepository mockRepo;
+    late MockPetRepository mockPetRepo;
+
 
     setUpAll(() {
-      registerFallbackValue(PetExpense(
-        id: '',
-        petId: '',
-        title: '',
-        amount: 0,
-        date: DateTime.now(),
-        category: ExpenseCategory.other,
-      ));
+      registerFallbackValue(
+        PetExpense(
+          id: '',
+          petId: '',
+          title: '',
+          amount: 0,
+          date: DateTime.now(),
+          category: ExpenseCategory.other,
+        ),
+      );
     });
 
     setUp(() {
       mockRepo = MockPetExpenseRepository();
+      mockPetRepo = MockPetRepository();
     });
 
-    testWidgets('Should add an expense and verify it appears in the list', (tester) async {
+
+    testWidgets('Should add an expense and verify it appears in the list', (
+      tester,
+    ) async {
       // 1. Setup Mock Data
-      final dummyUser = UserModel(id: 'user-456', email: 'test@example.com', name: 'Tester');
-      final dummyPet = PetModel(
+      final dummyUser = UserModel(
+        id: 'user-456',
+        email: 'test@example.com',
+        name: 'Tester',
+      );
+      const dummyPet = PetModel(
         id: 'pet-123',
         userId: 'user-456',
         name: 'Test Buddy',
@@ -59,18 +76,25 @@ void main() {
 
       // 2. Mock Repository Responses
       when(() => mockRepo.fetchExpenses('pet-123')).thenAnswer((_) async => []);
-      when(() => mockRepo.createExpense(any())).thenAnswer((_) async => newExpense);
+      when(
+        () => mockRepo.createExpense(any()),
+      ).thenAnswer((_) async => newExpense);
+
+      when(
+        () => mockPetRepo.fetchMyPets('user-456'),
+      ).thenAnswer((_) async => [dummyPet]);
+
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             authProvider.overrideWith(() => _MockAuthNotifier(dummyUser)),
             activePetProvider.overrideWithValue(dummyPet),
+            petRepositoryProvider.overrideWithValue(mockPetRepo),
             petExpenseRepositoryProvider.overrideWithValue(mockRepo),
           ],
-          child: const MaterialApp(
-            home: PetExpenseTrackerScreen(),
-          ),
+
+          child: const MaterialApp(home: PetExpenseTrackerScreen()),
         ),
       );
       await tester.pumpAndSettle();
@@ -86,18 +110,23 @@ void main() {
       expect(textFields, findsNWidgets(2));
       await tester.enterText(textFields.at(0), 'Premium Kibble');
       await tester.enterText(textFields.at(1), '45.99');
-      
+
       // Tap Save
       await tester.tap(find.text('Save Expense'));
-      
+
       // Mock fetch after add
-      when(() => mockRepo.fetchExpenses('pet-123')).thenAnswer((_) async => [newExpense]);
-      
+      when(
+        () => mockRepo.fetchExpenses('pet-123'),
+      ).thenAnswer((_) async => [newExpense]);
+
       await tester.pumpAndSettle();
 
       // 5. Verify expense in list
       expect(find.text('Premium Kibble'), findsOneWidget);
-      expect(find.text('\$45.99'), findsWidgets); // Might be in list and summary
+      expect(
+        find.text('\$45.99'),
+        findsWidgets,
+      ); // Might be in list and summary
     });
   });
 }
@@ -109,7 +138,9 @@ class _MockAuthNotifier extends AuthNotifier {
   @override
   AuthState build() {
     return AuthState(
-      status: mockUser != null ? AuthStatus.authenticated : AuthStatus.unauthenticated,
+      status: mockUser != null
+          ? AuthStatus.authenticated
+          : AuthStatus.unauthenticated,
       user: mockUser,
     );
   }

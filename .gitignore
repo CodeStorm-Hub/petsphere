@@ -63,6 +63,11 @@ lib/generated_plugin_registrant.dart
 **/ios/Flutter/ephemeral/
 **/ios/Runner.xcworkspace/xcuserdata/
 
+# Code generation
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
 # Symbolication related
 app.*.symbols
 

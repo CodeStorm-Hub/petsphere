@@ -1,0 +1,346 @@
+{
+  "database": {
+    "name": "petsphere",
+    "project_id": "foubokcqaxyqgjhtgzsx",
+    "region": "ap-southeast-1",
+    "status": "ACTIVE_HEALTHY",
+    "postgresql_version": "17.6.1.084",
+    "engine": "17",
+    "created_at": "2026-03-28T19:01:04.738126Z",
+    "exported_at": "2026-05-09T00:00:00Z"
+  },
+  "statistics": {
+    "total_tables": 30,
+    "total_columns": 210,
+    "total_foreign_keys": 75,
+    "rls_enabled_tables": 29,
+    "tables_with_arrays": 15,
+    "tables_with_jsonb": 7,
+    "primary_entities": ["pets", "auth.users"]
+  },
+  "tables": {
+    "profiles": {
+      "columns": 8,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["id → auth.users.id"],
+      "description": "User profile information"
+    },
+    "pets": {
+      "columns": 21,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["user_id → auth.users.id"],
+      "dependent_tables": 26,
+      "description": "Core pet profiles - primary hub entity"
+    },
+    "posts": {
+      "columns": 8,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["pet_id → pets.id"],
+      "dependent_tables": 2,
+      "description": "Social media posts"
+    },
+    "post_likes": {
+      "columns": 3,
+      "rls": true,
+      "primary_key": ["post_id", "pet_id"],
+      "foreign_keys": ["post_id → posts.id", "pet_id → pets.id"],
+      "description": "Post engagement - likes"
+    },
+    "comments": {
+      "columns": 5,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["post_id → posts.id", "pet_id → pets.id"],
+      "description": "Post comments"
+    },
+    "stories": {
+      "columns": 8,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["pet_id → pets.id", "user_id → auth.users.id"],
+      "ttl_field": "expires_at",
+      "description": "24-hour ephemeral stories"
+    },
+    "match_requests": {
+      "columns": 5,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["sender_pet_id → pets.id", "receiver_pet_id → pets.id"],
+      "status_enum": ["pending", "matched", "rejected"],
+      "description": "Pet matching/dating requests"
+    },
+    "chat_threads": {
+      "columns": 5,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["pet_id_1 → pets.id", "pet_id_2 → pets.id"],
+      "description": "Conversation threads between two pets"
+    },
+    "messages": {
+      "columns": 8,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["thread_id → chat_threads.id", "sender_pet_id → pets.id"],
+      "description": "Messages in chat threads"
+    },
+    "notifications": {
+      "columns": 7,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["user_id → auth.users.id"],
+      "description": "In-app notifications"
+    },
+    "follows": {
+      "columns": 5,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": [
+        "follower_user_id → auth.users.id",
+        "followed_user_id → auth.users.id",
+        "followed_pet_id → pets.id"
+      ],
+      "description": "Follow relationships (flexible: user→user or user→pet)"
+    },
+    "pet_symptoms": {
+      "columns": 7,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["pet_id → pets.id", "user_id → auth.users.id"],
+      "description": "Health symptom logs"
+    },
+    "pet_medications": {
+      "columns": 10,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["pet_id → pets.id", "user_id → auth.users.id"],
+      "description": "Medication prescriptions"
+    },
+    "pet_medication_doses": {
+      "columns": 6,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": [
+        "medication_id → pet_medications.id",
+        "pet_id → pets.id",
+        "user_id → auth.users.id"
+      ],
+      "description": "Individual medication administration records"
+    },
+    "pet_allergies": {
+      "columns": 7,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["pet_id → pets.id", "user_id → auth.users.id"],
+      "severity_enum": ["low", "medium", "high", "critical"],
+      "description": "Known allergies and reactions"
+    },
+    "pet_parasite_prevention": {
+      "columns": 8,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["pet_id → pets.id", "user_id → auth.users.id"],
+      "description": "Parasite treatment records"
+    },
+    "pet_dental_logs": {
+      "columns": 6,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["pet_id → pets.id", "user_id → auth.users.id"],
+      "description": "Dental care and checkup records"
+    },
+    "pet_activity_logs": {
+      "columns": 8,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["pet_id → pets.id", "user_id → auth.users.id"],
+      "description": "Exercise and activity tracking"
+    },
+    "pet_care_logs": {
+      "columns": 22,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["pet_id → pets.id"],
+      "description": "Daily care activities (feeding, water, tasks)"
+    },
+    "pet_weight_logs": {
+      "columns": 5,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["pet_id → pets.id"],
+      "description": "Weight tracking over time"
+    },
+    "pet_vet_appointments": {
+      "columns": 7,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["pet_id → pets.id"],
+      "description": "Veterinary appointment scheduling"
+    },
+    "pet_vaccinations": {
+      "columns": 8,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["pet_id → pets.id"],
+      "status_enum": ["scheduled", "completed"],
+      "description": "Vaccination record and schedule"
+    },
+    "care_badge_definitions": {
+      "columns": 5,
+      "rls": true,
+      "primary_key": "slug",
+      "total_badges": 6,
+      "description": "Master list of achievement badges"
+    },
+    "pet_care_gamification": {
+      "columns": 12,
+      "rls": true,
+      "primary_key": "pet_id",
+      "foreign_keys": ["pet_id → pets.id"],
+      "relationship": "1-to-1",
+      "description": "Gamification stats and streaks"
+    },
+    "pet_care_badge_unlocks": {
+      "columns": 4,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": [
+        "pet_id → pets.id",
+        "badge_slug → care_badge_definitions.slug"
+      ],
+      "description": "Badge unlock history"
+    },
+    "pet_care_onboarding": {
+      "columns": 4,
+      "rls": true,
+      "primary_key": "pet_id",
+      "foreign_keys": ["pet_id → pets.id"],
+      "relationship": "1-to-1",
+      "description": "Onboarding state per pet"
+    },
+    "products": {
+      "columns": 13,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["vendor_id → auth.users.id"],
+      "description": "Marketplace product listings"
+    },
+    "orders": {
+      "columns": 6,
+      "rls": true,
+      "primary_key": "id",
+      "foreign_keys": ["user_id → auth.users.id"],
+      "status_enum": ["pending", "completed", "cancelled"],
+      "description": "Marketplace orders"
+    },
+    "user_fcm_tokens": {
+      "columns": 4,
+      "rls": true,
+      "primary_key": ["user_id", "fcm_token"],
+      "foreign_keys": ["user_id → auth.users.id"],
+      "description": "Firebase Cloud Messaging tokens"
+    },
+    "waitlist": {
+      "columns": 5,
+      "rls": true,
+      "primary_key": "id",
+      "description": "Email signup waitlist"
+    }
+  },
+  "domains": {
+    "user_auth": {
+      "tables": ["auth.users", "profiles", "user_fcm_tokens"],
+      "description": "Authentication and user profiles"
+    },
+    "core_pets": {
+      "tables": ["pets"],
+      "description": "Core pet entities"
+    },
+    "social": {
+      "tables": ["posts", "post_likes", "comments", "stories", "follows"],
+      "description": "Social features and engagement"
+    },
+    "matching_communication": {
+      "tables": ["match_requests", "chat_threads", "messages", "notifications"],
+      "description": "Pet matching and messaging"
+    },
+    "health_wellness": {
+      "tables": [
+        "pet_symptoms", "pet_medications", "pet_medication_doses",
+        "pet_allergies", "pet_parasite_prevention", "pet_dental_logs",
+        "pet_vet_appointments", "pet_vaccinations"
+      ],
+      "description": "Health and wellness management"
+    },
+    "care_tracking": {
+      "tables": [
+        "pet_care_logs", "pet_activity_logs", "pet_weight_logs"
+      ],
+      "description": "Care activity tracking"
+    },
+    "gamification": {
+      "tables": [
+        "care_badge_definitions", "pet_care_gamification",
+        "pet_care_badge_unlocks", "pet_care_onboarding"
+      ],
+      "description": "Achievement and streak system"
+    },
+    "marketplace": {
+      "tables": ["products", "orders"],
+      "description": "Product marketplace"
+    },
+    "administrative": {
+      "tables": ["waitlist"],
+      "description": "Administrative features"
+    }
+  },
+  "key_metrics": {
+    "primary_entities": {
+      "pets": {
+        "dependent_tables": 26,
+        "key_relationships": "Owner (user_id), Posts, Stories, Messages, Health records, Care logs, Gamification"
+      },
+      "auth_users": {
+        "dependent_tables": 10,
+        "key_relationships": "Profiles, Pets (owner), Notifications, Orders, Products (vendor), Follows, Health logs"
+      }
+    },
+    "relationship_types": {
+      "one_to_one": 4,
+      "one_to_many": 60,
+      "bidirectional": 5,
+      "many_to_many_via_junction": 5
+    },
+    "field_types": {
+      "uuid": 150,
+      "text": 30,
+      "numeric": 10,
+      "integer": 20,
+      "boolean": 25,
+      "date": 15,
+      "timestamptz": 60,
+      "jsonb": 7,
+      "array": 15
+    }
+  },
+  "security": {
+    "rls_status": "Enabled on 29/30 tables",
+    "rls_disabled": ["auth.users (Supabase managed)"],
+    "authentication_layer": "Supabase Auth",
+    "recommended_rls_rules": [
+      "Users can view own profiles and public pet profiles",
+      "Pets belong to owners (user_id)",
+      "Followers can view followed pet content",
+      "Messages only visible to involved pets' owners",
+      "Health records only visible to pet owners"
+    ]
+  },
+  "backup_info": {
+    "frequency": "Daily automatic backups",
+    "provider": "Supabase",
+    "recovery_available": true,
+    "export_date": "2026-05-09"
+  }
+}

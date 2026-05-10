@@ -1,6 +1,6 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pet_dating_app/utils/supabase_config.dart';
+import 'package:petsphere/core/constants/supabase_config.dart';
 
 void main() {
   test('non-release resolves Supabase URL and anon key', () {
@@ -13,4 +13,3 @@ void main() {
     expect(() => assertValidReleaseSupabaseConfig(), returnsNormally);
   });
 }
-

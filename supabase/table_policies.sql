@@ -72,11 +72,7 @@ CREATE POLICY "Users can insert posts for their own pets"
 ON public.posts FOR INSERT
 TO authenticated
 WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.pets
-    WHERE pets.id = posts.pet_id
-    AND pets.user_id = auth.uid()
-  )
+  user_owns_pet(posts.pet_id, (SELECT auth.uid()))
 );
 
 DROP POLICY IF EXISTS "Users can delete their own posts" ON public.posts;
@@ -84,11 +80,7 @@ CREATE POLICY "Users can delete their own posts"
 ON public.posts FOR DELETE
 TO authenticated
 USING (
-  EXISTS (
-    SELECT 1 FROM public.pets
-    WHERE pets.id = posts.pet_id
-    AND pets.user_id = auth.uid()
-  )
+  user_owns_pet(posts.pet_id, (SELECT auth.uid()))
 );
 
 DROP POLICY IF EXISTS "Users can update their own posts" ON public.posts;
@@ -96,18 +88,10 @@ CREATE POLICY "Users can update their own posts"
 ON public.posts FOR UPDATE
 TO authenticated
 USING (
-  EXISTS (
-    SELECT 1 FROM public.pets
-    WHERE pets.id = posts.pet_id
-    AND pets.user_id = auth.uid()
-  )
+  user_owns_pet(posts.pet_id, (SELECT auth.uid()))
 )
 WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.pets
-    WHERE pets.id = posts.pet_id
-    AND pets.user_id = auth.uid()
-  )
+  user_owns_pet(posts.pet_id, (SELECT auth.uid()))
 );
 
 -- ─────────────────────────────────────────────────────────
@@ -126,11 +110,7 @@ CREATE POLICY "Users can like posts as their own pets"
 ON public.post_likes FOR INSERT
 TO authenticated
 WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.pets
-    WHERE pets.id = post_likes.pet_id
-    AND pets.user_id = auth.uid()
-  )
+  user_owns_pet(post_likes.pet_id, (SELECT auth.uid()))
 );
 
 DROP POLICY IF EXISTS "Users can unlike posts as their own pets" ON public.post_likes;
@@ -138,11 +118,7 @@ CREATE POLICY "Users can unlike posts as their own pets"
 ON public.post_likes FOR DELETE
 TO authenticated
 USING (
-  EXISTS (
-    SELECT 1 FROM public.pets
-    WHERE pets.id = post_likes.pet_id
-    AND pets.user_id = auth.uid()
-  )
+  user_owns_pet(post_likes.pet_id, (SELECT auth.uid()))
 );
 
 -- ─────────────────────────────────────────────────────────
@@ -161,11 +137,7 @@ CREATE POLICY "Users can comment as their own pets"
 ON public.comments FOR INSERT
 TO authenticated
 WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.pets
-    WHERE pets.id = comments.pet_id
-    AND pets.user_id = auth.uid()
-  )
+  user_owns_pet(comments.pet_id, (SELECT auth.uid()))
 );
 
 -- ─────────────────────────────────────────────────────────
@@ -178,11 +150,8 @@ CREATE POLICY "Users can view match requests related to their pets"
 ON public.match_requests FOR SELECT
 TO authenticated
 USING (
-  EXISTS (
-    SELECT 1 FROM public.pets
-    WHERE (pets.id = match_requests.sender_pet_id OR pets.id = match_requests.receiver_pet_id)
-    AND pets.user_id = auth.uid()
-  )
+  user_owns_pet(match_requests.sender_pet_id, (SELECT auth.uid()))
+  OR user_owns_pet(match_requests.receiver_pet_id, (SELECT auth.uid()))
 );
 
 DROP POLICY IF EXISTS "Users can send match requests from their own pets" ON public.match_requests;
@@ -190,11 +159,7 @@ CREATE POLICY "Users can send match requests from their own pets"
 ON public.match_requests FOR INSERT
 TO authenticated
 WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.pets
-    WHERE pets.id = match_requests.sender_pet_id
-    AND pets.user_id = auth.uid()
-  )
+  user_owns_pet(match_requests.sender_pet_id, (SELECT auth.uid()))
 );
 
 DROP POLICY IF EXISTS "Users can update match requests for their own pets" ON public.match_requests;
@@ -202,11 +167,8 @@ CREATE POLICY "Users can update match requests for their own pets"
 ON public.match_requests FOR UPDATE
 TO authenticated
 USING (
-  EXISTS (
-    SELECT 1 FROM public.pets
-    WHERE (pets.id = match_requests.sender_pet_id OR pets.id = match_requests.receiver_pet_id)
-    AND pets.user_id = auth.uid()
-  )
+  user_owns_pet(match_requests.sender_pet_id, (SELECT auth.uid()))
+  OR user_owns_pet(match_requests.receiver_pet_id, (SELECT auth.uid()))
 );
 
 -- ─────────────────────────────────────────────────────────
@@ -219,11 +181,8 @@ CREATE POLICY "Users can view threads their pets are in"
 ON public.chat_threads FOR SELECT
 TO authenticated
 USING (
-  EXISTS (
-    SELECT 1 FROM public.pets
-    WHERE (pets.id = chat_threads.pet_id_1 OR pets.id = chat_threads.pet_id_2)
-    AND pets.user_id = auth.uid()
-  )
+  user_owns_pet(chat_threads.pet_id_1, (SELECT auth.uid()))
+  OR user_owns_pet(chat_threads.pet_id_2, (SELECT auth.uid()))
 );
 
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
@@ -235,9 +194,11 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM public.chat_threads t
-    JOIN public.pets p ON (p.id = t.pet_id_1 OR p.id = t.pet_id_2)
     WHERE t.id = messages.thread_id
-    AND p.user_id = auth.uid()
+    AND (
+      user_owns_pet(t.pet_id_1, (SELECT auth.uid()))
+      OR user_owns_pet(t.pet_id_2, (SELECT auth.uid()))
+    )
   )
 );
 
@@ -246,9 +207,5 @@ CREATE POLICY "Users can send messages as their pets"
 ON public.messages FOR INSERT
 TO authenticated
 WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.pets
-    WHERE pets.id = messages.sender_pet_id
-    AND pets.user_id = auth.uid()
-  )
+  user_owns_pet(messages.sender_pet_id, (SELECT auth.uid()))
 );

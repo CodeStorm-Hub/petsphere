@@ -1,7 +1,7 @@
 // Entry point for flutter drive --target (instrumented app with driver extension).
 // flutter drive --target=integration_test/phase1_audit_driver_target.dart --driver=integration_test/phase1_audit_driver_test.dart -d emulator-5554 --dart-define=FLUTTER_DRIVER_TEST=true
 import 'package:flutter_driver/driver_extension.dart';
-import 'package:pet_dating_app/main.dart' as app;
+import 'package:petsphere/main.dart' as app;
 
 void main() {
   enableFlutterDriverExtension();

@@ -35,7 +35,7 @@ All 5 agents completed. The web research agent returned detailed findings across
 ```
 ---
 
-# PetSphere: Complete Refactoring & UI/UX Redesign Execution Plan
+# PetFolio: Complete Refactoring & UI/UX Redesign Execution Plan
 
 ## Codebase Audit Summary
 
@@ -62,18 +62,18 @@ All 5 agents completed. The web research agent returned detailed findings across
 **Goal**: Standardize naming, fix .gitignore, harden analysis options.
 
 **Files to modify**:
-- `pubspec.yaml` — rename `pet_dating_app` to `petsphere`
+- `pubspec.yaml` — rename `pet_dating_app` to `petfolio`
 - `.gitignore` — add missing entries
 - `analysis_options.yaml` — enable strict rules
-- `lib/main.dart` — rename `PetFolioApp` to `PetSphereApp`
-- `lib/theme/app_theme.dart` — rename all `Petfolio*` references to `PetSphere*`
+- `lib/main.dart` — rename `PetSphereApp` to `PetFolioApp`
+- `lib/theme/app_theme.dart` — rename all `Petsphere*` references to `PetFolio*`
 
 **Actions**:
 
 1. **Fix pubspec.yaml**:
    ```yaml
-   name: petsphere  # was: pet_dating_app
-   description: PetSphere - Pet Social & Marketplace Platform
+   name: petfolio  # was: pet_dating_app
+   description: PetFolio - Pet Social & Marketplace Platform
    ```
 
 2. **Update .gitignore** (add these missing entries):
@@ -142,10 +142,10 @@ All 5 agents completed. The web research agent returned detailed findings across
        - avoid_redundant_argument_values
    ```
 
-4. **Rename all PetFolio references** across the codebase to PetSphere:
-   - `lib/main.dart`: `PetFolioApp` -> `PetSphereApp`
-   - `lib/theme/app_theme.dart`: `PetfolioShadows` -> `PetSphereShadows`, all brand references
-   - Search and replace across all files: `PetFolio` -> `PetSphere`, `Petfolio` -> `Petsphere`, `petfolio` -> `petsphere`
+4. **Rename all PetFolio references** across the codebase to PetFolio:
+   - `lib/main.dart`: `PetSphereApp` -> `PetFolioApp`
+   - `lib/theme/app_theme.dart`: `PetsphereShadows` -> `PetFolioShadows`, all brand references
+   - Search and replace across all files: `PetSphere` -> `PetFolio`, `Petsphere` -> `Petfolio`, `petfolio` -> `petfolio`
 
 ---
 
@@ -289,7 +289,7 @@ CREATE INDEX idx_user_fcm_tokens_user_id ON public.user_fcm_tokens(user_id);
 lib/
 ├── main.dart
 ├── app/
-│   ├── app.dart                    # PetSphereApp widget
+│   ├── app.dart                    # PetFolioApp widget
 │   ├── router.dart                 # GoRouter configuration
 │   └── bootstrap.dart              # App initialization
 ├── core/
@@ -760,9 +760,9 @@ class VideoCompressor {
 
 1. **New color system** — `colors.dart`:
    ```dart
-   class PetSphereColors {
+   class PetFolioColors {
      // Brand colors (fallback when Dynamic Color unavailable)
-     static const Color primary = Color(0xFF4A7DF7);      // PetSphere Blue
+     static const Color primary = Color(0xFF4A7DF7);      // PetFolio Blue
      static const Color secondary = Color(0xFF47B4FF);     // Sky Blue
      static const Color tertiary = Color(0xFF7C5CE0);      // Lavender accent
      static const Color success = Color(0xFF4CAF50);       // Green
@@ -787,8 +787,8 @@ class VideoCompressor {
    ```dart
    DynamicColorBuilder(
      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-       final lightScheme = lightDynamic?.harmonized() ?? PetSphereColors.lightScheme;
-       final darkScheme = darkDynamic?.harmonized() ?? PetSphereColors.darkScheme;
+       final lightScheme = lightDynamic?.harmonized() ?? PetFolioColors.lightScheme;
+       final darkScheme = darkDynamic?.harmonized() ?? PetFolioColors.darkScheme;
        
        return MaterialApp.router(
          theme: AppTheme.light(lightScheme),
@@ -801,7 +801,7 @@ class VideoCompressor {
 
 3. **Typography** — `typography.dart`:
    ```dart
-   class PetSphereTypography {
+   class PetFolioTypography {
      static TextTheme textTheme = TextTheme(
        displayLarge: GoogleFonts.playfairDisplay(fontSize: 57, fontWeight: FontWeight.w400),
        displayMedium: GoogleFonts.playfairDisplay(fontSize: 45, fontWeight: FontWeight.w400),
@@ -824,7 +824,7 @@ class VideoCompressor {
 
 4. **Spacing & Sizing** — `spacing.dart`:
    ```dart
-   class PetSphereSpacing {
+   class PetFolioSpacing {
      static const double xs = 4;
      static const double sm = 8;
      static const double md = 16;
@@ -1080,7 +1080,7 @@ import 'package:patrol/patrol.dart';
 
 void main() {
   patrolTest('complete user journey - signup to post creation', ($) async {
-    await $.pumpWidgetAndSettle(const PetSphereApp());
+    await $.pumpWidgetAndSettle(const PetFolioApp());
     
     // 1. Login/Signup
     await $(#emailField).enterText('test@example.com');
@@ -1269,7 +1269,7 @@ void main() {
     };
     
     // ... initialization
-    runApp(const ProviderScope(child: PetSphereApp()));
+    runApp(const ProviderScope(child: PetFolioApp()));
   }, (error, stack) {
     developer.log('Unhandled error: $error', name: 'ZoneError', stackTrace: stack);
   });

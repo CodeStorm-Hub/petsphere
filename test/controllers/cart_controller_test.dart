@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pet_dating_app/controllers/cart_controller.dart';
-import 'package:pet_dating_app/models/cart_item_model.dart';
-import 'package:pet_dating_app/models/product_model.dart';
+import 'package:petsphere/features/marketplace/presentation/controllers/cart_controller.dart';
+import 'package:petsphere/features/marketplace/data/models/cart_item_model.dart';
+import 'package:petsphere/features/marketplace/data/models/product_model.dart';
 
 void main() {
   group('CartState', () {
@@ -27,11 +27,7 @@ void main() {
         category: 'food',
       );
 
-      final item = CartItemModel(
-        id: 'item-1',
-        product: product,
-        quantity: 2,
-      );
+      final item = CartItemModel(id: 'item-1', product: product, quantity: 2);
 
       final state = CartState(items: [item]);
 
@@ -62,15 +58,16 @@ void main() {
         category: 'toys',
       );
 
-      final item1 = CartItemModel(id: 'item-1', product: product1, quantity: 1);
-      final item2 = CartItemModel(id: 'item-2', product: product2, quantity: 1);
+      final item1 = CartItemModel(id: 'item-1', product: product1);
+      final item2 = CartItemModel(id: 'item-2', product: product2);
 
       var state = CartState(items: [item1, item2]);
       expect(state.totalPrice, closeTo(44.98, 0.01));
 
       // Remove item1
-      final updatedItems =
-          state.items.where((item) => item.id != 'item-1').toList();
+      final updatedItems = state.items
+          .where((item) => item.id != 'item-1')
+          .toList();
       state = state.copyWith(items: updatedItems);
 
       expect(state.totalItemCount, 1);
@@ -89,7 +86,7 @@ void main() {
         category: 'food',
       );
 
-      final item = CartItemModel(id: 'item-1', product: product, quantity: 1);
+      final item = CartItemModel(id: 'item-1', product: product);
       var state = CartState(items: [item]);
 
       expect(state.totalPrice, closeTo(29.99, 0.01));
@@ -120,8 +117,7 @@ void main() {
         category: 'food',
       );
 
-      final item =
-          CartItemModel(id: 'item-1', product: product, quantity: 1);
+      final item = CartItemModel(id: 'item-1', product: product);
       final state = CartState(items: [item]);
 
       expect(state.totalItemCount, 1);
@@ -172,7 +168,7 @@ void main() {
 
       final items = [
         CartItemModel(id: 'item-1', product: product1, quantity: 2),
-        CartItemModel(id: 'item-2', product: product2, quantity: 1),
+        CartItemModel(id: 'item-2', product: product2),
         CartItemModel(id: 'item-3', product: product3, quantity: 3),
       ];
 
@@ -196,16 +192,15 @@ void main() {
         category: 'food',
       );
 
-      final item =
-          CartItemModel(id: 'item-1', product: product, quantity: 1);
+      final item = CartItemModel(id: 'item-1', product: product);
       final state1 = CartState(
         items: [item],
-        isCheckingOut: false,
-        orderSuccess: false,
       );
 
-      final state2 =
-          state1.copyWith(isCheckingOut: true, error: 'Payment failed');
+      final state2 = state1.copyWith(
+        isCheckingOut: true,
+        error: 'Payment failed',
+      );
 
       expect(state2.items.length, 1);
       expect(state2.isCheckingOut, true);

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pet_dating_app/models/user_model.dart';
+import 'package:petsphere/features/auth/data/models/user_model.dart';
 
 void main() {
   group('UserModel', () {
@@ -59,10 +59,7 @@ void main() {
         name: 'John Doe',
       );
 
-      final updated = user.copyWith(
-        name: 'Jane Doe',
-        bio: 'Cat lover',
-      );
+      final updated = user.copyWith(name: 'Jane Doe', bio: 'Cat lover');
 
       expect(updated.id, 'user-123');
       expect(updated.email, 'test@example.com');
