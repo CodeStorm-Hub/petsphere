@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/vitals_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/appointment_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/vaccination_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/medication_controller.dart';
-import 'package:petsphere/features/health/data/models/pet_health_extended_models.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/vitals_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/appointment_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/vaccination_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/medication_controller.dart';
+import 'package:petfolio/features/health/data/models/pet_health_models.dart';
+import 'package:petfolio/features/health/data/models/pet_health_extended_models.dart';
 
 class PetHealthRecordScreen extends ConsumerStatefulWidget {
   const PetHealthRecordScreen({super.key});
@@ -84,6 +87,17 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
                   const SizedBox(height: 16),
                   _VitalsGrid(vitalsState: vitalsState),
                   const SizedBox(height: 32),
+                  if (vitalsState.weightLogs.isNotEmpty) ...[
+                    Text(
+                      'Weight Trend',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _WeightChart(weightLogs: vitalsState.weightLogs),
+                    const SizedBox(height: 32),
+                  ],
                   TabBar(
                     controller: _tabController,
                     isScrollable: true,
@@ -683,6 +697,136 @@ class _MedicationCard extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _WeightChart extends StatelessWidget {
+  final List<PetWeightLog> weightLogs;
+
+  const _WeightChart({required this.weightLogs});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final sortedLogs = [...weightLogs]..sort((a, b) => a.logDate.compareTo(b.logDate));
+
+    if (sortedLogs.isEmpty) return const SizedBox.shrink();
+
+    final spots = sortedLogs.asMap().entries.map((e) {
+      return FlSpot(e.key.toDouble(), e.value.weightLbs);
+    }).toList();
+
+    return Container(
+      height: 220,
+      padding: const EdgeInsets.fromLTRB(16, 24, 24, 8),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: LineChart(
+        LineChartData(
+          gridData: const FlGridData(show: false),
+          titlesData: FlTitlesData(
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  final index = value.toInt();
+                  if (index < 0 || index >= sortedLogs.length) return const SizedBox.shrink();
+                  if (index % (sortedLogs.length > 5 ? (sortedLogs.length / 3).ceil() : 1) != 0) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      DateFormat('MM/dd').format(sortedLogs[index].logDate),
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
+                },
+                reservedSize: 30,
+              ),
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 40,
+                getTitlesWidget: (value, meta) {
+                  return Text(
+                    value.toStringAsFixed(1),
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          borderData: FlBorderData(show: false),
+          lineBarsData: [
+            LineChartBarData(
+              spots: spots,
+              isCurved: true,
+              color: colorScheme.primary,
+              barWidth: 4,
+              isStrokeCapRound: true,
+              dotData: FlDotData(
+                getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
+                  radius: 4,
+                  color: Colors.white,
+                  strokeWidth: 3,
+                  strokeColor: colorScheme.primary,
+                ),
+              ),
+              belowBarData: BarAreaData(
+                show: true,
+                gradient: LinearGradient(
+                  colors: [
+                    colorScheme.primary.withAlpha(50),
+                    colorScheme.primary.withAlpha(0),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+            ),
+          ],
+          lineTouchData: LineTouchData(
+            touchTooltipData: LineTouchTooltipData(
+              getTooltipColor: (spot) => colorScheme.primaryContainer,
+              getTooltipItems: (touchedSpots) {
+                return touchedSpots.map((spot) {
+                  return LineTooltipItem(
+                    '${spot.y} lbs\n',
+                    GoogleFonts.dmSans(
+                      color: colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: DateFormat('MMM d').format(sortedLogs[spot.spotIndex].logDate),
+                        style: TextStyle(
+                          color: colorScheme.onPrimaryContainer.withAlpha(150),
+                          fontSize: 11,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList();
+              },
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/core/constants/app_strings.dart';
-import 'package:petsphere/core/utils/logger.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/marketplace/data/marketplace_repository.dart';
-import 'package:petsphere/features/marketplace/data/models/product_model.dart';
+import 'package:petfolio/core/constants/app_strings.dart';
+import 'package:petfolio/core/utils/logger.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/marketplace/data/marketplace_repository.dart';
+import 'package:petfolio/features/marketplace/data/models/product_model.dart';
 
 // ---------------------------------------------------------------------------
 // State

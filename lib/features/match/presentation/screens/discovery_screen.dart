@@ -5,11 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/match_controller.dart';
-import 'package:petsphere/core/theme/app_theme.dart';
-import 'package:petsphere/core/utils/layout_utils.dart';
-import 'package:petsphere/core/widgets/brand_logo.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
+import 'package:petfolio/core/utils/layout_utils.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Discovery Screen (tab host)
@@ -197,27 +198,14 @@ class DiscoveryTab extends ConsumerStatefulWidget {
   ConsumerState<DiscoveryTab> createState() => DiscoveryTabState();
 }
 
-class DiscoveryTabState extends ConsumerState<DiscoveryTab>
-    with TickerProviderStateMixin {
+class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
   int currentIndex = 0;
   String? filterType; // null = For You, 'breed' = Same Breed, 'nearby' = Nearby
   final Set<String> dismissedPetIds = {};
   // Tracks pets whose discovery feeds are known to be empty after loading.
   final Set<String> allCaughtUpPetIds = {};
 
-  // Drag tracking
-  double _dragX = 0.0;
-  bool _isAnimating = false;
-
-  // Per-swipe state captured before animation completes
-  PetModel? _swipingPet;
-  bool? _pendingLike;
-
-  // Two controllers: one for commit-swipe, one for snap-back
-  late AnimationController _swipeOutController;
-  late AnimationController _snapBackController;
-  late Animation<double> _swipeOutAnim;
-  late Animation<double> _snapBackAnim;
+  final CardSwiperController _swiperController = CardSwiperController();
 
   static const _filterLabels = ['For You', 'Same Breed', 'Nearby'];
   // We use these locally for UI state; 'breed' and 'nearby' are special modes.
@@ -226,20 +214,6 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
   @override
   void initState() {
     super.initState();
-    _swipeOutController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    _snapBackController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 450),
-    );
-
-    _swipeOutController.addListener(_onSwipeOutFrame);
-    _swipeOutController.addStatusListener(_onSwipeOutStatus);
-    _snapBackController.addListener(_onSnapBackFrame);
-    _snapBackController.addStatusListener(_onSnapBackStatus);
-
     // Seed the discovery pet selector with the global active pet on first load.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -253,57 +227,42 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
 
   @override
   void dispose() {
-    _swipeOutController.removeListener(_onSwipeOutFrame);
-    _swipeOutController.removeStatusListener(_onSwipeOutStatus);
-    _snapBackController.removeListener(_onSnapBackFrame);
-    _snapBackController.removeStatusListener(_onSnapBackStatus);
-    _swipeOutController.dispose();
-    _snapBackController.dispose();
+    _swiperController.dispose();
     super.dispose();
   }
 
-  // ── Animation callbacks ──────────────────────────────────────────────────
+  bool _onSwipe(
+    int previousIndex,
+    int? currentIndex,
+    CardSwiperDirection direction,
+  ) {
+    final filteredPets = _applyFilter(ref.read(matchProvider).discoveryPets);
+    if (previousIndex >= filteredPets.length) return false;
+    final pet = filteredPets[previousIndex];
+    final liked = direction == CardSwiperDirection.right;
 
-  void _onSwipeOutFrame() {
-    if (mounted) setState(() => _dragX = _swipeOutAnim.value);
-  }
-
-  void _onSwipeOutStatus(AnimationStatus status) {
-    if (status != AnimationStatus.completed) return;
-    final pet = _swipingPet;
-    final liked = _pendingLike;
-    _swipingPet = null;
-    _pendingLike = null;
-    if (!mounted || pet == null || liked == null) return;
-
-    final allPets = ref.read(matchProvider).discoveryPets;
     setState(() {
-      _dragX = 0;
       dismissedPetIds.add(pet.id);
-      _clampIndex(allPets);
-      _isAnimating = false;
+      if (currentIndex != null) {
+        this.currentIndex = currentIndex;
+      }
     });
 
-    if (!liked) return;
-
-    // Pass the currently-selected discovery pet so the like is sent from
-    // the correct pet (not the global active pet).
-    final discoveryPetId = ref.read(discoveryActivePetIdProvider);
-    ref
-        .read(matchProvider.notifier)
-        .sendLikeRequest(pet.id, fromPetId: discoveryPetId)
-        .then((success) {
-          if (!mounted) return;
-          if (success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Liked ${pet.name}! 🐾'),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-            return;
-          }
-          // On failure: re-show the pet by removing it from the dismissed set.
+    if (liked) {
+      final discoveryPetId = ref.read(discoveryActivePetIdProvider);
+      ref
+          .read(matchProvider.notifier)
+          .sendLikeRequest(pet.id, fromPetId: discoveryPetId)
+          .then((success) {
+        if (!mounted) return;
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Liked ${pet.name}! 🐾'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else {
           setState(() => dismissedPetIds.remove(pet.id));
           final error = ref.read(matchProvider).error;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -313,68 +272,11 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
               behavior: SnackBarBehavior.floating,
             ),
           );
-        });
-  }
-
-  void _onSnapBackFrame() {
-    if (mounted) setState(() => _dragX = _snapBackAnim.value);
-  }
-
-  void _onSnapBackStatus(AnimationStatus status) {
-    if (status == AnimationStatus.completed && mounted) {
-      setState(() {
-        _dragX = 0;
-        _isAnimating = false;
+        }
       });
     }
+    return true;
   }
-
-  // ── Gesture handlers ─────────────────────────────────────────────────────
-
-  void _onDragUpdate(DragUpdateDetails details) {
-    if (_isAnimating) return;
-    setState(() => _dragX += details.delta.dx);
-  }
-
-  void _onDragEnd(DragEndDetails details, double screenWidth) {
-    if (_isAnimating) return;
-    final velocity = details.velocity.pixelsPerSecond.dx;
-    final threshold = screenWidth * 0.28;
-    if (_dragX > threshold || velocity > 500) {
-      _commitSwipe(true, screenWidth);
-    } else if (_dragX < -threshold || velocity < -500) {
-      _commitSwipe(false, screenWidth);
-    } else {
-      _snapBack();
-    }
-  }
-
-  void _snapBack() {
-    _snapBackAnim = Tween<double>(begin: _dragX, end: 0).animate(
-      CurvedAnimation(parent: _snapBackController, curve: Curves.elasticOut),
-    );
-    _snapBackController.reset();
-    _snapBackController.forward();
-    setState(() => _isAnimating = true);
-  }
-
-  void _commitSwipe(bool liked, double screenWidth) {
-    final filteredPets = _applyFilter(ref.read(matchProvider).discoveryPets);
-    if (_isAnimating || filteredPets.isEmpty) return;
-    final pet = filteredPets[currentIndex];
-    _swipingPet = pet;
-    _pendingLike = liked;
-
-    final endX = liked ? screenWidth * 1.5 : -screenWidth * 1.5;
-    _swipeOutAnim = Tween<double>(begin: _dragX, end: endX).animate(
-      CurvedAnimation(parent: _swipeOutController, curve: Curves.easeOutCubic),
-    );
-    _swipeOutController.reset();
-    _swipeOutController.forward();
-    setState(() => _isAnimating = true);
-  }
-
-  // ── Helpers ──────────────────────────────────────────────────────────────
 
   List<PetModel> _applyFilter(List<PetModel> allPets) {
     final visible = allPets
@@ -400,22 +302,11 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
 
   int _fakeDistanceMi(PetModel pet) => (pet.id.hashCode.abs() % 25) + 1;
 
-  // ── Pet selector ─────────────────────────────────────────────────────────
-
   void _selectPet(PetModel pet) {
-    // Stop any in-flight swipe animation cleanly before switching.
-    if (_isAnimating) {
-      _swipeOutController.stop();
-      _snapBackController.stop();
-      _isAnimating = false;
-      _swipingPet = null;
-      _pendingLike = null;
-    }
     ref.read(discoveryActivePetIdProvider.notifier).select(pet.id);
     setState(() {
       dismissedPetIds.clear();
       currentIndex = 0;
-      _dragX = 0;
       if (filterType != null &&
           filterType != 'nearby' &&
           filterType != pet.animalType) {
@@ -537,8 +428,6 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
       );
     }
 
-    final screenWidth = MediaQuery.of(context).size.width;
-
     final myPets = ref.watch(petProvider).myPets;
 
     return Column(
@@ -579,7 +468,6 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
                     setState(() {
                       filterType = value;
                       currentIndex = 0;
-                      _dragX = 0;
                     });
 
                     // Sync with controller
@@ -668,61 +556,22 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
                       child: Column(
                         children: [
                           Expanded(
-                            child: Stack(
-                              alignment: Alignment.topCenter,
-                              children: [
-                                // Background card
-                                if (filteredPets.length > 1)
-                                  Positioned(
-                                    bottom: 0,
-                                    left: 12,
-                                    right: 12,
-                                    top: 8,
-                                    child: Transform.scale(
-                                      scale: 0.95,
-                                      child: PetCard(
-                                        pet:
-                                            filteredPets[(currentIndex + 1) %
-                                                filteredPets.length],
-                                        isBackground: true,
-                                        dragX: 0,
-                                        followerCount:
-                                            matchState
-                                                .discoveryFollowerCounts[filteredPets[(currentIndex +
-                                                        1) %
-                                                    filteredPets.length]
-                                                .id],
-                                      ),
-                                    ),
-                                  ),
-
-                                // Foreground card
-                                GestureDetector(
-                                  onHorizontalDragUpdate: _onDragUpdate,
-                                  onHorizontalDragEnd: (d) =>
-                                      _onDragEnd(d, screenWidth),
-                                  child: Transform.translate(
-                                    offset: Offset(_dragX, _dragX.abs() * 0.05),
-                                    child: Transform.rotate(
-                                      angle: (_dragX / screenWidth) * 0.35,
-                                      child: RepaintBoundary(
-                                        child: PetCard(
-                                          pet: filteredPets[currentIndex],
-                                          isBackground: false,
-                                          dragX: _dragX,
-                                          followerCount:
-                                              matchState
-                                                  .discoveryFollowerCounts[filteredPets[currentIndex]
-                                                  .id],
-                                          onTap: () => context.push(
-                                            '/pet/${filteredPets[currentIndex].id}',
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            child: CardSwiper(
+                              controller: _swiperController,
+                              cardsCount: filteredPets.length,
+                              onSwipe: _onSwipe,
+                              numberOfCardsDisplayed: filteredPets.length > 1 ? 2 : 1,
+                              isLoop: false,
+                              padding: EdgeInsets.zero,
+                              cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
+                                return PetCard(
+                                  pet: filteredPets[index],
+                                  isBackground: false,
+                                  dragX: percentThresholdX.toDouble(),
+                                  followerCount: matchState.discoveryFollowerCounts[filteredPets[index].id],
+                                  onTap: () => context.push('/pet/${filteredPets[index].id}'),
+                                );
+                              },
                             ),
                           ),
 
@@ -735,6 +584,7 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
                                 // Nope
                                 ActionButton(
                                   size: nopeSize,
+                                  label: 'Nope',
                                   color: colorScheme.surface,
                                   borderColor: colorScheme.outlineVariant,
                                   child: Icon(
@@ -742,12 +592,13 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
                                     size: nopeSize * 0.44,
                                     color: colorScheme.onSurfaceVariant,
                                   ),
-                                  onTap: () => _commitSwipe(false, screenWidth),
+                                  onTap: () => _swiperController.swipe(CardSwiperDirection.left),
                                 ),
                                 SizedBox(width: btnGap),
                                 // Prominent View / Star
                                 ActionButton(
                                   size: infoSize,
+                                  label: 'View Profile',
                                   color: colorScheme.surface,
                                   borderColor: const Color(
                                     0xFF4A7DF7,
@@ -768,6 +619,7 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
                                 // Like
                                 ActionButton(
                                   size: likeSize,
+                                  label: 'Like',
                                   gradient: LinearGradient(
                                     colors: [
                                       colorScheme.primary,
@@ -786,7 +638,7 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab>
                                     size: likeSize * 0.44,
                                     color: colorScheme.onPrimary,
                                   ),
-                                  onTap: () => _commitSwipe(true, screenWidth),
+                                  onTap: () => _swiperController.swipe(CardSwiperDirection.right),
                                 ),
                               ],
                             ),
@@ -1431,6 +1283,7 @@ class _NearbyPetTile extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 class ActionButton extends StatelessWidget {
   final double size;
+  final String label;
   final Color? color;
   final Color? borderColor;
   final Color? shadowColor;
@@ -1441,6 +1294,7 @@ class ActionButton extends StatelessWidget {
   const ActionButton({
     super.key,
     required this.size,
+    required this.label,
     required this.child,
     required this.onTap,
     this.color,
@@ -1452,37 +1306,50 @@ class ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: gradient == null ? color : null,
-          gradient: gradient,
-          shape: BoxShape.circle,
-          border: borderColor != null
-              ? Border.all(color: borderColor!, width: 2.0)
-              : null,
-          boxShadow: shadowColor != null
-              ? [
-                  BoxShadow(
-                    color: shadowColor!.withValues(alpha: 0.3),
-                    blurRadius: 30,
-                    offset: const Offset(0, 12),
-                    spreadRadius: 2,
-                  ),
-                ]
-              : [
-                  BoxShadow(
-                    color: colorScheme.shadow.withValues(alpha: 0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
+    return Semantics(
+      label: label,
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 48,
+            minHeight: 48,
+          ),
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                color: gradient == null ? color : null,
+                gradient: gradient,
+                shape: BoxShape.circle,
+                border: borderColor != null
+                    ? Border.all(color: borderColor!, width: 2.0)
+                    : null,
+                boxShadow: shadowColor != null
+                    ? [
+                        BoxShadow(
+                          color: shadowColor!.withValues(alpha: 0.3),
+                          blurRadius: 30,
+                          offset: const Offset(0, 12),
+                          spreadRadius: 2,
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: colorScheme.shadow.withValues(alpha: 0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+              ),
+              child: Center(child: child),
+            ),
+          ),
         ),
-        child: Center(child: child),
       ),
     );
   }

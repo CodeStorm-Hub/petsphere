@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:petsphere/core/widgets/brand_logo.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

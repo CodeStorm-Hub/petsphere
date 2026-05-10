@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
-import 'package:petsphere/core/widgets/brand_logo.dart';
-import 'package:petsphere/features/social/presentation/controllers/feed_controller.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/core/utils/image_upload_helper.dart';
-import 'package:petsphere/core/utils/media_utils.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
+import 'package:petfolio/features/social/presentation/controllers/feed_controller.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/core/utils/image_upload_helper.dart';
+import 'package:petfolio/core/utils/media_utils.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
   final String? initialPetId;

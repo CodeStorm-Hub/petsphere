@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
 
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 class PushTokenRepository {
   Future<void> upsertToken({

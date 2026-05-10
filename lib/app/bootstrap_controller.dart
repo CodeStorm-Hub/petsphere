@@ -2,23 +2,23 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/core/constants/app_strings.dart';
-import 'package:petsphere/core/utils/logger.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/social/presentation/controllers/feed_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/allergy_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/appointment_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/dental_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/medication_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/parasite_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/vaccination_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/vitals_controller.dart';
-import 'package:petsphere/features/marketplace/presentation/controllers/marketplace_controller.dart';
-import 'package:petsphere/features/notifications/presentation/controllers/notification_controller.dart';
-import 'package:petsphere/features/care/presentation/controllers/care_gamification_controller.dart';
-import 'package:petsphere/features/care/presentation/controllers/care_goals_controller.dart';
-import 'package:petsphere/features/care/presentation/controllers/care_log_controller.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/core/constants/app_strings.dart';
+import 'package:petfolio/core/utils/logger.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/social/presentation/controllers/feed_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/allergy_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/appointment_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/dental_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/medication_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/parasite_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/vaccination_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/vitals_controller.dart';
+import 'package:petfolio/features/marketplace/presentation/controllers/marketplace_controller.dart';
+import 'package:petfolio/features/notifications/presentation/controllers/notification_controller.dart';
+import 'package:petfolio/features/care/presentation/controllers/care_gamification_controller.dart';
+import 'package:petfolio/features/care/presentation/controllers/care_goals_controller.dart';
+import 'package:petfolio/features/care/presentation/controllers/care_log_controller.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 
 /// Immutable snapshot for the app bootstrap / data sync coordinator.
 class BootstrapState {

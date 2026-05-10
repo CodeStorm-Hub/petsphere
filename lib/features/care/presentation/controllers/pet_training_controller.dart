@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/features/care/data/training_repository.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/care/data/training_repository.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 
 final petTrainingProgressProvider =
     FutureProvider.autoDispose<List<TrainingProgress>>((ref) async {

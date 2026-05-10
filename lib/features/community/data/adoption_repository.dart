@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Models

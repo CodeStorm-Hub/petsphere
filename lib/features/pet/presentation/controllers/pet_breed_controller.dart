@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petsphere/features/pet/data/breed_repository.dart';
+import 'package:petfolio/features/pet/data/breed_repository.dart';
 
 class PetBreedController extends Notifier<AsyncValue<BreedScan?>> {
   @override

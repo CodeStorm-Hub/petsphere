@@ -1,9 +1,9 @@
 import 'dart:developer' as developer;
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:petsphere/features/messaging/data/models/chat_thread_model.dart';
-import 'package:petsphere/features/messaging/data/models/message_model.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/features/messaging/data/models/chat_thread_model.dart';
+import 'package:petfolio/features/messaging/data/models/message_model.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 class ChatRepository {
   // -------------------------------------------------------------------------

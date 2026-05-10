@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:petsphere/core/theme/app_theme.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class GlassCard extends StatelessWidget {
@@ -406,8 +406,21 @@ class PetFolioGradientBackgroundState
     extends State<PetFolioGradientBackground> {
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Theme.of(context).scaffoldBackgroundColor,
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: const Alignment(-0.8, -0.6),
+          radius: 1.5,
+          colors: [
+            theme.colorScheme.primary.withValues(alpha: isDark ? 0.15 : 0.08),
+            theme.scaffoldBackgroundColor,
+          ],
+          stops: const [0.0, 1.0],
+        ),
+      ),
       child: widget.child,
     );
   }

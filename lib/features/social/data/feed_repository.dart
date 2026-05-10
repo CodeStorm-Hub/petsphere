@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:petsphere/features/social/data/models/post_model.dart';
-import 'package:petsphere/features/social/data/models/story_model.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/features/social/data/models/post_model.dart';
+import 'package:petfolio/features/social/data/models/story_model.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 class FeedRepository {
   /// Comment rows join commenter pet for name + avatar (post detail UX).
@@ -20,6 +20,31 @@ class FeedRepository {
         )
         .order('created_at', ascending: false)
         .limit(50);
+
+    return data.map((e) => PostModel.fromJson(e)).toList();
+  }
+
+  Future<List<StoryModel>> fetchStoriesByPet(String petId) async {
+    final data = await supabase
+        .from('stories')
+        .select('*, pets!stories_pet_id_fkey(*)')
+        .eq('pet_id', petId)
+        .gt('expires_at', DateTime.now().toUtc().toIso8601String())
+        .order('created_at', ascending: true)
+        .limit(50);
+
+    return data.map((e) => StoryModel.fromJson(e)).toList();
+  }
+
+  Future<List<PostModel>> fetchPostsByPet(String petId) async {
+    final data = await supabase
+        .from('posts')
+        .select(
+          '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, $commentPetEmbed)',
+        )
+        .eq('pet_id', petId)
+        .order('created_at', ascending: false)
+        .limit(100);
 
     return data.map((e) => PostModel.fromJson(e)).toList();
   }

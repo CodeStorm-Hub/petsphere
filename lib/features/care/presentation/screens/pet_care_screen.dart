@@ -2,25 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:petsphere/features/care/presentation/controllers/care_log_controller.dart';
-import 'package:petsphere/features/care/presentation/controllers/care_gamification_controller.dart';
-import 'package:petsphere/features/care/presentation/controllers/care_goals_controller.dart';
+import 'package:petfolio/features/care/presentation/controllers/care_log_controller.dart';
+import 'package:petfolio/features/care/presentation/controllers/care_gamification_controller.dart';
+import 'package:petfolio/features/care/presentation/controllers/care_goals_controller.dart';
 
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/care/data/models/care_badge_model.dart';
-import 'package:petsphere/features/care/data/models/pet_care_log_model.dart';
-import 'package:petsphere/features/care/utils/care_gamification_logic.dart';
-import 'package:petsphere/features/care/utils/care_personalization.dart';
-import 'package:petsphere/features/health/presentation/controllers/allergy_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/appointment_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/dental_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/medication_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/parasite_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/vaccination_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/vitals_controller.dart';
-import 'package:petsphere/features/health/presentation/screens/health_tab.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/core/widgets/brand_logo.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/care/data/models/care_badge_model.dart';
+import 'package:petfolio/features/care/data/models/pet_care_log_model.dart';
+import 'package:petfolio/features/care/utils/care_gamification_logic.dart';
+import 'package:petfolio/features/care/utils/care_personalization.dart';
+import 'package:petfolio/features/health/presentation/controllers/allergy_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/appointment_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/dental_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/medication_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/parasite_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/vaccination_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/vitals_controller.dart';
+import 'package:petfolio/features/health/presentation/screens/health_tab.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
 import 'care_goal_editor_modal.dart';
 
 class _SetupBanner extends StatelessWidget {

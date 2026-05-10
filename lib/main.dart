@@ -8,11 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:petsphere/app/app.dart';
-import 'package:petsphere/core/services/push_notification_service.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
-import 'package:petsphere/core/services/offline_cache.dart';
-import 'package:petsphere/core/theme/theme_bootstrap.dart';
+import 'package:petfolio/app/app.dart';
+import 'package:petfolio/core/services/push_notification_service.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
+import 'package:petfolio/core/services/offline_cache.dart';
+import 'package:petfolio/core/theme/theme_bootstrap.dart';
 
 /// Set via `flutter test integration_test/... --dart-define=INTEGRATION_TEST=true`
 /// so [IntegrationTestWidgetsFlutterBinding] is not replaced by Marionette.

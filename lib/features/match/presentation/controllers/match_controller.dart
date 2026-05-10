@@ -1,17 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petsphere/core/constants/app_strings.dart';
-import 'package:petsphere/core/utils/logger.dart';
+import 'package:petfolio/core/constants/app_strings.dart';
+import 'package:petfolio/core/utils/logger.dart';
 
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/match/data/match_repository.dart';
-import 'package:petsphere/features/match/data/models/match_request_model.dart';
-import 'package:petsphere/features/messaging/presentation/controllers/chat_controller.dart';
-import 'package:petsphere/features/notifications/data/notification_repository.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/features/social/data/follow_repository.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/match/data/match_repository.dart';
+import 'package:petfolio/features/match/data/models/match_request_model.dart';
+import 'package:petfolio/features/messaging/presentation/controllers/chat_controller.dart';
+import 'package:petfolio/features/notifications/data/notification_repository.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/social/data/follow_repository.dart';
 
 // ---------------------------------------------------------------------------
 // Discovery tab: which of the user's pets is browsing (null = active pet)

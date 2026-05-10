@@ -2,14 +2,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:image_cropper/image_cropper.dart';
 
-import 'package:petsphere/core/utils/image_upload_helper.dart';
-import 'package:petsphere/core/widgets/brand_logo.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/core/utils/image_upload_helper.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
 
 class AddPetScreen extends ConsumerStatefulWidget {
-  const AddPetScreen({super.key});
+  final PetModel? pet;
+  const AddPetScreen({super.key, this.pet});
 
   @override
   ConsumerState<AddPetScreen> createState() => _AddPetScreenState();
@@ -43,6 +45,13 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
   @override
   void initState() {
     super.initState();
+    if (widget.pet != null) {
+      _nameController.text = widget.pet!.name;
+      _breedController.text = widget.pet!.breed;
+      _ageController.text = widget.pet!.age.toString();
+      _bioController.text = widget.pet!.bio;
+      _selectedAnimalType = widget.pet!.animalType;
+    }
     _animController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
@@ -67,14 +76,37 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
   Future<void> _pickImage() async {
     final file = await ImageUploadHelper.pickFromGallery();
     if (file != null) {
-      setState(() => _selectedImage = file);
+      await _cropAndSetImage(file.path);
     }
   }
 
   Future<void> _takePhoto() async {
     final file = await ImageUploadHelper.pickFromCamera();
     if (file != null) {
-      setState(() => _selectedImage = file);
+      await _cropAndSetImage(file.path);
+    }
+  }
+
+  Future<void> _cropAndSetImage(String path) async {
+    final croppedFile = await ImageCropper().cropImage(
+      sourcePath: path,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Pet Photo',
+          toolbarColor: Theme.of(context).colorScheme.primary,
+          toolbarWidgetColor: Theme.of(context).colorScheme.onPrimary,
+          initAspectRatio: CropAspectRatioPreset.square,
+          lockAspectRatio: true,
+        ),
+        IOSUiSettings(
+          title: 'Crop Pet Photo',
+          aspectRatioLockEnabled: true,
+          resetAspectRatioEnabled: false,
+        ),
+      ],
+    );
+    if (croppedFile != null) {
+      setState(() => _selectedImage = File(croppedFile.path));
     }
   }
 
@@ -189,7 +221,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
       _animController.forward();
     } else if (_currentStep == 2) {
       // Photo + bio step => submit
-      _submitPet();
+      _savePet();
     }
   }
 
@@ -212,80 +244,55 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
     );
   }
 
-  Future<void> _submitPet() async {
+  Future<void> _savePet() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() => _isSaving = true);
-
     try {
-      var profileImageUrl = '';
+      var finalImageUrl = widget.pet?.profileImageUrl ?? '';
 
-      // Upload image if selected — gracefully skip if bucket doesn't exist
+      // Upload image if selected
       if (_selectedImage != null) {
         try {
-          final ext = _selectedImage!.path.split('.').last;
-          final path = 'new_pet/${DateTime.now().millisecondsSinceEpoch}.$ext';
-          profileImageUrl = await ImageUploadHelper.upload(
-            file: _selectedImage!,
-            bucket: kBucketPetImages,
-            path: path,
+          finalImageUrl = await ImageUploadHelper.uploadPetProfileImage(
+            _selectedImage!,
+            _nameController.text.trim().toLowerCase().replaceAll(' ', '_'),
           );
         } catch (uploadError) {
-          // Storage bucket may not exist — continue without image
-          debugPrint(
-            'Image upload failed (bucket may not exist): $uploadError',
-          );
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    const Expanded(
-                      child: Text(
-                        'Photo upload failed — saving pet without photo.',
-                      ),
-                    ),
-                  ],
-                ),
-                backgroundColor: Theme.of(context).colorScheme.error,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            );
-          }
+          debugPrint('Image upload failed: $uploadError');
+          // We can decide to continue or stop. For now, we continue with old image or empty.
         }
       }
 
-      final success = await ref
-          .read(petProvider.notifier)
-          .createPet(
-            name: _nameController.text.trim(),
-            breed: _breedController.text.trim(),
-            animalType: _selectedAnimalType,
-            age: int.tryParse(_ageController.text.trim()) ?? 1,
-            bio: _bioController.text.trim(),
-            profileImageUrl: profileImageUrl,
-          );
+      final success = widget.pet == null
+          ? await ref.read(petProvider.notifier).createPet(
+              name: _nameController.text.trim(),
+              breed: _breedController.text.trim(),
+              animalType: _selectedAnimalType,
+              age: int.tryParse(_ageController.text.trim()) ?? 0,
+              bio: _bioController.text.trim(),
+              profileImageUrl: finalImageUrl,
+            )
+          : await ref.read(petProvider.notifier).updatePet(
+              widget.pet!.id,
+              {
+                'name': _nameController.text.trim(),
+                'breed': _breedController.text.trim(),
+                'animal_type': _selectedAnimalType,
+                'age': int.tryParse(_ageController.text.trim()) ?? 0,
+                'bio': _bioController.text.trim(),
+                'profile_image_url': finalImageUrl,
+              },
+            );
 
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Row(
-                children: [
-                  Icon(
-                    Icons.check_circle,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text('${_nameController.text.trim()} added successfully!'),
-                ],
+              content: Text(
+                widget.pet == null
+                    ? 'Pet added successfully!'
+                    : 'Pet updated successfully!',
               ),
               backgroundColor: Theme.of(context).colorScheme.tertiary,
               behavior: SnackBarBehavior.floating,
@@ -297,7 +304,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
           context.pop();
         } else {
           final petError = ref.read(petProvider).error;
-          _showError(petError ?? 'Failed to add pet. Please try again.');
+          _showError(petError ?? 'Failed to save pet. Please try again.');
         }
       }
     } catch (e) {
@@ -308,6 +315,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
       if (mounted) setState(() => _isSaving = false);
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -325,9 +333,9 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
             }
           },
         ),
-        title: const Text(
-          'Add New Pet',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          widget.pet == null ? 'Add New Pet' : 'Edit Pet Details',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
           if (_currentStep < 2)
@@ -530,8 +538,8 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                               color: isSelected
                                   ? optionColor
                                   : Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -655,12 +663,12 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                       shape: BoxShape.circle,
                       color: Theme.of(context).colorScheme.surfaceContainerHigh,
                       border: Border.all(
-                        color: _selectedImage != null
+                        color: _selectedImage != null || widget.pet?.profileImageUrl != null
                             ? Theme.of(context).colorScheme.primary
                             : Theme.of(context).colorScheme.outline,
-                        width: _selectedImage != null ? 3 : 2,
+                        width: _selectedImage != null || widget.pet?.profileImageUrl != null ? 3 : 2,
                       ),
-                      boxShadow: _selectedImage != null
+                      boxShadow: _selectedImage != null || widget.pet?.profileImageUrl != null
                           ? [
                               BoxShadow(
                                 color: Theme.of(
@@ -676,9 +684,14 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                               image: FileImage(_selectedImage!),
                               fit: BoxFit.cover,
                             )
-                          : null,
+                          : (widget.pet?.profileImageUrl != null
+                              ? DecorationImage(
+                                  image: NetworkImage(widget.pet!.profileImageUrl),
+                                  fit: BoxFit.cover,
+                                )
+                              : null),
                     ),
-                    child: _selectedImage == null
+                    child: _selectedImage == null && widget.pet?.profileImageUrl == null
                         ? Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -700,7 +713,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                           )
                         : null,
                   ),
-                  if (_selectedImage == null)
+                  if (_selectedImage == null && widget.pet?.profileImageUrl == null)
                     Positioned(
                       bottom: 0,
                       right: 0,
@@ -725,7 +738,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
               ),
             ),
           ),
-          if (_selectedImage != null)
+          if (_selectedImage != null || widget.pet?.profileImageUrl != null)
             Center(
               child: TextButton.icon(
                 onPressed: _showImageSourceSheet,
@@ -755,7 +768,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
             width: double.infinity,
             height: 56,
             child: FilledButton(
-              onPressed: _isSaving ? null : _submitPet,
+              onPressed: _isSaving ? null : _savePet,
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -779,7 +792,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
                         const BrandLogo(customSize: 22, color: Colors.white),
                         const SizedBox(width: 10),
                         Text(
-                          'Add ${_nameController.text.trim().isNotEmpty ? _nameController.text.trim() : 'Pet'}',
+                          widget.pet == null ? 'Add Pet' : 'Save Changes',
                           style: const TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.bold,

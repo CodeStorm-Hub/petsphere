@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import 'package:petsphere/features/marketplace/data/models/product_model.dart';
+import 'package:petfolio/features/marketplace/data/models/product_model.dart';
 
 class ProductCard extends StatelessWidget {
   final ProductModel product;
@@ -23,7 +23,9 @@ class ProductCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final currencyFormat = NumberFormat.currency(symbol: '\$');
 
-    return GestureDetector(
+    return Semantics(
+      label: '${product.name}, ${product.category}, ${currencyFormat.format(product.price)}, ${product.rating} stars',
+      button: true,
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
@@ -155,18 +157,31 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                       // Subtle Add Button matching the image detail page's theme
-                      GestureDetector(
-                        onTap: onAdd,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.add_rounded,
-                            color: Colors.white,
-                            size: 18,
+                      Semantics(
+                        label: 'Add ${product.name} to cart',
+                        button: true,
+                        child: GestureDetector(
+                          onTap: onAdd,
+                          behavior: HitTestBehavior.opaque,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              minWidth: 48,
+                              minHeight: 48,
+                            ),
+                            child: Center(
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.add_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),

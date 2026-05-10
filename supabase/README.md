@@ -1,6 +1,6 @@
 # Supabase Backend Configuration
 
-This directory contains all Supabase configuration, migrations, and database setup files for PetSphere.
+This directory contains all Supabase configuration, migrations, and database setup files for PetFolio.
 
 ## Directory Structure
 

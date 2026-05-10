@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'models/pet_expense_model.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 class PetExpenseRepository {
   Future<List<PetExpense>> fetchExpenses(String petId) async {

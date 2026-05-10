@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import 'package:petsphere/features/notifications/presentation/controllers/notification_controller.dart';
+import 'package:petfolio/features/notifications/presentation/controllers/notification_controller.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});

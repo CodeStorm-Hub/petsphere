@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/pet_memorial_controller.dart';
-import 'package:petsphere/features/social/data/models/pet_memorial_models.dart';
+import 'package:petfolio/features/social/data/models/pet_memorial_models.dart';
 
 class PetMemorialScreen extends ConsumerWidget {
   const PetMemorialScreen({super.key});

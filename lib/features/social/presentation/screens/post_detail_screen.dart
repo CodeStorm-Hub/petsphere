@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/features/social/presentation/controllers/feed_controller.dart';
-import 'package:petsphere/features/social/presentation/widgets/post_card.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/social/presentation/controllers/feed_controller.dart';
+import 'package:petfolio/features/social/presentation/widgets/post_card.dart';
 
 class PostDetailScreen extends ConsumerWidget {
   final String postId;

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/core/repositories/feature_repositories.dart';
-import 'package:petsphere/features/marketplace/data/models/gear_review_models.dart';
+import 'package:petfolio/features/marketplace/data/gear_reviews_repository.dart';
+import 'package:petfolio/features/marketplace/data/models/gear_review_models.dart';
 
 class SelectedGearCategory extends Notifier<String?> {
   @override

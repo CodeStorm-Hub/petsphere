@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
-import 'package:petsphere/features/match/data/models/match_request_model.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/match/data/models/match_request_model.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
 
 /// How long a declined breeding profile stays hidden in discovery for the decliner.
 const Duration kDiscoveryRejectionCooldown = Duration(days: 7);

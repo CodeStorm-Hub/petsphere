@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
-import 'package:petsphere/core/utils/image_compressor.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
+import 'package:petfolio/core/utils/image_compressor.dart';
 
 /// A utility class for picking media and uploading it to Supabase Storage.
 ///
@@ -103,6 +103,13 @@ class ImageUploadHelper {
     final ext = file.path.split('.').last;
     final path = '$folder/${DateTime.now().millisecondsSinceEpoch}.$ext';
     return upload(file: file, bucket: bucket, path: path, compress: compress);
+  }
+
+  /// Specialized: Upload a pet's profile image to the 'pets' bucket.
+  static Future<String> uploadPetProfileImage(File file, String petName) async {
+    final ext = file.path.split('.').last;
+    final path = 'profiles/${petName}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+    return upload(file: file, bucket: 'pets', path: path);
   }
 
   // ── Internals ─────────────────────────────────────────────────────────────

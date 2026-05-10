@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petsphere/features/services/data/models/pet_event_models.dart';
-import 'package:petsphere/features/services/data/pet_events_repository.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/features/services/data/models/pet_event_models.dart';
+import 'package:petfolio/features/services/data/pet_events_repository.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 final petEventsRepositoryProvider = Provider<PetEventsRepository>((ref) {
   return PetEventsRepository(supabase);

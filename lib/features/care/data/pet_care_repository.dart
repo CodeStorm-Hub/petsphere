@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petsphere/features/care/data/models/care_badge_model.dart';
-import 'package:petsphere/features/care/data/models/pet_activity_log_model.dart';
-import 'package:petsphere/features/care/data/models/pet_care_log_model.dart';
-import 'package:petsphere/features/health/data/models/pet_health_models.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/features/care/data/models/care_badge_model.dart';
+import 'package:petfolio/features/care/data/models/pet_activity_log_model.dart';
+import 'package:petfolio/features/care/data/models/pet_care_log_model.dart';
+import 'package:petfolio/features/health/data/models/pet_health_models.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
-export 'package:petsphere/features/health/data/models/pet_health_models.dart' show PetSymptom;
+export 'package:petfolio/features/health/data/models/pet_health_models.dart' show PetSymptom;
 
 /// Data access for the Pet Care feature.
 ///
@@ -143,7 +143,8 @@ class PetCareRepository {
         .from('pet_vet_appointments')
         .select()
         .eq('pet_id', petId)
-        .order('scheduled_at', ascending: false);
+        .order('scheduled_at', ascending: false)
+        .limit(100);
 
     return raw.map(PetVetAppointment.fromJson).toList();
   }
@@ -156,7 +157,8 @@ class PetCareRepository {
         .select()
         .eq('pet_id', petId)
         .gte('scheduled_at', DateTime.now().toUtc().toIso8601String())
-        .order('scheduled_at', ascending: true);
+        .order('scheduled_at', ascending: true)
+        .limit(50);
 
     return raw.map(PetVetAppointment.fromJson).toList();
   }
@@ -184,7 +186,8 @@ class PetCareRepository {
         .select()
         .eq('pet_id', petId)
         .order('completed_on', ascending: false, nullsFirst: false)
-        .order('scheduled_for', ascending: true, nullsFirst: false);
+        .order('scheduled_for', ascending: true, nullsFirst: false)
+        .limit(100);
 
     return raw.map(PetVaccination.fromJson).toList();
   }
@@ -223,7 +226,8 @@ class PetCareRepository {
         .select()
         .eq('pet_id', petId)
         .order('resolved_at', ascending: false, nullsFirst: true)
-        .order('observed_at', ascending: false);
+        .order('observed_at', ascending: false)
+        .limit(100);
 
     return raw.map(PetSymptom.fromJson).toList();
   }
@@ -322,7 +326,8 @@ class PetCareRepository {
     final raw = await supabase
         .from('care_badge_definitions')
         .select()
-        .order('sort_order', ascending: true);
+        .order('sort_order', ascending: true)
+        .limit(100);
     return raw.map(CareBadgeDefinition.fromJson).toList();
   }
 
@@ -331,7 +336,8 @@ class PetCareRepository {
         .from('pet_care_badge_unlocks')
         .select('id, pet_id, badge_slug, unlocked_at')
         .eq('pet_id', petId)
-        .order('unlocked_at', ascending: false);
+        .order('unlocked_at', ascending: false)
+        .limit(200);
     return raw.map(PetCareBadgeUnlock.fromJson).toList();
   }
 
@@ -376,7 +382,8 @@ class PetCareRepository {
         .from('pet_care_badge_unlocks')
         .select('id, pet_id, badge_slug, unlocked_at')
         .eq('user_id', userId)
-        .inFilter('badge_slug', slugs);
+        .inFilter('badge_slug', slugs)
+        .limit(50);
     return raw.map(PetCareBadgeUnlock.fromJson).toList();
   }
 
@@ -399,7 +406,8 @@ class PetCareRepository {
         .select()
         .eq('pet_id', petId)
         .gte('log_date', _dateOnly(start))
-        .order('log_date', ascending: false);
+        .order('log_date', ascending: false)
+        .limit(100);
     return raw.map(PetActivityLog.fromJson).toList();
   }
 

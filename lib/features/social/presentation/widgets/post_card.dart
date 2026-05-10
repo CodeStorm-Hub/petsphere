@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:petsphere/features/social/data/models/post_model.dart';
+import 'package:petfolio/features/social/data/models/post_model.dart';
 
 class PostCard extends StatelessWidget {
   final PostModel post;

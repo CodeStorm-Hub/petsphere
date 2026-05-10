@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/marketplace/data/marketplace_repository.dart';
-import 'package:petsphere/features/marketplace/data/models/order_model.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/marketplace/data/marketplace_repository.dart';
+import 'package:petfolio/features/marketplace/data/models/order_model.dart';
 
 final _ordersProvider = FutureProvider.autoDispose<List<OrderModel>>((
   ref,

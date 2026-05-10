@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:petsphere/features/auth/data/models/user_model.dart';
-import 'package:petsphere/features/auth/data/auth_repository.dart';
-import 'package:petsphere/core/constants/app_strings.dart';
-import 'package:petsphere/core/constants/app_durations.dart';
-import 'package:petsphere/core/utils/logger.dart';
-import 'package:petsphere/features/care/data/care_cache.dart';
+import 'package:petfolio/features/auth/data/models/user_model.dart';
+import 'package:petfolio/features/auth/data/auth_repository.dart';
+import 'package:petfolio/core/constants/app_strings.dart';
+import 'package:petfolio/core/constants/app_durations.dart';
+import 'package:petfolio/core/utils/logger.dart';
+import 'package:petfolio/features/care/data/care_cache.dart';
 
 // ---------------------------------------------------------------------------
 // State

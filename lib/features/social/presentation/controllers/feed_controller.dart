@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
-import 'package:petsphere/features/social/data/feed_repository.dart';
-import 'package:petsphere/features/social/data/models/post_model.dart';
-import 'package:petsphere/features/social/data/models/story_model.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/social/data/feed_repository.dart';
+import 'package:petfolio/features/social/data/models/post_model.dart';
+import 'package:petfolio/features/social/data/models/story_model.dart';
 
 class FeedState {
   final List<PostModel> posts;
@@ -215,3 +215,11 @@ class FeedNotifier extends Notifier<FeedState> {
 }
 
 final feedProvider = NotifierProvider<FeedNotifier, FeedState>(FeedNotifier.new);
+
+final petStoriesProvider = FutureProvider.family<List<StoryModel>, String>((ref, petId) {
+  return feedRepository.fetchStoriesByPet(petId);
+});
+
+final petPostsProvider = FutureProvider.family<List<PostModel>, String>((ref, petId) {
+  return feedRepository.fetchPostsByPet(petId);
+});

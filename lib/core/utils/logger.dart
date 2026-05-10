@@ -5,7 +5,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 
 class AppLogger {
-  static const String _prefix = '[PetSphere]';
+  static const String _prefix = '[PetFolio]';
 
   /// Log informational message
   static void info(String message, {String? tag}) {

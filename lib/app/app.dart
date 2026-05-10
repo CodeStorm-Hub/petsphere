@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 
-import 'package:petsphere/app/router.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/app/bootstrap_controller.dart';
-import 'package:petsphere/features/notifications/presentation/controllers/push_notification_coordinator.dart';
-import 'package:petsphere/core/theme/theme_controller.dart';
-import 'package:petsphere/core/theme/app_theme.dart';
+import 'package:petfolio/app/router.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/app/bootstrap_controller.dart';
+import 'package:petfolio/features/notifications/presentation/controllers/push_notification_coordinator.dart';
+import 'package:petfolio/core/theme/theme_controller.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
 
 class PetFolioApp extends ConsumerWidget {
   const PetFolioApp({super.key});

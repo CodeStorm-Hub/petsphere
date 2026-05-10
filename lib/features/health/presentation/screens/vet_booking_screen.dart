@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:petsphere/features/health/presentation/controllers/appointment_controller.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/features/health/data/models/pet_health_models.dart';
+import 'package:petfolio/features/health/presentation/controllers/appointment_controller.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/health/data/models/pet_health_models.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Vet Booking Screen — #33 Fully backed by pet_vet_appointments table

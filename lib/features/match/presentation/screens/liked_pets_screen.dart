@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:petsphere/features/match/presentation/controllers/match_requests_controller.dart';
-import 'package:petsphere/core/widgets/brand_logo.dart';
-import 'package:petsphere/core/widgets/pet_avatar.dart';
+import 'package:petfolio/features/match/presentation/controllers/match_requests_controller.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
+import 'package:petfolio/core/widgets/pet_avatar.dart';
 
 class LikedPetsScreen extends ConsumerWidget {
   const LikedPetsScreen({super.key});

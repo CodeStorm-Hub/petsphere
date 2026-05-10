@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:petsphere/main.dart' as app;
+import 'package:petfolio/main.dart' as app;
 
 /// Device journey tests against the real app + Supabase.
 ///

@@ -1,6 +1,6 @@
-import 'package:petsphere/features/care/data/models/care_badge_model.dart';
-import 'package:petsphere/features/care/data/models/pet_care_log_model.dart';
-import 'package:petsphere/features/care/utils/care_calculator.dart';
+import 'package:petfolio/features/care/data/models/care_badge_model.dart';
+import 'package:petfolio/features/care/data/models/pet_care_log_model.dart';
+import 'package:petfolio/features/care/utils/care_calculator.dart';
 
 /// Short hints derived from [PetCareOnboarding.data] for checklist encouragement.
 String careChecklistNudge(

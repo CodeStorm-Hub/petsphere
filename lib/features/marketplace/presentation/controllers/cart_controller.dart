@@ -3,12 +3,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:petsphere/core/constants/app_strings.dart';
-import 'package:petsphere/core/utils/logger.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/marketplace/data/marketplace_repository.dart';
-import 'package:petsphere/features/marketplace/data/models/cart_item_model.dart';
-import 'package:petsphere/features/marketplace/data/models/product_model.dart';
+import 'package:petfolio/core/constants/app_strings.dart';
+import 'package:petfolio/core/utils/logger.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/marketplace/data/marketplace_repository.dart';
+import 'package:petfolio/features/marketplace/data/models/cart_item_model.dart';
+import 'package:petfolio/features/marketplace/data/models/product_model.dart';
 
 class CartState {
   final List<CartItemModel> items;

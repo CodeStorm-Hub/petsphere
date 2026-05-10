@@ -1,9 +1,9 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
 
 class PetRepository {
   // -------------------------------------------------------------------------
@@ -51,9 +51,11 @@ class PetRepository {
   // Create a new pet
   // -------------------------------------------------------------------------
   Future<PetModel> createPet(PetModel pet) async {
+    final json = pet.toJson()
+      ..remove('id'); // Let Postgres generate the UUID via gen_random_uuid()
     final data = await supabase
         .from('pets')
-        .insert(pet.toJson())
+        .insert(json)
         .select()
         .single();
 

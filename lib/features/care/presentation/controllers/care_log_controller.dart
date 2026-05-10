@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/features/care/data/models/pet_care_log_model.dart';
-import 'package:petsphere/features/care/data/pet_care_repository.dart';
-import 'package:petsphere/features/care/data/care_cache.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/care/data/models/pet_care_log_model.dart';
+import 'package:petfolio/features/care/data/pet_care_repository.dart';
+import 'package:petfolio/features/care/data/care_cache.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 
 @immutable
 class CareLogState {

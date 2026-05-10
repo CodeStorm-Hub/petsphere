@@ -47,6 +47,7 @@ class AppRoutes {
   static const String petTimeline = '/pet_timeline';
   static const String breedIdentifier = '/breed_identifier';
   static const String knowledgeBase = '/knowledge_base';
+  static const String articleDetail = '/article_detail';
   static const String gearReviews = '/gear_reviews';
 
   static String petProfileById(String id) => '$petProfile/$id';

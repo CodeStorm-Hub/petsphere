@@ -1,5 +1,5 @@
-import 'package:petsphere/features/care/data/models/care_badge_model.dart';
-import 'package:petsphere/features/care/data/models/pet_care_log_model.dart';
+import 'package:petfolio/features/care/data/models/care_badge_model.dart';
+import 'package:petfolio/features/care/data/models/pet_care_log_model.dart';
 
 DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 

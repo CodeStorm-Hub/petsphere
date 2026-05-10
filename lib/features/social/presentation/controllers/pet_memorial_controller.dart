@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petsphere/features/social/data/models/pet_memorial_models.dart';
-import 'package:petsphere/features/social/data/memorial_repository.dart';
+import 'package:petfolio/features/social/data/models/pet_memorial_models.dart';
+import 'package:petfolio/features/social/data/memorial_repository.dart';
 
 final memorialEntriesProvider = FutureProvider<List<PetMemorialEntry>>((
   ref,

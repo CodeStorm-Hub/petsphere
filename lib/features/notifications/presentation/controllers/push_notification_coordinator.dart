@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/app/router.dart';
-import 'package:petsphere/core/services/push_notification_service.dart';
-import 'package:petsphere/core/services/push_deeplink_routes.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/app/router.dart';
+import 'package:petfolio/core/services/push_notification_service.dart';
+import 'package:petfolio/core/services/push_deeplink_routes.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 
 class PushNotificationCoordinator extends Notifier<void> {
   @override

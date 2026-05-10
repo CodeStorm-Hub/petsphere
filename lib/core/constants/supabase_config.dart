@@ -74,7 +74,13 @@ void assertValidReleaseSupabaseConfig() {
 // ---------------------------------------------------------------------------
 // Convenience getter — use after [Supabase.initialize]
 // ---------------------------------------------------------------------------
-SupabaseClient get supabase => Supabase.instance.client;
+SupabaseClient get supabase => _mockSupabaseClient ?? Supabase.instance.client;
+
+/// INTERNAL: Used only for testing to override the global supabase client.
+@visibleForTesting
+set debugSupabaseClient(SupabaseClient? client) => _mockSupabaseClient = client;
+
+SupabaseClient? _mockSupabaseClient;
 
 // ---------------------------------------------------------------------------
 // Storage bucket names

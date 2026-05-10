@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:petsphere/features/care/data/models/care_badge_model.dart';
-import 'package:petsphere/features/care/data/models/pet_care_log_model.dart'
+import 'package:petfolio/features/care/data/models/care_badge_model.dart';
+import 'package:petfolio/features/care/data/models/pet_care_log_model.dart'
     show DailyTask, PetCareLog;
-import 'package:petsphere/features/care/utils/care_gamification_logic.dart';
+import 'package:petfolio/features/care/utils/care_gamification_logic.dart';
 
 void main() {
   group('CareGamificationLogic', () {

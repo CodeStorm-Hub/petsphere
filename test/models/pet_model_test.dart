@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
 
 void main() {
   group('PetModel', () {

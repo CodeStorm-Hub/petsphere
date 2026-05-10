@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:petsphere/features/messaging/data/models/chat_thread_model.dart';
-import 'package:petsphere/core/widgets/brand_logo.dart';
-import 'package:petsphere/core/utils/pet_navigation.dart';
+import 'package:petfolio/features/messaging/data/models/chat_thread_model.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
+import 'package:petfolio/core/utils/pet_navigation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ChatThreadTile extends ConsumerWidget {

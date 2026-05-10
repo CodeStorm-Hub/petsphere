@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:petsphere/features/auth/data/models/user_model.dart';
+import 'package:petfolio/features/auth/data/models/user_model.dart';
 
 void main() {
   group('UserModel', () {

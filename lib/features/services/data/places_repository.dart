@@ -1,5 +1,5 @@
-import 'package:petsphere/core/constants/supabase_config.dart';
-import 'package:petsphere/features/services/data/models/pet_friendly_place_model.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
+import 'package:petfolio/features/services/data/models/pet_friendly_place_model.dart';
 
 class PetFriendlyPlacesRepository {
   Future<List<PetFriendlyPlace>> fetchPetFriendlyPlaces(String category) async {

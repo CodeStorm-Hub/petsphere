@@ -1,4 +1,4 @@
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 class NutritionLog {
   final String id;

@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import 'package:petsphere/features/messaging/data/models/chat_thread_model.dart';
-import 'package:petsphere/features/messaging/presentation/controllers/chat_controller.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/messaging/data/models/chat_thread_model.dart';
+import 'package:petfolio/features/messaging/presentation/controllers/chat_controller.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 
 class MessagesListScreen extends ConsumerStatefulWidget {
   const MessagesListScreen({super.key});

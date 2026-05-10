@@ -40,14 +40,14 @@ class PetFolioShadows extends ThemeExtension<PetFolioShadows> {
 class AppTheme {
   const AppTheme._();
 
-  // Brand color: PetFolio Blue (#4A7DF7)
-  static const primary = Color(0xFF4A7DF7);
+  // Brand color: PetFolio Amber (#D4845A)
+  static const primary = Color(0xFFD4845A);
   static const secondary = Color(0xFF47B4FF); // Sky Blue Accent
   static const bgLight = Color(0xFFFCFAF8); // Off-white/cream
   static const bgDark = Color(0xFF121212); // Deep black
 
-  // Semantic Colors (Restored to PetFolio Blue System)
-  static const primaryAccent = Color(0xFF4A7DF7); // Brand Primary
+  // Semantic Colors
+  static const primaryAccent = Color(0xFFD4845A); // Brand Primary
   static const secondaryAccent = Color(
     0xFF47B4FF,
   ); // Light Blue (for active/given statuses)

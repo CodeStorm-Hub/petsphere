@@ -1,6 +1,6 @@
-# Claude Code Configuration for PetSphere
+# Claude Code Configuration for PetFolio
 
-This directory contains tailored automation, skills, and settings for PetSphere Flutter development.
+This directory contains tailored automation, skills, and settings for PetFolio Flutter development.
 
 ## 📋 Contents
 
@@ -10,7 +10,7 @@ This directory contains tailored automation, skills, and settings for PetSphere 
 ### Skills (User-Invocable)
 
 #### 1. `/flutter-new-component`
-Scaffold new reusable Flutter components following PetSphere patterns.
+Scaffold new reusable Flutter components following PetFolio patterns.
 
 ```bash
 /flutter-new-component PetCard "Displays a pet profile card"
@@ -47,7 +47,7 @@ Scaffold complete feature layers (model + repository + controller) in one comman
 - `lib/repositories/{feature_name}_repository.dart`
 - `lib/controllers/{feature_name}_controller.dart`
 
-All three files follow PetSphere architecture patterns and are production-ready.
+All three files follow PetFolio architecture patterns and are production-ready.
 
 ---
 

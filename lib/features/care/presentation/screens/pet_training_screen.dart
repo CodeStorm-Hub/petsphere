@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/features/care/presentation/controllers/pet_training_controller.dart';
-import 'package:petsphere/core/widgets/brand_logo.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/care/presentation/controllers/pet_training_controller.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:petsphere/core/widgets/skeleton_loader.dart';
+import 'package:petfolio/core/widgets/skeleton_loader.dart';
 
 class PetTrainingScreen extends ConsumerWidget {
   const PetTrainingScreen({super.key});

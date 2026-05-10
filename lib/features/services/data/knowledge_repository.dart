@@ -1,5 +1,5 @@
-import 'package:petsphere/core/constants/supabase_config.dart';
-import 'package:petsphere/features/services/data/models/knowledge_base_models.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
+import 'package:petfolio/features/services/data/models/knowledge_base_models.dart';
 
 class KnowledgeBaseRepository {
   final _db = supabase;

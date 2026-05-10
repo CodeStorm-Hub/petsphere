@@ -6,8 +6,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'package:petsphere/firebase_options.dart';
-import 'package:petsphere/core/services/push_token_repository.dart';
+import 'package:petfolio/firebase_options.dart';
+import 'package:petfolio/core/services/push_token_repository.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {

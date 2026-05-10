@@ -1,12 +1,12 @@
-# CLAUDE.md - PetSphere Development Guide
+# CLAUDE.md - PetFolio Development Guide
 
-This document provides comprehensive guidance for AI assistants working on the PetSphere Flutter application. It explains the codebase structure, architectural patterns, conventions, and workflows for effective collaboration.
+This document provides comprehensive guidance for AI assistants working on the PetFolio Flutter application. It explains the codebase structure, architectural patterns, conventions, and workflows for effective collaboration.
 
 ---
 
 ## Project Overview
 
-**PetSphere** is a comprehensive pet-centric social and marketplace platform built with Flutter. The application enables pet owners to:
+**PetFolio** is a comprehensive pet-centric social and marketplace platform built with Flutter. The application enables pet owners to:
 
 - Create and manage pet profiles
 - Connect with other pet owners (matching/dating features)
@@ -85,7 +85,7 @@ flutter build ipa                  # iOS (requires provisioning profile)
 
 ## Architecture Overview
 
-PetSphere follows a **layered, feature-based architecture** with clear separation of concerns:
+PetFolio follows a **layered, feature-based architecture** with clear separation of concerns:
 
 ```
 lib/
@@ -325,7 +325,7 @@ class ResponsiveScreen extends ConsumerWidget {
 
 ```dart
 // Pattern: Always use ProviderScope and MaterialApp.router for routing
-runApp(const ProviderScope(child: PetSphereApp()));
+runApp(const ProviderScope(child: PetFolioApp()));
 ```
 
 ### `/lib/models/`
@@ -1188,7 +1188,7 @@ git push origin feature/pet-health-tracking
 
 ### Workflow Overview
 
-PetSphere uses GitHub Actions to automate testing and building across all platforms.
+PetFolio uses GitHub Actions to automate testing and building across all platforms.
 
 **File**: `.github/workflows/test-and-build.yml`
 
@@ -1520,4 +1520,4 @@ flutter run -d <device_id>
 ---
 
 **Last Updated**: April 2026
-**Maintained by**: PetSphere Development Team
+**Maintained by**: PetFolio Development Team

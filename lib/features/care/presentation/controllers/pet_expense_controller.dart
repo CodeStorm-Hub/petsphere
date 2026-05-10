@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/features/care/data/models/pet_expense_model.dart';
-import 'package:petsphere/features/care/data/pet_expense_repository.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/care/data/models/pet_expense_model.dart';
+import 'package:petfolio/features/care/data/pet_expense_repository.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 
 class PetExpenseState {
   final List<PetExpense> expenses;

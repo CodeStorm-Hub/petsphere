@@ -1,4 +1,4 @@
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
 
 class CommentModel {
   final String id;

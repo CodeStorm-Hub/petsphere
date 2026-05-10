@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petsphere/features/social/data/models/post_model.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
-import 'package:petsphere/features/marketplace/data/models/product_model.dart';
-import 'package:petsphere/features/match/data/search_repository.dart';
+import 'package:petfolio/features/social/data/models/post_model.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/marketplace/data/models/product_model.dart';
+import 'package:petfolio/features/match/data/search_repository.dart';
 
 class SearchState {
   final List<PostModel> posts;

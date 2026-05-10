@@ -15,7 +15,14 @@
       "Bash(gh run *)",
       "Bash(git restore *)",
       "Bash(git commit -m 'Fix: Update deprecated actions/upload-artifact from v3 to v4 *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(flutter pub *)",
+      "mcp__plugin_supabase_supabase__execute_sql",
+      "Bash(Remove-Item \"g:\\\\Pet\\\\petsphere\\\\lib\\\\core\\\\repositories\\\\feature_repositories.dart\" -Force)",
+      "Bash(Get-ChildItem -Path \"G:\\\\Pet\\\\petsphere\\\\lib\\\\features\" -Directory)",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Bash(xargs grep -l \"\\\\.insert\\(\")",
+      "Bash(Remove-Item \"g:\\\\Pet\\\\petsphere\\\\lib\\\\features\\\\home\\\\presentation\\\\screens\\\\main_layout.dart\")"
     ]
   },
   "outputStyle": "default"

@@ -1,4 +1,4 @@
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 class NutritionLog {
   final String id;
@@ -54,7 +54,8 @@ class NutritionRepository {
         .select()
         .eq('pet_id', petId)
         .gte('logged_at', start.toIso8601String())
-        .order('logged_at');
+        .order('logged_at')
+        .limit(50);
     return (rows as List)
         .map((e) => NutritionLog.fromJson(e as Map<String, dynamic>))
         .toList();

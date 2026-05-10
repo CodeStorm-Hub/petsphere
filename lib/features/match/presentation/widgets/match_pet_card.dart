@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:petsphere/core/widgets/brand_logo.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
 
 class MatchPetCard extends StatelessWidget {
   final PetModel pet;

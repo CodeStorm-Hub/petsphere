@@ -1,5 +1,5 @@
-import 'package:petsphere/core/utils/media_utils.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/core/utils/media_utils.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
 
 /// Story rules enforced by this model and the backend:
 ///   • Still images display for 7 seconds per frame (enforced in viewer).

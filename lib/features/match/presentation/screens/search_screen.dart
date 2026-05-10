@@ -2,13 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:petsphere/core/widgets/brand_logo.dart';
-import 'package:petsphere/features/match/presentation/controllers/search_controller.dart';
-import 'package:petsphere/features/social/presentation/widgets/post_card.dart';
-import 'package:petsphere/features/marketplace/presentation/widgets/product_card.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/features/marketplace/presentation/controllers/cart_controller.dart';
-import 'package:petsphere/features/social/presentation/controllers/feed_controller.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
+import 'package:petfolio/features/match/presentation/controllers/search_controller.dart';
+import 'package:petfolio/features/social/presentation/widgets/post_card.dart';
+import 'package:petfolio/features/marketplace/presentation/widgets/product_card.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/marketplace/presentation/controllers/cart_controller.dart';
+import 'package:petfolio/features/social/presentation/controllers/feed_controller.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});

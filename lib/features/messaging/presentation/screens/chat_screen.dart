@@ -3,13 +3,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:petsphere/features/messaging/presentation/controllers/chat_controller.dart';
-import 'package:petsphere/features/notifications/presentation/controllers/notification_controller.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/messaging/presentation/controllers/chat_controller.dart';
+import 'package:petfolio/features/notifications/presentation/controllers/notification_controller.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:petsphere/core/utils/pet_navigation.dart';
-import 'package:petsphere/features/messaging/presentation/widgets/message_bubble.dart';
-import 'package:petsphere/core/widgets/skeleton_loader.dart';
+import 'package:petfolio/core/utils/pet_navigation.dart';
+import 'package:petfolio/features/messaging/presentation/widgets/message_bubble.dart';
+import 'package:petfolio/core/widgets/skeleton_loader.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String threadId;

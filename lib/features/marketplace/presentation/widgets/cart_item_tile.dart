@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/features/marketplace/data/models/cart_item_model.dart';
-import 'package:petsphere/features/marketplace/presentation/controllers/cart_controller.dart';
+import 'package:petfolio/features/marketplace/data/models/cart_item_model.dart';
+import 'package:petfolio/features/marketplace/presentation/controllers/cart_controller.dart';
 
 class CartItemTile extends ConsumerWidget {
   final CartItemModel item;

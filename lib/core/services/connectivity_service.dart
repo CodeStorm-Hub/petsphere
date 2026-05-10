@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:petsphere/core/constants/supabase_config.dart';
-import 'package:petsphere/core/services/offline_cache.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
+import 'package:petfolio/core/services/offline_cache.dart';
 
 /// Simple connectivity status for PetFolio.
 enum ConnectivityStatus { online, offline, unknown }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:petsphere/core/theme/colors.dart';
+import 'package:petfolio/core/theme/colors.dart';
 
 class AppTypography {
   const AppTypography._();

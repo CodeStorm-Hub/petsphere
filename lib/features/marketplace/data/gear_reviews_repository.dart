@@ -1,5 +1,5 @@
-import 'package:petsphere/core/constants/supabase_config.dart';
-import 'package:petsphere/features/marketplace/data/models/gear_review_models.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
+import 'package:petfolio/features/marketplace/data/models/gear_review_models.dart';
 
 class GearReviewsRepository {
   final _db = supabase;
@@ -16,9 +16,10 @@ class GearReviewsRepository {
   }
 
   Future<GearReview> submitReview(GearReview review) async {
+    final json = review.toJson()..remove('id');
     final row = await _db
         .from('gear_reviews')
-        .insert(review.toJson())
+        .insert(json)
         .select()
         .single();
     return GearReview.fromJson(row);

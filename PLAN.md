@@ -65,8 +65,8 @@ All 5 agents completed. The web research agent returned detailed findings across
 - `pubspec.yaml` — rename `pet_dating_app` to `petfolio`
 - `.gitignore` — add missing entries
 - `analysis_options.yaml` — enable strict rules
-- `lib/main.dart` — rename `PetSphereApp` to `PetFolioApp`
-- `lib/theme/app_theme.dart` — rename all `Petsphere*` references to `PetFolio*`
+- `lib/main.dart` — rename `PetFolioApp` to `PetFolioApp`
+- `lib/theme/app_theme.dart` — rename all `Petfolio*` references to `PetFolio*`
 
 **Actions**:
 
@@ -143,9 +143,9 @@ All 5 agents completed. The web research agent returned detailed findings across
    ```
 
 4. **Rename all PetFolio references** across the codebase to PetFolio:
-   - `lib/main.dart`: `PetSphereApp` -> `PetFolioApp`
-   - `lib/theme/app_theme.dart`: `PetsphereShadows` -> `PetFolioShadows`, all brand references
-   - Search and replace across all files: `PetSphere` -> `PetFolio`, `Petsphere` -> `Petfolio`, `petfolio` -> `petfolio`
+   - `lib/main.dart`: `PetFolioApp` -> `PetFolioApp`
+   - `lib/theme/app_theme.dart`: `PetfolioShadows` -> `PetFolioShadows`, all brand references
+   - Search and replace across all files: `PetFolio` -> `PetFolio`, `Petfolio` -> `Petfolio`, `petfolio` -> `petfolio`
 
 ---
 

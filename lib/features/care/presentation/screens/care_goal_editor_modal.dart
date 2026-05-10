@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../controllers/care_log_controller.dart';
 
-import 'package:petsphere/features/care/data/models/pet_care_log_model.dart';
-import 'package:petsphere/features/care/utils/care_calculator.dart';
+import 'package:petfolio/features/care/data/models/pet_care_log_model.dart';
+import 'package:petfolio/features/care/utils/care_calculator.dart';
 
 class CareGoalEditorModal extends ConsumerStatefulWidget {
   const CareGoalEditorModal({

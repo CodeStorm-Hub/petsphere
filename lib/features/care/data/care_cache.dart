@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:petsphere/features/care/data/models/pet_care_log_model.dart';
-import 'package:petsphere/features/health/data/models/pet_health_models.dart';
+import 'package:petfolio/features/care/data/models/pet_care_log_model.dart';
+import 'package:petfolio/features/health/data/models/pet_health_models.dart';
 
 /// Lightweight SharedPreferences-backed cache for the Pet Care feature.
 ///

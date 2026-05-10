@@ -1,9 +1,9 @@
 
-# PetSphere Flutter App
+# PetFolio Flutter App
 
 ## Overview
 
-PetSphere is a pet social and marketplace platform that allows users to connect with other pet owners, find and list pets for adoption, and buy and sell pet products.
+PetFolio is a pet social and marketplace platform that allows users to connect with other pet owners, find and list pets for adoption, and buy and sell pet products.
 
 ## Features
 ---
@@ -96,7 +96,7 @@ When the app is in the background or killed, **in-app** Supabase Realtime update
 **Client (this repo)**  
 - After login, the app registers an FCM device token and upserts it into Supabase `user_fcm_tokens` (`lib/services/push_notification_service.dart`, `lib/repositories/push_token_repository.dart`).  
 - Android 13+ uses the existing `POST_NOTIFICATIONS` permission plus a runtime prompt via `permission_handler`.  
-- Firebase is wired for **PetSphere** (`petfolio-197e6`): `firebase.json`, `android/app/google-services.json`, and `lib/firebase_options.dart` are generated via [FlutterFire CLI](https://firebase.flutter.dev/docs/cli/configure) (`flutterfire configure --project=petfolio-197e6 …`). Re-run that command if you clone on a new machine or add iOS/Web. `google-services.json.example` remains as a template reference only.
+- Firebase is wired for **PetFolio** (`petfolio-197e6`): `firebase.json`, `android/app/google-services.json`, and `lib/firebase_options.dart` are generated via [FlutterFire CLI](https://firebase.flutter.dev/docs/cli/configure) (`flutterfire configure --project=petfolio-197e6 …`). Re-run that command if you clone on a new machine or add iOS/Web. `google-services.json.example` remains as a template reference only.
 
 **Server (Supabase)**  
 1. Apply migration `supabase/migrations/20260505140000_user_fcm_tokens.sql` (`supabase db push` or Dashboard SQL).  
@@ -372,7 +372,7 @@ When the app is in the background or killed, **in-app** Supabase Realtime update
 ---
 
 ### 🌐 Cross-Cutting Features
-- Material Design 3 with custom `PetsphereShadows` theme extension
+- Material Design 3 with custom `PetfolioShadows` theme extension
 - Playfair Display (headings) + DM Sans (body) typography
 - Light and dark theme support
 - Responsive layout (max-width constraints for tablet/web)

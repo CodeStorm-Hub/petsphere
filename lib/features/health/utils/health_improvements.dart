@@ -1,5 +1,5 @@
-import 'package:petsphere/features/health/data/models/pet_health_extended_models.dart';
-import 'package:petsphere/features/health/data/models/pet_health_models.dart';
+import 'package:petfolio/features/health/data/models/pet_health_extended_models.dart';
+import 'package:petfolio/features/health/data/models/pet_health_models.dart';
 
 /// Health tracking improvements for Issue #54.
 ///

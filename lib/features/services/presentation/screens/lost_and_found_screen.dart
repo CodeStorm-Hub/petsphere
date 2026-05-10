@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/community/data/lost_found_repository.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/community/data/lost_found_repository.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Lost & Found Screen — #34 backed by lost_and_found_reports table

@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/core/repositories/feature_repositories.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/services/data/insurance_repository.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 
 final insuranceClaimsProvider =
     FutureProvider.autoDispose<List<InsuranceClaim>>((ref) async {

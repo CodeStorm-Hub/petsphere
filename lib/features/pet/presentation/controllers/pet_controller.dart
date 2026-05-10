@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petsphere/core/constants/app_strings.dart';
-import 'package:petsphere/core/utils/logger.dart';
+import 'package:petfolio/core/constants/app_strings.dart';
+import 'package:petfolio/core/utils/logger.dart';
 
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
-import 'package:petsphere/features/pet/data/pet_repository.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/pet/data/pet_repository.dart';
 
 // ---------------------------------------------------------------------------
 // State

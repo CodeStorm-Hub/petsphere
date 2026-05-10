@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:petsphere/core/widgets/petfolio_widgets.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 
 /// A collection of skeleton loading widgets used across the app for consistent shimmer effects.
 class ProfileSkeletonLoader extends StatelessWidget {

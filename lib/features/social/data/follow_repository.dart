@@ -1,7 +1,7 @@
 import 'dart:math';
 
 
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 class FollowRepository {
   // -------------------------------------------------------------------------
@@ -222,13 +222,15 @@ class FollowRepository {
           .from('follows')
           .select('follower_user_id, created_at')
           .not('followed_pet_id', 'is', null)
-          .eq('followed_pet_id', petId),
+          .eq('followed_pet_id', petId)
+          .limit(200),
       // Owner followers (implicit pet followers)
       supabase
           .from('follows')
           .select('follower_user_id, created_at')
           .not('followed_user_id', 'is', null)
-          .eq('followed_user_id', ownerUserId),
+          .eq('followed_user_id', ownerUserId)
+          .limit(200),
     ]);
 
     final seen = <String>{};
@@ -254,7 +256,8 @@ class FollowRepository {
         .from('follows')
         .select('follower_user_id, created_at')
         .not('followed_user_id', 'is', null)
-        .eq('followed_user_id', ownerId);
+        .eq('followed_user_id', ownerId)
+        .limit(200);
 
     final combined = data
         .map(
@@ -275,7 +278,8 @@ class FollowRepository {
     final data = await supabase
         .from('follows')
         .select('followed_user_id, followed_pet_id, created_at')
-        .eq('follower_user_id', userId);
+        .eq('follower_user_id', userId)
+        .limit(200);
 
     final list = <Map<String, dynamic>>[];
     for (final row in data) {

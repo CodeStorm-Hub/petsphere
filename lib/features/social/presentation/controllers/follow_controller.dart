@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
-import 'package:petsphere/core/utils/logger.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/notifications/data/notification_repository.dart';
-import 'package:petsphere/features/social/data/follow_repository.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
+import 'package:petfolio/core/utils/logger.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/notifications/data/notification_repository.dart';
+import 'package:petfolio/features/social/data/follow_repository.dart';
 
 // ---------------------------------------------------------------------------
 // Reactive query providers (auto-refresh on invalidation)

@@ -1,9 +1,9 @@
 import 'dart:developer' as developer;
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
-import 'package:petsphere/features/notifications/data/models/notification_model.dart';
+import 'package:petfolio/features/notifications/data/models/notification_model.dart';
 
 class NotificationRepository {
   Future<List<NotificationModel>> fetchForUser(

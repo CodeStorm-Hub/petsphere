@@ -1,9 +1,9 @@
-import 'package:petsphere/features/marketplace/data/models/product_model.dart';
-import 'package:petsphere/features/marketplace/data/models/cart_item_model.dart';
-import 'package:petsphere/features/marketplace/data/models/order_model.dart';
-import 'package:petsphere/features/marketplace/data/marketplace_repository.dart';
-import 'package:petsphere/core/services/connectivity_service.dart';
-import 'package:petsphere/core/services/offline_cache.dart';
+import 'package:petfolio/features/marketplace/data/models/product_model.dart';
+import 'package:petfolio/features/marketplace/data/models/cart_item_model.dart';
+import 'package:petfolio/features/marketplace/data/models/order_model.dart';
+import 'package:petfolio/features/marketplace/data/marketplace_repository.dart';
+import 'package:petfolio/core/services/connectivity_service.dart';
+import 'package:petfolio/core/services/offline_cache.dart';
 
 /// Offline-first wrapper around MarketplaceRepository.
 ///

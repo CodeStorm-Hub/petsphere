@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/core/repositories/feature_repositories.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/services/data/sitter_repository.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 
 final mySitterJobsProvider = FutureProvider.autoDispose<List<SitterJob>>((
   ref,

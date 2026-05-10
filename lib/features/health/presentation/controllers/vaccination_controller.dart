@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/core/constants/app_strings.dart';
-import 'package:petsphere/core/utils/logger.dart';
-import 'package:petsphere/features/care/data/pet_care_repository.dart';
-import 'package:petsphere/features/health/data/models/pet_health_models.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/core/constants/app_strings.dart';
+import 'package:petfolio/core/utils/logger.dart';
+import 'package:petfolio/features/care/data/pet_care_repository.dart';
+import 'package:petfolio/features/health/data/models/pet_health_models.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // State

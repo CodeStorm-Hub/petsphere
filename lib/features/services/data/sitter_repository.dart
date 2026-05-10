@@ -1,4 +1,4 @@
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 class SitterJob {
   final String id;
@@ -49,7 +49,8 @@ class SitterJobsRepository {
         .from('pet_sitter_jobs')
         .select()
         .eq('pet_owner_id', userId)
-        .order('start_date');
+        .order('start_date')
+        .limit(50);
     return (rows as List)
         .map((e) => SitterJob.fromJson(e as Map<String, dynamic>))
         .toList();

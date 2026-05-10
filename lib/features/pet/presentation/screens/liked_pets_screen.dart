@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:petsphere/core/widgets/brand_logo.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
 
 class LikedPetsScreen extends StatelessWidget {
   const LikedPetsScreen({super.key});

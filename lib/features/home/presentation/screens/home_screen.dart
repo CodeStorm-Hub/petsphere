@@ -2,28 +2,28 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:petsphere/core/widgets/brand_logo.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:petsphere/features/messaging/presentation/controllers/chat_controller.dart';
-import 'package:petsphere/features/social/presentation/controllers/feed_controller.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/notifications/presentation/controllers/notification_controller.dart';
-import 'package:petsphere/features/notifications/data/notification_repository.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
-import 'package:petsphere/features/social/data/models/post_model.dart';
-import 'package:petsphere/features/social/data/models/story_model.dart';
-import 'package:petsphere/core/theme/spacing.dart';
-import 'package:petsphere/features/social/utils/post_actions.dart';
-import 'package:petsphere/core/utils/pet_navigation.dart';
-import 'package:petsphere/core/widgets/petfolio_widgets.dart';
-import 'package:petsphere/features/social/presentation/widgets/post_card.dart';
-import 'package:petsphere/core/utils/layout_utils.dart';
+import 'package:petfolio/features/messaging/presentation/controllers/chat_controller.dart';
+import 'package:petfolio/features/social/presentation/controllers/feed_controller.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/notifications/presentation/controllers/notification_controller.dart';
+import 'package:petfolio/features/notifications/data/notification_repository.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/social/data/models/post_model.dart';
+import 'package:petfolio/features/social/data/models/story_model.dart';
+import 'package:petfolio/core/theme/spacing.dart';
+import 'package:petfolio/features/social/utils/post_actions.dart';
+import 'package:petfolio/core/utils/pet_navigation.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
+import 'package:petfolio/features/social/presentation/widgets/post_card.dart';
+import 'package:petfolio/core/utils/layout_utils.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:petsphere/core/widgets/skeleton_loader.dart';
+import 'package:petfolio/core/widgets/skeleton_loader.dart';
 
 // Maximum feed column width on wide screens (tablets, foldables, web).
 // Below this, the feed is full-width edge-to-edge like the Instagram phone app.
@@ -166,6 +166,34 @@ class HomeScreen extends ConsumerWidget {
       child: centerWrap(
         CustomScrollView(
           slivers: [
+            // ── Personalized Greeting ────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$greeting, $userName!',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                        fontFamily: 'Playfair Display',
+                      ),
+                    ).animate().fade(duration: 600.ms).slideY(begin: 0.2, end: 0),
+                    const SizedBox(height: 4),
+                    Text(
+                      'See what your favorite pets are up to today.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontFamily: 'DM Sans',
+                      ),
+                    ).animate().fade(delay: 200.ms, duration: 600.ms),
+                  ],
+                ),
+              ),
+            ),
+
             // ── Stories row (Instagram-style) ────────────────────────
             if (myPets.isNotEmpty)
               SliverToBoxAdapter(

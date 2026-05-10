@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
-import 'package:petsphere/features/care/data/models/pet_expense_model.dart';
-import 'package:petsphere/features/auth/data/models/user_model.dart';
-import 'package:petsphere/features/care/data/pet_expense_repository.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/care/presentation/screens/pet_expense_tracker_screen.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/care/data/models/pet_expense_model.dart';
+import 'package:petfolio/features/auth/data/models/user_model.dart';
+import 'package:petfolio/features/care/data/pet_expense_repository.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/care/presentation/screens/pet_expense_tracker_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petsphere/features/pet/data/pet_repository.dart';
+import 'package:petfolio/features/pet/data/pet_repository.dart';
 
 
 class MockPetExpenseRepository extends Mock implements PetExpenseRepository {}

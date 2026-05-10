@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petsphere/core/services/connectivity_service.dart';
+import 'package:petfolio/core/services/connectivity_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Providers

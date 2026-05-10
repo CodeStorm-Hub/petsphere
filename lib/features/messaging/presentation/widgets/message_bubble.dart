@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:petsphere/features/messaging/data/models/message_model.dart';
+import 'package:petfolio/features/messaging/data/models/message_model.dart';
 
 class MessageBubble extends StatelessWidget {
   final MessageModel message;

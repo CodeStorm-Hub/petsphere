@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
-import 'package:petsphere/core/utils/pet_navigation.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/features/social/presentation/controllers/follow_controller.dart';
+import 'package:petfolio/core/utils/pet_navigation.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/social/presentation/controllers/follow_controller.dart';
 
 enum FollowListType { petFollowers, ownerFollowers, following }
 

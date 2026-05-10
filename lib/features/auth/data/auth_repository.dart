@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:petsphere/features/auth/data/models/user_model.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/features/auth/data/models/user_model.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 class AuthRepository {
   // -------------------------------------------------------------------------

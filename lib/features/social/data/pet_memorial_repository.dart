@@ -1,5 +1,5 @@
-import 'package:petsphere/core/constants/supabase_config.dart';
-import 'package:petsphere/features/social/data/models/pet_memorial_models.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
+import 'package:petfolio/features/social/data/models/pet_memorial_models.dart';
 
 class PetMemorialRepository {
   final _db = supabase;
@@ -24,9 +24,10 @@ class PetMemorialRepository {
   }
 
   Future<PetMemorialEntry> createMemorial(PetMemorialEntry entry) async {
+    final json = entry.toJson()..remove('id');
     final row = await _db
         .from('pet_memorial_entries')
-        .insert(entry.toJson())
+        .insert(json)
         .select()
         .single();
     return PetMemorialEntry.fromJson(row);

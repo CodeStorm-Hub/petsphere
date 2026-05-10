@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petsphere/features/social/data/models/post_model.dart';
-import 'package:petsphere/features/social/presentation/controllers/feed_controller.dart';
+import 'package:petfolio/features/social/data/models/post_model.dart';
+import 'package:petfolio/features/social/presentation/controllers/feed_controller.dart';
 
 void showEditPostDialog(BuildContext context, WidgetRef ref, PostModel post) {
   final controller = TextEditingController(text: post.caption);

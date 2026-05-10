@@ -89,9 +89,9 @@ class PetModel {
       id: json['id'] as String,
       userId: json['user_id'] as String,
       name: json['name'] as String,
-      breed: json['breed'] as String,
-      animalType: json['animal_type'] as String,
-      age: (json['age'] as num).toInt(),
+      breed: json['breed'] as String? ?? '',
+      animalType: json['animal_type'] as String? ?? '',
+      age: (json['age'] as num?)?.toInt() ?? 0,
       bio: json['bio'] as String? ?? '',
       profileImageUrl: json['profile_image_url'] as String? ?? '',
       images:

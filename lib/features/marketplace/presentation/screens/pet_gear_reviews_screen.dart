@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/features/marketplace/data/models/gear_review_models.dart';
-import 'package:petsphere/features/marketplace/presentation/controllers/gear_reviews_controller.dart';
+import 'package:petfolio/features/marketplace/data/models/gear_review_models.dart';
+import 'package:petfolio/features/marketplace/presentation/controllers/gear_reviews_controller.dart';
 
 class PetGearReviewsScreen extends ConsumerWidget {
   const PetGearReviewsScreen({super.key});

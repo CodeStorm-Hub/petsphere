@@ -1,4 +1,4 @@
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 class BreedScan {
   final String id;
@@ -55,9 +55,10 @@ class BreedIdentifierRepository {
   }
 
   Future<BreedScan> saveScan(BreedScan scan) async {
+    final json = scan.toJson()..remove('id');
     final row = await _db
         .from('pet_breed_scans')
-        .insert(scan.toJson())
+        .insert(json)
         .select()
         .single();
     return BreedScan.fromJson(row);

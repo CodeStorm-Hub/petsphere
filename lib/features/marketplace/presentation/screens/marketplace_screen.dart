@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/marketplace_controller.dart';
 import '../controllers/cart_controller.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/features/marketplace/presentation/widgets/product_card.dart';
-import 'package:petsphere/core/utils/layout_utils.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/marketplace/presentation/widgets/product_card.dart';
+import 'package:petfolio/core/utils/layout_utils.dart';
 
 class MarketplaceScreen extends ConsumerWidget {
   const MarketplaceScreen({super.key});

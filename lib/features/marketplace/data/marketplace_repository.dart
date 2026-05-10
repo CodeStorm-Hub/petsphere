@@ -1,4 +1,4 @@
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 import 'models/cart_item_model.dart';
 import 'models/order_model.dart';

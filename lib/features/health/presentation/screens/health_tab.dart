@@ -1,24 +1,25 @@
 
-import 'dart:math';
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import 'package:petsphere/features/health/presentation/controllers/allergy_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/appointment_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/dental_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/medication_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/parasite_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/vaccination_controller.dart';
-import 'package:petsphere/features/health/presentation/controllers/vitals_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/allergy_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/appointment_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/dental_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/medication_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/parasite_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/vaccination_controller.dart';
+import 'package:petfolio/features/health/presentation/controllers/vitals_controller.dart';
 
-import 'package:petsphere/core/theme/app_theme.dart';
-import 'package:petsphere/core/widgets/petfolio_widgets.dart';
-import 'package:petsphere/features/health/presentation/controllers/symptom_controller.dart';
-import 'package:petsphere/features/health/data/models/pet_health_extended_models.dart';
-import 'package:petsphere/features/health/data/models/pet_health_models.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/core/theme/app_theme.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:petfolio/features/health/presentation/controllers/symptom_controller.dart';
+import 'package:petfolio/features/health/data/models/pet_health_extended_models.dart';
+import 'package:petfolio/features/health/data/models/pet_health_models.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -366,9 +367,6 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
     final delta = (latest != null && prior != null)
         ? latest.weightLbs - prior.weightLbs
         : null;
-    final maxW = weights.isEmpty
-        ? 1.0
-        : weights.map((PetWeightLog w) => w.weightLbs).reduce(max);
 
     return _SectionCard(
       title: 'Vitals & Weight',
@@ -489,37 +487,74 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
             icon: Icons.show_chart,
           )
         else
-          SizedBox(
-            height: 80,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: weights.map((PetWeightLog w) {
-                final ratio = maxW > 0 ? w.weightLbs / maxW : 0.5;
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Flexible(
-                          child: FractionallySizedBox(
-                            heightFactor: ratio.clamp(0.05, 1.0),
-                            child: VitalsBar(value: ratio.clamp(0.05, 1.0)),
-                          ),
+          Semantics(
+            label: 'Weight history chart for the last $_rangeDays days',
+            child: SizedBox(
+              height: 140,
+              child: LineChart(
+                LineChartData(
+                  gridData: const FlGridData(show: false),
+                  titlesData: const FlTitlesData(show: false),
+                  borderData: FlBorderData(show: false),
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: weights.asMap().entries.map((e) {
+                        return FlSpot(
+                          e.key.toDouble(),
+                          e.value.weightLbs,
+                        );
+                      }).toList(),
+                      isCurved: true,
+                      gradient: LinearGradient(
+                        colors: [
+                          colorScheme.primary,
+                          colorScheme.primary.withValues(alpha: 0.5),
+                        ],
+                      ),
+                      barWidth: 4,
+                      isStrokeCapRound: true,
+                      dotData: FlDotData(
+                        getDotPainter: (spot, percent, barData, index) =>
+                            FlDotCirclePainter(
+                              radius: 4,
+                              color: colorScheme.primary,
+                              strokeWidth: 2,
+                              strokeColor: colorScheme.surface,
+                            ),
+                      ),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            colorScheme.primary.withValues(alpha: 0.2),
+                            colorScheme.primary.withValues(alpha: 0.0),
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          DateFormat('E').format(w.logDate),
-                          style: TextStyle(
-                            fontSize: 9,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
+                      ),
+                    ),
+                  ],
+                  lineTouchData: LineTouchData(
+                    touchTooltipData: LineTouchTooltipData(
+                      getTooltipColor: (touchedSpot) => colorScheme.surface,
+                      getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
+                        return touchedBarSpots.map((barSpot) {
+                          final date = weights[barSpot.x.toInt()].logDate;
+                          return LineTooltipItem(
+                            '${barSpot.y.toStringAsFixed(1)} lbs\n${DateFormat('MMM d').format(date)}',
+                            TextStyle(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          );
+                        }).toList();
+                      },
                     ),
                   ),
-                );
-              }).toList(),
+                ),
+              ),
             ),
           ),
       ],

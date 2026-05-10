@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petsphere/features/services/data/models/knowledge_base_models.dart';
-import 'package:petsphere/features/services/data/knowledge_repository.dart';
+import 'package:petfolio/features/services/data/models/knowledge_base_models.dart';
+import 'package:petfolio/features/services/data/knowledge_repository.dart';
 
 class KnowledgeBaseCategoryNotifier extends Notifier<String> {
   @override

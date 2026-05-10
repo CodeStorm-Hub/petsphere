@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:petsphere/features/health/presentation/controllers/dental_controller.dart';
-import 'package:petsphere/features/health/data/health_repository.dart';
-import 'package:petsphere/features/health/data/models/pet_health_extended_models.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
-import 'package:petsphere/core/constants/app_strings.dart';
+import 'package:petfolio/features/health/presentation/controllers/dental_controller.dart';
+import 'package:petfolio/features/health/data/health_repository.dart';
+import 'package:petfolio/features/health/data/models/pet_health_extended_models.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/core/constants/app_strings.dart';
 
 class MockHealthRepository extends Mock implements HealthRepository {}
 

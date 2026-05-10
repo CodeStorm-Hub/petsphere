@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:petsphere/features/care/data/models/pet_care_log_model.dart';
+import 'package:petfolio/features/care/data/models/pet_care_log_model.dart';
 
 void main() {
   test(

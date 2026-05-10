@@ -5,7 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/marketplace_controller.dart';
 
-import 'package:petsphere/features/marketplace/data/models/product_model.dart';
+import 'package:petfolio/features/marketplace/data/models/product_model.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   final String productId;

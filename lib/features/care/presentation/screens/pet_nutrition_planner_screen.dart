@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:petsphere/features/nutrition/data/nutrition_repository.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/features/care/presentation/controllers/pet_nutrition_controller.dart';
+import 'package:petfolio/features/nutrition/data/nutrition_repository.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/care/presentation/controllers/pet_nutrition_controller.dart';
 
 class PetNutritionPlannerScreen extends ConsumerStatefulWidget {
   const PetNutritionPlannerScreen({super.key});

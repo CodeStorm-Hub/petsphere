@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/care_gamification_controller.dart';
 import '../controllers/care_log_controller.dart';
 
-import 'package:petsphere/features/care/data/models/care_badge_model.dart';
+import 'package:petfolio/features/care/data/models/care_badge_model.dart';
 
 class GamificationScreen extends ConsumerWidget {
   const GamificationScreen({super.key});

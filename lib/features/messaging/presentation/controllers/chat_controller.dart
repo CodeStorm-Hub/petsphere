@@ -3,14 +3,14 @@ import 'dart:developer' as developer;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:petsphere/features/messaging/data/models/chat_thread_model.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
-import 'package:petsphere/features/messaging/data/models/message_model.dart';
-import 'package:petsphere/features/messaging/data/chat_repository.dart';
-import 'package:petsphere/features/pet/presentation/controllers/pet_controller.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
-import 'package:petsphere/core/constants/app_strings.dart';
-import 'package:petsphere/core/utils/logger.dart';
+import 'package:petfolio/features/messaging/data/models/chat_thread_model.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/messaging/data/models/message_model.dart';
+import 'package:petfolio/features/messaging/data/chat_repository.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/app_strings.dart';
+import 'package:petfolio/core/utils/logger.dart';
 
 // ---------------------------------------------------------------------------
 // Per-Thread Messages State (with Realtime)

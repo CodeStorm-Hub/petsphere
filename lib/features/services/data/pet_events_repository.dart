@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:petsphere/features/services/data/models/pet_event_models.dart';
+import 'package:petfolio/features/services/data/models/pet_event_models.dart';
 
 class PetEventsRepository {
   final SupabaseClient _client;

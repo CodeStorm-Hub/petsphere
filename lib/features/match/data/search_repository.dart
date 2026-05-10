@@ -1,8 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:petsphere/features/marketplace/data/models/product_model.dart';
-import 'package:petsphere/features/pet/data/models/pet_model.dart';
-import 'package:petsphere/features/social/data/models/post_model.dart';
-import 'package:petsphere/core/utils/search_query_escape.dart';
+import 'package:petfolio/features/marketplace/data/models/product_model.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/social/data/models/post_model.dart';
+import 'package:petfolio/core/utils/search_query_escape.dart';
 
 class SearchRepository {
   final _client = Supabase.instance.client;

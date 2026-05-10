@@ -1,52 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:petsphere/core/constants/app_routes.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:petsphere/core/utils/safe_route_params.dart';
-import 'package:petsphere/features/home/presentation/screens/main_layout.dart';
-import 'package:petsphere/features/social/presentation/screens/create_post_screen.dart';
-import 'package:petsphere/features/social/presentation/screens/create_story_screen.dart';
-import 'package:petsphere/features/pet/presentation/screens/add_pet_screen.dart';
-import 'package:petsphere/features/messaging/presentation/screens/messages_list_screen.dart';
-import 'package:petsphere/features/messaging/presentation/screens/chat_screen.dart';
-import 'package:petsphere/features/marketplace/presentation/screens/product_detail_screen.dart';
-import 'package:petsphere/features/social/presentation/screens/post_detail_screen.dart';
-import 'package:petsphere/features/marketplace/presentation/screens/cart_screen.dart';
-import 'package:petsphere/features/marketplace/presentation/screens/order_history_screen.dart';
-import 'package:petsphere/features/notifications/presentation/screens/notifications_screen.dart';
-import 'package:petsphere/features/pet/presentation/screens/liked_pets_screen.dart';
-import 'package:petsphere/features/auth/presentation/screens/login_screen.dart';
-import 'package:petsphere/features/auth/presentation/screens/registration_screen.dart';
-import 'package:petsphere/features/settings/presentation/screens/settings_screen.dart';
-import 'package:petsphere/features/auth/presentation/screens/splash_screen.dart';
-import 'package:petsphere/features/care/presentation/screens/pet_care_screen.dart';
-import 'package:petsphere/features/care/presentation/screens/pet_care_onboarding_screen.dart';
-import 'package:petsphere/features/social/presentation/screens/story_viewer_screen.dart';
-import 'package:petsphere/features/discovery/presentation/screens/search_screen.dart';
-import 'package:petsphere/features/care/presentation/screens/gamification_screen.dart';
-import 'package:petsphere/features/health/presentation/screens/vet_booking_screen.dart';
-import 'package:petsphere/features/health/presentation/screens/emergency_care_screen.dart';
-import 'package:petsphere/features/community/presentation/screens/community_groups_screen.dart';
-import 'package:petsphere/features/services/presentation/screens/lost_and_found_screen.dart';
-import 'package:petsphere/features/services/presentation/screens/adoption_center_screen.dart';
-import 'package:petsphere/features/care/presentation/screens/pet_training_screen.dart';
-import 'package:petsphere/features/services/presentation/screens/pet_insurance_hub_screen.dart';
-import 'package:petsphere/features/care/presentation/screens/pet_expense_tracker_screen.dart';
-import 'package:petsphere/features/health/presentation/screens/pet_growth_chart_screen.dart';
-import 'package:petsphere/features/social/presentation/screens/pet_memorial_screen.dart';
-import 'package:petsphere/features/social/presentation/screens/pet_memorial_detail_screen.dart';
-import 'package:petsphere/features/services/presentation/screens/pet_friendly_places_screen.dart';
-import 'package:petsphere/features/services/presentation/screens/pet_event_discovery_screen.dart';
-import 'package:petsphere/features/health/presentation/screens/pet_health_record_export_screen.dart';
-import 'package:petsphere/features/health/presentation/screens/pet_health_record_screen.dart';
-import 'package:petsphere/features/services/presentation/screens/pet_sitter_dashboard_screen.dart';
-import 'package:petsphere/features/care/presentation/screens/pet_nutrition_planner_screen.dart';
-import 'package:petsphere/features/social/presentation/screens/pet_social_timeline_screen.dart';
-import 'package:petsphere/features/services/presentation/screens/pet_breed_identifier_screen.dart';
-import 'package:petsphere/features/services/presentation/screens/pet_knowledge_base_screen.dart';
-import 'package:petsphere/features/marketplace/presentation/screens/pet_gear_reviews_screen.dart';
-import 'package:petsphere/features/social/presentation/screens/pet_followers_screen.dart';
+import 'package:petfolio/core/constants/app_routes.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/core/utils/safe_route_params.dart';
+import 'package:petfolio/app/main_layout.dart';
+import 'package:petfolio/features/home/presentation/screens/home_screen.dart';
+import 'package:petfolio/features/match/presentation/screens/discovery_screen.dart';
+import 'package:petfolio/features/marketplace/presentation/screens/marketplace_screen.dart';
+import 'package:petfolio/features/pet/presentation/screens/pet_profile_screen.dart';
+import 'package:petfolio/features/social/presentation/screens/create_post_screen.dart';
+import 'package:petfolio/features/social/presentation/screens/create_story_screen.dart';
+import 'package:petfolio/features/pet/presentation/screens/add_pet_screen.dart';
+import 'package:petfolio/features/messaging/presentation/screens/messages_list_screen.dart';
+import 'package:petfolio/features/messaging/presentation/screens/chat_screen.dart';
+import 'package:petfolio/features/marketplace/presentation/screens/product_detail_screen.dart';
+import 'package:petfolio/features/social/presentation/screens/post_detail_screen.dart';
+import 'package:petfolio/features/marketplace/presentation/screens/cart_screen.dart';
+import 'package:petfolio/features/marketplace/presentation/screens/order_history_screen.dart';
+import 'package:petfolio/features/social/presentation/screens/pet_followers_screen.dart';
+import 'package:petfolio/features/pet/presentation/screens/visitor_pet_profile_screen.dart';
+import 'package:petfolio/features/social/presentation/screens/visitor_user_profile_screen.dart';
+import 'package:petfolio/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:petfolio/features/pet/presentation/screens/liked_pets_screen.dart';
+import 'package:petfolio/features/auth/presentation/screens/login_screen.dart';
+import 'package:petfolio/features/auth/presentation/screens/registration_screen.dart';
+import 'package:petfolio/features/settings/presentation/screens/settings_screen.dart';
+import 'package:petfolio/features/auth/presentation/screens/splash_screen.dart';
+import 'package:petfolio/features/care/presentation/screens/pet_care_screen.dart';
+import 'package:petfolio/features/care/presentation/screens/pet_care_onboarding_screen.dart';
+import 'package:petfolio/features/social/presentation/screens/story_viewer_screen.dart';
+import 'package:petfolio/features/services/presentation/screens/article_detail_screen.dart';
+import 'package:petfolio/features/services/data/models/knowledge_base_models.dart';
+import 'package:petfolio/features/discovery/presentation/screens/search_screen.dart';
+import 'package:petfolio/features/care/presentation/screens/gamification_screen.dart';
+import 'package:petfolio/features/health/presentation/screens/vet_booking_screen.dart';
+import 'package:petfolio/features/health/presentation/screens/emergency_care_screen.dart';
+import 'package:petfolio/features/community/presentation/screens/community_groups_screen.dart';
+import 'package:petfolio/features/services/presentation/screens/lost_and_found_screen.dart';
+import 'package:petfolio/features/services/presentation/screens/adoption_center_screen.dart';
+import 'package:petfolio/features/care/presentation/screens/pet_training_screen.dart';
+import 'package:petfolio/features/services/presentation/screens/pet_insurance_hub_screen.dart';
+import 'package:petfolio/features/care/presentation/screens/pet_expense_tracker_screen.dart';
+import 'package:petfolio/features/health/presentation/screens/pet_growth_chart_screen.dart';
+import 'package:petfolio/features/social/presentation/screens/pet_memorial_screen.dart';
+import 'package:petfolio/features/social/presentation/screens/pet_memorial_detail_screen.dart';
+import 'package:petfolio/features/services/presentation/screens/pet_friendly_places_screen.dart';
+import 'package:petfolio/features/services/presentation/screens/pet_event_discovery_screen.dart';
+import 'package:petfolio/features/health/presentation/screens/pet_health_record_export_screen.dart';
+import 'package:petfolio/features/health/presentation/screens/pet_health_record_screen.dart';
+import 'package:petfolio/features/services/presentation/screens/pet_sitter_dashboard_screen.dart';
+import 'package:petfolio/features/care/presentation/screens/pet_nutrition_planner_screen.dart';
+import 'package:petfolio/features/social/presentation/screens/pet_social_timeline_screen.dart';
+import 'package:petfolio/features/services/presentation/screens/pet_breed_identifier_screen.dart';
+import 'package:petfolio/features/services/presentation/screens/pet_knowledge_base_screen.dart';
+import 'package:petfolio/features/marketplace/presentation/screens/pet_gear_reviews_screen.dart';
+import 'package:petfolio/features/pet/data/models/pet_model.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authNotifier = ValueNotifier<AuthState>(ref.read(authProvider));
@@ -94,9 +103,43 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.register,
         builder: (context, state) => const RegistrationScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.home,
-        builder: (context, state) => const MainLayout(),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, shell) =>
+            MainLayout(navigationShell: shell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.home,
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.discover,
+                builder: (context, state) => const DiscoveryScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.shop,
+                builder: (context, state) => const MarketplaceScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.profile,
+                builder: (context, state) => const PetProfileScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
         path: AppRoutes.createPost,
@@ -114,7 +157,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.addPet,
-        builder: (context, state) => const AddPetScreen(),
+        builder: (context, state) {
+          final pet = state.extra as PetModel?;
+          return AddPetScreen(pet: pet);
+        },
       ),
       GoRoute(
         path: AppRoutes.petCare,
@@ -145,12 +191,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           if (petId == null) {
             return const InvalidRouteErrorScreen(missingParam: 'pet ID');
           }
-          return _buildMigrationPlaceholderScreen(
-            title: 'Pet profile',
-            message: 'Visitor pet profile is being migrated.',
-            idLabel: 'Pet ID',
-            idValue: petId,
-          );
+          return VisitorPetProfileScreen(petId: petId);
         },
       ),
       GoRoute(
@@ -160,12 +201,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           if (userId == null) {
             return const InvalidRouteErrorScreen(missingParam: 'user ID');
           }
-          return _buildMigrationPlaceholderScreen(
-            title: 'User profile',
-            message: 'Visitor user profile is being migrated.',
-            idLabel: 'User ID',
-            idValue: userId,
-          );
+          return VisitorUserProfileScreen(userId: userId);
         },
       ),
       GoRoute(
@@ -362,6 +398,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const PetKnowledgeBaseScreen(),
       ),
       GoRoute(
+        path: AppRoutes.articleDetail,
+        builder: (context, state) {
+          final article = state.extra as KnowledgeArticle?;
+          if (article == null) {
+            return const InvalidRouteErrorScreen(missingParam: 'article data');
+          }
+          return ArticleDetailScreen(article: article);
+        },
+      ),
+      GoRoute(
         path: AppRoutes.gearReviews,
         builder: (context, state) => const PetGearReviewsScreen(),
       ),
@@ -407,26 +453,3 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-Widget _buildMigrationPlaceholderScreen({
-  required String title,
-  required String message,
-  required String idLabel,
-  required String idValue,
-}) {
-  return Scaffold(
-    appBar: AppBar(title: Text(title)),
-    body: Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 8),
-            Text('$idLabel: $idValue'),
-          ],
-        ),
-      ),
-    ),
-  );
-}

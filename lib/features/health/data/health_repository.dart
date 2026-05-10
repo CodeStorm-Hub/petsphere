@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/pet_health_extended_models.dart';
 import '../data/models/pet_health_models.dart';
-import 'package:petsphere/core/constants/supabase_config.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
 
 /// Repository for all extended health data:
 /// medications, doses, allergies, parasite prevention, dental logs.

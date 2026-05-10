@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:petsphere/core/widgets/brand_logo.dart';
-import 'package:petsphere/features/auth/data/auth_repository.dart';
-import 'package:petsphere/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
+import 'package:petfolio/features/auth/data/auth_repository.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
