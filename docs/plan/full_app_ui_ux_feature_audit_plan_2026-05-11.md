@@ -1,7 +1,7 @@
 # PetFolio Full App UI, UX, Architecture, Security, and Feature Remediation Plan
 
 Date: 2026-05-11  
-Scope: Flutter app in `lib/`, Supabase-backed data/auth flows, Android emulator UI traversal, runtime logs, user-story docs, and current online best practices.
+Scope: Flutter app in `lib/`, Supabase-backed data/auth flows, Android emulator UI traversal, runtime logs, user-story docs, and current online best practices. 
 
 ## Evidence Reviewed
 
@@ -31,6 +31,9 @@ Scope: Flutter app in `lib/`, Supabase-backed data/auth flows, Android emulator 
   - Firebase FCM token freshness guidance: https://firebase.google.com/docs/cloud-messaging/manage-tokens
   - Material 3 adaptive layout guidance: https://m3.material.io/foundations/layout/applying-layout/window-size-classes
   - Apple HIG Activity Rings guidance: https://developer.apple.com/design/human-interface-guidelines/activity-rings
+  - Flutter adaptive UI: https://docs.flutter.dev/ui/adaptive-responsive/general
+  - Flutter accessibility: https://docs.flutter.dev/ui/accessibility
+  - Supabase API security: https://supabase.com/docs/guides/api/securing-your-api
 
 ## 2026-05-11 Codex Follow-Up Evidence
 
@@ -59,7 +62,7 @@ Fresh runtime findings:
 
 - The notification permission dialog still showed `Allow PetSphere to send you notifications?` before the branding fix. This was caused by `android:label="PetSphere"` and is now corrected in source.
 - Firebase MCP reports Android app display name `pet_dating_app (android)` and namespace `com.example.pet_dating_app`. This should be migrated deliberately later because it affects Firebase app registration, `google-services.json`, Kotlin package paths, and potentially released app identity.
-- Home exposes: `Pet Folio`, Search, New Post, Notifications, Messages, greeting, story tray, Home, Discover, Pet Care, Marketplace, Profile.
+- Home exposed `Pet Folio` before the source branding fix; the canonical in-app brand is now `PetFolio`. The same shell exposes Search, New Post, Notifications, Messages, greeting, story tray, Home, Discover, Pet Care, Marketplace, and Profile.
 - Discovery exposes: `Breeding Discovery`, Liked Pets, New Listing, Discover/Nearby/My Listings tabs, Try Again, and still shows `Failed to load matches.`
 - Marketplace exposes: Good Morning Pet Parent, Order History, cart/action button, Search Products, promo banner, category chips, and `No items found in this category`.
 - Profile exposes pet profile content, not owner profile content: Montu, species/breed, hardcoded `2.4k Fans`, bio, Edit Profile, New Post, Photos/Awards/Health tabs.
@@ -70,6 +73,19 @@ Fresh runtime findings:
   - `pet_care_gamification.best_streak_days` missing from schema cache
   - `pet_medication_doses.scheduled_for does not exist`
 - Attempting a top-right profile action opened the Android share sheet with text `Check out Montu on PetFolio! Persian looking for friends.`, confirming profile share is wired, but settings was not discoverable from the current profile UI hierarchy.
+
+Runtime component and action matrix from the emulator pass:
+
+| Area | Components, Fields, Buttons, Links | Observed Or Required Behavior |
+| --- | --- | --- |
+| Login | Email, Password, Forgot Password, Sign In, Google, Apple, Register | Email/password reaches the authenticated shell with valid credentials; Forgot Password opens reset dialog; Google/Apple are placeholder snackbars; Register opens the account creation form. |
+| Home/Feed | Brand wordmark, Search, New Post, Notifications, Messages, story tray, bottom tabs | Bottom tabs navigate; Search/New Post/Notifications/Messages are primary shell actions and need route-harness verification for complete behavior and error handling. |
+| Discovery | Liked Pets, New Listing, Discover/Nearby/My Listings tabs, Try Again | Tabs render but all matching states are blocked by schema drift; Try Again retries the failing query; Liked/New Listing need seeded route verification. |
+| Marketplace | Order History, cart/action icon, search field, promo banner, category chips, empty state | Category chips update filter state; tested account has no visible inventory; order/cart/product paths need seeded product/order data. |
+| Profile | Pet header, share action, Edit Profile, New Post, Photos/Awards/Health tabs | Share opens Android share sheet with PetFolio copy; Profile is pet-centric instead of owner-centric; Edit/New Post/tabs need route-harness confirmation. |
+| Pet Care | Back, active pet chip, Care Diary/Health/Feeding tabs, setup prompt, Edit Goals, checklist tasks, progress/streak cards | Tabs switch content; care/health data is partially blocked by schema drift; setup/goals/checklist writes need contract tests. |
+| Pet Care Resource Grid | Vet Booking, Emergency, Nutrition, Expenses, Growth, Insurance, Training, Adoption, Places, Events, Medical, Sitters, Timeline, Identifier, Knowledge, Reviews, Groups, Lost/Found, Memorial | Tiles are discoverable at the bottom of Care. Each should become either a complete subflow with loading/empty/error/success states or be hidden until functional. |
+| Messaging/Notifications | Messages entry, Notifications entry, FCM permission prompt | Permission request appears; FCM token lifecycle exists in code; notification preferences and stale-token cleanup remain missing. |
 
 Static code mapping from `lib`:
 
@@ -166,13 +182,13 @@ Plan:
 
 Observed:
 
-- Home loads with "Pet Folio" branding, greeting, stories, and one post by Montu.
+- Home loaded with pre-fix "Pet Folio" branding, greeting, stories, and one post by Montu. Source branding has since been corrected to `PetFolio`.
 - Accessibility tree exposes app-bar buttons and bottom nav labels.
 - Scroll did not reveal additional content for the tested dataset.
 
 Issues:
 
-- Brand mismatch: app label is `PetSphere`, UI title is `Pet Folio`, package is `com.example.pet_dating_app`.
+- Brand mismatch was present during traversal: app label `PetSphere`, UI title `Pet Folio`, and package `com.example.pet_dating_app`. Android/iOS display names and the shared wordmark are now corrected to `PetFolio`; the package/Firebase namespace remains a separate migration.
 - Greeting says "Pet" rather than the owner name.
 - The empty or light dataset state is not guided enough for a first real user.
 
@@ -536,8 +552,8 @@ Steps performed:
 Result:
 
 - The normal debug app starts from clean data and lands on the Login screen.
-- Visible fresh-start UI:
-  - `Pet Folio`
+- Visible fresh-start UI before the source branding fix:
+  - `Pet Folio` (now corrected to `PetFolio` in source)
   - `Welcome Back`
   - Email field
   - Password field
@@ -565,7 +581,7 @@ Fresh-start UX issues:
 - OAuth buttons are visible as real sign-in choices but only show "coming soon". These should be hidden behind feature flags or implemented end to end.
 - Password reset opens a dialog, but the app still needs deep-link recovery handling and a change-password screen.
 - Registration has terms/privacy buttons, but the audit did not verify that they open real legal documents; this remains a required action check.
-- The app brand still appears as `Pet Folio` while Android label/docs use `PetSphere`.
+- The fresh-start app brand appeared as `Pet Folio` while the Android label showed `PetSphere`; both display surfaces have since been corrected in source to `PetFolio`.
 
 ### Existing Integration Test Finding
 
@@ -654,29 +670,50 @@ Actions:
 
 ## Branding And Design System Plan
 
-Current brand inconsistencies:
+Canonical brand:
 
-- Android label: `PetSphere`
-- UI brand: `Pet Folio`
+- Product name: `PetFolio`
+- Android label: corrected in source to `PetFolio`
+- iOS display name and bundle name: corrected in source to `PetFolio`
+- In-app wordmark semantics: corrected in source to `PetFolio`
 - Package/application ID: `com.example.pet_dating_app`
-- Some docs use PetSphere, some UI uses PetFolio.
+- Firebase Android app display name from MCP: `pet_dating_app (android)`
+- Remaining migration: package/application ID, Kotlin package path, Firebase Android app registration, and `google-services.json` still use the old technical identity. Treat this as a deliberate release-management migration, not a cosmetic rename.
 
 Plan:
 
-1. Select one brand name. Recommended: `PetSphere`, because docs and Android label already use it and it better supports social, commerce, care, and services.
+1. Use `PetFolio` everywhere visible to users, legal documents, App Store/Play Store copy, notification permissions, emails, and support content.
 2. Create a production logo system:
    - app launcher icon
    - splash logo
    - small wordmark
    - monochrome icon
    - adaptive Android icon
-3. Define brand tokens:
-   - primary, secondary, success, warning, danger, surface, outline
+3. Redesign the current logo into a simple blue-forward mark that works at 24px and launcher-icon scale. Avoid detailed pet silhouettes that collapse at small sizes; use a clean paw/profile/folio-page symbol plus a sturdy wordmark.
+4. Define brand tokens:
+   - primary, secondary, accent, success, warning, danger, surface, outline
    - typography scale
    - spacing scale
    - radius scale
    - elevation rules
-4. Replace ad hoc screen styling with reusable components:
+5. Adopt this modern blue palette as the next design baseline:
+   - Primary: `#2563EB`
+   - Primary container: `#DCE8FF`
+   - Secondary teal: `#14B8A6`
+   - Pet warmth accent: `#FFB020`
+   - Success: `#22C55E`
+   - Warning: `#F59E0B`
+   - Danger: `#EF4444`
+   - Light background: `#F7FAFF`
+   - Light surface: `#FFFFFF`
+   - Light surface alternate: `#EEF4FF`
+   - Text primary: `#0F172A`
+   - Text secondary: `#64748B`
+   - Outline: `#CBD5E1`
+   - Dark background: `#07111F`
+   - Dark surface: `#0F1B2D`
+   - Dark primary: `#7AA2FF`
+6. Replace ad hoc screen styling with reusable components:
    - `AppHeader`
    - `OwnerAvatar`
    - `PetAvatar`
@@ -689,7 +726,43 @@ Plan:
    - `SettingsSection`
    - `ProductCard`
    - `CareMetricCard`
-5. Keep the UI warm and pet-friendly, but operational screens such as settings, checkout, health, and care should be dense, calm, and scannable.
+7. Keep the UI friendly, but operational screens such as settings, checkout, health, and care should be dense, calm, and scannable. Reserve playful warmth for onboarding, pet profile moments, achievements, and empty states.
+
+## Product Redesign Blueprint
+
+Target product model:
+
+- Pet owner is the account identity.
+- Pets are switchable profiles owned by that account.
+- Social content can be authored from the owner account or a selected pet persona when appropriate.
+- Dating/matching is pet-centric but owner consent, safety, reporting, and chat permissions are account-level concerns.
+- Care, health, reminders, and commerce are scoped to the active pet by default, with an all-pets view for owners with multiple pets.
+
+Primary navigation:
+
+- Mobile bottom bar: Feed, Match, Care, Shop, Profile.
+- Top shell controls: active pet switcher, global search, create button, notifications, messages.
+- Tablet/desktop: navigation rail or side navigation with the same five primary destinations plus secondary access to Settings, Orders, Services, and Community.
+- Profile tab should open the owner profile first, with pet cards and a prominent account-style pet switcher.
+- Pet profile detail should be a sub-route, not the root Profile tab.
+
+Screen split recommendations:
+
+- Home should become Feed: following feed, story tray, composer entry, saved/search, and post detail.
+- Profile should split into Owner Profile, Manage Pets, Pet Profile, Pet Switcher, Settings, Privacy, Security, Notification Preferences, and Account/Data controls.
+- Discovery should split into Match Home, Swipe/Deck View, Nearby Pets, My Listings, Filters, Match Detail, Safety/Report, and Liked Pets.
+- Care should split into Care Dashboard, Daily Checklist, Goals, Reminders, Medications, Health Records, Vitals/Growth, Nutrition, Expenses, Training, and Vet Sharing.
+- Marketplace should split into Shop Home, Product Search/Filters, Product Detail, Cart, Checkout, Orders, Returns, Reviews, and Seller Dashboard.
+- Services and Community should be consolidated into clear hubs: Places, Events, Adoption, Lost/Found, Sitters, Knowledge Base, Groups, Gear Reviews, and Memorial.
+- Messaging should split into Thread List, Chat Thread, Media/Attachment Picker, Match Context, and Chat Safety. If attachments/voice are not implemented, hide those buttons.
+- Notifications should split into Notification Center and Notification Preferences, backed by FCM token freshness tracking and user-level notification settings.
+
+Experience references applied:
+
+- Instagram-like social: visual feed, stories, creation flow, comments, likes, saves, shares, creator identity, and profile grids.
+- Tinder-like matching: fast pet cards, filters, like/pass/super-like or equivalent, non-swipe accessibility actions, mutual-match confirmation, safety/reporting, and chat unlock rules.
+- Apple Fitness-like care: daily rings or progress summaries, streaks, goal cards, trend charts, achievements, and reminder loops. Activity-style visuals must remain understandable without color alone.
+- Modern commerce: searchable catalog, filters, product variants, reviews, clear cart totals, shipping/payment steps, order tracking, and seller/admin boundaries.
 
 ## Missing Screens And Components
 
