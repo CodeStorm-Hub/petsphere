@@ -17,5 +17,6 @@
       "Bash(git commit -m 'Fix: Update deprecated actions/upload-artifact from v3 to v4 *)",
       "Bash(git push *)"
     ]
-  }
+  },
+  "outputStyle": "default"
 }
