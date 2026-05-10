@@ -8,15 +8,15 @@ import 'package:petfolio/features/notifications/data/models/notification_model.d
 import 'package:petfolio/features/notifications/data/notification_repository.dart';
 
 class NotificationState {
-  final List<NotificationModel> items;
-  final bool isLoading;
-  final String? error;
 
   const NotificationState({
     this.items = const [],
     this.isLoading = false,
     this.error,
   });
+  final List<NotificationModel> items;
+  final bool isLoading;
+  final String? error;
 
   int get unreadCount =>
       items.where((n) => !n.isRead && n.type != 'message').length;

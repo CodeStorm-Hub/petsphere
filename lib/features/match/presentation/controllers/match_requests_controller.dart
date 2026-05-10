@@ -7,10 +7,6 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 
 @immutable
 class MatchRequestsState {
-  final List<MatchRequestModel> myRequests;
-  final List<MatchRequestModel> sentRequests;
-  final bool isLoading;
-  final String? error;
 
   const MatchRequestsState({
     this.myRequests = const [],
@@ -18,6 +14,10 @@ class MatchRequestsState {
     this.isLoading = false,
     this.error,
   });
+  final List<MatchRequestModel> myRequests;
+  final List<MatchRequestModel> sentRequests;
+  final bool isLoading;
+  final String? error;
 
   MatchRequestsState copyWith({
     List<MatchRequestModel>? myRequests,

@@ -15,7 +15,7 @@ class EmergencyCareScreen extends ConsumerStatefulWidget {
 class _EmergencyCareScreenState extends ConsumerState<EmergencyCareScreen> {
   final List<String> _emergencyNumbers = ['855-764-7661', '888-426-4435'];
 
-  void _callNumber(String number) async {
+  Future<void> _callNumber(String number) async {
     final url = Uri.parse('tel:$number');
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
@@ -221,8 +221,8 @@ class _EmergencyHero extends StatelessWidget {
 }
 
 class _MedicalIdCard extends StatelessWidget {
-  final String petName;
   const _MedicalIdCard({required this.petName});
+  final String petName;
 
   @override
   Widget build(BuildContext context) {
@@ -294,10 +294,6 @@ class _MedicalIdCard extends StatelessWidget {
 }
 
 class _EmergencyContactCard extends StatelessWidget {
-  final String title;
-  final String phone;
-  final String description;
-  final IconData icon;
 
   const _EmergencyContactCard({
     required this.title,
@@ -305,6 +301,10 @@ class _EmergencyContactCard extends StatelessWidget {
     required this.description,
     required this.icon,
   });
+  final String title;
+  final String phone;
+  final String description;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {

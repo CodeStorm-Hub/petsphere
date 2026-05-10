@@ -11,10 +11,6 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 
 @immutable
 class CareGoalsState {
-  final PetCareOnboarding? onboarding;
-  final bool isLoading;
-  final String? error;
-  final String? activePetId;
 
   const CareGoalsState({
     this.onboarding,
@@ -22,6 +18,10 @@ class CareGoalsState {
     this.error,
     this.activePetId,
   });
+  final PetCareOnboarding? onboarding;
+  final bool isLoading;
+  final String? error;
+  final String? activePetId;
 
   CareGoalsState copyWith({
     PetCareOnboarding? onboarding,

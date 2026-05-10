@@ -117,8 +117,8 @@ class LostAndFoundScreen extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ReportList extends ConsumerWidget {
-  final String status;
   const _ReportList({required this.status});
+  final String status;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -163,8 +163,8 @@ class _ReportList extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ReportCard extends StatelessWidget {
-  final LostFoundReport report;
   const _ReportCard({required this.report});
+  final LostFoundReport report;
 
   @override
   Widget build(BuildContext context) {
@@ -324,8 +324,8 @@ class _ReportCard extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  final bool isLost;
   const _StatusBadge({required this.isLost});
+  final bool isLost;
 
   @override
   Widget build(BuildContext context) {
@@ -365,8 +365,8 @@ class _StatusBadge extends StatelessWidget {
 }
 
 class _PetImagePlaceholder extends StatelessWidget {
-  final bool isLost;
   const _PetImagePlaceholder({required this.isLost});
+  final bool isLost;
 
   @override
   Widget build(BuildContext context) {
@@ -393,9 +393,9 @@ class _PetImagePlaceholder extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ReportSheet extends StatefulWidget {
+  const _ReportSheet({required this.reporterId, required this.onSaved});
   final String reporterId;
   final VoidCallback onSaved;
-  const _ReportSheet({required this.reporterId, required this.onSaved});
 
   @override
   State<_ReportSheet> createState() => _ReportSheetState();

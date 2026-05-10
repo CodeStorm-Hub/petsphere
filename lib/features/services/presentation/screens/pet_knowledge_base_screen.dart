@@ -125,9 +125,9 @@ class PetKnowledgeBaseScreen extends ConsumerWidget {
 }
 
 class _SearchBar extends StatelessWidget {
-  final WidgetRef ref;
 
   const _SearchBar({required this.ref});
+  final WidgetRef ref;
 
   @override
   Widget build(BuildContext context) {
@@ -148,10 +148,10 @@ class _SearchBar extends StatelessWidget {
 }
 
 class _CategorySelector extends StatelessWidget {
-  final WidgetRef ref;
-  final String selectedCategory;
 
   const _CategorySelector({required this.ref, required this.selectedCategory});
+  final WidgetRef ref;
+  final String selectedCategory;
 
   static const categories = [
     'All Topics',
@@ -193,9 +193,9 @@ class _CategorySelector extends StatelessWidget {
 }
 
 class _FeaturedArticleCard extends StatelessWidget {
-  final KnowledgeArticle article;
 
   const _FeaturedArticleCard({required this.article});
+  final KnowledgeArticle article;
 
   @override
   Widget build(BuildContext context) {
@@ -284,9 +284,9 @@ class _FeaturedArticleCard extends StatelessWidget {
 }
 
 class _ArticleListItem extends StatelessWidget {
-  final KnowledgeArticle article;
 
   const _ArticleListItem({required this.article});
+  final KnowledgeArticle article;
 
   @override
   Widget build(BuildContext context) {
@@ -371,14 +371,14 @@ class _ArticleListItem extends StatelessWidget {
 }
 
 class AsyncValueSliverWidget<T> extends StatelessWidget {
-  final AsyncValue<T> value;
-  final Widget Function(T) data;
 
   const AsyncValueSliverWidget({
     super.key,
     required this.value,
     required this.data,
   });
+  final AsyncValue<T> value;
+  final Widget Function(T) data;
 
   @override
   Widget build(BuildContext context) {

@@ -1,13 +1,6 @@
 import 'package:petfolio/core/constants/supabase_config.dart';
 
 class BreedScan {
-  final String id;
-  final String breedName;
-  final double confidence;
-  final String? imageUrl;
-  final String? description;
-  final Map<String, String>? characteristics;
-  final DateTime scannedAt;
 
   const BreedScan({
     required this.id,
@@ -28,6 +21,13 @@ class BreedScan {
     characteristics: (json['characteristics'] as Map?)?.cast<String, String>(),
     scannedAt: DateTime.parse(json['scanned_at'] as String).toLocal(),
   );
+  final String id;
+  final String breedName;
+  final double confidence;
+  final String? imageUrl;
+  final String? description;
+  final Map<String, String>? characteristics;
+  final DateTime scannedAt;
 
   Map<String, dynamic> toJson() => {
     'id': id,

@@ -6,14 +6,14 @@ import 'dart:convert';
 /// Provides local persistence for critical data (feed, products, health records).
 /// Syncs with Supabase when connectivity is restored.
 class OfflineCache {
+
+  factory OfflineCache() => _instance;
+
+  OfflineCache._internal();
   static final OfflineCache _instance = OfflineCache._internal();
 
   late SharedPreferences _prefs;
   bool _initialized = false;
-
-  OfflineCache._internal();
-
-  factory OfflineCache() => _instance;
 
   /// Initialize the cache with SharedPreferences instance
   Future<void> initialize() async {

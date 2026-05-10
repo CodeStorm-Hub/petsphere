@@ -18,275 +18,287 @@ class MarketplaceScreen extends ConsumerWidget {
     final user = ref.watch(authProvider).user;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final navSpace = bottomNavSpaceFor(context);
+    final width = MediaQuery.of(context).size.width;
+    final isTablet = width > 600;
+    final navSpace = isTablet ? 24.0 : bottomNavSpaceFor(context);
+    const maxContentWidth = 1000.0;
+    
+    // Calculate cross axis count based on available width
+    final crossAxisCount = (width / 250).floor().clamp(2, 4);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: RefreshIndicator(
         onRefresh: () => ref.read(marketplaceProvider.notifier).refresh(),
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            // ── Personalized Greeting Header ────────────────────────────────
-            SliverAppBar(
-              floating: true,
-              backgroundColor: theme.scaffoldBackgroundColor,
-              elevation: 0,
-              surfaceTintColor: Colors.transparent,
-              toolbarHeight: 80,
-              title: Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Good Morning,',
-                      style: GoogleFonts.dmSans(
-                        fontSize: 14,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      user?.name?.split(' ').first ?? 'Pet Parent',
-                      style: GoogleFonts.dmSans(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.receipt_long_outlined),
-                        tooltip: 'Order History',
-                        onPressed: () => context.push('/orders'),
-                      ),
-                      _CartButton(count: cartState.totalItemCount),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-              ],
-            ),
-
-            // ── Search & Filter ───────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _MarketSearchBar(
-                        onTap: () => context.push('/search'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Filter Button
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: cs.primary,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.tune_rounded,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // ── Member Exclusive Promo Banner ──────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-                child: Semantics(
-                  button: true,
-                  label:
-                      'Member Exclusive: Summer Grooming Kit — Now 20% Off. Tap to browse Grooming.',
-                  child: GestureDetector(
-                    onTap: () => ref
-                        .read(marketplaceProvider.notifier)
-                        .setFilter('Grooming'),
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [cs.primary, cs.secondary],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: cs.primary.withAlpha(40),
-                            blurRadius: 15,
-                            offset: const Offset(0, 8),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: maxContentWidth),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // ── Personalized Greeting Header ────────────────────────────────
+                SliverAppBar(
+                  floating: true,
+                  backgroundColor: theme.scaffoldBackgroundColor,
+                  elevation: 0,
+                  surfaceTintColor: Colors.transparent,
+                  toolbarHeight: 80,
+                  title: Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Good Morning,',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 14,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
                           ),
-                        ],
-                      ),
+                        ),
+                        Text(
+                          user?.name?.split(' ').first ?? 'Pet Parent',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.workspace_premium_rounded,
-                            color: cs.onPrimary,
-                            size: 32,
+                          IconButton(
+                            icon: const Icon(Icons.receipt_long_outlined),
+                            tooltip: 'Order History',
+                            onPressed: () => context.push('/orders'),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'MEMBER EXCLUSIVE',
-                                  style: GoogleFonts.dmSans(
-                                    color: cs.onPrimary.withAlpha(200),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 1.2,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Summer Grooming Kit — Now 20% Off',
-                                  style: GoogleFonts.dmSans(
-                                    color: cs.onPrimary,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right_rounded,
-                            color: cs.onPrimary,
-                          ),
+                          _CartButton(count: cartState.totalItemCount),
                         ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                  ],
+                ),
+
+                // ── Search & Filter ───────────────────────────────────────────
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _MarketSearchBar(
+                            onTap: () => context.push('/search'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Filter Button
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: cs.primary,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.tune_rounded,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // ── Member Exclusive Promo Banner ──────────────────────────────
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    child: Semantics(
+                      button: true,
+                      label:
+                          'Member Exclusive: Summer Grooming Kit — Now 20% Off. Tap to browse Grooming.',
+                      child: GestureDetector(
+                        onTap: () => ref
+                            .read(marketplaceProvider.notifier)
+                            .setFilter('Grooming'),
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [cs.primary, cs.secondary],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: cs.primary.withAlpha(40),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.workspace_premium_rounded,
+                                color: cs.onPrimary,
+                                size: 32,
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'MEMBER EXCLUSIVE',
+                                      style: GoogleFonts.dmSans(
+                                        color: cs.onPrimary.withAlpha(200),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 1.2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Summer Grooming Kit — Now 20% Off',
+                                      style: GoogleFonts.dmSans(
+                                        color: cs.onPrimary,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                color: cs.onPrimary,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
 
-            // ── Minimalist Categories ──────────────────────────────────────
-            SliverToBoxAdapter(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    _CategoryChip(
-                      label: 'All Items',
-                      value: null,
-                      current: marketState.filterCategory,
+                // ── Minimalist Categories ──────────────────────────────────────
+                SliverToBoxAdapter(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        _CategoryChip(
+                          label: 'All Items',
+                          value: null,
+                          current: marketState.filterCategory,
+                        ),
+                        const SizedBox(width: 12),
+                        _CategoryChip(
+                          label: 'Food',
+                          value: 'Food',
+                          current: marketState.filterCategory,
+                        ),
+                        const SizedBox(width: 12),
+                        _CategoryChip(
+                          label: 'Toys',
+                          value: 'Toys',
+                          current: marketState.filterCategory,
+                        ),
+                        const SizedBox(width: 12),
+                        _CategoryChip(
+                          label: 'Bedding',
+                          value: 'Bedding',
+                          current: marketState.filterCategory,
+                        ),
+                        const SizedBox(width: 12),
+                        _CategoryChip(
+                          label: 'Grooming',
+                          value: 'Grooming',
+                          current: marketState.filterCategory,
+                        ),
+                        const SizedBox(width: 12),
+                        _CategoryChip(
+                          label: 'Treats',
+                          value: 'Treats',
+                          current: marketState.filterCategory,
+                        ),
+                        const SizedBox(width: 12),
+                        _CategoryChip(
+                          label: 'Accessories',
+                          value: 'Accessories',
+                          current: marketState.filterCategory,
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    _CategoryChip(
-                      label: 'Food',
-                      value: 'Food',
-                      current: marketState.filterCategory,
-                    ),
-                    const SizedBox(width: 12),
-                    _CategoryChip(
-                      label: 'Toys',
-                      value: 'Toys',
-                      current: marketState.filterCategory,
-                    ),
-                    const SizedBox(width: 12),
-                    _CategoryChip(
-                      label: 'Bedding',
-                      value: 'Bedding',
-                      current: marketState.filterCategory,
-                    ),
-                    const SizedBox(width: 12),
-                    _CategoryChip(
-                      label: 'Grooming',
-                      value: 'Grooming',
-                      current: marketState.filterCategory,
-                    ),
-                    const SizedBox(width: 12),
-                    _CategoryChip(
-                      label: 'Treats',
-                      value: 'Treats',
-                      current: marketState.filterCategory,
-                    ),
-                    const SizedBox(width: 12),
-                    _CategoryChip(
-                      label: 'Accessories',
-                      value: 'Accessories',
-                      current: marketState.filterCategory,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-
-            // ── Product Grid ────────────────────────────────────────────────
-            if (marketState.products.isEmpty && !marketState.isLoading)
-              const SliverFillRemaining(
-                child: Center(child: Text('No items found in this category')),
-              )
-            else
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + navSpace),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.7,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
                   ),
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    if (index >= marketState.products.length) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    final product = marketState.products[index];
-                    return ProductCard(
-                      product: product,
-                      onTap: () => context.push('/product/${product.id}'),
-                      onAdd: () {
-                        ref.read(cartProvider.notifier).addProduct(product);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${product.name} added to cart'),
-                            behavior: SnackBarBehavior.floating,
-                            duration: const Duration(seconds: 1),
-                          ),
-                        );
-                      },
-                    );
-                  }, childCount: marketState.products.length),
                 ),
-              ),
-          ],
+
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+                // ── Product Grid ────────────────────────────────────────────────
+                if (marketState.products.isEmpty && !marketState.isLoading)
+                  const SliverFillRemaining(
+                    child: Center(child: Text('No items found in this category')),
+                  )
+                else
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + navSpace),
+                    sliver: SliverGrid(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        childAspectRatio: 0.7,
+                        crossAxisSpacing: 20,
+                        mainAxisSpacing: 20,
+                      ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        if (index >= marketState.products.length) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        final product = marketState.products[index];
+                        return ProductCard(
+                          product: product,
+                          onTap: () => context.push('/product/${product.id}'),
+                          onAdd: () {
+                            ref.read(cartProvider.notifier).addProduct(product);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${product.name} added to cart'),
+                                behavior: SnackBarBehavior.floating,
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                        );
+                      }, childCount: marketState.products.length),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
+
   }
 }
 
 // ── Components ─────────────────────────────────────────────────────────────
 
 class _CartButton extends StatelessWidget {
-  final int count;
   const _CartButton({required this.count});
+  final int count;
 
   @override
   Widget build(BuildContext context) {
@@ -325,8 +337,8 @@ class _CartButton extends StatelessWidget {
 }
 
 class _MarketSearchBar extends StatelessWidget {
-  final VoidCallback onTap;
   const _MarketSearchBar({required this.onTap});
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -368,15 +380,15 @@ class _MarketSearchBar extends StatelessWidget {
 }
 
 class _CategoryChip extends ConsumerWidget {
-  final String label;
-  final String? value;
-  final String? current;
 
   const _CategoryChip({
     required this.label,
     required this.value,
     required this.current,
   });
+  final String label;
+  final String? value;
+  final String? current;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

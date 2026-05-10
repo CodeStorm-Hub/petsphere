@@ -1,13 +1,4 @@
 class PetFriendlyPlace {
-  final String id;
-  final String name;
-  final String category;
-  final String? imageUrl;
-  final double rating;
-  final int reviewCount;
-  final double distanceMiles;
-  final String? status;
-  final DateTime createdAt;
 
   const PetFriendlyPlace({
     required this.id,
@@ -34,6 +25,15 @@ class PetFriendlyPlace {
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
+  final String id;
+  final String name;
+  final String category;
+  final String? imageUrl;
+  final double rating;
+  final int reviewCount;
+  final double distanceMiles;
+  final String? status;
+  final DateTime createdAt;
 
   Map<String, dynamic> toJson() {
     return {

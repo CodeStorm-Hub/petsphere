@@ -1,16 +1,6 @@
 import 'package:petfolio/core/constants/supabase_config.dart';
 
 class SitterJob {
-  final String id;
-  final String petOwnerId;
-  final String? sitterId;
-  final String? petId;
-  final DateTime startDate;
-  final DateTime endDate;
-  final String status;
-  final String? description;
-  final double? ratePerDay;
-  final DateTime createdAt;
 
   const SitterJob({
     required this.id,
@@ -37,6 +27,16 @@ class SitterJob {
     ratePerDay: (json['rate_per_day'] as num?)?.toDouble(),
     createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
   );
+  final String id;
+  final String petOwnerId;
+  final String? sitterId;
+  final String? petId;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String status;
+  final String? description;
+  final double? ratePerDay;
+  final DateTime createdAt;
 }
 
 class SitterJobsRepository {

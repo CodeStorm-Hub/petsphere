@@ -111,14 +111,16 @@ class HomeScreen extends ConsumerWidget {
   ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final navSpace = bottomNavSpaceFor(context);
+    final width = MediaQuery.of(context).size.width;
+    final isTablet = width > 600;
+    final navSpace = isTablet ? 24.0 : bottomNavSpaceFor(context);
 
     Widget centerWrap(Widget child) {
       return LayoutBuilder(
         builder: (context, constraints) {
-          final width = math.min(constraints.maxWidth, _kFeedMaxWidth);
+          final feedWidth = math.min(constraints.maxWidth, _kFeedMaxWidth);
           return Center(
-            child: SizedBox(width: width, child: child),
+            child: SizedBox(width: feedWidth, child: child),
           );
         },
       );
@@ -332,7 +334,7 @@ class HomeScreen extends ConsumerWidget {
     return 'Good evening';
   }
 
-  void _showShareSheet(
+  Future<void> _showShareSheet(
     BuildContext context,
     WidgetRef ref,
     PostModel post,
@@ -660,15 +662,15 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _CommentBottomSheetWidget extends ConsumerStatefulWidget {
-  final String postId;
-  final String currentPetId;
-  final String petName;
 
   const _CommentBottomSheetWidget({
     required this.postId,
     required this.currentPetId,
     required this.petName,
   });
+  final String postId;
+  final String currentPetId;
+  final String petName;
 
   @override
   ConsumerState<_CommentBottomSheetWidget> createState() =>
@@ -890,12 +892,6 @@ class _CommentBottomSheetWidgetState
 // story bubbles. The active pet is shown first as "Your story" with a + overlay.
 // Sized intrinsically so it never overflows on any device or text scale.
 class _StoriesRow extends StatelessWidget {
-  final List<PetModel> pets;
-  final List<StoryModel> stories;
-  final String currentPetId;
-  final VoidCallback onCreateStory;
-  final ValueChanged<String> onStoryTap;
-  final ValueChanged<String?> onYourStoryTap;
 
   const _StoriesRow({
     required this.pets,
@@ -905,6 +901,12 @@ class _StoriesRow extends StatelessWidget {
     required this.onStoryTap,
     required this.onYourStoryTap,
   });
+  final List<PetModel> pets;
+  final List<StoryModel> stories;
+  final String currentPetId;
+  final VoidCallback onCreateStory;
+  final ValueChanged<String> onStoryTap;
+  final ValueChanged<String?> onYourStoryTap;
 
   @override
   Widget build(BuildContext context) {
@@ -973,12 +975,6 @@ enum _RingStyle { none, gradient, dashed }
 enum _StoryBadge { none, plus }
 
 class _StoryItem extends StatelessWidget {
-  final String imageUrl;
-  final String label;
-  final _RingStyle ringStyle;
-  final _StoryBadge badge;
-  final VoidCallback onTap;
-  final VoidCallback? onBadgeTap;
 
   const _StoryItem({
     required this.imageUrl,
@@ -988,6 +984,12 @@ class _StoryItem extends StatelessWidget {
     required this.onTap,
     this.onBadgeTap,
   });
+  final String imageUrl;
+  final String label;
+  final _RingStyle ringStyle;
+  final _StoryBadge badge;
+  final VoidCallback onTap;
+  final VoidCallback? onBadgeTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1126,9 +1128,6 @@ class _StoryItem extends StatelessWidget {
 
 /// Simple dashed circular border for the "Add Pet" story bubble.
 class DottedCircle extends StatelessWidget {
-  final Widget child;
-  final Color color;
-  final double padding;
 
   const DottedCircle({
     super.key,
@@ -1136,6 +1135,9 @@ class DottedCircle extends StatelessWidget {
     required this.color,
     this.padding = 4,
   });
+  final Widget child;
+  final Color color;
+  final double padding;
 
   @override
   Widget build(BuildContext context) {
@@ -1147,8 +1149,8 @@ class DottedCircle extends StatelessWidget {
 }
 
 class _DashedCirclePainter extends CustomPainter {
-  final Color color;
   _DashedCirclePainter({required this.color});
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1181,8 +1183,8 @@ class _DashedCirclePainter extends CustomPainter {
 }
 
 class _NotificationIconButton extends ConsumerWidget {
-  final VoidCallback onTap;
   const _NotificationIconButton({required this.onTap});
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1236,8 +1238,8 @@ class _NotificationIconButton extends ConsumerWidget {
 }
 
 class _MessageIconButton extends ConsumerWidget {
-  final VoidCallback onTap;
   const _MessageIconButton({required this.onTap});
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

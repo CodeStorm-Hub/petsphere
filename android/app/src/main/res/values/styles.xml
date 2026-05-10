@@ -3,7 +3,7 @@
     <!-- flutter_stripe PaymentSheet requires Theme.AppCompat / Theme.MaterialComponents
          (not android: Theme.Black.*). See: https://github.com/flutter-stripe/flutter_stripe -->
     <!-- Theme applied to the Android Window while the process is starting.
-         Uses dark window + splash drawable to match PetSphere. -->
+         Uses dark window + splash drawable to match PetFolio. -->
     <style name="LaunchTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowBackground">@drawable/launch_background</item>
     </style>

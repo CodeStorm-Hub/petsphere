@@ -6,21 +6,6 @@ import 'package:petfolio/core/constants/supabase_config.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class AdoptionListing {
-  final String id;
-  final String shelterName;
-  final String petName;
-  final String species;
-  final String? breed;
-  final int? ageMonths;
-  final String? gender;
-  final String? description;
-  final String? imageUrl;
-  final double? adoptionFee;
-  final bool isAvailable;
-  final String? contactEmail;
-  final String? contactPhone;
-  final String? location;
-  final DateTime createdAt;
 
   const AdoptionListing({
     required this.id,
@@ -40,14 +25,6 @@ class AdoptionListing {
     required this.createdAt,
   });
 
-  String get ageLabel {
-    if (ageMonths == null) return 'Age unknown';
-    if (ageMonths! < 12) return '${ageMonths}mo';
-    final years = ageMonths! ~/ 12;
-    final months = ageMonths! % 12;
-    return months > 0 ? '${years}y ${months}mo' : '${years}y';
-  }
-
   factory AdoptionListing.fromJson(Map<String, dynamic> json) =>
       AdoptionListing(
         id: json['id'] as String,
@@ -66,15 +43,32 @@ class AdoptionListing {
         location: json['location'] as String?,
         createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
       );
+  final String id;
+  final String shelterName;
+  final String petName;
+  final String species;
+  final String? breed;
+  final int? ageMonths;
+  final String? gender;
+  final String? description;
+  final String? imageUrl;
+  final double? adoptionFee;
+  final bool isAvailable;
+  final String? contactEmail;
+  final String? contactPhone;
+  final String? location;
+  final DateTime createdAt;
+
+  String get ageLabel {
+    if (ageMonths == null) return 'Age unknown';
+    if (ageMonths! < 12) return '${ageMonths}mo';
+    final years = ageMonths! ~/ 12;
+    final months = ageMonths! % 12;
+    return months > 0 ? '${years}y ${months}mo' : '${years}y';
+  }
 }
 
 class AdoptionApplication {
-  final String id;
-  final String listingId;
-  final String applicantId;
-  final String status; // pending|approved|rejected|withdrawn
-  final String? message;
-  final DateTime createdAt;
 
   const AdoptionApplication({
     required this.id,
@@ -94,6 +88,12 @@ class AdoptionApplication {
         message: json['message'] as String?,
         createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
       );
+  final String id;
+  final String listingId;
+  final String applicantId;
+  final String status; // pending|approved|rejected|withdrawn
+  final String? message;
+  final DateTime createdAt;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

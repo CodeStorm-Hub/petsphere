@@ -8,15 +8,15 @@ import 'package:path/path.dart' as p;
 
 /// Compression result containing the compressed file and metadata.
 class CompressionResult {
-  final File file;
-  final int originalBytes;
-  final int compressedBytes;
 
   const CompressionResult({
     required this.file,
     required this.originalBytes,
     required this.compressedBytes,
   });
+  final File file;
+  final int originalBytes;
+  final int compressedBytes;
 
   double get compressionRatio =>
       originalBytes > 0 ? compressedBytes / originalBytes : 1.0;
@@ -175,10 +175,10 @@ class ImageCompressor {
 
 // Isolate payload for batch compression
 class _BatchParams {
+  const _BatchParams(this.files, this.quality, this.maxDimension);
   final List<File> files;
   final int quality;
   final int maxDimension;
-  const _BatchParams(this.files, this.quality, this.maxDimension);
 }
 
 Future<List<CompressionResult>> _compressBatchIsolate(

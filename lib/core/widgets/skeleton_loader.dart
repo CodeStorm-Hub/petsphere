@@ -120,8 +120,8 @@ class ProfileSkeletonLoader extends StatelessWidget {
 }
 
 class DiscoverySkeletonLoader extends StatelessWidget {
-  final double navSpace;
   const DiscoverySkeletonLoader({super.key, required this.navSpace});
+  final double navSpace;
 
   @override
   Widget build(BuildContext context) {

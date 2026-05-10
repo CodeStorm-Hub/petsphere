@@ -69,10 +69,10 @@ class PetFriendlyPlacesScreen extends ConsumerWidget {
 }
 
 class _CategoryHeader extends StatelessWidget {
-  final WidgetRef ref;
-  final String selectedCategory;
 
   const _CategoryHeader({required this.ref, required this.selectedCategory});
+  final WidgetRef ref;
+  final String selectedCategory;
 
   static const categories = [
     {'name': 'Parks', 'icon': Icons.park_outlined},
@@ -147,9 +147,9 @@ class _CategoryHeader extends StatelessWidget {
 }
 
 class _PlaceCard extends StatelessWidget {
-  final PetFriendlyPlace place;
 
   const _PlaceCard({required this.place});
+  final PetFriendlyPlace place;
 
   @override
   Widget build(BuildContext context) {
@@ -268,10 +268,10 @@ class _PlaceCard extends StatelessWidget {
 }
 
 class _FeatureIcon extends StatelessWidget {
-  final IconData icon;
-  final String label;
 
   const _FeatureIcon({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
 
   @override
   Widget build(BuildContext context) {

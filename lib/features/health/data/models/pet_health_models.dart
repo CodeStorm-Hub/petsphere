@@ -6,13 +6,6 @@ import 'package:petfolio/core/theme/app_theme.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 @immutable
 class PetSymptom {
-  final String id;
-  final String petId;
-  final DateTime observedAt;
-  final String symptomType;
-  final String severity; // mild | moderate | severe
-  final String? notes;
-  final DateTime? resolvedAt;
 
   const PetSymptom({
     required this.id,
@@ -23,6 +16,27 @@ class PetSymptom {
     this.notes,
     this.resolvedAt,
   });
+
+  factory PetSymptom.fromJson(Map<String, dynamic> json) {
+    return PetSymptom(
+      id: json['id'] as String,
+      petId: json['pet_id'] as String,
+      observedAt: DateTime.parse(json['observed_at'] as String).toLocal(),
+      symptomType: json['symptom_type'] as String,
+      severity: json['severity'] as String? ?? 'mild',
+      notes: json['notes'] as String?,
+      resolvedAt: json['resolved_at'] == null
+          ? null
+          : DateTime.parse(json['resolved_at'] as String).toLocal(),
+    );
+  }
+  final String id;
+  final String petId;
+  final DateTime observedAt;
+  final String symptomType;
+  final String severity; // mild | moderate | severe
+  final String? notes;
+  final DateTime? resolvedAt;
 
   bool get isResolved => resolvedAt != null;
 
@@ -46,20 +60,6 @@ class PetSymptom {
       default:
         return 'Mild';
     }
-  }
-
-  factory PetSymptom.fromJson(Map<String, dynamic> json) {
-    return PetSymptom(
-      id: json['id'] as String,
-      petId: json['pet_id'] as String,
-      observedAt: DateTime.parse(json['observed_at'] as String).toLocal(),
-      symptomType: json['symptom_type'] as String,
-      severity: json['severity'] as String? ?? 'mild',
-      notes: json['notes'] as String?,
-      resolvedAt: json['resolved_at'] == null
-          ? null
-          : DateTime.parse(json['resolved_at'] as String).toLocal(),
-    );
   }
 
   Map<String, dynamic> toInsertJson(String petId) => {
@@ -125,14 +125,7 @@ class PetSymptom {
 
 // ─────────────────────────────────────────────────────────────────────────────
 @immutable
-class PetWeightLog {
-  final String? id;
-  final String petId;
-  final DateTime logDate;
-  final double weightLbs;
-  final String? notes;
-  final int? bcsScore; // 1–9 Body Condition Score
-  final String unit; // lbs | kg
+class PetWeightLog { // lbs | kg
 
   const PetWeightLog({
     this.id,
@@ -143,6 +136,25 @@ class PetWeightLog {
     this.bcsScore,
     this.unit = 'lbs',
   });
+
+  factory PetWeightLog.fromJson(Map<String, dynamic> json) {
+    return PetWeightLog(
+      id: json['id'] as String?,
+      petId: json['pet_id'] as String,
+      logDate: DateTime.parse(json['log_date'] as String),
+      weightLbs: (json['weight_lbs'] as num).toDouble(),
+      notes: json['notes'] as String?,
+      bcsScore: json['bcs_score'] as int?,
+      unit: json['unit'] as String? ?? 'lbs',
+    );
+  }
+  final String? id;
+  final String petId;
+  final DateTime logDate;
+  final double weightLbs;
+  final String? notes;
+  final int? bcsScore; // 1–9 Body Condition Score
+  final String unit;
 
   String get bcsLabel {
     switch (bcsScore) {
@@ -166,18 +178,6 @@ class PetWeightLog {
       default:
         return 'Not set';
     }
-  }
-
-  factory PetWeightLog.fromJson(Map<String, dynamic> json) {
-    return PetWeightLog(
-      id: json['id'] as String?,
-      petId: json['pet_id'] as String,
-      logDate: DateTime.parse(json['log_date'] as String),
-      weightLbs: (json['weight_lbs'] as num).toDouble(),
-      notes: json['notes'] as String?,
-      bcsScore: json['bcs_score'] as int?,
-      unit: json['unit'] as String? ?? 'lbs',
-    );
   }
 
   Map<String, dynamic> toUpsertJson() => {
@@ -236,17 +236,6 @@ class PetWeightLog {
 
 @immutable
 class PetVetAppointment {
-  final String id;
-  final String petId;
-  final String title;
-  final String? doctor;
-  final DateTime scheduledAt;
-  final String? notes;
-  final String status; // scheduled | completed | cancelled
-  final String
-  appointmentType; // routine | emergency | specialist | dental | surgery | follow_up
-  final String? location;
-  final double? cost;
 
   const PetVetAppointment({
     required this.id,
@@ -260,6 +249,32 @@ class PetVetAppointment {
     this.location,
     this.cost,
   });
+
+  factory PetVetAppointment.fromJson(Map<String, dynamic> json) {
+    return PetVetAppointment(
+      id: json['id'] as String,
+      petId: json['pet_id'] as String,
+      title: json['title'] as String,
+      doctor: json['doctor'] as String?,
+      scheduledAt: DateTime.parse(json['scheduled_at'] as String).toLocal(),
+      notes: json['notes'] as String?,
+      status: json['status'] as String? ?? 'scheduled',
+      appointmentType: json['appointment_type'] as String? ?? 'routine',
+      location: json['location'] as String?,
+      cost: (json['cost'] as num?)?.toDouble(),
+    );
+  }
+  final String id;
+  final String petId;
+  final String title;
+  final String? doctor;
+  final DateTime scheduledAt;
+  final String? notes;
+  final String status; // scheduled | completed | cancelled
+  final String
+  appointmentType; // routine | emergency | specialist | dental | surgery | follow_up
+  final String? location;
+  final double? cost;
 
   int get daysUntil => scheduledAt.difference(DateTime.now()).inDays;
 
@@ -278,21 +293,6 @@ class PetVetAppointment {
       default:
         return 'Routine';
     }
-  }
-
-  factory PetVetAppointment.fromJson(Map<String, dynamic> json) {
-    return PetVetAppointment(
-      id: json['id'] as String,
-      petId: json['pet_id'] as String,
-      title: json['title'] as String,
-      doctor: json['doctor'] as String?,
-      scheduledAt: DateTime.parse(json['scheduled_at'] as String).toLocal(),
-      notes: json['notes'] as String?,
-      status: json['status'] as String? ?? 'scheduled',
-      appointmentType: json['appointment_type'] as String? ?? 'routine',
-      location: json['location'] as String?,
-      cost: (json['cost'] as num?)?.toDouble(),
-    );
   }
 
   Map<String, dynamic> toUpsertJson() => {
@@ -366,16 +366,6 @@ class PetVetAppointment {
 
 @immutable
 class PetVaccination {
-  final String id;
-  final String petId;
-  final String vaccineName;
-  final String status; // scheduled | completed
-  final DateTime? scheduledFor;
-  final DateTime? completedOn;
-  final DateTime? nextDueDate;
-  final String? administeredBy;
-  final String? batchNumber;
-  final String? notes;
 
   const PetVaccination({
     required this.id,
@@ -389,13 +379,6 @@ class PetVaccination {
     this.batchNumber,
     this.notes,
   });
-
-  bool get isCompleted => status == 'completed';
-
-  bool get isDueSoon {
-    if (nextDueDate == null) return false;
-    return nextDueDate!.difference(DateTime.now()).inDays <= 30;
-  }
 
   factory PetVaccination.fromJson(Map<String, dynamic> json) {
     DateTime? parseDate(dynamic v) =>
@@ -412,6 +395,23 @@ class PetVaccination {
       batchNumber: json['batch_number'] as String?,
       notes: json['notes'] as String?,
     );
+  }
+  final String id;
+  final String petId;
+  final String vaccineName;
+  final String status; // scheduled | completed
+  final DateTime? scheduledFor;
+  final DateTime? completedOn;
+  final DateTime? nextDueDate;
+  final String? administeredBy;
+  final String? batchNumber;
+  final String? notes;
+
+  bool get isCompleted => status == 'completed';
+
+  bool get isDueSoon {
+    if (nextDueDate == null) return false;
+    return nextDueDate!.difference(DateTime.now()).inDays <= 30;
   }
 
   Map<String, dynamic> toUpsertJson() => {

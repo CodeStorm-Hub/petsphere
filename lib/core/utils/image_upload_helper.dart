@@ -7,6 +7,7 @@ import 'package:petfolio/core/utils/image_compressor.dart';
 /// A utility class for picking media and uploading it to Supabase Storage.
 ///
 /// Automatically compresses images before upload and validates file sizes.
+/// Enforces pathing that matches the RLS policies in Supabase.
 class ImageUploadHelper {
   static final _picker = ImagePicker();
 
@@ -79,37 +80,61 @@ class ImageUploadHelper {
 
     final contentType = _contentTypeFor(ext);
 
-    await supabase.storage
-        .from(bucket)
-        .upload(
-          path,
-          uploadFile,
-          fileOptions: FileOptions(upsert: true, contentType: contentType),
-        );
+    await supabase.storage.from(bucket).upload(
+      path,
+      uploadFile,
+      fileOptions: FileOptions(upsert: true, contentType: contentType),
+    );
 
     return supabase.storage.from(bucket).getPublicUrl(path);
   }
 
-  /// Convenience: Pick from gallery, compress, and upload in one call.
-  /// Returns null if the user cancelled.
-  static Future<String?> pickAndUpload({
-    required String bucket,
-    required String folder,
-    bool compress = true,
-  }) async {
-    final file = await pickFromGallery();
-    if (file == null) return null;
+  /// Specialized: Upload a pet's profile image to the 'pet-images' bucket.
+  /// Path: `avatars/uid_timestamp.ext` (Matches RLS policy)
+  static Future<String> uploadPetAvatar(File file) async {
+    final uid = supabase.auth.currentUser?.id;
+    if (uid == null) throw Exception('User not authenticated');
 
-    final ext = file.path.split('.').last;
-    final path = '$folder/${DateTime.now().millisecondsSinceEpoch}.$ext';
-    return upload(file: file, bucket: bucket, path: path, compress: compress);
+    final ext = file.path.split('.').last.toLowerCase();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final path = 'avatars/${uid}_$timestamp.$ext';
+
+    return upload(
+      file: file,
+      bucket: kBucketAvatars,
+      path: path,
+    );
   }
 
-  /// Specialized: Upload a pet's profile image to the 'pets' bucket.
-  static Future<String> uploadPetProfileImage(File file, String petName) async {
-    final ext = file.path.split('.').last;
-    final path = 'profiles/${petName}_${DateTime.now().millisecondsSinceEpoch}.$ext';
-    return upload(file: file, bucket: 'pets', path: path);
+  /// Specialized: Upload post media to the 'post-media' bucket.
+  /// Path: `uid/timestamp.ext` (Matches RLS policy)
+  static Future<String> uploadPostMedia(File file) async {
+    final uid = supabase.auth.currentUser?.id;
+    if (uid == null) throw Exception('User not authenticated');
+
+    final ext = file.path.split('.').last.toLowerCase();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final path = '$uid/$timestamp.$ext';
+
+    return upload(
+      file: file,
+      bucket: kBucketPostMedia,
+      path: path,
+    );
+  }
+
+  /// Specialized: Upload story media to the 'post-media' bucket.
+  /// Path: `stories/petId/timestamp.ext` (Matches RLS policy)
+  static Future<String> uploadStoryMedia(File file, String petId) async {
+    final ext = file.path.split('.').last.toLowerCase();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final path = 'stories/$petId/$timestamp.$ext';
+
+    return upload(
+      file: file,
+      bucket: kBucketPostMedia,
+      path: path,
+    );
   }
 
   // ── Internals ─────────────────────────────────────────────────────────────
@@ -137,7 +162,7 @@ class ImageUploadHelper {
       'webm' => 'video/webm',
       'avi' => 'video/x-msvideo',
       'mkv' => 'video/x-matroska',
-      _ => 'image/jpeg',
+      _ => 'application/octet-stream',
     };
   }
 }

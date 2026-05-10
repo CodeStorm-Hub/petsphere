@@ -188,8 +188,8 @@ class PetInsuranceHubScreen extends ConsumerWidget {
 }
 
 class _ClaimCard extends StatelessWidget {
-  final InsuranceClaim claim;
   const _ClaimCard({required this.claim});
+  final InsuranceClaim claim;
 
   @override
   Widget build(BuildContext context) {
@@ -271,8 +271,8 @@ class _ClaimCard extends StatelessWidget {
 }
 
 class _FileClaimSheet extends ConsumerStatefulWidget {
-  final String petId;
   const _FileClaimSheet({required this.petId});
+  final String petId;
 
   @override
   ConsumerState<_FileClaimSheet> createState() => _FileClaimSheetState();

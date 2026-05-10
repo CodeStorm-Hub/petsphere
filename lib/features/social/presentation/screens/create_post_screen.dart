@@ -9,12 +9,11 @@ import 'package:petfolio/features/social/presentation/controllers/feed_controlle
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/core/utils/image_upload_helper.dart';
 import 'package:petfolio/core/utils/media_utils.dart';
-import 'package:petfolio/core/constants/supabase_config.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
-  final String? initialPetId;
 
   const CreatePostScreen({super.key, this.initialPetId});
+  final String? initialPetId;
 
   @override
   ConsumerState<CreatePostScreen> createState() => CreatePostScreenState();
@@ -325,13 +324,7 @@ class CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
     setState(() => _isUploading = true);
     try {
-      final ext = _selectedFile!.path.split('.').last;
-      final path = '${pet.id}/${DateTime.now().millisecondsSinceEpoch}.$ext';
-      final mediaUrl = await ImageUploadHelper.upload(
-        file: _selectedFile!,
-        bucket: kBucketPostMedia,
-        path: path,
-      );
+      final mediaUrl = await ImageUploadHelper.uploadPostMedia(_selectedFile!);
 
       await ref
           .read(feedProvider.notifier)
@@ -536,9 +529,9 @@ class CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 }
 
 class _CloseComposerButton extends StatelessWidget {
-  final VoidCallback onPressed;
 
   const _CloseComposerButton({required this.onPressed});
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -577,9 +570,6 @@ class _CloseComposerButton extends StatelessWidget {
 }
 
 class ComposerSheet extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final Widget child;
 
   const ComposerSheet({
     super.key,
@@ -587,6 +577,9 @@ class ComposerSheet extends StatelessWidget {
     required this.subtitle,
     required this.child,
   });
+  final String title;
+  final String subtitle;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -647,15 +640,15 @@ class ComposerSheet extends StatelessWidget {
 }
 
 class _GradientShareButton extends StatelessWidget {
-  final bool enabled;
-  final bool isLoading;
-  final VoidCallback onPressed;
 
   const _GradientShareButton({
     required this.enabled,
     required this.isLoading,
     required this.onPressed,
   });
+  final bool enabled;
+  final bool isLoading;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -763,9 +756,9 @@ class _ComposerHero extends StatelessWidget {
 }
 
 class _SectionLabel extends StatelessWidget {
-  final String label;
 
   const _SectionLabel(this.label);
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -783,15 +776,15 @@ class _SectionLabel extends StatelessWidget {
 }
 
 class _MediaComposerCard extends StatelessWidget {
-  final File? file;
-  final PostMediaType mediaType;
-  final VoidCallback onTap;
 
   const _MediaComposerCard({
     required this.file,
     required this.mediaType,
     required this.onTap,
   });
+  final File? file;
+  final PostMediaType mediaType;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -976,10 +969,10 @@ class _VideoMediaPrompt extends StatelessWidget {
 }
 
 class _PillBadge extends StatelessWidget {
-  final IconData icon;
-  final String label;
 
   const _PillBadge({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -1011,10 +1004,10 @@ class _PillBadge extends StatelessWidget {
 }
 
 class _CaptionCard extends StatelessWidget {
-  final TextEditingController controller;
-  final VoidCallback onChanged;
 
   const _CaptionCard({required this.controller, required this.onChanged});
+  final TextEditingController controller;
+  final VoidCallback onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -1046,10 +1039,6 @@ class _CaptionCard extends StatelessWidget {
 }
 
 class _PostOptionsCard extends StatelessWidget {
-  final String location;
-  final List<PetModel> taggedPets;
-  final VoidCallback onLocationTap;
-  final VoidCallback onTagTap;
 
   const _PostOptionsCard({
     required this.location,
@@ -1057,6 +1046,10 @@ class _PostOptionsCard extends StatelessWidget {
     required this.onLocationTap,
     required this.onTagTap,
   });
+  final String location;
+  final List<PetModel> taggedPets;
+  final VoidCallback onLocationTap;
+  final VoidCallback onTagTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1093,11 +1086,6 @@ class _PostOptionsCard extends StatelessWidget {
 }
 
 class _ComposerOptionTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final bool isActive;
-  final VoidCallback onTap;
 
   const _ComposerOptionTile({
     required this.icon,
@@ -1106,6 +1094,11 @@ class _ComposerOptionTile extends StatelessWidget {
     this.isActive = false,
     required this.onTap,
   });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool isActive;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1140,9 +1133,9 @@ class _ComposerOptionTile extends StatelessWidget {
 }
 
 class _EmptyPetsState extends StatelessWidget {
-  final VoidCallback onAddPet;
 
   const _EmptyPetsState({required this.onAddPet});
+  final VoidCallback onAddPet;
 
   @override
   Widget build(BuildContext context) {
@@ -1191,11 +1184,6 @@ class _EmptyPetsState extends StatelessWidget {
 }
 
 class _MediaSourceTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
-  final VoidCallback onTap;
 
   const _MediaSourceTile({
     required this.icon,
@@ -1204,6 +1192,11 @@ class _MediaSourceTile extends StatelessWidget {
     required this.color,
     required this.onTap,
   });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1258,10 +1251,10 @@ class _MediaSourceTile extends StatelessWidget {
 }
 
 class _AuthorAvatar extends StatelessWidget {
-  final PetModel pet;
-  final bool isSelected;
 
   const _AuthorAvatar({required this.pet, required this.isSelected});
+  final PetModel pet;
+  final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -1315,8 +1308,8 @@ class _AuthorAvatar extends StatelessWidget {
 }
 
 class LocationSheetContent extends StatefulWidget {
-  final String initialLocation;
   const LocationSheetContent({super.key, required this.initialLocation});
+  final String initialLocation;
 
   @override
   State<LocationSheetContent> createState() => LocationSheetContentState();

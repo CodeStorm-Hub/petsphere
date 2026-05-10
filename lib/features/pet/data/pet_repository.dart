@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petfolio/core/constants/supabase_config.dart';
 
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/core/utils/image_upload_helper.dart';
 
 class PetRepository {
   // -------------------------------------------------------------------------
@@ -78,12 +79,8 @@ class PetRepository {
 
   /// Upload a pet image to Supabase Storage — returns the public URL
   Future<String> uploadPetImage(String petId, File imageFile) async {
-    final ext = imageFile.path.split('.').last;
-    final path = '$petId/${DateTime.now().millisecondsSinceEpoch}.$ext';
-
-    await supabase.storage.from(kBucketPetImages).upload(path, imageFile);
-
-    return supabase.storage.from(kBucketPetImages).getPublicUrl(path);
+    // Standardize on ImageUploadHelper for all media uploads
+    return ImageUploadHelper.uploadPetAvatar(imageFile);
   }
 
   // -------------------------------------------------------------------------

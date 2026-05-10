@@ -5,15 +5,15 @@ import 'package:petfolio/features/care/data/pet_expense_repository.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 
 class PetExpenseState {
-  final List<PetExpense> expenses;
-  final bool isLoading;
-  final String? error;
 
   PetExpenseState({
     this.expenses = const [],
     this.isLoading = false,
     this.error,
   });
+  final List<PetExpense> expenses;
+  final bool isLoading;
+  final String? error;
 
   PetExpenseState copyWith({
     List<PetExpense>? expenses,

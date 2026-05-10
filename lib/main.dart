@@ -13,6 +13,7 @@ import 'package:petfolio/core/services/push_notification_service.dart';
 import 'package:petfolio/core/constants/supabase_config.dart';
 import 'package:petfolio/core/services/offline_cache.dart';
 import 'package:petfolio/core/theme/theme_bootstrap.dart';
+import 'package:petfolio/core/services/storage_service.dart';
 
 /// Set via `flutter test integration_test/... --dart-define=INTEGRATION_TEST=true`
 /// so [IntegrationTestWidgetsFlutterBinding] is not replaced by Marionette.
@@ -57,6 +58,10 @@ Future<void> main() async {
         url: supabaseInitUrl,
         anonKey: supabaseInitAnonKey,
       );
+
+      // Self-heal storage buckets (ensure they are public and exist)
+      final storageService = StorageService(Supabase.instance.client);
+      await storageService.initializeBuckets();
 
       if (_kStripePublishableKey.isNotEmpty) {
         try {

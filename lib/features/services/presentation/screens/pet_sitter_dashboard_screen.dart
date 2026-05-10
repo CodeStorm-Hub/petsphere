@@ -110,10 +110,10 @@ class _MarketplaceTab extends ConsumerWidget {
 }
 
 class _JobCard extends StatelessWidget {
-  final SitterJob job;
-  final bool isMarketplace;
 
   const _JobCard({required this.job, this.isMarketplace = false});
+  final SitterJob job;
+  final bool isMarketplace;
 
   @override
   Widget build(BuildContext context) {
@@ -237,15 +237,15 @@ class _JobCard extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String message;
 
   const _EmptyState({
     required this.icon,
     required this.title,
     required this.message,
   });
+  final IconData icon;
+  final String title;
+  final String message;
 
   @override
   Widget build(BuildContext context) {

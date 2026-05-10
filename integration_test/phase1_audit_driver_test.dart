@@ -63,9 +63,9 @@ void main() {
           final landing = await _waitForLanding(driver);
           if (landing == _Landing.login) {
             await driver.tap(find.byValueKey('login_email_field'));
-            await driver.enterText('afsanchowdhury25@gmail.com');
+            await driver.enterText('syed.reza181@gmail.com');
             await driver.tap(find.byValueKey('login_password_field'));
-            await driver.enterText('callofduty100');
+            await driver.enterText('123qweasd');
             await driver.tap(find.text('Sign In'));
             await _assertMainShell(driver);
           }

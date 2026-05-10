@@ -35,55 +35,66 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
   Widget build(BuildContext context) {
     final petState = ref.watch(petProvider);
     final pet = petState.activePet;
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     if (pet == null) {
       return _buildEmptyState(context, cs);
     }
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          _buildSliverAppBar(context, pet, cs),
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildProfileHeader(context, pet, cs),
-                _buildActionButtons(context, pet, cs),
-                const SizedBox(height: 24),
-              ],
-            ),
-          ),
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _SliverAppBarDelegate(
-              TabBar(
-                controller: _tabController,
-                indicatorColor: cs.primary,
-                labelColor: cs.primary,
-                unselectedLabelColor: cs.onSurfaceVariant,
-                tabs: const [
-                  Tab(icon: Icon(Icons.grid_on_rounded), text: 'Photos'),
-                  Tab(icon: Icon(Icons.emoji_events_outlined), text: 'Awards'),
-                  Tab(icon: Icon(Icons.health_and_safety_outlined), text: 'Health'),
-                ],
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: CustomScrollView(
+            slivers: [
+              _buildSliverAppBar(context, pet, cs),
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildProfileHeader(context, pet, cs),
+                    _buildActionButtons(context, pet, cs),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
-            ),
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _SliverAppBarDelegate(
+                  TabBar(
+                    controller: _tabController,
+                    indicatorColor: cs.primary,
+                    labelColor: cs.primary,
+                    unselectedLabelColor: cs.onSurfaceVariant,
+                    tabs: const [
+                      Tab(icon: Icon(Icons.grid_on_rounded), text: 'Photos'),
+                      Tab(icon: Icon(Icons.emoji_events_outlined), text: 'Awards'),
+                      Tab(
+                        icon: Icon(Icons.health_and_safety_outlined),
+                        text: 'Health',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SliverFillRemaining(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildPhotosGrid(pet),
+                    _buildAchievementsTab(cs),
+                    _buildHealthSummaryTab(pet, cs),
+                  ],
+                ),
+              ),
+            ],
           ),
-          SliverFillRemaining(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildPhotosGrid(pet),
-                _buildAchievementsTab(cs),
-                _buildHealthSummaryTab(pet, cs),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
+
   }
 
   Widget _buildSliverAppBar(BuildContext context, PetModel pet, ColorScheme cs) {

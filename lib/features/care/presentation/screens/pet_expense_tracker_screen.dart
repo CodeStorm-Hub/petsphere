@@ -282,15 +282,15 @@ class _AddExpenseModalState extends ConsumerState<_AddExpenseModal> {
 }
 
 class _BudgetDashboard extends ConsumerWidget {
-  final double totalSpent;
-  final double budget;
-  final String petName;
 
   const _BudgetDashboard({
     required this.totalSpent,
     required this.budget,
     required this.petName,
   });
+  final double totalSpent;
+  final double budget;
+  final String petName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -485,8 +485,8 @@ class _BudgetDashboard extends ConsumerWidget {
 }
 
 class _CategoryBreakdown extends StatelessWidget {
-  final List<PetExpense> expenses;
   const _CategoryBreakdown({required this.expenses});
+  final List<PetExpense> expenses;
 
   @override
   Widget build(BuildContext context) {
@@ -529,10 +529,6 @@ class _CategoryBreakdown extends StatelessWidget {
 }
 
 class _CategoryCard extends StatelessWidget {
-  final String name;
-  final IconData icon;
-  final Color color;
-  final double amount;
 
   const _CategoryCard({
     required this.name,
@@ -540,6 +536,10 @@ class _CategoryCard extends StatelessWidget {
     required this.color,
     required this.amount,
   });
+  final String name;
+  final IconData icon;
+  final Color color;
+  final double amount;
 
   @override
   Widget build(BuildContext context) {
@@ -626,14 +626,14 @@ class _UpcomingBills extends StatelessWidget {
 }
 
 class _BillItem extends StatelessWidget {
-  final String title;
-  final String date;
-  final String amount;
   const _BillItem({
     required this.title,
     required this.date,
     required this.amount,
   });
+  final String title;
+  final String date;
+  final String amount;
 
   @override
   Widget build(BuildContext context) {
@@ -663,8 +663,8 @@ class _BillItem extends StatelessWidget {
 }
 
 class _TransactionCard extends ConsumerWidget {
-  final PetExpense tx;
   const _TransactionCard({required this.tx});
+  final PetExpense tx;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -748,9 +748,9 @@ class _TransactionCard extends ConsumerWidget {
 }
 
 class _PeriodSelector extends StatelessWidget {
+  const _PeriodSelector({required this.selected, required this.onSelected});
   final String selected;
   final ValueChanged<String> onSelected;
-  const _PeriodSelector({required this.selected, required this.onSelected});
 
   @override
   Widget build(BuildContext context) {

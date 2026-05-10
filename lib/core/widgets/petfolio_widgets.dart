@@ -4,10 +4,6 @@ import 'package:petfolio/core/theme/app_theme.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class GlassCard extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry padding;
-  final EdgeInsetsGeometry? margin;
-  final VoidCallback? onTap;
 
   const GlassCard({
     super.key,
@@ -16,6 +12,10 @@ class GlassCard extends StatelessWidget {
     this.margin,
     this.onTap,
   });
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? margin;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -53,10 +53,6 @@ class GlassCard extends StatelessWidget {
 }
 
 class PillButton extends StatefulWidget {
-  final Widget child;
-  final VoidCallback? onPressed;
-  final bool outlined;
-  final IconData? icon;
 
   const PillButton({
     super.key,
@@ -65,6 +61,10 @@ class PillButton extends StatefulWidget {
     this.outlined = false,
     this.icon,
   });
+  final Widget child;
+  final VoidCallback? onPressed;
+  final bool outlined;
+  final IconData? icon;
 
   @override
   State<PillButton> createState() => PillButtonState();
@@ -120,9 +120,9 @@ class PillButtonState extends State<PillButton> {
 }
 
 class SectionTag extends StatelessWidget {
-  final String text;
 
   const SectionTag(this.text, {super.key});
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -139,9 +139,9 @@ class SectionTag extends StatelessWidget {
 }
 
 class AnimatedBadge extends StatefulWidget {
-  final Widget child;
 
   const AnimatedBadge({super.key, required this.child});
+  final Widget child;
 
   @override
   State<AnimatedBadge> createState() => AnimatedBadgeState();
@@ -205,9 +205,9 @@ class AnimatedBadgeState extends State<AnimatedBadge>
 }
 
 class VitalsBar extends StatefulWidget {
-  final double value;
 
   const VitalsBar({super.key, required this.value});
+  final double value;
 
   @override
   State<VitalsBar> createState() => VitalsBarState();
@@ -273,10 +273,6 @@ class VitalsBarState extends State<VitalsBar>
 }
 
 class ShimmerLoader extends StatefulWidget {
-  final double height;
-  final double? width;
-  final BorderRadiusGeometry borderRadius;
-  final bool shouldAnimate;
 
   const ShimmerLoader({
     super.key,
@@ -287,6 +283,10 @@ class ShimmerLoader extends StatefulWidget {
     ),
     this.shouldAnimate = true,
   });
+  final double height;
+  final double? width;
+  final BorderRadiusGeometry borderRadius;
+  final bool shouldAnimate;
 
   @override
   State<ShimmerLoader> createState() => ShimmerLoaderState();
@@ -366,9 +366,9 @@ class ShimmerLoaderState extends State<ShimmerLoader>
 }
 
 class ShimmerGroup extends StatelessWidget {
-  final Widget child;
 
   const ShimmerGroup({super.key, required this.child});
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -383,19 +383,19 @@ class ShimmerGroup extends StatelessWidget {
 }
 
 class FadeSlideIn extends StatefulWidget {
-  final Widget child;
-  final int delayMs;
 
   const FadeSlideIn({super.key, required this.child, this.delayMs = 0});
+  final Widget child;
+  final int delayMs;
 
   @override
   State<FadeSlideIn> createState() => FadeSlideInState();
 }
 
 class PetFolioGradientBackground extends StatefulWidget {
-  final Widget child;
 
   const PetFolioGradientBackground({super.key, required this.child});
+  final Widget child;
 
   @override
   State<PetFolioGradientBackground> createState() =>

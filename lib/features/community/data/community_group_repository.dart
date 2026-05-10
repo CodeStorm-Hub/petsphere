@@ -5,16 +5,6 @@ import 'package:petfolio/core/constants/supabase_config.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class CommunityGroup {
-  final String id;
-  final String name;
-  final String? description;
-  final String category;
-  final String? coverUrl;
-  final String ownerId;
-  final int memberCount;
-  final bool isPublic;
-  final DateTime createdAt;
-  bool isMember;
 
   CommunityGroup({
     required this.id,
@@ -40,6 +30,16 @@ class CommunityGroup {
     isPublic: json['is_public'] as bool? ?? true,
     createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
   );
+  final String id;
+  final String name;
+  final String? description;
+  final String category;
+  final String? coverUrl;
+  final String ownerId;
+  final int memberCount;
+  final bool isPublic;
+  final DateTime createdAt;
+  bool isMember;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

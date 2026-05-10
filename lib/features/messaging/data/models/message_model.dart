@@ -1,10 +1,4 @@
 class MessageModel {
-  final String id;
-  final String threadId;
-  final String senderPetId;
-  final String text;
-  final DateTime createdAt;
-  final bool isRead;
 
   MessageModel({
     required this.id,
@@ -14,6 +8,23 @@ class MessageModel {
     required this.createdAt,
     this.isRead = false,
   });
+
+  factory MessageModel.fromJson(Map<String, dynamic> json) {
+    return MessageModel(
+      id: json['id'] as String,
+      threadId: json['thread_id'] as String,
+      senderPetId: json['sender_pet_id'] as String,
+      text: json['text'] as String,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      isRead: json['is_read'] as bool? ?? false,
+    );
+  }
+  final String id;
+  final String threadId;
+  final String senderPetId;
+  final String text;
+  final DateTime createdAt;
+  final bool isRead;
 
   MessageModel copyWith({
     String? id,
@@ -30,17 +41,6 @@ class MessageModel {
       text: text ?? this.text,
       createdAt: createdAt ?? this.createdAt,
       isRead: isRead ?? this.isRead,
-    );
-  }
-
-  factory MessageModel.fromJson(Map<String, dynamic> json) {
-    return MessageModel(
-      id: json['id'] as String,
-      threadId: json['thread_id'] as String,
-      senderPetId: json['sender_pet_id'] as String,
-      text: json['text'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      isRead: json['is_read'] as bool? ?? false,
     );
   }
 

@@ -1,4 +1,4 @@
-# PetSphere Full App UI, UX, Architecture, Security, and Feature Remediation Plan
+# PetFolio Full App UI, UX, Architecture, Security, and Feature Remediation Plan
 
 Date: 2026-05-11  
 Scope: Flutter app in `lib/`, Supabase-backed data/auth flows, Android emulator UI traversal, runtime logs, user-story docs, and current online best practices.
@@ -21,11 +21,70 @@ Scope: Flutter app in `lib/`, Supabase-backed data/auth flows, Android emulator 
 - Current web research:
   - Flutter architecture guide: https://docs.flutter.dev/app-architecture/guide
   - Flutter adaptive design guide: https://docs.flutter.dev/ui/adaptive-responsive/general
+  - Flutter adaptive best practices: https://docs.flutter.dev/ui/adaptive-responsive/best-practices
   - Flutter accessibility guide: https://docs.flutter.dev/ui/accessibility
   - Supabase RLS guide: https://supabase.com/docs/guides/database/postgres/row-level-security
+  - Supabase Data API hardening guide: https://supabase.com/docs/guides/api/securing-your-api
   - Supabase MFA guide: https://supabase.com/docs/guides/auth/auth-mfa
   - Supabase changelog: https://supabase.com/changelog
+  - Firebase Cloud Messaging Flutter setup: https://firebase.google.com/docs/cloud-messaging/flutter/get-started
+  - Firebase FCM token freshness guidance: https://firebase.google.com/docs/cloud-messaging/manage-tokens
   - Material 3 adaptive layout guidance: https://m3.material.io/foundations/layout/applying-layout/window-size-classes
+  - Apple HIG Activity Rings guidance: https://developer.apple.com/design/human-interface-guidelines/activity-rings
+
+## 2026-05-11 Codex Follow-Up Evidence
+
+Evidence folder:
+
+- `docs/logs/full-ui-audit-2026-05-11-codex/`
+
+Actions performed:
+
+- Loaded the requested Flutter UI/UX, adaptive UI, Dart code review, responsive layout, architecture, frontend-design, frontend app builder, Supabase, Firebase, and Android emulator QA workflows.
+- Ran `flutter analyze`: no issues found.
+- Used Firebase MCP against active project `petfolio-197e6`.
+- Launched the app on connected emulator `emulator-5554` (`1080x2424`, density `420`).
+- Logged in with the supplied account after adb input correction for the `@` character.
+- Accepted the Android notification permission prompt.
+- Traversed Home, Discovery, Marketplace, Profile, and Pet Care; scrolled Pet Care to the end and captured UI XML/screenshot evidence.
+- Rechecked runtime logs after traversal.
+- Corrected app display branding in code:
+  - Android label: `PetFolio`
+  - iOS `CFBundleDisplayName`: `PetFolio`
+  - iOS `CFBundleName`: `PetFolio`
+  - In-app `BrandLogo(withText: true)` semantics: `PetFolio` instead of `Pet Folio`
+  - Android splash comments from `PetSphere` to `PetFolio`
+
+Fresh runtime findings:
+
+- The notification permission dialog still showed `Allow PetSphere to send you notifications?` before the branding fix. This was caused by `android:label="PetSphere"` and is now corrected in source.
+- Firebase MCP reports Android app display name `pet_dating_app (android)` and namespace `com.example.pet_dating_app`. This should be migrated deliberately later because it affects Firebase app registration, `google-services.json`, Kotlin package paths, and potentially released app identity.
+- Home exposes: `Pet Folio`, Search, New Post, Notifications, Messages, greeting, story tray, Home, Discover, Pet Care, Marketplace, Profile.
+- Discovery exposes: `Breeding Discovery`, Liked Pets, New Listing, Discover/Nearby/My Listings tabs, Try Again, and still shows `Failed to load matches.`
+- Marketplace exposes: Good Morning Pet Parent, Order History, cart/action button, Search Products, promo banner, category chips, and `No items found in this category`.
+- Profile exposes pet profile content, not owner profile content: Montu, species/breed, hardcoded `2.4k Fans`, bio, Edit Profile, New Post, Photos/Awards/Health tabs.
+- Pet Care top exposes: Back, Pet Care, active pet chip, Care Diary/Health/Feeding tabs, setup prompt, Today's Overview, Edit Goals, streak, checklist tasks.
+- Pet Care end exposes the full resource grid: Vet Booking, Emergency, Nutrition, Expenses, Growth, Insurance, Training, Adoption, Places, Events, Medical, Sitters, Timeline, Identifier, Knowledge, Reviews, Groups, Lost/Found, Memorial.
+- Runtime logs still reproduce:
+  - `match_requests.rejected_at does not exist`
+  - `pet_care_gamification.best_streak_days` missing from schema cache
+  - `pet_medication_doses.scheduled_for does not exist`
+- Attempting a top-right profile action opened the Android share sheet with text `Check out Montu on PetFolio! Persian looking for friends.`, confirming profile share is wired, but settings was not discoverable from the current profile UI hierarchy.
+
+Static code mapping from `lib`:
+
+- App code references these Supabase tables: `adoption_applications`, `adoption_listings`, `care_badge_definitions`, `chat_threads`, `comments`, `community_group_members`, `community_groups`, `follows`, `gear_reviews`, `knowledge_base_articles`, `lost_and_found_reports`, `match_requests`, `messages`, `notifications`, `orders`, `pet_activity_logs`, `pet_allergies`, `pet_breed_scans`, `pet_care_badge_unlocks`, `pet_care_gamification`, `pet_care_logs`, `pet_care_onboarding`, `pet_dental_logs`, `pet_event_rsvps`, `pet_events`, `pet_expenses`, `pet_friendly_places`, `pet_insurance_claims`, `pet_medication_doses`, `pet_medications`, `pet_memorial_entries`, `pet_nutrition_logs`, `pet_parasite_prevention`, `pet_sitter_jobs`, `pet_symptoms`, `pet_training_progress`, `pet_vaccinations`, `pet_vet_appointments`, `pet_weight_logs`, `pets`, `post_likes`, `posts`, `products`, `profiles`, `stories`, `user_fcm_tokens`, `vaccination_schedules`.
+- Storage buckets referenced by app code: `avatars`, `pet-images`, `post-media`, `product-images`.
+- Firebase/notification code path:
+  - `PushNotificationService` initializes Firebase, registers background and opened-message handlers, requests notification permission, stores FCM tokens, listens to token refresh, and deletes token on logout.
+  - `push-fcm` Edge Function exists under `supabase/functions/push-fcm`.
+  - Firebase best practice gap: token rows should include freshness timestamps and server-side stale-token pruning. Firebase recommends storing registration tokens with timestamps and periodically refreshing/removing stale tokens.
+
+Source-level frontend review deltas:
+
+- `flutter analyze` is clean, but static action scan still finds visible no-op or placeholder actions in shared async retry, search share actions, chat attachments/voice, post detail comments/share, pet social timeline, memorial, community groups, adoption, lost/found, training, nutrition, expenses, events, article share/bookmark, insurance claims, places map/detail, sitters, emergency care, growth charts, and health records.
+- Architecture has a feature-first shape with `data`, `presentation`, models, controllers, and repositories, which mostly aligns with Flutter's official separation-of-concerns guidance. The main issue is scale: very large screens such as `health_tab.dart` and `pet_care_screen.dart` carry too many concerns and should be split into feature widgets and route-level subflows.
+- Adaptive shell exists (`PetFolioNavBar`, `PetFolioNavRail`), but the primary product IA still needs a clearer owner/pet identity model and more large-screen two-pane layouts.
 
 ## Current Product Reality
 

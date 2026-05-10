@@ -364,15 +364,15 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
 }
 
 class _HealthStatusHeader extends StatelessWidget {
-  final String petName;
-  final String status;
-  final String lastCheckup;
 
   const _HealthStatusHeader({
     required this.petName,
     required this.status,
     required this.lastCheckup,
   });
+  final String petName;
+  final String status;
+  final String lastCheckup;
 
   @override
   Widget build(BuildContext context) {
@@ -451,9 +451,9 @@ class _HealthStatusHeader extends StatelessWidget {
 }
 
 class _VitalsGrid extends StatelessWidget {
-  final VitalsState vitalsState;
 
   const _VitalsGrid({required this.vitalsState});
+  final VitalsState vitalsState;
 
   @override
   Widget build(BuildContext context) {
@@ -507,11 +507,6 @@ class _VitalsGrid extends StatelessWidget {
 }
 
 class _VitalCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final String trend;
-  final Color color;
 
   const _VitalCard({
     required this.label,
@@ -520,6 +515,11 @@ class _VitalCard extends StatelessWidget {
     required this.trend,
     required this.color,
   });
+  final String label;
+  final String value;
+  final IconData icon;
+  final String trend;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -604,10 +604,6 @@ class _MedicalTimeline extends ConsumerWidget {
 }
 
 class _TimelineItem extends StatelessWidget {
-  final String date;
-  final String title;
-  final String doctor;
-  final String type;
 
   const _TimelineItem({
     required this.date,
@@ -615,6 +611,10 @@ class _TimelineItem extends StatelessWidget {
     required this.doctor,
     required this.type,
   });
+  final String date;
+  final String title;
+  final String doctor;
+  final String type;
 
   @override
   Widget build(BuildContext context) {
@@ -745,10 +745,6 @@ class _VaccineList extends ConsumerWidget {
 }
 
 class _VaccineCard extends StatelessWidget {
-  final String name;
-  final String date;
-  final String nextDue;
-  final String status;
 
   const _VaccineCard({
     required this.name,
@@ -756,6 +752,10 @@ class _VaccineCard extends StatelessWidget {
     required this.nextDue,
     required this.status,
   });
+  final String name;
+  final String date;
+  final String nextDue;
+  final String status;
 
   @override
   Widget build(BuildContext context) {
@@ -859,9 +859,9 @@ class _MedicationList extends ConsumerWidget {
 }
 
 class _MedicationCard extends StatelessWidget {
-  final PetMedication med;
 
   const _MedicationCard({required this.med});
+  final PetMedication med;
 
   @override
   Widget build(BuildContext context) {
@@ -919,9 +919,9 @@ class _MedicationCard extends StatelessWidget {
 }
 
 class _WeightChart extends StatelessWidget {
-  final List<PetWeightLog> weightLogs;
 
   const _WeightChart({required this.weightLogs});
+  final List<PetWeightLog> weightLogs;
 
   @override
   Widget build(BuildContext context) {
@@ -1049,8 +1049,8 @@ class _WeightChart extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  final String text;
   const _EmptyState({required this.text});
+  final String text;
 
   @override
   Widget build(BuildContext context) {

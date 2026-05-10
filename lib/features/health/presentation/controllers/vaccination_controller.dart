@@ -13,15 +13,15 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 
 @immutable
 class VaccinationState {
-  final List<PetVaccination> vaccinations;
-  final bool isLoading;
-  final String? error;
 
   const VaccinationState({
     this.vaccinations = const [],
     this.isLoading = false,
     this.error,
   });
+  final List<PetVaccination> vaccinations;
+  final bool isLoading;
+  final String? error;
 
   List<PetVaccination> get completed =>
       vaccinations.where((v) => v.isCompleted).toList();

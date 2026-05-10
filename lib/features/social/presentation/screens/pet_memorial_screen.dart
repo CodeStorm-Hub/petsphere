@@ -99,8 +99,8 @@ class PetMemorialScreen extends ConsumerWidget {
 }
 
 class _MemorialGridCard extends StatelessWidget {
-  final PetMemorialEntry entry;
   const _MemorialGridCard({required this.entry});
+  final PetMemorialEntry entry;
 
   @override
   Widget build(BuildContext context) {

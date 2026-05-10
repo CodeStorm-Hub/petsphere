@@ -11,11 +11,6 @@ import 'package:petfolio/core/utils/logger.dart';
 
 @immutable
 class MedicationState {
-  final List<PetMedication> medications;
-  final List<MedicationDose> todayDoses;
-  final bool isLoading;
-  final String? error;
-  final String? activePetId;
 
   const MedicationState({
     this.medications = const [],
@@ -24,6 +19,11 @@ class MedicationState {
     this.error,
     this.activePetId,
   });
+  final List<PetMedication> medications;
+  final List<MedicationDose> todayDoses;
+  final bool isLoading;
+  final String? error;
+  final String? activePetId;
 
   List<PetMedication> get activeMedications =>
       medications.where((m) => m.isActive).toList();

@@ -1,25 +1,4 @@
 class PetModel {
-  final String id;
-  final String userId;
-  final String name;
-  final String breed;
-  final String animalType;
-  final int age;
-  final String bio;
-  final String profileImageUrl;
-  final List<String> images;
-  final bool isPublicOwner;
-  final bool isBreedingListed;
-  final bool isVerified;
-  final bool isVaccinated;
-  final bool isCareListed;
-
-  /// Care goals & current vitals — `null` if the owner hasn't set them yet
-  /// (the UI then falls back to sensible defaults).
-  final int? dailyCalorieGoal;
-  final int? dailyWaterGoalCups;
-  final double? weightLbs;
-  final double monthlyBudget;
 
   const PetModel({
     required this.id,
@@ -41,6 +20,54 @@ class PetModel {
     this.weightLbs,
     this.monthlyBudget = 1000.0,
   });
+
+  factory PetModel.fromJson(Map<String, dynamic> json) {
+    return PetModel(
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      name: json['name'] as String,
+      breed: json['breed'] as String? ?? '',
+      animalType: json['animal_type'] as String? ?? '',
+      age: (json['age'] as num?)?.toInt() ?? 0,
+      bio: json['bio'] as String? ?? '',
+      profileImageUrl: json['profile_image_url'] as String? ?? '',
+      images:
+          (json['images'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      isPublicOwner: json['is_public_owner'] as bool? ?? true,
+      isBreedingListed: json['is_breeding_listed'] as bool? ?? false,
+      isVerified: json['is_verified'] as bool? ?? false,
+      isVaccinated: json['is_vaccinated'] as bool? ?? false,
+      isCareListed: json['is_care_listed'] as bool? ?? false,
+      dailyCalorieGoal: (json['daily_calorie_goal'] as num?)?.toInt(),
+      dailyWaterGoalCups: (json['daily_water_goal_cups'] as num?)?.toInt(),
+      weightLbs: (json['weight_lbs'] as num?)?.toDouble(),
+      monthlyBudget: (json['monthly_budget'] as num?)?.toDouble() ?? 1000.0,
+    );
+  }
+  final String id;
+  final String userId;
+  final String name;
+  final String breed;
+  final String animalType;
+  final int age;
+  final String bio;
+  final String profileImageUrl;
+  final List<String> images;
+  final bool isPublicOwner;
+  final bool isBreedingListed;
+  final bool isVerified;
+  final bool isVaccinated;
+  final bool isCareListed;
+
+  /// Care goals & current vitals — `null` if the owner hasn't set them yet
+  /// (the UI then falls back to sensible defaults).
+  final int? dailyCalorieGoal;
+  final int? dailyWaterGoalCups;
+  final double? weightLbs;
+  final double monthlyBudget;
 
   PetModel copyWith({
     String? id,
@@ -81,33 +108,6 @@ class PetModel {
       dailyWaterGoalCups: dailyWaterGoalCups ?? this.dailyWaterGoalCups,
       weightLbs: weightLbs ?? this.weightLbs,
       monthlyBudget: monthlyBudget ?? this.monthlyBudget,
-    );
-  }
-
-  factory PetModel.fromJson(Map<String, dynamic> json) {
-    return PetModel(
-      id: json['id'] as String,
-      userId: json['user_id'] as String,
-      name: json['name'] as String,
-      breed: json['breed'] as String? ?? '',
-      animalType: json['animal_type'] as String? ?? '',
-      age: (json['age'] as num?)?.toInt() ?? 0,
-      bio: json['bio'] as String? ?? '',
-      profileImageUrl: json['profile_image_url'] as String? ?? '',
-      images:
-          (json['images'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          [],
-      isPublicOwner: json['is_public_owner'] as bool? ?? true,
-      isBreedingListed: json['is_breeding_listed'] as bool? ?? false,
-      isVerified: json['is_verified'] as bool? ?? false,
-      isVaccinated: json['is_vaccinated'] as bool? ?? false,
-      isCareListed: json['is_care_listed'] as bool? ?? false,
-      dailyCalorieGoal: (json['daily_calorie_goal'] as num?)?.toInt(),
-      dailyWaterGoalCups: (json['daily_water_goal_cups'] as num?)?.toInt(),
-      weightLbs: (json['weight_lbs'] as num?)?.toDouble(),
-      monthlyBudget: (json['monthly_budget'] as num?)?.toDouble() ?? 1000.0,
     );
   }
 

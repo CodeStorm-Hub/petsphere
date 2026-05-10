@@ -203,15 +203,15 @@ class _MilestoneSliverList extends StatelessWidget {
 }
 
 class _TimeRangeSelector extends StatelessWidget {
-  final String selected;
-  final List<String> ranges;
-  final ValueChanged<String> onChanged;
 
   const _TimeRangeSelector({
     required this.selected,
     required this.ranges,
     required this.onChanged,
   });
+  final String selected;
+  final List<String> ranges;
+  final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -266,11 +266,6 @@ class _TimeRangeSelector extends StatelessWidget {
 }
 
 class _ChartContainer extends StatelessWidget {
-  final String title;
-  final String unit;
-  final String trend;
-  final Color trendColor;
-  final Widget chart;
 
   const _ChartContainer({
     required this.title,
@@ -279,6 +274,11 @@ class _ChartContainer extends StatelessWidget {
     required this.trend,
     required this.trendColor,
   });
+  final String title;
+  final String unit;
+  final String trend;
+  final Color trendColor;
+  final Widget chart;
 
   @override
   Widget build(BuildContext context) {
@@ -366,8 +366,8 @@ class _ChartContainer extends StatelessWidget {
 }
 
 class _WeightChart extends StatelessWidget {
-  final String timeRange;
   const _WeightChart({required this.timeRange});
+  final String timeRange;
 
   @override
   Widget build(BuildContext context) {
@@ -425,8 +425,8 @@ class _WeightChart extends StatelessWidget {
 }
 
 class _HeightChart extends StatelessWidget {
-  final String timeRange;
   const _HeightChart({required this.timeRange});
+  final String timeRange;
 
   @override
   Widget build(BuildContext context) {
@@ -538,15 +538,15 @@ class _LogMeasurementSheet extends StatelessWidget {
 }
 
 class _MeasurementInput extends StatelessWidget {
-  final String label;
-  final String unit;
-  final IconData icon;
 
   const _MeasurementInput({
     required this.label,
     required this.unit,
     required this.icon,
   });
+  final String label;
+  final String unit;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {

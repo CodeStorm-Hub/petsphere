@@ -4,10 +4,10 @@ import 'package:petfolio/core/widgets/brand_logo.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
 
 class MatchPetCard extends StatelessWidget {
-  final PetModel pet;
-  final VoidCallback onTap;
 
   const MatchPetCard({super.key, required this.pet, required this.onTap});
+  final PetModel pet;
+  final VoidCallback onTap;
 
   // Derive pseudo-stats from pet data (deterministic, real-data-driven)
   int _energyLevel(PetModel p) {
@@ -182,10 +182,6 @@ class MatchPetCard extends StatelessWidget {
 }
 
 class _StatBadge extends StatelessWidget {
-  final IconData icon;
-  final int value;
-  final String label;
-  final Color color;
 
   const _StatBadge({
     required this.icon,
@@ -193,6 +189,10 @@ class _StatBadge extends StatelessWidget {
     required this.label,
     required this.color,
   });
+  final IconData icon;
+  final int value;
+  final String label;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {

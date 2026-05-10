@@ -147,10 +147,6 @@ class _PetNutritionPlannerScreenState
 }
 
 class _CalorieBudgetCard extends StatelessWidget {
-  final int consumed;
-  final int total;
-  final String petName;
-  final List<NutritionLog> logs;
 
   const _CalorieBudgetCard({
     required this.consumed,
@@ -158,6 +154,10 @@ class _CalorieBudgetCard extends StatelessWidget {
     required this.petName,
     required this.logs,
   });
+  final int consumed;
+  final int total;
+  final String petName;
+  final List<NutritionLog> logs;
 
   @override
   Widget build(BuildContext context) {
@@ -295,14 +295,14 @@ class _CalorieBudgetCard extends StatelessWidget {
 }
 
 class _StatMini extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
   const _StatMini({
     required this.label,
     required this.value,
     required this.color,
   });
+  final String label;
+  final String value;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -332,15 +332,15 @@ class _StatMini extends StatelessWidget {
 }
 
 class _HydrationTracker extends StatelessWidget {
-  final int current;
-  final int goal;
-  final VoidCallback onAdd;
 
   const _HydrationTracker({
     required this.current,
     required this.goal,
     required this.onAdd,
   });
+  final int current;
+  final int goal;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -460,9 +460,9 @@ class _SafeFoodLookup extends StatelessWidget {
 }
 
 class _MealItem extends StatelessWidget {
-  final NutritionLog log;
 
   const _MealItem({required this.log});
+  final NutritionLog log;
 
   @override
   Widget build(BuildContext context) {
@@ -594,9 +594,9 @@ class _DietaryProfile extends StatelessWidget {
 }
 
 class _Tag extends StatelessWidget {
+  const _Tag({required this.label, required this.color});
   final String label;
   final Color color;
-  const _Tag({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -620,10 +620,10 @@ class _Tag extends StatelessWidget {
 }
 
 class _AddMealSheet extends ConsumerStatefulWidget {
-  final String petId;
-  final VoidCallback onAdded;
 
   const _AddMealSheet({required this.petId, required this.onAdded});
+  final String petId;
+  final VoidCallback onAdded;
 
   @override
   ConsumerState<_AddMealSheet> createState() => _AddMealSheetState();

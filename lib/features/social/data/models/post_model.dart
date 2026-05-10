@@ -1,14 +1,7 @@
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/core/utils/media_utils.dart';
 
 class CommentModel {
-  final String id;
-  final String petId;
-  final String petName;
-
-  /// From joined `pets.profile_image_url` when present (empty if unknown).
-  final String petProfileImageUrl;
-  final String text;
-  final DateTime createdAt;
 
   CommentModel({
     required this.id,
@@ -31,6 +24,14 @@ class CommentModel {
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
+  final String id;
+  final String petId;
+  final String petName;
+
+  /// From joined `pets.profile_image_url` when present (empty if unknown).
+  final String petProfileImageUrl;
+  final String text;
+  final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -62,16 +63,6 @@ class CommentModel {
 }
 
 class PostModel {
-  final String id;
-  final PetModel pet;
-  final String mediaUrl;
-  final String caption;
-  final String location;
-  final List<String> taggedPetIds;
-  final List<String> taggedPetNames;
-  final List<String> likedByPetIds;
-  final List<CommentModel> comments;
-  final DateTime createdAt;
 
   PostModel({
     required this.id,
@@ -85,32 +76,6 @@ class PostModel {
     this.comments = const [],
     required this.createdAt,
   });
-
-  PostModel copyWith({
-    String? id,
-    PetModel? pet,
-    String? mediaUrl,
-    String? caption,
-    String? location,
-    List<String>? taggedPetIds,
-    List<String>? taggedPetNames,
-    List<String>? likedByPetIds,
-    List<CommentModel>? comments,
-    DateTime? createdAt,
-  }) {
-    return PostModel(
-      id: id ?? this.id,
-      pet: pet ?? this.pet,
-      mediaUrl: mediaUrl ?? this.mediaUrl,
-      caption: caption ?? this.caption,
-      location: location ?? this.location,
-      taggedPetIds: taggedPetIds ?? this.taggedPetIds,
-      taggedPetNames: taggedPetNames ?? this.taggedPetNames,
-      likedByPetIds: likedByPetIds ?? this.likedByPetIds,
-      comments: comments ?? this.comments,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
 
   /// Parses from a Supabase joined query:
   /// posts.*, pets(*), post_likes(pet_id), comments(*, pets(name))
@@ -144,6 +109,46 @@ class PostModel {
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
+  final String id;
+  final PetModel pet;
+  final String mediaUrl;
+  final String caption;
+  final String location;
+  final List<String> taggedPetIds;
+  final List<String> taggedPetNames;
+  final List<String> likedByPetIds;
+  final List<CommentModel> comments;
+  final DateTime createdAt;
+
+  PostModel copyWith({
+    String? id,
+    PetModel? pet,
+    String? mediaUrl,
+    String? caption,
+    String? location,
+    List<String>? taggedPetIds,
+    List<String>? taggedPetNames,
+    List<String>? likedByPetIds,
+    List<CommentModel>? comments,
+    DateTime? createdAt,
+  }) {
+    return PostModel(
+      id: id ?? this.id,
+      pet: pet ?? this.pet,
+      mediaUrl: mediaUrl ?? this.mediaUrl,
+      caption: caption ?? this.caption,
+      location: location ?? this.location,
+      taggedPetIds: taggedPetIds ?? this.taggedPetIds,
+      taggedPetNames: taggedPetNames ?? this.taggedPetNames,
+      likedByPetIds: likedByPetIds ?? this.likedByPetIds,
+      comments: comments ?? this.comments,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  PostMediaType get mediaType => postMediaTypeFromPath(mediaUrl);
+
+  int get commentCount => comments.length;
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -156,6 +161,17 @@ class PostModel {
     'post_likes': likedByPetIds.map((id) => {'pet_id': id}).toList(),
     'comments': comments.map((c) => c.toJson()).toList(),
     'created_at': createdAt.toIso8601String(),
+  };
+
+  /// Returns a JSON map suitable for Supabase insertion into the 'posts' table.
+  /// Excludes joined objects like 'pets', 'post_likes', and 'comments'.
+  Map<String, dynamic> toUpsertJson() => {
+    'pet_id': pet.id,
+    'media_url': mediaUrl,
+    'caption': caption,
+    'location': location,
+    'tagged_pet_ids': taggedPetIds,
+    'tagged_pet_names': taggedPetNames,
   };
 
   @override

@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'brand_logo.dart';
 
 class PetAvatar extends StatelessWidget {
-  final String imageUrl;
-  final double radius;
-  final bool hasStory;
 
   const PetAvatar({
     super.key,
@@ -12,6 +9,9 @@ class PetAvatar extends StatelessWidget {
     this.radius = 20,
     this.hasStory = false,
   });
+  final String imageUrl;
+  final double radius;
+  final bool hasStory;
 
   @override
   Widget build(BuildContext context) {

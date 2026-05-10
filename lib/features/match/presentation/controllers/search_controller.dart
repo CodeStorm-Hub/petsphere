@@ -5,12 +5,6 @@ import 'package:petfolio/features/marketplace/data/models/product_model.dart';
 import 'package:petfolio/features/match/data/search_repository.dart';
 
 class SearchState {
-  final List<PostModel> posts;
-  final List<PetModel> pets;
-  final List<ProductModel> products;
-  final bool isLoading;
-  final String? error;
-  final String query;
 
   SearchState({
     this.posts = const [],
@@ -20,6 +14,12 @@ class SearchState {
     this.error,
     this.query = '',
   });
+  final List<PostModel> posts;
+  final List<PetModel> pets;
+  final List<ProductModel> products;
+  final bool isLoading;
+  final String? error;
+  final String query;
 
   SearchState copyWith({
     List<PostModel>? posts,

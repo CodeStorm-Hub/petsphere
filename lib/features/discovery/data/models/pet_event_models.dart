@@ -1,14 +1,4 @@
 class PetEvent {
-  final String id;
-  final String title;
-  final String description;
-  final String? location;
-  final DateTime eventDate;
-  final String? imageUrl;
-  final String eventType; // 'meetup', 'workshop', 'show', 'charity'
-  final int? maxAttendees;
-  final String? organizerId;
-  final bool isActive;
 
   PetEvent({
     required this.id,
@@ -37,6 +27,16 @@ class PetEvent {
       isActive: json['is_active'] as bool? ?? true,
     );
   }
+  final String id;
+  final String title;
+  final String description;
+  final String? location;
+  final DateTime eventDate;
+  final String? imageUrl;
+  final String eventType; // 'meetup', 'workshop', 'show', 'charity'
+  final int? maxAttendees;
+  final String? organizerId;
+  final bool isActive;
 
   Map<String, dynamic> toJson() {
     return {

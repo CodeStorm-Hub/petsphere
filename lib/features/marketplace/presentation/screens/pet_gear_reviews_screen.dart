@@ -112,9 +112,9 @@ class _GearHeader extends StatelessWidget {
 }
 
 class _GearReviewCard extends StatelessWidget {
-  final GearReview review;
 
   const _GearReviewCard({required this.review});
+  final GearReview review;
 
   @override
   Widget build(BuildContext context) {

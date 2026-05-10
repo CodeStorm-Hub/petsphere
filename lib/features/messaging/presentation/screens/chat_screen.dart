@@ -12,9 +12,9 @@ import 'package:petfolio/features/messaging/presentation/widgets/message_bubble.
 import 'package:petfolio/core/widgets/skeleton_loader.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
-  final String threadId;
 
   const ChatScreen({super.key, required this.threadId});
+  final String threadId;
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -526,10 +526,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 }
 
 class _AttachOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
 
   const _AttachOption({
     required this.icon,
@@ -537,6 +533,10 @@ class _AttachOption extends StatelessWidget {
     required this.color,
     required this.onTap,
   });
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

@@ -1719,10 +1719,6 @@ class _MealCard extends StatelessWidget {
 }
 
 class _QuickActionItem extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
 
   const _QuickActionItem({
     required this.label,
@@ -1730,6 +1726,10 @@ class _QuickActionItem extends StatelessWidget {
     required this.color,
     required this.onTap,
   });
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

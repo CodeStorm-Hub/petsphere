@@ -75,13 +75,13 @@ class DiscoveryScreen extends ConsumerWidget {
 // My Listings Tab
 // ─────────────────────────────────────────────────────────────────────────────
 class MyListingsTab extends ConsumerWidget {
-  final List<PetModel> listedPets;
-  final double navSpace;
   const MyListingsTab({
     super.key,
     required this.listedPets,
     required this.navSpace,
   });
+  final List<PetModel> listedPets;
+  final double navSpace;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -185,14 +185,14 @@ class MyListingsTab extends ConsumerWidget {
 // Discover Tab  —  swipeable card stack
 // ─────────────────────────────────────────────────────────────────────────────
 class DiscoveryTab extends ConsumerStatefulWidget {
-  final bool hasActivePet;
-  final bool isPetLoading;
 
   const DiscoveryTab({
     super.key,
     required this.hasActivePet,
     required this.isPetLoading,
   });
+  final bool hasActivePet;
+  final bool isPetLoading;
 
   @override
   ConsumerState<DiscoveryTab> createState() => DiscoveryTabState();
@@ -356,7 +356,9 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
     final matchState = ref.watch(matchProvider);
     final filteredPets = _applyFilter(matchState.discoveryPets);
     final hasPets = filteredPets.isNotEmpty;
-    final navSpace = bottomNavSpaceFor(context);
+    final width = MediaQuery.of(context).size.width;
+    final isTablet = width > 600;
+    final navSpace = isTablet ? 24.0 : bottomNavSpaceFor(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     if (widget.isPetLoading || matchState.isLoading) {
@@ -430,241 +432,240 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
 
     final myPets = ref.watch(petProvider).myPets;
 
-    return Column(
-      children: [
-        // ── Pet selector (only when user has multiple pets) ──────────
-        if (myPets.length > 1)
-          PetSelectorBar(
-            allCaughtUpPetIds: allCaughtUpPetIds,
-            onPetSelected: _selectPet,
-          ),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 800),
+        child: Column(
+          children: [
+            // ── Pet selector (only when user has multiple pets) ──────────
+            if (myPets.length > 1)
+              PetSelectorBar(
+                allCaughtUpPetIds: allCaughtUpPetIds,
+                onPetSelected: _selectPet,
+              ),
 
-        // ── Filter chips ────────────────────────────────────────────
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: List.generate(_filterLabels.length, (i) {
-              final value = _filterValues[i];
-              // Check selection: 'For You' is null/null, 'Same Breed' is 'breed' mode, 'Nearby' is 'nearby' mode
-              final isSelected = filterType == value;
+            // ── Filter chips ────────────────────────────────────────────
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: List.generate(_filterLabels.length, (i) {
+                  final value = _filterValues[i];
+                  // Check selection: 'For You' is null/null, 'Same Breed' is 'breed' mode, 'Nearby' is 'nearby' mode
+                  final isSelected = filterType == value;
 
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: GestureDetector(
-                  onTap: () {
-                    final selId =
-                        ref.read(discoveryActivePetIdProvider) ??
-                        ref.read(petProvider).activePet?.id;
-                    final myPets = ref.read(petProvider).myPets;
-                    PetModel? selPet;
-                    if (selId != null) {
-                      selPet = myPets.cast<PetModel?>().firstWhere(
-                        (p) => p?.id == selId,
-                        orElse: () => null,
-                      );
-                    }
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: GestureDetector(
+                      onTap: () {
+                        final selId =
+                            ref.read(discoveryActivePetIdProvider) ??
+                            ref.read(petProvider).activePet?.id;
+                        final myPets = ref.read(petProvider).myPets;
+                        PetModel? selPet;
+                        if (selId != null) {
+                          selPet = myPets.cast<PetModel?>().firstWhere(
+                            (p) => p?.id == selId,
+                            orElse: () => null,
+                          );
+                        }
 
-                    setState(() {
-                      filterType = value;
-                      currentIndex = 0;
-                    });
+                        setState(() {
+                          filterType = value;
+                          currentIndex = 0;
+                        });
 
-                    // Sync with controller
-                    if (value == 'breed') {
-                      if (selPet != null) {
-                        ref
-                            .read(matchProvider.notifier)
-                            .setFilterBreed(selPet.breed);
-                      }
-                    } else {
-                      // Reset breed filter for 'For You' and 'Nearby'
-                      ref.read(matchProvider.notifier).setFilterBreed(null);
-                    }
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? colorScheme.primary.withValues(alpha: 0.15)
-                          : colorScheme.surfaceContainerHighest,
-                      border: Border.all(
-                        color: isSelected
-                            ? colorScheme.primary
-                            : colorScheme.outline.withValues(alpha: 0.3),
-                        width: 1.5,
-                      ),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      _filterLabels[i],
-                      style: TextStyle(
-                        color: isSelected
-                            ? colorScheme.primary
-                            : colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ),
-
-        // ── Card stack or empty state ────────────────────────────────
-        Expanded(
-          child: !hasPets
-              ? RefreshIndicator(
-                  onRefresh: () => ref.read(matchProvider.notifier).refresh(),
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
-                    children: [
-                      BrandLogo(
-                        customSize: 64,
-                        color: colorScheme.outline.withAlpha(100),
-                      ),
-                      const SizedBox(height: 16),
-                      Center(
+                        // Sync with controller
+                        if (value == 'breed') {
+                          if (selPet != null) {
+                            ref
+                                .read(matchProvider.notifier)
+                                .setFilterBreed(selPet.breed);
+                          }
+                        } else {
+                          // Reset breed filter for 'For You' and 'Nearby'
+                          ref.read(matchProvider.notifier).setFilterBreed(null);
+                        }
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? colorScheme.primary.withValues(alpha: 0.15)
+                              : colorScheme.surfaceContainerHighest,
+                          border: Border.all(
+                            color: isSelected
+                                ? colorScheme.primary
+                                : colorScheme.outline.withValues(alpha: 0.3),
+                            width: 1.5,
+                          ),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
                         child: Text(
-                          'No more pets available. Check back soon!',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: colorScheme.onSurfaceVariant),
+                          _filterLabels[i],
+                          style: TextStyle(
+                            color: isSelected
+                                ? colorScheme.primary
+                                : colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                )
-              : LayoutBuilder(
-                  builder: (context, constraints) {
-                    final sw = MediaQuery.of(context).size.width;
-                    // Responsive button sizes
-                    final nopeSize = (sw * 0.158).clamp(52.0, 70.0);
-                    final infoSize = (sw * 0.138).clamp(44.0, 60.0);
-                    final likeSize = (sw * 0.198).clamp(64.0, 84.0);
-                    final hPad = (sw * 0.048).clamp(12.0, 24.0);
-                    final btnGap = sw * 0.045;
+                    ),
+                  );
+                }),
+              ),
+            ),
 
-                    return Padding(
-                      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, navSpace),
-                      child: Column(
+            // ── Card stack or empty state ────────────────────────────────
+            Expanded(
+              child: !hasPets
+                  ? RefreshIndicator(
+                      onRefresh: () => ref.read(matchProvider.notifier).refresh(),
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
                         children: [
-                          Expanded(
-                            child: CardSwiper(
-                              controller: _swiperController,
-                              cardsCount: filteredPets.length,
-                              onSwipe: _onSwipe,
-                              numberOfCardsDisplayed: filteredPets.length > 1 ? 2 : 1,
-                              isLoop: false,
-                              padding: EdgeInsets.zero,
-                              cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-                                return PetCard(
-                                  pet: filteredPets[index],
-                                  isBackground: false,
-                                  dragX: percentThresholdX.toDouble(),
-                                  followerCount: matchState.discoveryFollowerCounts[filteredPets[index].id],
-                                  onTap: () => context.push('/pet/${filteredPets[index].id}'),
-                                );
-                              },
-                            ),
+                          BrandLogo(
+                            customSize: 64,
+                            color: colorScheme.outline.withAlpha(100),
                           ),
-
-                          // ── Action buttons ────────────────────────
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 24),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Nope
-                                ActionButton(
-                                  key: const ValueKey('discovery_nope_button'),
-                                  size: nopeSize,
-                                  label: 'Nope',
-                                  color: colorScheme.surface,
-                                  borderColor: colorScheme.outlineVariant,
-                                  child: Icon(
-                                    Icons.close_rounded,
-                                    size: nopeSize * 0.44,
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                  onTap: () => _swiperController.swipe(CardSwiperDirection.left),
-                                ),
-                                SizedBox(width: btnGap),
-                                // Prominent View / Star
-                                ActionButton(
-                                  key: const ValueKey('discovery_view_profile_button'),
-                                  size: infoSize,
-                                  label: 'View Profile',
-                                  color: colorScheme.surface,
-                                  borderColor: const Color(
-                                    0xFF4A7DF7,
-                                  ).withValues(alpha: 0.3),
-                                  shadowColor: const Color(
-                                    0xFF4A7DF7,
-                                  ).withValues(alpha: 0.2),
-                                  child: const Icon(
-                                    Icons.star_rounded,
-                                    size: 32,
-                                    color: Color(0xFF4A7DF7),
-                                  ),
-                                  onTap: () => context.push(
-                                    '/pet/${filteredPets[currentIndex].id}',
-                                  ),
-                                ),
-                                SizedBox(width: btnGap),
-                                // Like
-                                ActionButton(
-                                  key: const ValueKey('discovery_like_button'),
-                                  size: likeSize,
-                                  label: 'Like',
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      colorScheme.primary,
-                                      colorScheme.primary.withValues(
-                                        alpha: 0.8,
-                                      ),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  shadowColor: colorScheme.primary.withValues(
-                                    alpha: 0.4,
-                                  ),
-                                  child: Icon(
-                                    Icons.favorite_rounded,
-                                    size: likeSize * 0.44,
-                                    color: colorScheme.onPrimary,
-                                  ),
-                                  onTap: () => _swiperController.swipe(CardSwiperDirection.right),
-                                ),
-                              ],
+                          const SizedBox(height: 16),
+                          Center(
+                            child: Text(
+                              'No more pets available. Check back soon!',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: colorScheme.onSurfaceVariant),
                             ),
                           ),
                         ],
                       ),
-                    );
-                  },
-                ),
+                    )
+                  : LayoutBuilder(
+                      builder: (context, constraints) {
+                        final sw = constraints.maxWidth;
+                        // Responsive button sizes
+                        final nopeSize = (sw * 0.158).clamp(52.0, 70.0);
+                        final infoSize = (sw * 0.138).clamp(44.0, 60.0);
+                        final likeSize = (sw * 0.198).clamp(64.0, 84.0);
+                        final hPad = (sw * 0.048).clamp(12.0, 24.0);
+                        final btnGap = sw * 0.045;
+
+                        return Padding(
+                          padding: EdgeInsets.fromLTRB(hPad, 0, hPad, navSpace),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: CardSwiper(
+                                  controller: _swiperController,
+                                  cardsCount: filteredPets.length,
+                                  onSwipe: _onSwipe,
+                                  numberOfCardsDisplayed: filteredPets.length > 1 ? 2 : 1,
+                                  isLoop: false,
+                                  padding: EdgeInsets.zero,
+                                  cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
+                                    return PetCard(
+                                      pet: filteredPets[index],
+                                      isBackground: false,
+                                      dragX: percentThresholdX.toDouble(),
+                                      followerCount: matchState.discoveryFollowerCounts[filteredPets[index].id],
+                                      onTap: () => context.push('/pet/${filteredPets[index].id}'),
+                                    );
+                                  },
+                                ),
+                              ),
+
+                              // ── Action buttons ────────────────────────
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 24),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    // Nope
+                                    ActionButton(
+                                      key: const ValueKey('discovery_nope_button'),
+                                      size: nopeSize,
+                                      label: 'Nope',
+                                      color: colorScheme.surface,
+                                      borderColor: colorScheme.outlineVariant,
+                                      child: Icon(
+                                        Icons.close_rounded,
+                                        size: nopeSize * 0.44,
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                      onTap: () => _swiperController.swipe(CardSwiperDirection.left),
+                                    ),
+                                    SizedBox(width: btnGap),
+                                    // Prominent View / Star
+                                    ActionButton(
+                                      key: const ValueKey('discovery_view_profile_button'),
+                                      size: infoSize,
+                                      label: 'View Profile',
+                                      color: colorScheme.surface,
+                                      borderColor: const Color(
+                                        0xFF4A7DF7,
+                                      ).withValues(alpha: 0.3),
+                                      shadowColor: const Color(
+                                        0xFF4A7DF7,
+                                      ).withValues(alpha: 0.2),
+                                      child: const Icon(
+                                        Icons.star_rounded,
+                                        size: 32,
+                                        color: Color(0xFF4A7DF7),
+                                      ),
+                                      onTap: () => context.push(
+                                        '/pet/${filteredPets[currentIndex].id}',
+                                      ),
+                                    ),
+                                    SizedBox(width: btnGap),
+                                    // Like
+                                    ActionButton(
+                                      key: const ValueKey('discovery_like_button'),
+                                      size: likeSize,
+                                      label: 'Like',
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          colorScheme.primary,
+                                          colorScheme.primary.withValues(
+                                            alpha: 0.8,
+                                          ),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      shadowColor: colorScheme.primary.withValues(
+                                        alpha: 0.4,
+                                      ),
+                                      child: Icon(
+                                        Icons.favorite_rounded,
+                                        size: likeSize * 0.44,
+                                        color: colorScheme.onPrimary,
+                                      ),
+                                      onTap: () => _swiperController.swipe(CardSwiperDirection.right),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
+
   }
 }
 
 class PetCard extends StatelessWidget {
-  final PetModel pet;
-  final bool isBackground;
-  final double dragX;
-  final VoidCallback? onTap;
-
-  /// When non-null (e.g. from batched discovery query), shown on-card.
-  final int? followerCount;
 
   const PetCard({
     super.key,
@@ -674,6 +675,13 @@ class PetCard extends StatelessWidget {
     this.onTap,
     this.followerCount,
   });
+  final PetModel pet;
+  final bool isBackground;
+  final double dragX;
+  final VoidCallback? onTap;
+
+  /// When non-null (e.g. from batched discovery query), shown on-card.
+  final int? followerCount;
 
   String _petVibe() {
     final vibes = [
@@ -1107,15 +1115,15 @@ class NearbyTab extends ConsumerWidget {
 }
 
 class _NearbyPetTile extends StatelessWidget {
-  final PetModel pet;
-  final int distanceMi;
-  final int? followerCount;
 
   const _NearbyPetTile({
     required this.pet,
     required this.distanceMi,
     this.followerCount,
   });
+  final PetModel pet;
+  final int distanceMi;
+  final int? followerCount;
 
   @override
   Widget build(BuildContext context) {
@@ -1285,14 +1293,6 @@ class _NearbyPetTile extends StatelessWidget {
 // Action Button
 // ─────────────────────────────────────────────────────────────────────────────
 class ActionButton extends StatelessWidget {
-  final double size;
-  final String label;
-  final Color? color;
-  final Color? borderColor;
-  final Color? shadowColor;
-  final LinearGradient? gradient;
-  final Widget child;
-  final VoidCallback onTap;
 
   const ActionButton({
     super.key,
@@ -1305,6 +1305,14 @@ class ActionButton extends StatelessWidget {
     this.shadowColor,
     this.gradient,
   });
+  final double size;
+  final String label;
+  final Color? color;
+  final Color? borderColor;
+  final Color? shadowColor;
+  final LinearGradient? gradient;
+  final Widget child;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1365,14 +1373,14 @@ class ActionButton extends StatelessWidget {
 /// Renders a horizontal scrollable row of pet chips.
 /// Hidden when the user has only one pet.
 class PetSelectorBar extends ConsumerWidget {
-  final Set<String> allCaughtUpPetIds;
-  final ValueChanged<PetModel> onPetSelected;
 
   const PetSelectorBar({
     super.key,
     required this.allCaughtUpPetIds,
     required this.onPetSelected,
   });
+  final Set<String> allCaughtUpPetIds;
+  final ValueChanged<PetModel> onPetSelected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1405,10 +1413,6 @@ class PetSelectorBar extends ConsumerWidget {
 }
 
 class _PetSelectorChip extends StatelessWidget {
-  final PetModel pet;
-  final bool isSelected;
-  final bool isCaughtUp;
-  final VoidCallback onTap;
 
   const _PetSelectorChip({
     required this.pet,
@@ -1416,6 +1420,10 @@ class _PetSelectorChip extends StatelessWidget {
     required this.isCaughtUp,
     required this.onTap,
   });
+  final PetModel pet;
+  final bool isSelected;
+  final bool isCaughtUp;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1528,8 +1536,8 @@ void showListPetSheet(BuildContext context, WidgetRef ref) {
 }
 
 class _ListPetSheet extends StatefulWidget {
-  final List<PetModel> myOwnedPets;
   const _ListPetSheet({required this.myOwnedPets});
+  final List<PetModel> myOwnedPets;
 
   @override
   State<_ListPetSheet> createState() => _ListPetSheetState();
@@ -1733,10 +1741,10 @@ class _ListPetSheetState extends State<_ListPetSheet> {
 }
 
 class _GlassBadge extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
 
   const _GlassBadge({required this.child, this.padding});
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {

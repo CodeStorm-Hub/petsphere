@@ -68,13 +68,6 @@ enum ExpenseCategory {
 }
 
 class PetExpense {
-  final String id;
-  final String petId;
-  final String title;
-  final double amount;
-  final DateTime date;
-  final ExpenseCategory category;
-  final String? notes;
 
   const PetExpense({
     required this.id,
@@ -100,6 +93,13 @@ class PetExpense {
       notes: json['notes'] as String?,
     );
   }
+  final String id;
+  final String petId;
+  final String title;
+  final double amount;
+  final DateTime date;
+  final ExpenseCategory category;
+  final String? notes;
 
   Map<String, dynamic> toJson() => {
     'pet_id': petId,

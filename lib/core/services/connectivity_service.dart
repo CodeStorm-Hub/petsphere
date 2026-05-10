@@ -12,11 +12,11 @@ enum ConnectivityStatus { online, offline, unknown }
 /// Provides a simple way to check if the device is online/offline,
 /// useful for offline-first features and sync strategies.
 class ConnectivityService {
-  static final ConnectivityService _instance = ConnectivityService._internal();
 
   factory ConnectivityService() => _instance;
 
   ConnectivityService._internal();
+  static final ConnectivityService _instance = ConnectivityService._internal();
 
   ConnectivityStatus _status = ConnectivityStatus.unknown;
   final _statusController = StreamController<ConnectivityStatus>.broadcast();

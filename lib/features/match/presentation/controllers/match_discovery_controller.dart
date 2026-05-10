@@ -22,14 +22,6 @@ final discoveryActivePetIdProvider =
 
 @immutable
 class MatchDiscoveryState {
-  final List<PetModel> discoveryPets;
-  final List<PetModel> allDiscoveryPets;
-  final Map<String, int> discoveryFollowerCounts;
-  final bool isLoading;
-  final String? filterAnimal;
-  final String? filterBreed;
-  final String searchQuery;
-  final String? error;
 
   const MatchDiscoveryState({
     this.discoveryPets = const [],
@@ -41,6 +33,14 @@ class MatchDiscoveryState {
     this.searchQuery = '',
     this.error,
   });
+  final List<PetModel> discoveryPets;
+  final List<PetModel> allDiscoveryPets;
+  final Map<String, int> discoveryFollowerCounts;
+  final bool isLoading;
+  final String? filterAnimal;
+  final String? filterBreed;
+  final String searchQuery;
+  final String? error;
 
   MatchDiscoveryState copyWith({
     List<PetModel>? discoveryPets,

@@ -11,11 +11,6 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 
 @immutable
 class CareGamificationState {
-  final PetCareGamification? gamification;
-  final List<PetCareBadgeUnlock> unlocks;
-  final bool isLoading;
-  final String? error;
-  final String? activePetId;
 
   const CareGamificationState({
     this.gamification,
@@ -24,6 +19,11 @@ class CareGamificationState {
     this.error,
     this.activePetId,
   });
+  final PetCareGamification? gamification;
+  final List<PetCareBadgeUnlock> unlocks;
+  final bool isLoading;
+  final String? error;
+  final String? activePetId;
 
   int get streakDays {
     // This could be moved to a getter that uses logs, but for now we'll 

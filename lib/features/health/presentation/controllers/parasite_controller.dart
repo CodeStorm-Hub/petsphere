@@ -13,15 +13,15 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 
 @immutable
 class ParasiteState {
-  final List<ParasitePrevention> entries;
-  final bool isLoading;
-  final String? error;
 
   const ParasiteState({
     this.entries = const [],
     this.isLoading = false,
     this.error,
   });
+  final List<ParasitePrevention> entries;
+  final bool isLoading;
+  final String? error;
 
   List<ParasitePrevention> get overdue =>
       entries.where((p) => p.isOverdue).toList();

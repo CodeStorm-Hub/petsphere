@@ -3,10 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:petfolio/features/messaging/data/models/message_model.dart';
 
 class MessageBubble extends StatelessWidget {
-  final MessageModel message;
-  final bool isMe;
 
   const MessageBubble({super.key, required this.message, required this.isMe});
+  final MessageModel message;
+  final bool isMe;
 
   @override
   Widget build(BuildContext context) {
@@ -112,8 +112,8 @@ class MessageBubble extends StatelessWidget {
 
 // ── Date separator (pill style as per Stitch) ─────────────────────────────
 class DateSeparator extends StatelessWidget {
-  final DateTime date;
   const DateSeparator({super.key, required this.date});
+  final DateTime date;
 
   @override
   Widget build(BuildContext context) {

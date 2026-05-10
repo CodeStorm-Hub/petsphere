@@ -1,16 +1,6 @@
 import 'package:petfolio/core/constants/supabase_config.dart';
 
 class NutritionLog {
-  final String id;
-  final String petId;
-  final String mealName;
-  final String mealType;
-  final int? calories;
-  final int? proteinPct;
-  final int? fatPct;
-  final int? carbPct;
-  final int? waterMl;
-  final DateTime loggedAt;
 
   const NutritionLog({
     required this.id,
@@ -37,6 +27,16 @@ class NutritionLog {
     waterMl: json['water_ml'] as int?,
     loggedAt: DateTime.parse(json['logged_at'] as String).toLocal(),
   );
+  final String id;
+  final String petId;
+  final String mealName;
+  final String mealType;
+  final int? calories;
+  final int? proteinPct;
+  final int? fatPct;
+  final int? carbPct;
+  final int? waterMl;
+  final DateTime loggedAt;
 }
 
 class NutritionRepository {

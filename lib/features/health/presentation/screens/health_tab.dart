@@ -92,11 +92,11 @@ class HealthTab extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _HealthOverviewCard extends ConsumerWidget {
-  final String petName;
 
   const _HealthOverviewCard({
     required this.petName,
   });
+  final String petName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -200,10 +200,10 @@ class _HealthOverviewCard extends ConsumerWidget {
 }
 
 class _AlertChip extends StatelessWidget {
-  final String label;
-  final Color color;
 
   const _AlertChip({required this.label, required this.color});
+  final String label;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -232,12 +232,6 @@ class _AlertChip extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _SectionCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final VoidCallback? onAdd;
-  final String? addTooltip;
-  final List<Widget> children;
-  final Widget? emptyState;
 
   const _SectionCard({
     required this.title,
@@ -247,6 +241,12 @@ class _SectionCard extends StatelessWidget {
     this.addTooltip,
     this.emptyState,
   });
+  final String title;
+  final IconData icon;
+  final VoidCallback? onAdd;
+  final String? addTooltip;
+  final List<Widget> children;
+  final Widget? emptyState;
 
   @override
   Widget build(BuildContext context) {
@@ -310,10 +310,10 @@ class _SectionCard extends StatelessWidget {
 }
 
 class _EmptyHint extends StatelessWidget {
-  final String text;
-  final IconData icon;
 
   const _EmptyHint({required this.text, required this.icon});
+  final String text;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -722,9 +722,9 @@ class _VitalsSectionState extends ConsumerState<_VitalsSection> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _MedicationsSection extends ConsumerWidget {
-  final String petId;
 
   const _MedicationsSection({required this.petId});
+  final String petId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -882,10 +882,6 @@ class _MedicationsSection extends ConsumerWidget {
 }
 
 class _MedicationRow extends StatelessWidget {
-  final PetMedication med;
-  final MedicationDose? dose;
-  final VoidCallback? onGive;
-  final VoidCallback? onSkip;
 
   const _MedicationRow({
     required this.med,
@@ -893,6 +889,10 @@ class _MedicationRow extends StatelessWidget {
     this.onGive,
     this.onSkip,
   });
+  final PetMedication med;
+  final MedicationDose? dose;
+  final VoidCallback? onGive;
+  final VoidCallback? onSkip;
 
   @override
   Widget build(BuildContext context) {
@@ -962,11 +962,11 @@ class _MedicationRow extends StatelessWidget {
 }
 
 class _DoseStatusRow extends StatelessWidget {
+
+  const _DoseStatusRow({required this.dose, this.onGive, this.onSkip});
   final MedicationDose dose;
   final VoidCallback? onGive;
   final VoidCallback? onSkip;
-
-  const _DoseStatusRow({required this.dose, this.onGive, this.onSkip});
 
   @override
   Widget build(BuildContext context) {
@@ -1047,9 +1047,9 @@ class _DoseStatusRow extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _AppointmentsSection extends ConsumerWidget {
-  final String petId;
 
   const _AppointmentsSection({required this.petId});
+  final String petId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1232,10 +1232,10 @@ class _AppointmentsSection extends ConsumerWidget {
 }
 
 class _AppointmentCard extends StatelessWidget {
-  final PetVetAppointment appt;
-  final WidgetRef ref;
 
   const _AppointmentCard({required this.appt, required this.ref});
+  final PetVetAppointment appt;
+  final WidgetRef ref;
 
   @override
   Widget build(BuildContext context) {
@@ -1359,9 +1359,9 @@ class _AppointmentCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _VaccinationsSection extends ConsumerWidget {
-  final String petId;
 
   const _VaccinationsSection({required this.petId});
+  final String petId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1560,9 +1560,9 @@ class _VaccinationsSection extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ParasiteSection extends ConsumerWidget {
-  final String petId;
 
   const _ParasiteSection({required this.petId});
+  final String petId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1805,9 +1805,9 @@ class _ParasiteSection extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _DentalSection extends ConsumerWidget {
-  final String petId;
 
   const _DentalSection({required this.petId});
+  final String petId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -2008,15 +2008,15 @@ class _DentalSection extends ConsumerWidget {
 }
 
 class _DentalRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
 
   const _DentalRow({
     required this.label,
     required this.value,
     required this.icon,
   });
+  final String label;
+  final String value;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -2049,9 +2049,9 @@ class _DentalRow extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _AllergySection extends ConsumerWidget {
-  final String petId;
 
   const _AllergySection({required this.petId});
+  final String petId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -2291,15 +2291,15 @@ class _AllergySection extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _SymptomsSection extends ConsumerStatefulWidget {
-  final List<PetSymptom> active;
-  final List<PetSymptom> resolved;
-  final String petId;
 
   const _SymptomsSection({
     required this.active,
     required this.resolved,
     required this.petId,
   });
+  final List<PetSymptom> active;
+  final List<PetSymptom> resolved;
+  final String petId;
 
   @override
   ConsumerState<_SymptomsSection> createState() => _SymptomsSectionState();
@@ -2530,10 +2530,10 @@ class _SymptomsSectionState extends ConsumerState<_SymptomsSection> {
 }
 
 class _SymptomRow extends StatelessWidget {
-  final PetSymptom symptom;
-  final VoidCallback? onResolve;
 
   const _SymptomRow({required this.symptom, this.onResolve});
+  final PetSymptom symptom;
+  final VoidCallback? onResolve;
 
   @override
   Widget build(BuildContext context) {

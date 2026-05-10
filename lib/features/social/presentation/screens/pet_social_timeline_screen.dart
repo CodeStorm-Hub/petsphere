@@ -64,8 +64,8 @@ class _PetSocialTimelineScreenState
 }
 
 class _SliverPetHeader extends StatelessWidget {
-  final String petName;
   const _SliverPetHeader({required this.petName});
+  final String petName;
 
   @override
   Widget build(BuildContext context) {
@@ -152,14 +152,14 @@ class _PetStatsRow extends StatelessWidget {
 }
 
 class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
   const _StatItem({
     required this.label,
     required this.value,
     required this.icon,
   });
+  final String label;
+  final String value;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -235,15 +235,15 @@ class _TimelineList extends StatelessWidget {
 }
 
 class _TimelineItem extends StatelessWidget {
-  final Map<String, String> event;
-  final bool isFirst;
-  final bool isLast;
 
   const _TimelineItem({
     required this.event,
     required this.isFirst,
     required this.isLast,
   });
+  final Map<String, String> event;
+  final bool isFirst;
+  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
@@ -392,14 +392,14 @@ class _TimelineItem extends StatelessWidget {
 }
 
 class _ReactionIcon extends StatelessWidget {
-  final IconData icon;
-  final String count;
-  final Color color;
   const _ReactionIcon({
     required this.icon,
     required this.count,
     required this.color,
   });
+  final IconData icon;
+  final String count;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {

@@ -6,18 +6,7 @@ import 'package:petfolio/core/theme/app_theme.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 @immutable
 
-class PetMedication {
-  final String id;
-  final String petId;
-  final String name;
-  final String? dose;
-  final String frequency;
-  final List<String> timesOfDay;
-  final DateTime startDate;
-  final DateTime? endDate;
-  final String? purpose;
-  final String? notes;
-  final String status; // active | paused | completed
+class PetMedication { // active | paused | completed
 
   const PetMedication({
     required this.id,
@@ -32,6 +21,39 @@ class PetMedication {
     this.notes,
     required this.status,
   });
+
+  factory PetMedication.fromJson(Map<String, dynamic> json) {
+    return PetMedication(
+      id: json['id'] as String,
+      petId: json['pet_id'] as String,
+      name: json['name'] as String,
+      dose: json['dose'] as String?,
+      frequency: json['frequency'] as String? ?? 'once_daily',
+      timesOfDay:
+          (json['times_of_day'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      startDate: DateTime.parse(json['start_date'] as String),
+      endDate: json['end_date'] != null
+          ? DateTime.parse(json['end_date'] as String)
+          : null,
+      purpose: json['purpose'] as String?,
+      notes: json['notes'] as String?,
+      status: json['status'] as String? ?? 'active',
+    );
+  }
+  final String id;
+  final String petId;
+  final String name;
+  final String? dose;
+  final String frequency;
+  final List<String> timesOfDay;
+  final DateTime startDate;
+  final DateTime? endDate;
+  final String? purpose;
+  final String? notes;
+  final String status;
 
   bool get isActive => status == 'active';
 
@@ -78,28 +100,6 @@ class PetMedication {
       default:
         return AppTheme.textSecondary;
     }
-  }
-
-  factory PetMedication.fromJson(Map<String, dynamic> json) {
-    return PetMedication(
-      id: json['id'] as String,
-      petId: json['pet_id'] as String,
-      name: json['name'] as String,
-      dose: json['dose'] as String?,
-      frequency: json['frequency'] as String? ?? 'once_daily',
-      timesOfDay:
-          (json['times_of_day'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          [],
-      startDate: DateTime.parse(json['start_date'] as String),
-      endDate: json['end_date'] != null
-          ? DateTime.parse(json['end_date'] as String)
-          : null,
-      purpose: json['purpose'] as String?,
-      notes: json['notes'] as String?,
-      status: json['status'] as String? ?? 'active',
-    );
   }
 
   Map<String, dynamic> toUpsertJson() => {
@@ -172,13 +172,6 @@ class PetMedication {
 @immutable
 
 class MedicationDose {
-  final String id;
-  final String medicationId;
-  final String petId;
-  final DateTime scheduledFor;
-  final DateTime? givenAt;
-  final bool skipped;
-  final String? notes;
 
   const MedicationDose({
     required this.id,
@@ -189,16 +182,6 @@ class MedicationDose {
     required this.skipped,
     this.notes,
   });
-
-  bool get isGiven => givenAt != null && !skipped;
-  bool get isPending => givenAt == null && !skipped;
-  bool get isOverdue => isPending && scheduledFor.isBefore(DateTime.now());
-
-  Color get statusColor {
-    if (isGiven) return AppTheme.secondaryAccent;
-    if (isOverdue) return AppTheme.alertAccent;
-    return AppTheme.textSecondary;
-  }
 
   factory MedicationDose.fromJson(Map<String, dynamic> json) {
     return MedicationDose(
@@ -212,6 +195,23 @@ class MedicationDose {
       skipped: json['skipped'] as bool? ?? false,
       notes: json['notes'] as String?,
     );
+  }
+  final String id;
+  final String medicationId;
+  final String petId;
+  final DateTime scheduledFor;
+  final DateTime? givenAt;
+  final bool skipped;
+  final String? notes;
+
+  bool get isGiven => givenAt != null && !skipped;
+  bool get isPending => givenAt == null && !skipped;
+  bool get isOverdue => isPending && scheduledFor.isBefore(DateTime.now());
+
+  Color get statusColor {
+    if (isGiven) return AppTheme.secondaryAccent;
+    if (isOverdue) return AppTheme.alertAccent;
+    return AppTheme.textSecondary;
   }
 
   Map<String, dynamic> toUpsertJson() => {
@@ -267,15 +267,6 @@ class MedicationDose {
 @immutable
 
 class PetAllergy {
-  final String id;
-  final String petId;
-  final String allergen;
-  final String allergenType; // food | environmental | drug | insect | other
-  final String severity; // mild | moderate | severe | life_threatening
-  final String? reaction;
-  final DateTime? diagnosedOn;
-  final bool isActive;
-  final String? notes;
 
   const PetAllergy({
     required this.id,
@@ -288,6 +279,31 @@ class PetAllergy {
     required this.isActive,
     this.notes,
   });
+
+  factory PetAllergy.fromJson(Map<String, dynamic> json) {
+    return PetAllergy(
+      id: json['id'] as String,
+      petId: json['pet_id'] as String,
+      allergen: json['allergen'] as String,
+      allergenType: json['allergen_type'] as String? ?? 'food',
+      severity: json['severity'] as String? ?? 'mild',
+      reaction: json['reaction'] as String?,
+      diagnosedOn: json['diagnosed_on'] != null
+          ? DateTime.parse(json['diagnosed_on'] as String)
+          : null,
+      isActive: json['is_active'] as bool? ?? true,
+      notes: json['notes'] as String?,
+    );
+  }
+  final String id;
+  final String petId;
+  final String allergen;
+  final String allergenType; // food | environmental | drug | insect | other
+  final String severity; // mild | moderate | severe | life_threatening
+  final String? reaction;
+  final DateTime? diagnosedOn;
+  final bool isActive;
+  final String? notes;
 
   Color get severityColor {
     switch (severity) {
@@ -328,22 +344,6 @@ class PetAllergy {
       default:
         return 'Food';
     }
-  }
-
-  factory PetAllergy.fromJson(Map<String, dynamic> json) {
-    return PetAllergy(
-      id: json['id'] as String,
-      petId: json['pet_id'] as String,
-      allergen: json['allergen'] as String,
-      allergenType: json['allergen_type'] as String? ?? 'food',
-      severity: json['severity'] as String? ?? 'mild',
-      reaction: json['reaction'] as String?,
-      diagnosedOn: json['diagnosed_on'] != null
-          ? DateTime.parse(json['diagnosed_on'] as String)
-          : null,
-      isActive: json['is_active'] as bool? ?? true,
-      notes: json['notes'] as String?,
-    );
   }
 
   Map<String, dynamic> toInsertJson() => {
@@ -406,13 +406,6 @@ class PetAllergy {
 @immutable
 
 class ParasitePrevention {
-  final String id;
-  final String petId;
-  final String productName;
-  final String productType; // flea|tick|flea_tick|heartworm|dewormer|other
-  final DateTime administeredOn;
-  final DateTime? nextDueDate;
-  final String? notes;
 
   const ParasitePrevention({
     required this.id,
@@ -423,6 +416,27 @@ class ParasitePrevention {
     this.nextDueDate,
     this.notes,
   });
+
+  factory ParasitePrevention.fromJson(Map<String, dynamic> json) {
+    return ParasitePrevention(
+      id: json['id'] as String,
+      petId: json['pet_id'] as String,
+      productName: json['product_name'] as String,
+      productType: json['product_type'] as String,
+      administeredOn: DateTime.parse(json['administered_on'] as String),
+      nextDueDate: json['next_due_date'] != null
+          ? DateTime.parse(json['next_due_date'] as String)
+          : null,
+      notes: json['notes'] as String?,
+    );
+  }
+  final String id;
+  final String petId;
+  final String productName;
+  final String productType; // flea|tick|flea_tick|heartworm|dewormer|other
+  final DateTime administeredOn;
+  final DateTime? nextDueDate;
+  final String? notes;
 
   bool get isOverdue =>
       nextDueDate != null && nextDueDate!.isBefore(DateTime.now());
@@ -454,20 +468,6 @@ class ParasitePrevention {
       default:
         return 'Other';
     }
-  }
-
-  factory ParasitePrevention.fromJson(Map<String, dynamic> json) {
-    return ParasitePrevention(
-      id: json['id'] as String,
-      petId: json['pet_id'] as String,
-      productName: json['product_name'] as String,
-      productType: json['product_type'] as String,
-      administeredOn: DateTime.parse(json['administered_on'] as String),
-      nextDueDate: json['next_due_date'] != null
-          ? DateTime.parse(json['next_due_date'] as String)
-          : null,
-      notes: json['notes'] as String?,
-    );
   }
 
   Map<String, dynamic> toInsertJson() => {
@@ -525,12 +525,6 @@ class ParasitePrevention {
 @immutable
 
 class DentalLog {
-  final String id;
-  final String petId;
-  final DateTime logDate;
-  final String
-  cleaningType; // home_brushing|dental_chew|professional_cleaning|water_additive
-  final String? notes;
 
   const DentalLog({
     required this.id,
@@ -539,6 +533,22 @@ class DentalLog {
     required this.cleaningType,
     this.notes,
   });
+
+  factory DentalLog.fromJson(Map<String, dynamic> json) {
+    return DentalLog(
+      id: json['id'] as String,
+      petId: json['pet_id'] as String,
+      logDate: DateTime.parse(json['log_date'] as String),
+      cleaningType: json['cleaning_type'] as String,
+      notes: json['notes'] as String?,
+    );
+  }
+  final String id;
+  final String petId;
+  final DateTime logDate;
+  final String
+  cleaningType; // home_brushing|dental_chew|professional_cleaning|water_additive
+  final String? notes;
 
   String get cleaningTypeLabel {
     switch (cleaningType) {
@@ -566,16 +576,6 @@ class DentalLog {
       default:
         return Icons.brush;
     }
-  }
-
-  factory DentalLog.fromJson(Map<String, dynamic> json) {
-    return DentalLog(
-      id: json['id'] as String,
-      petId: json['pet_id'] as String,
-      logDate: DateTime.parse(json['log_date'] as String),
-      cleaningType: json['cleaning_type'] as String,
-      notes: json['notes'] as String?,
-    );
   }
 
   Map<String, dynamic> toInsertJson() => {

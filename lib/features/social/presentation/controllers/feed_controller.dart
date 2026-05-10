@@ -7,10 +7,6 @@ import 'package:petfolio/features/social/data/models/post_model.dart';
 import 'package:petfolio/features/social/data/models/story_model.dart';
 
 class FeedState {
-  final List<PostModel> posts;
-  final List<StoryModel> stories;
-  final bool isLoading;
-  final String? error;
 
   FeedState({
     this.posts = const [],
@@ -18,6 +14,10 @@ class FeedState {
     this.isLoading = false,
     this.error,
   });
+  final List<PostModel> posts;
+  final List<StoryModel> stories;
+  final bool isLoading;
+  final String? error;
 
   FeedState copyWith({
     List<PostModel>? posts,

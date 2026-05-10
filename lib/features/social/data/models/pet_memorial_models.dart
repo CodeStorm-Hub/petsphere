@@ -2,16 +2,6 @@ import 'package:flutter/foundation.dart';
 
 @immutable
 class PetMemorialEntry {
-  final String id;
-  final String petId;
-  final String petName;
-  final String birthYear;
-  final String passingYear;
-  final String title;
-  final String message;
-  final String? petImageUrl;
-  final String? messageImageUrl;
-  final DateTime createdAt;
 
   const PetMemorialEntry({
     required this.id,
@@ -39,6 +29,16 @@ class PetMemorialEntry {
         messageImageUrl: json['message_image_url'] as String?,
         createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
       );
+  final String id;
+  final String petId;
+  final String petName;
+  final String birthYear;
+  final String passingYear;
+  final String title;
+  final String message;
+  final String? petImageUrl;
+  final String? messageImageUrl;
+  final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
     'id': id,

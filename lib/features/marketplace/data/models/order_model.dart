@@ -2,12 +2,6 @@ import 'package:flutter/foundation.dart';
 
 @immutable
 class OrderModel {
-  final String id;
-  final String userId;
-  final List<OrderLineItem> items;
-  final double total;
-  final String status;
-  final DateTime createdAt;
 
   const OrderModel({
     required this.id,
@@ -32,6 +26,12 @@ class OrderModel {
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
+  final String id;
+  final String userId;
+  final List<OrderLineItem> items;
+  final double total;
+  final String status;
+  final DateTime createdAt;
 
   String get statusLabel {
     return switch (status) {
@@ -94,11 +94,6 @@ class OrderModel {
 
 @immutable
 class OrderLineItem {
-  final String productId;
-  final String name;
-  final int quantity;
-  final double price;
-  final double subtotal;
 
   const OrderLineItem({
     required this.productId,
@@ -117,6 +112,11 @@ class OrderLineItem {
       subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0,
     );
   }
+  final String productId;
+  final String name;
+  final int quantity;
+  final double price;
+  final double subtotal;
 
   Map<String, dynamic> toJson() => {
     'product_id': productId,

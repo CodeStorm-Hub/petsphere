@@ -8,24 +8,19 @@ enum BrandLogoSize {
   medium(48),
   large(120);
 
-  final double size;
   const BrandLogoSize(this.size);
+  final double size;
 }
 
 enum BrandLogoVariant {
   icon('assets/icon.svg'),
   full('assets/logo_without_slogan.svg');
 
-  final String assetPath;
   const BrandLogoVariant(this.assetPath);
+  final String assetPath;
 }
 
 class BrandLogo extends StatelessWidget {
-  final BrandLogoSize? size;
-  final double? customSize;
-  final Color? color;
-  final bool withText;
-  final BrandLogoVariant variant;
 
   const BrandLogo({
     super.key,
@@ -35,6 +30,11 @@ class BrandLogo extends StatelessWidget {
     this.withText = false,
     this.variant = BrandLogoVariant.icon,
   });
+  final BrandLogoSize? size;
+  final double? customSize;
+  final Color? color;
+  final bool withText;
+  final BrandLogoVariant variant;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +63,7 @@ class BrandLogo extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'Pet ',
+                  text: 'Pet',
                   style: GoogleFonts.playfairDisplay(
                     fontWeight: FontWeight.w900,
                     color: isDark ? textColor : textPrimary,

@@ -4,11 +4,6 @@ import 'package:flutter/material.dart';
 ///
 /// Persisted as JSON inside [PetCareLog.tasks].
 class DailyTask {
-  final String key;
-  final String title;
-  final String subtitle;
-  final String iconKey;
-  final bool done;
 
   const DailyTask({
     required this.key,
@@ -17,6 +12,21 @@ class DailyTask {
     required this.iconKey,
     this.done = false,
   });
+
+  factory DailyTask.fromJson(Map<String, dynamic> json) {
+    return DailyTask(
+      key: json['key'] as String,
+      title: json['title'] as String? ?? '',
+      subtitle: json['subtitle'] as String? ?? '',
+      iconKey: json['icon'] as String? ?? 'checklist',
+      done: json['done'] as bool? ?? false,
+    );
+  }
+  final String key;
+  final String title;
+  final String subtitle;
+  final String iconKey;
+  final bool done;
 
   DailyTask copyWith({
     String? title,
@@ -30,16 +40,6 @@ class DailyTask {
       subtitle: subtitle ?? this.subtitle,
       iconKey: iconKey ?? this.iconKey,
       done: done ?? this.done,
-    );
-  }
-
-  factory DailyTask.fromJson(Map<String, dynamic> json) {
-    return DailyTask(
-      key: json['key'] as String,
-      title: json['title'] as String? ?? '',
-      subtitle: json['subtitle'] as String? ?? '',
-      iconKey: json['icon'] as String? ?? 'checklist',
-      done: json['done'] as bool? ?? false,
     );
   }
 
@@ -119,6 +119,93 @@ class DailyTask {
 /// task completion, mood, and a snapshot of that day's goals.
 @immutable
 class PetCareLog {
+
+  const PetCareLog({
+    this.id,
+    required this.petId,
+    required this.logDate,
+    this.breakfastFed = false,
+    this.dinnerFed = false,
+    this.breakfastKcal = 250,
+    this.dinnerKcal = 250,
+    this.breakfastFood = 'Dry Kibble - 1 cup',
+    this.dinnerFood = 'Wet Food - 1/2 can',
+    this.snackFed = false,
+    this.snackKcal = 0,
+    this.snackFood = '',
+    this.treatsCount = 0,
+    this.treatsKcal = 0,
+    this.waterCups = 0,
+    this.tasks = const [],
+    this.mood,
+    this.dailyCalorieGoal = 500,
+    this.dailyWaterGoalCups = 8,
+    this.dailyExerciseGoalMinutes = 30,
+  });
+
+  // -------------------------------------------------------------------------
+  // Serialisation
+  // -------------------------------------------------------------------------
+  factory PetCareLog.fromJson(Map<String, dynamic> json) {
+    final rawTasks = json['tasks'];
+    final tasks = (rawTasks is List)
+        ? rawTasks
+              .whereType<Map<String, dynamic>>()
+              .map(DailyTask.fromJson)
+              .toList()
+        : <DailyTask>[];
+
+    return PetCareLog(
+      id: json['id'] as String?,
+      petId: json['pet_id'] as String,
+      logDate: DateTime.parse(json['log_date'] as String),
+      breakfastFed: json['breakfast_fed'] as bool? ?? false,
+      dinnerFed: json['dinner_fed'] as bool? ?? false,
+      breakfastKcal: (json['breakfast_kcal'] as num?)?.toInt() ?? 250,
+      dinnerKcal: (json['dinner_kcal'] as num?)?.toInt() ?? 250,
+      breakfastFood: json['breakfast_food'] as String? ?? 'Dry Kibble - 1 cup',
+      dinnerFood: json['dinner_food'] as String? ?? 'Wet Food - 1/2 can',
+      snackFed: json['snack_fed'] as bool? ?? false,
+      snackKcal: (json['snack_kcal'] as num?)?.toInt() ?? 0,
+      snackFood: json['snack_food'] as String? ?? '',
+      treatsCount: (json['treats_count'] as num?)?.toInt() ?? 0,
+      treatsKcal: (json['treats_kcal'] as num?)?.toInt() ?? 0,
+      waterCups: (json['water_cups'] as num?)?.toInt() ?? 0,
+      tasks: tasks.isEmpty ? List.of(DailyTask.defaults) : tasks,
+      mood: json['mood'] as String?,
+      dailyCalorieGoal: (json['daily_calorie_goal'] as num?)?.toInt() ?? 500,
+      dailyWaterGoalCups: (json['daily_water_goal_cups'] as num?)?.toInt() ?? 8,
+      dailyExerciseGoalMinutes:
+          (json['daily_exercise_goal_minutes'] as num?)?.toInt() ?? 30,
+    );
+  }
+
+  /// Builds an empty log for the given pet/day, copying the goal snapshot
+  /// from the pet's defaults.
+  factory PetCareLog.empty({
+    required String petId,
+    required DateTime logDate,
+    int dailyCalorieGoal = 500,
+    int dailyWaterGoalCups = 8,
+    int dailyExerciseGoalMinutes = 30,
+    List<DailyTask>? taskTemplate,
+    int breakfastKcal = 250,
+    int dinnerKcal = 250,
+  }) {
+    final t = taskTemplate;
+    return PetCareLog(
+      petId: petId,
+      logDate: DateTime(logDate.year, logDate.month, logDate.day),
+      dailyCalorieGoal: dailyCalorieGoal,
+      dailyWaterGoalCups: dailyWaterGoalCups,
+      dailyExerciseGoalMinutes: dailyExerciseGoalMinutes,
+      breakfastKcal: breakfastKcal,
+      dinnerKcal: dinnerKcal,
+      tasks: t != null && t.isNotEmpty
+          ? [for (final x in t) x]
+          : List.of(DailyTask.defaults),
+    );
+  }
   /// `null` for an unsaved log that lives only on the client.
   final String? id;
   final String petId;
@@ -152,29 +239,6 @@ class PetCareLog {
   final int dailyCalorieGoal;
   final int dailyWaterGoalCups;
   final int dailyExerciseGoalMinutes;
-
-  const PetCareLog({
-    this.id,
-    required this.petId,
-    required this.logDate,
-    this.breakfastFed = false,
-    this.dinnerFed = false,
-    this.breakfastKcal = 250,
-    this.dinnerKcal = 250,
-    this.breakfastFood = 'Dry Kibble - 1 cup',
-    this.dinnerFood = 'Wet Food - 1/2 can',
-    this.snackFed = false,
-    this.snackKcal = 0,
-    this.snackFood = '',
-    this.treatsCount = 0,
-    this.treatsKcal = 0,
-    this.waterCups = 0,
-    this.tasks = const [],
-    this.mood,
-    this.dailyCalorieGoal = 500,
-    this.dailyWaterGoalCups = 8,
-    this.dailyExerciseGoalMinutes = 30,
-  });
 
   // -------------------------------------------------------------------------
   // Derived helpers used by the UI
@@ -266,43 +330,6 @@ class PetCareLog {
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Serialisation
-  // -------------------------------------------------------------------------
-  factory PetCareLog.fromJson(Map<String, dynamic> json) {
-    final rawTasks = json['tasks'];
-    final tasks = (rawTasks is List)
-        ? rawTasks
-              .whereType<Map<String, dynamic>>()
-              .map(DailyTask.fromJson)
-              .toList()
-        : <DailyTask>[];
-
-    return PetCareLog(
-      id: json['id'] as String?,
-      petId: json['pet_id'] as String,
-      logDate: DateTime.parse(json['log_date'] as String),
-      breakfastFed: json['breakfast_fed'] as bool? ?? false,
-      dinnerFed: json['dinner_fed'] as bool? ?? false,
-      breakfastKcal: (json['breakfast_kcal'] as num?)?.toInt() ?? 250,
-      dinnerKcal: (json['dinner_kcal'] as num?)?.toInt() ?? 250,
-      breakfastFood: json['breakfast_food'] as String? ?? 'Dry Kibble - 1 cup',
-      dinnerFood: json['dinner_food'] as String? ?? 'Wet Food - 1/2 can',
-      snackFed: json['snack_fed'] as bool? ?? false,
-      snackKcal: (json['snack_kcal'] as num?)?.toInt() ?? 0,
-      snackFood: json['snack_food'] as String? ?? '',
-      treatsCount: (json['treats_count'] as num?)?.toInt() ?? 0,
-      treatsKcal: (json['treats_kcal'] as num?)?.toInt() ?? 0,
-      waterCups: (json['water_cups'] as num?)?.toInt() ?? 0,
-      tasks: tasks.isEmpty ? List.of(DailyTask.defaults) : tasks,
-      mood: json['mood'] as String?,
-      dailyCalorieGoal: (json['daily_calorie_goal'] as num?)?.toInt() ?? 500,
-      dailyWaterGoalCups: (json['daily_water_goal_cups'] as num?)?.toInt() ?? 8,
-      dailyExerciseGoalMinutes:
-          (json['daily_exercise_goal_minutes'] as num?)?.toInt() ?? 30,
-    );
-  }
-
   /// JSON suitable for `upsert` — `pet_id` + `log_date` is the natural key
   /// and we omit `id` so Postgres assigns it.
   Map<String, dynamic> toUpsertJson() => {
@@ -376,31 +403,4 @@ class PetCareLog {
       dailyCalorieGoal.hashCode ^
       dailyWaterGoalCups.hashCode ^
       dailyExerciseGoalMinutes.hashCode;
-
-  /// Builds an empty log for the given pet/day, copying the goal snapshot
-  /// from the pet's defaults.
-  factory PetCareLog.empty({
-    required String petId,
-    required DateTime logDate,
-    int dailyCalorieGoal = 500,
-    int dailyWaterGoalCups = 8,
-    int dailyExerciseGoalMinutes = 30,
-    List<DailyTask>? taskTemplate,
-    int breakfastKcal = 250,
-    int dinnerKcal = 250,
-  }) {
-    final t = taskTemplate;
-    return PetCareLog(
-      petId: petId,
-      logDate: DateTime(logDate.year, logDate.month, logDate.day),
-      dailyCalorieGoal: dailyCalorieGoal,
-      dailyWaterGoalCups: dailyWaterGoalCups,
-      dailyExerciseGoalMinutes: dailyExerciseGoalMinutes,
-      breakfastKcal: breakfastKcal,
-      dinnerKcal: dinnerKcal,
-      tasks: t != null && t.isNotEmpty
-          ? [for (final x in t) x]
-          : List.of(DailyTask.defaults),
-    );
-  }
 }

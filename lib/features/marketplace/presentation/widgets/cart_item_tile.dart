@@ -6,9 +6,9 @@ import 'package:petfolio/features/marketplace/data/models/cart_item_model.dart';
 import 'package:petfolio/features/marketplace/presentation/controllers/cart_controller.dart';
 
 class CartItemTile extends ConsumerWidget {
-  final CartItemModel item;
 
   const CartItemTile({super.key, required this.item});
+  final CartItemModel item;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -115,10 +115,10 @@ class CartItemTile extends ConsumerWidget {
 }
 
 class _QuantityButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
 
   const _QuantityButton({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

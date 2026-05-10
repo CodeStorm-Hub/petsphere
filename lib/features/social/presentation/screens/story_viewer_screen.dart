@@ -8,9 +8,9 @@ import 'package:petfolio/core/widgets/async_value_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class StoryViewerScreen extends ConsumerStatefulWidget {
-  final String petId;
 
   const StoryViewerScreen({super.key, required this.petId});
+  final String petId;
 
   @override
   ConsumerState<StoryViewerScreen> createState() => _StoryViewerScreenState();
@@ -99,9 +99,9 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> {
 }
 
 class _StoryHeader extends StatelessWidget {
-  final PetModel pet;
 
   const _StoryHeader({required this.pet});
+  final PetModel pet;
 
   @override
   Widget build(BuildContext context) {

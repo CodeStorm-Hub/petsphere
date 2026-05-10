@@ -10,10 +10,6 @@ import 'package:petfolio/features/pet/data/pet_repository.dart';
 // State
 // ---------------------------------------------------------------------------
 class PetState {
-  final List<PetModel> myPets;
-  final PetModel? activePet; // The "currently acting as" pet
-  final bool isLoading;
-  final String? error;
 
   PetState({
     this.myPets = const [],
@@ -21,6 +17,10 @@ class PetState {
     this.isLoading = false,
     this.error,
   });
+  final List<PetModel> myPets;
+  final PetModel? activePet; // The "currently acting as" pet
+  final bool isLoading;
+  final String? error;
 
   PetState copyWith({
     List<PetModel>? myPets,

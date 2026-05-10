@@ -13,15 +13,15 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 
 @immutable
 class AllergyState {
-  final List<PetAllergy> allergies;
-  final bool isLoading;
-  final String? error;
 
   const AllergyState({
     this.allergies = const [],
     this.isLoading = false,
     this.error,
   });
+  final List<PetAllergy> allergies;
+  final bool isLoading;
+  final String? error;
 
   AllergyState copyWith({
     List<PetAllergy>? allergies,

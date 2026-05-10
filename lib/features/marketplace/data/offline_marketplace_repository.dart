@@ -12,11 +12,6 @@ import 'package:petfolio/core/services/offline_cache.dart';
 /// - Orders: Queue if offline, sync when online
 /// - Cache TTL: 4 hours for product catalog (stable data)
 class OfflineMarketplaceRepository {
-  final MarketplaceRepository _repository;
-  final OfflineCache _cache;
-  final ConnectivityService _connectivity;
-
-  static const Duration _productsCacheTTL = Duration(hours: 4);
 
   OfflineMarketplaceRepository({
     required MarketplaceRepository repository,
@@ -25,6 +20,11 @@ class OfflineMarketplaceRepository {
   }) : _repository = repository,
        _cache = cache,
        _connectivity = connectivity;
+  final MarketplaceRepository _repository;
+  final OfflineCache _cache;
+  final ConnectivityService _connectivity;
+
+  static const Duration _productsCacheTTL = Duration(hours: 4);
 
   /// Fetch products with offline support
   ///
@@ -194,7 +194,7 @@ class OfflineMarketplaceRepository {
     if (_connectivity.isOffline) {
       throw Exception('Cannot fetch order history while offline');
     }
-    return await _repository.fetchOrders(userId);
+    return _repository.fetchOrders(userId);
   }
 
   /// Clear product cache (force refresh)

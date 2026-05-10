@@ -10,12 +10,11 @@ import 'package:petfolio/features/pet/data/models/pet_model.dart';
 import 'package:petfolio/core/widgets/brand_logo.dart';
 import 'package:petfolio/core/utils/image_upload_helper.dart';
 import 'package:petfolio/core/utils/media_utils.dart';
-import 'package:petfolio/core/constants/supabase_config.dart';
 
 class CreateStoryScreen extends ConsumerStatefulWidget {
-  final String? initialPetId;
 
   const CreateStoryScreen({super.key, this.initialPetId});
+  final String? initialPetId;
 
   @override
   ConsumerState<CreateStoryScreen> createState() => _CreateStoryScreenState();
@@ -182,14 +181,8 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
     final pet = pets.firstWhere((p) => p.id == selectedPetId);
     setState(() => _isUploading = true);
     try {
-      final ext = selectedFile.path.split('.').last;
-      final path =
-          'stories/${pet.id}/${DateTime.now().millisecondsSinceEpoch}.$ext';
-      final mediaUrl = await ImageUploadHelper.upload(
-        file: selectedFile,
-        bucket: kBucketPostMedia,
-        path: path,
-      );
+      final mediaUrl =
+          await ImageUploadHelper.uploadStoryMedia(selectedFile, pet.id);
 
       final success = await ref
           .read(feedProvider.notifier)
@@ -555,15 +548,15 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen> {
 }
 
 class _MediaPickerTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
 
   const _MediaPickerTile({
     required this.icon,
     required this.title,
     required this.onTap,
   });
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -593,10 +586,10 @@ class _MediaPickerTile extends StatelessWidget {
 }
 
 class _DurationBadge extends StatelessWidget {
-  final IconData icon;
-  final String label;
 
   const _DurationBadge({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
 
   @override
   Widget build(BuildContext context) {

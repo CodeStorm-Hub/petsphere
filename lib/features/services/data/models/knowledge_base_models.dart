@@ -2,15 +2,6 @@ import 'package:flutter/foundation.dart';
 
 @immutable
 class KnowledgeArticle {
-  final String id;
-  final String title;
-  final String content;
-  final String category;
-  final String? imageUrl;
-  final String? readTime;
-  final bool isExpertVerified;
-  final bool isFeatured;
-  final DateTime createdAt;
 
   const KnowledgeArticle({
     required this.id,
@@ -36,6 +27,15 @@ class KnowledgeArticle {
         isFeatured: json['is_featured'] as bool? ?? false,
         createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
       );
+  final String id;
+  final String title;
+  final String content;
+  final String category;
+  final String? imageUrl;
+  final String? readTime;
+  final bool isExpertVerified;
+  final bool isFeatured;
+  final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
     'id': id,

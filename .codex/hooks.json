@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "dart format {filePath}"
+          },
+          {
+            "type": "command",
+            "command": "flutter analyze --no-pub {filePath}"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "flutter test --reporter=compact test/ 2>&1 | head -100"
+          }
+        ]
+      }
+    ]
+  }
+}

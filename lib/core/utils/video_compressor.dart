@@ -9,11 +9,6 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 
 /// Result of a video compression operation.
 class VideoCompressionResult {
-  final File file;
-  final int originalBytes;
-  final int compressedBytes;
-  final Uint8List? thumbnail;
-  final Duration? duration;
 
   const VideoCompressionResult({
     required this.file,
@@ -22,6 +17,11 @@ class VideoCompressionResult {
     this.thumbnail,
     this.duration,
   });
+  final File file;
+  final int originalBytes;
+  final int compressedBytes;
+  final Uint8List? thumbnail;
+  final Duration? duration;
 
   double get compressionRatio =>
       originalBytes > 0 ? compressedBytes / originalBytes : 1.0;

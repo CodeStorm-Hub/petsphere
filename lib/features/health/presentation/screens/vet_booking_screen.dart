@@ -201,8 +201,8 @@ class _VetBookingScreenState extends ConsumerState<VetBookingScreen>
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _UpcomingBanner extends StatelessWidget {
-  final List<PetVetAppointment> appointments;
   const _UpcomingBanner({required this.appointments});
+  final List<PetVetAppointment> appointments;
 
   @override
   Widget build(BuildContext context) {
@@ -272,9 +272,9 @@ class _UpcomingBanner extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _VetCard extends StatelessWidget {
+  const _VetCard({required this.vet, required this.onBook});
   final Map<String, dynamic> vet;
   final VoidCallback onBook;
-  const _VetCard({required this.vet, required this.onBook});
 
   @override
   Widget build(BuildContext context) {
@@ -415,8 +415,8 @@ class _VetCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _VetBookingSheet extends ConsumerStatefulWidget {
-  final Map<String, dynamic> vet;
   const _VetBookingSheet({required this.vet});
+  final Map<String, dynamic> vet;
 
   @override
   ConsumerState<_VetBookingSheet> createState() => _VetBookingSheetState();

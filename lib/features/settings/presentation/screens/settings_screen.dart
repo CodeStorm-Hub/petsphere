@@ -16,25 +16,31 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: ListView(
-        children: [
-          SwitchListTile(
-            title: const Text('Dark mode'),
-            value: isDark,
-            onChanged: (_) => ref.read(themeProvider.notifier).toggle(),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: ListView(
+            children: [
+              SwitchListTile(
+                title: const Text('Dark mode'),
+                value: isDark,
+                onChanged: (_) => ref.read(themeProvider.notifier).toggle(),
+              ),
+              if (user != null)
+                ListTile(
+                  title: const Text('Signed in as'),
+                  subtitle: Text(user.email),
+                ),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text('Sign out'),
+                onTap: () => ref.read(authProvider.notifier).logout(),
+              ),
+            ],
           ),
-          if (user != null)
-            ListTile(
-              title: const Text('Signed in as'),
-              subtitle: Text(user.email),
-            ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Sign out'),
-            onTap: () => ref.read(authProvider.notifier).logout(),
-          ),
-        ],
+        ),
       ),
     );
+
   }
 }

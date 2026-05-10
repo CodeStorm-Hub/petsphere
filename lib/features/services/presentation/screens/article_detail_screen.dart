@@ -5,9 +5,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
-  final KnowledgeArticle article;
 
   const ArticleDetailScreen({super.key, required this.article});
+  final KnowledgeArticle article;
 
   @override
   Widget build(BuildContext context) {

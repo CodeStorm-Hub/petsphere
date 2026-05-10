@@ -33,18 +33,6 @@ final discoveryActivePetIdProvider =
 // State
 // ---------------------------------------------------------------------------
 class MatchState {
-  final List<PetModel> discoveryPets;
-  final List<PetModel> _allDiscoveryPets; // unfiltered set for search
-  final List<MatchRequestModel> myRequests;
-  final List<MatchRequestModel> sentRequests;
-
-  /// Batched follower counts for pets on the discovery feed (Issue #29).
-  final Map<String, int> discoveryFollowerCounts;
-  final bool isLoading;
-  final String? filterAnimal;
-  final String? filterBreed;
-  final String searchQuery;
-  final String? error;
 
   MatchState({
     this.discoveryPets = const [],
@@ -58,6 +46,18 @@ class MatchState {
     this.searchQuery = '',
     this.error,
   }) : _allDiscoveryPets = allDiscoveryPets ?? discoveryPets;
+  final List<PetModel> discoveryPets;
+  final List<PetModel> _allDiscoveryPets; // unfiltered set for search
+  final List<MatchRequestModel> myRequests;
+  final List<MatchRequestModel> sentRequests;
+
+  /// Batched follower counts for pets on the discovery feed (Issue #29).
+  final Map<String, int> discoveryFollowerCounts;
+  final bool isLoading;
+  final String? filterAnimal;
+  final String? filterBreed;
+  final String searchQuery;
+  final String? error;
 
   List<PetModel> get allDiscoveryPets => _allDiscoveryPets;
 

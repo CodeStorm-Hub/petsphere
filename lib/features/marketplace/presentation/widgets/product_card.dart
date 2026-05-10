@@ -6,9 +6,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:petfolio/features/marketplace/data/models/product_model.dart';
 
 class ProductCard extends StatelessWidget {
-  final ProductModel product;
-  final VoidCallback onTap;
-  final VoidCallback onAdd;
 
   const ProductCard({
     super.key,
@@ -16,6 +13,9 @@ class ProductCard extends StatelessWidget {
     required this.onTap,
     required this.onAdd,
   });
+  final ProductModel product;
+  final VoidCallback onTap;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {

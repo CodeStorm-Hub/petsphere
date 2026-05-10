@@ -26,8 +26,8 @@ final isFollowingPetProvider =
     });
 
 class VisitorPetProfileScreen extends ConsumerStatefulWidget {
-  final String petId;
   const VisitorPetProfileScreen({super.key, required this.petId});
+  final String petId;
 
   @override
   ConsumerState<VisitorPetProfileScreen> createState() =>
@@ -564,8 +564,8 @@ class _VisitorPetProfileScreenState extends ConsumerState<VisitorPetProfileScree
 }
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
   _SliverAppBarDelegate({required this.child});
+  final Widget child;
 
   @override
   double get minExtent => 50;

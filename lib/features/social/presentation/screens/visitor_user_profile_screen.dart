@@ -30,8 +30,8 @@ final isFollowingUserProvider = FutureProvider.family<bool, String>((ref, ownerI
 });
 
 class VisitorUserProfileScreen extends ConsumerStatefulWidget {
-  final String userId;
   const VisitorUserProfileScreen({super.key, required this.userId});
+  final String userId;
 
   @override
   ConsumerState<VisitorUserProfileScreen> createState() =>
@@ -506,8 +506,8 @@ class _VisitorUserProfileScreenState extends ConsumerState<VisitorUserProfileScr
 }
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
   _SliverAppBarDelegate({required this.child});
+  final Widget child;
 
   @override
   double get minExtent => 50;

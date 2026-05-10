@@ -124,11 +124,6 @@ class CartScreen extends ConsumerWidget {
 }
 
 class _CheckoutBar extends StatelessWidget {
-  final double total;
-  final int itemCount;
-  final bool isCheckingOut;
-  final NumberFormat currencyFormat;
-  final VoidCallback onCheckout;
 
   const _CheckoutBar({
     required this.total,
@@ -137,6 +132,11 @@ class _CheckoutBar extends StatelessWidget {
     required this.currencyFormat,
     required this.onCheckout,
   });
+  final double total;
+  final int itemCount;
+  final bool isCheckingOut;
+  final NumberFormat currencyFormat;
+  final VoidCallback onCheckout;
 
   @override
   Widget build(BuildContext context) {
@@ -280,10 +280,6 @@ class _CheckoutBar extends StatelessWidget {
 }
 
 class _SummaryRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color valueColor;
-  final FontWeight valueWeight;
 
   const _SummaryRow({
     required this.label,
@@ -291,6 +287,10 @@ class _SummaryRow extends StatelessWidget {
     required this.valueColor,
     this.valueWeight = FontWeight.w600,
   });
+  final String label;
+  final String value;
+  final Color valueColor;
+  final FontWeight valueWeight;
 
   @override
   Widget build(BuildContext context) {

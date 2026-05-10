@@ -1,15 +1,6 @@
 import 'package:petfolio/core/constants/supabase_config.dart';
 
 class InsuranceClaim {
-  final String id;
-  final String petId;
-  final String userId;
-  final String title;
-  final double amount;
-  final DateTime incurredAt;
-  final String status;
-  final String? notes;
-  final DateTime createdAt;
 
   const InsuranceClaim({
     required this.id,
@@ -34,6 +25,15 @@ class InsuranceClaim {
     notes: json['notes'] as String?,
     createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
   );
+  final String id;
+  final String petId;
+  final String userId;
+  final String title;
+  final double amount;
+  final DateTime incurredAt;
+  final String status;
+  final String? notes;
+  final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
     'id': id,

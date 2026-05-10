@@ -9,10 +9,6 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 
 @immutable
 class CareLogState {
-  final List<PetCareLog> recentLogs;
-  final bool isLoading;
-  final String? error;
-  final String? activePetId;
 
   const CareLogState({
     this.recentLogs = const [],
@@ -20,6 +16,10 @@ class CareLogState {
     this.error,
     this.activePetId,
   });
+  final List<PetCareLog> recentLogs;
+  final bool isLoading;
+  final String? error;
+  final String? activePetId;
 
   PetCareLog? get todayLog => recentLogs.isEmpty ? null : recentLogs.first;
 

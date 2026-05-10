@@ -1,12 +1,4 @@
 class UserModel {
-  final String id;
-  final String email;
-  final String? name;
-  final String? profileImageUrl;
-  final String? bio;
-  final String? location;
-  final List<String> publicCareBadgeSlugs;
-  final bool showCareBadgesOnProfile;
 
   UserModel({
     required this.id,
@@ -18,6 +10,32 @@ class UserModel {
     this.publicCareBadgeSlugs = const [],
     this.showCareBadgesOnProfile = true,
   });
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'] as String,
+      email: json['email'] as String? ?? '',
+      name: json['name'] as String?,
+      profileImageUrl: json['profile_image_url'] as String?,
+      bio: json['bio'] as String?,
+      location: json['location'] as String?,
+      publicCareBadgeSlugs:
+          (json['public_care_badge_slugs'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      showCareBadgesOnProfile:
+          json['show_care_badges_on_profile'] as bool? ?? true,
+    );
+  }
+  final String id;
+  final String email;
+  final String? name;
+  final String? profileImageUrl;
+  final String? bio;
+  final String? location;
+  final List<String> publicCareBadgeSlugs;
+  final bool showCareBadgesOnProfile;
 
   UserModel copyWith({
     String? id,
@@ -42,24 +60,6 @@ class UserModel {
       publicCareBadgeSlugs: publicCareBadgeSlugs ?? this.publicCareBadgeSlugs,
       showCareBadgesOnProfile:
           showCareBadgesOnProfile ?? this.showCareBadgesOnProfile,
-    );
-  }
-
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      id: json['id'] as String,
-      email: json['email'] as String? ?? '',
-      name: json['name'] as String?,
-      profileImageUrl: json['profile_image_url'] as String?,
-      bio: json['bio'] as String?,
-      location: json['location'] as String?,
-      publicCareBadgeSlugs:
-          (json['public_care_badge_slugs'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      showCareBadgesOnProfile:
-          json['show_care_badges_on_profile'] as bool? ?? true,
     );
   }
 

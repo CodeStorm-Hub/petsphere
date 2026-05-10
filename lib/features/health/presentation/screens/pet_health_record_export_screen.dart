@@ -25,7 +25,7 @@ class _PetHealthRecordExportScreenState
 
   bool _isGenerating = false;
 
-  void _handleExport(String action) async {
+  Future<void> _handleExport(String action) async {
     setState(() => _isGenerating = true);
     // Simulate generation delay
     await Future<void>.delayed(const Duration(seconds: 2));
@@ -156,10 +156,10 @@ class _PetHealthRecordExportScreenState
 }
 
 class _ExportPreviewCard extends StatelessWidget {
-  final String petName;
-  final bool isGenerating;
 
   const _ExportPreviewCard({required this.petName, required this.isGenerating});
+  final String petName;
+  final bool isGenerating;
 
   @override
   Widget build(BuildContext context) {
@@ -310,10 +310,10 @@ class _FormatSelectorState extends State<_FormatSelector> {
 }
 
 class _ExportActions extends StatelessWidget {
-  final bool isGenerating;
-  final void Function(String) onAction;
 
   const _ExportActions({required this.isGenerating, required this.onAction});
+  final bool isGenerating;
+  final void Function(String) onAction;
 
   @override
   Widget build(BuildContext context) {

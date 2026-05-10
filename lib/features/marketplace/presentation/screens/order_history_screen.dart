@@ -120,15 +120,15 @@ class OrderHistoryScreen extends ConsumerWidget {
 }
 
 class _OrderCard extends StatelessWidget {
-  final OrderModel order;
-  final NumberFormat currencyFormat;
-  final DateFormat dateFormat;
 
   const _OrderCard({
     required this.order,
     required this.currencyFormat,
     required this.dateFormat,
   });
+  final OrderModel order;
+  final NumberFormat currencyFormat;
+  final DateFormat dateFormat;
 
   @override
   Widget build(BuildContext context) {

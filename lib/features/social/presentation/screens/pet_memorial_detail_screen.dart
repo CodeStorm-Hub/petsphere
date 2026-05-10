@@ -4,8 +4,8 @@ import '../controllers/pet_memorial_controller.dart';
 import 'package:petfolio/features/social/data/models/pet_memorial_models.dart';
 
 class PetMemorialDetailScreen extends ConsumerWidget {
-  final String memorialId;
   const PetMemorialDetailScreen({super.key, required this.memorialId});
+  final String memorialId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -90,8 +90,8 @@ class PetMemorialDetailScreen extends ConsumerWidget {
 }
 
 class _MemorialBackground extends StatelessWidget {
-  final String? imageUrl;
   const _MemorialBackground({this.imageUrl});
+  final String? imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -135,8 +135,8 @@ class _MemorialBackground extends StatelessWidget {
 }
 
 class _MemorialProfile extends StatelessWidget {
-  final PetMemorialEntry entry;
   const _MemorialProfile({required this.entry});
+  final PetMemorialEntry entry;
 
   @override
   Widget build(BuildContext context) {
@@ -193,8 +193,8 @@ class _MemorialProfile extends StatelessWidget {
 }
 
 class _MemorialQuote extends StatelessWidget {
-  final String? quote;
   const _MemorialQuote({this.quote});
+  final String? quote;
 
   @override
   Widget build(BuildContext context) {
@@ -270,14 +270,14 @@ class _MemorialMessageBoard extends StatelessWidget {
 }
 
 class _MessageBubble extends StatelessWidget {
-  final String name;
-  final String message;
-  final String date;
   const _MessageBubble({
     required this.name,
     required this.message,
     required this.date,
   });
+  final String name;
+  final String message;
+  final String date;
 
   @override
   Widget build(BuildContext context) {

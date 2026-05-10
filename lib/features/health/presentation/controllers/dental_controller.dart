@@ -13,15 +13,15 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 
 @immutable
 class DentalState {
-  final List<DentalLog> logs;
-  final bool isLoading;
-  final String? error;
 
   const DentalState({
     this.logs = const [],
     this.isLoading = false,
     this.error,
   });
+  final List<DentalLog> logs;
+  final bool isLoading;
+  final String? error;
 
   DentalLog? get lastHomeBrushing {
     final matches =

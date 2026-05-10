@@ -85,6 +85,7 @@ SupabaseClient? _mockSupabaseClient;
 // ---------------------------------------------------------------------------
 // Storage bucket names
 // ---------------------------------------------------------------------------
+const String kBucketAvatars = 'avatars';
 const String kBucketPetImages = 'pet-images';
 const String kBucketPostMedia = 'post-media';
 const String kBucketProductImages = 'product-images';

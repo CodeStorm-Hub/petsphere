@@ -2,12 +2,6 @@ import 'package:petfolio/features/pet/data/models/pet_model.dart';
 import 'package:petfolio/features/messaging/data/models/message_model.dart';
 
 class ChatThreadModel {
-  final String id;
-  final List<String> participantPetIds;
-  final List<PetModel> participantPets;
-  final MessageModel? lastMessage;
-  final int unreadCount;
-  final DateTime updatedAt;
 
   const ChatThreadModel({
     required this.id,
@@ -17,24 +11,6 @@ class ChatThreadModel {
     this.unreadCount = 0,
     required this.updatedAt,
   });
-
-  ChatThreadModel copyWith({
-    String? id,
-    List<String>? participantPetIds,
-    List<PetModel>? participantPets,
-    MessageModel? lastMessage,
-    int? unreadCount,
-    DateTime? updatedAt,
-  }) {
-    return ChatThreadModel(
-      id: id ?? this.id,
-      participantPetIds: participantPetIds ?? this.participantPetIds,
-      participantPets: participantPets ?? this.participantPets,
-      lastMessage: lastMessage ?? this.lastMessage,
-      unreadCount: unreadCount ?? this.unreadCount,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
 
   /// Parse from: chat_threads joined with pet1:pets!pet_id_1(*) and pet2:pets!pet_id_2(*).
   factory ChatThreadModel.fromJson(Map<String, dynamic> json) {
@@ -63,6 +39,30 @@ class ChatThreadModel {
       updatedAt: DateTime.parse(
         json['updated_at'] as String? ?? DateTime.now().toIso8601String(),
       ),
+    );
+  }
+  final String id;
+  final List<String> participantPetIds;
+  final List<PetModel> participantPets;
+  final MessageModel? lastMessage;
+  final int unreadCount;
+  final DateTime updatedAt;
+
+  ChatThreadModel copyWith({
+    String? id,
+    List<String>? participantPetIds,
+    List<PetModel>? participantPets,
+    MessageModel? lastMessage,
+    int? unreadCount,
+    DateTime? updatedAt,
+  }) {
+    return ChatThreadModel(
+      id: id ?? this.id,
+      participantPetIds: participantPetIds ?? this.participantPetIds,
+      participantPets: participantPets ?? this.participantPets,
+      lastMessage: lastMessage ?? this.lastMessage,
+      unreadCount: unreadCount ?? this.unreadCount,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 

@@ -2,13 +2,6 @@ import 'dart:developer';
 import 'package:petfolio/core/constants/supabase_config.dart';
 
 class TrainingProgress {
-  final String id;
-  final String petId;
-  final String? programId;
-  final String command;
-  final bool mastered;
-  final String? notes;
-  final DateTime loggedAt;
 
   const TrainingProgress({
     required this.id,
@@ -30,6 +23,13 @@ class TrainingProgress {
         notes: json['notes'] as String?,
         loggedAt: DateTime.parse(json['logged_at'] as String).toLocal(),
       );
+  final String id;
+  final String petId;
+  final String? programId;
+  final String command;
+  final bool mastered;
+  final String? notes;
+  final DateTime loggedAt;
 }
 
 class TrainingRepository {

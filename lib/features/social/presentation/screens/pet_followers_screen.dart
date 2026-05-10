@@ -20,9 +20,6 @@ String _loadErrorMessage(FollowListType type) {
 }
 
 class PetFollowersScreen extends ConsumerWidget {
-  final String? petId;
-  final String? userId;
-  final FollowListType type;
 
   PetFollowersScreen({super.key, this.petId, this.userId, required this.type})
     : assert(
@@ -31,6 +28,9 @@ class PetFollowersScreen extends ConsumerWidget {
             : (userId != null && userId.isNotEmpty),
         'PetFollowersScreen: use petId for petFollowers and userId for ownerFollowers/following.',
       );
+  final String? petId;
+  final String? userId;
+  final FollowListType type;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -273,12 +273,6 @@ class PetFollowersScreen extends ConsumerWidget {
 }
 
 class _FollowTile extends StatelessWidget {
-  final String name;
-  final String imageUrl;
-  final String? date;
-  final String? typeLabel;
-  final ColorScheme colorScheme;
-  final VoidCallback? onTap;
 
   const _FollowTile({
     required this.name,
@@ -288,6 +282,12 @@ class _FollowTile extends StatelessWidget {
     required this.colorScheme,
     this.onTap,
   });
+  final String name;
+  final String imageUrl;
+  final String? date;
+  final String? typeLabel;
+  final ColorScheme colorScheme;
+  final VoidCallback? onTap;
 
   String _formatDate(String? isoString) {
     if (isoString == null) return '';

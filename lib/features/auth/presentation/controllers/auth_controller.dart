@@ -15,10 +15,6 @@ import 'package:petfolio/features/care/data/care_cache.dart';
 enum AuthStatus { initial, unauthenticated, authenticated }
 
 class AuthState {
-  final AuthStatus status;
-  final UserModel? user;
-  final bool isLoading;
-  final String? error;
 
   AuthState({
     this.status = AuthStatus.initial,
@@ -26,6 +22,10 @@ class AuthState {
     this.isLoading = false,
     this.error,
   });
+  final AuthStatus status;
+  final UserModel? user;
+  final bool isLoading;
+  final String? error;
 
   AuthState copyWith({
     AuthStatus? status,

@@ -5,17 +5,17 @@ import 'models/order_model.dart';
 import 'models/product_model.dart';
 
 class CreatePaymentIntentResult {
-  final String clientSecret;
-  final String paymentIntentId;
   const CreatePaymentIntentResult({
     required this.clientSecret,
     required this.paymentIntentId,
   });
+  final String clientSecret;
+  final String paymentIntentId;
 }
 
 class MarketplaceOutOfStockException implements Exception {
-  final List<OutOfStockLine> lines;
   MarketplaceOutOfStockException(this.lines);
+  final List<OutOfStockLine> lines;
 
   @override
   String toString() {
@@ -31,16 +31,16 @@ class MarketplaceOutOfStockException implements Exception {
 }
 
 class OutOfStockLine {
-  final String productId;
-  final String productName;
-  final int available;
-  final int requested;
   OutOfStockLine({
     required this.productId,
     required this.productName,
     required this.available,
     required this.requested,
   });
+  final String productId;
+  final String productName;
+  final int available;
+  final int requested;
 }
 
 class MarketplaceRepository {

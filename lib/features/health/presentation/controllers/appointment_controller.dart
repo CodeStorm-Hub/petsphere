@@ -10,10 +10,6 @@ import 'package:petfolio/core/utils/logger.dart';
 
 @immutable
 class AppointmentState {
-  final List<PetVetAppointment> appointments;
-  final bool isLoading;
-  final String? error;
-  final String? activePetId;
 
   const AppointmentState({
     this.appointments = const [],
@@ -21,6 +17,10 @@ class AppointmentState {
     this.error,
     this.activePetId,
   });
+  final List<PetVetAppointment> appointments;
+  final bool isLoading;
+  final String? error;
+  final String? activePetId;
 
   List<PetVetAppointment> get upcomingAppointments =>
       appointments.where((a) => a.scheduledAt.isAfter(DateTime.now())).toList()

@@ -10,8 +10,8 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
 
 class AddPetScreen extends ConsumerStatefulWidget {
-  final PetModel? pet;
   const AddPetScreen({super.key, this.pet});
+  final PetModel? pet;
 
   @override
   ConsumerState<AddPetScreen> createState() => _AddPetScreenState();
@@ -254,10 +254,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
       // Upload image if selected
       if (_selectedImage != null) {
         try {
-          finalImageUrl = await ImageUploadHelper.uploadPetProfileImage(
-            _selectedImage!,
-            _nameController.text.trim().toLowerCase().replaceAll(' ', '_'),
-          );
+          finalImageUrl = await ImageUploadHelper.uploadPetAvatar(_selectedImage!);
         } catch (uploadError) {
           debugPrint('Image upload failed: $uploadError');
           // We can decide to continue or stop. For now, we continue with old image or empty.
@@ -858,8 +855,8 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen>
 }
 
 class _AnimalOption {
-  final String label;
-  final IconData icon;
 
   const _AnimalOption(this.label, this.icon);
+  final String label;
+  final IconData icon;
 }

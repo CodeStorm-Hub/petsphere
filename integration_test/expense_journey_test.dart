@@ -132,8 +132,8 @@ void main() {
 }
 
 class _MockAuthNotifier extends AuthNotifier {
-  final UserModel? mockUser;
   _MockAuthNotifier(this.mockUser);
+  final UserModel? mockUser;
 
   @override
   AuthState build() {

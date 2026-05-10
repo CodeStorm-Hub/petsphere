@@ -210,28 +210,30 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen>
                                     ),
                                   ),
                                   const SizedBox(width: 12),
-                                  RichText(
-                                    text: TextSpan(
-                                      style: TextStyle(
-                                        color: colorScheme.onSurface,
-                                        fontSize: 13,
+                                  Expanded(
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: TextStyle(
+                                          color: colorScheme.onSurface,
+                                          fontSize: 13,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: 'Join 2,400+ ',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w800,
+                                              color: colorScheme.onSurface,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text:
+                                                'pet lovers already\nnurturing their best lives.',
+                                            style: TextStyle(
+                                              color: colorScheme.onSurfaceVariant,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      children: [
-                                        TextSpan(
-                                          text: 'Join 2,400+ ',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w800,
-                                            color: colorScheme.onSurface,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text:
-                                              'pet lovers already\nnurturing their best lives.',
-                                          style: TextStyle(
-                                            color: colorScheme.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ],
                                     ),
                                   ),
                                 ],

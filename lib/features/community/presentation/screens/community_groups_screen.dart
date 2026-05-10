@@ -155,9 +155,9 @@ class _CommunityGroupsScreenState extends ConsumerState<CommunityGroupsScreen> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _GroupCard extends StatelessWidget {
+  const _GroupCard({required this.group, required this.onToggle});
   final CommunityGroup group;
   final VoidCallback onToggle;
-  const _GroupCard({required this.group, required this.onToggle});
 
   @override
   Widget build(BuildContext context) {
@@ -292,9 +292,9 @@ class _GroupCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _CreateGroupSheet extends StatefulWidget {
+  const _CreateGroupSheet({required this.ownerId, required this.onCreated});
   final String ownerId;
   final VoidCallback onCreated;
-  const _CreateGroupSheet({required this.ownerId, required this.onCreated});
 
   @override
   State<_CreateGroupSheet> createState() => _CreateGroupSheetState();
@@ -422,9 +422,9 @@ class _CreateGroupSheetState extends State<_CreateGroupSheet> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.icon, required this.message});
   final IconData icon;
   final String message;
-  const _EmptyState({required this.icon, required this.message});
 
   @override
   Widget build(BuildContext context) {

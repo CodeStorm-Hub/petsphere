@@ -3,15 +3,15 @@ import 'package:google_fonts/google_fonts.dart';
 
 @immutable
 class PetFolioShadows extends ThemeExtension<PetFolioShadows> {
-  final List<BoxShadow> card;
-  final List<BoxShadow> button;
-  final List<BoxShadow> hoverLift;
 
   const PetFolioShadows({
     required this.card,
     required this.button,
     required this.hoverLift,
   });
+  final List<BoxShadow> card;
+  final List<BoxShadow> button;
+  final List<BoxShadow> hoverLift;
 
   @override
   PetFolioShadows copyWith({

@@ -2,9 +2,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:petfolio/features/services/data/models/pet_event_models.dart';
 
 class PetEventsRepository {
-  final SupabaseClient _client;
 
   PetEventsRepository(this._client);
+  final SupabaseClient _client;
 
   Future<List<PetEvent>> getEvents({String? type}) async {
     var query = _client.from('pet_events').select().eq('is_active', true);

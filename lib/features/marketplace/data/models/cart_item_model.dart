@@ -1,13 +1,8 @@
 import 'product_model.dart';
 
 class CartItemModel {
-  final String id;
-  final ProductModel product;
-  final int quantity;
 
   CartItemModel({required this.id, required this.product, this.quantity = 1});
-
-  double get subtotal => product.price * quantity;
 
   factory CartItemModel.fromJson(Map<String, dynamic> json) {
     return CartItemModel(
@@ -16,6 +11,11 @@ class CartItemModel {
       quantity: (json['quantity'] as num?)?.toInt() ?? 1,
     );
   }
+  final String id;
+  final ProductModel product;
+  final int quantity;
+
+  double get subtotal => product.price * quantity;
 
   Map<String, dynamic> toJson() => {
     'id': id,

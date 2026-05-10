@@ -3,13 +3,6 @@ import 'package:flutter/material.dart';
 /// A single exercise/activity log entry for a pet.
 @immutable
 class PetActivityLog {
-  final String? id;
-  final String petId;
-  final DateTime logDate;
-  final String activityType;
-  final int durationMinutes;
-  final String intensity;
-  final String? notes;
 
   const PetActivityLog({
     this.id,
@@ -20,6 +13,25 @@ class PetActivityLog {
     this.intensity = 'moderate',
     this.notes,
   });
+
+  factory PetActivityLog.fromJson(Map<String, dynamic> json) {
+    return PetActivityLog(
+      id: json['id'] as String?,
+      petId: json['pet_id'] as String,
+      logDate: DateTime.parse(json['log_date'] as String),
+      activityType: json['activity_type'] as String,
+      durationMinutes: (json['duration_minutes'] as num?)?.toInt() ?? 0,
+      intensity: json['intensity'] as String? ?? 'moderate',
+      notes: json['notes'] as String?,
+    );
+  }
+  final String? id;
+  final String petId;
+  final DateTime logDate;
+  final String activityType;
+  final int durationMinutes;
+  final String intensity;
+  final String? notes;
 
   /// Human-readable label for the activity type.
   String get typeLabel => switch (activityType) {
@@ -53,18 +65,6 @@ class PetActivityLog {
     'high' => const Color(0xFFFFA726), // secondary
     _ => const Color(0xFF2979FF), // primary
   };
-
-  factory PetActivityLog.fromJson(Map<String, dynamic> json) {
-    return PetActivityLog(
-      id: json['id'] as String?,
-      petId: json['pet_id'] as String,
-      logDate: DateTime.parse(json['log_date'] as String),
-      activityType: json['activity_type'] as String,
-      durationMinutes: (json['duration_minutes'] as num?)?.toInt() ?? 0,
-      intensity: json['intensity'] as String? ?? 'moderate',
-      notes: json['notes'] as String?,
-    );
-  }
 
   Map<String, dynamic> toInsertJson() => {
     'pet_id': petId,

@@ -6,21 +6,6 @@ import 'package:petfolio/core/constants/supabase_config.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class LostFoundReport {
-  final String id;
-  final String reporterId;
-  final String? petId;
-  final String status; // lost | found | reunited
-  final String petName;
-  final String petType;
-  final String? breed;
-  final String? description;
-  final DateTime? lastSeenAt;
-  final String? lastSeenLocation;
-  final String? contactInfo;
-  final double? rewardAmount;
-  final String? imageUrl;
-  final bool isActive;
-  final DateTime createdAt;
 
   const LostFoundReport({
     required this.id,
@@ -39,8 +24,6 @@ class LostFoundReport {
     required this.isActive,
     required this.createdAt,
   });
-
-  bool get hasReward => rewardAmount != null && rewardAmount! > 0;
 
   factory LostFoundReport.fromJson(Map<String, dynamic> json) {
     return LostFoundReport(
@@ -63,6 +46,23 @@ class LostFoundReport {
       createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
     );
   }
+  final String id;
+  final String reporterId;
+  final String? petId;
+  final String status; // lost | found | reunited
+  final String petName;
+  final String petType;
+  final String? breed;
+  final String? description;
+  final DateTime? lastSeenAt;
+  final String? lastSeenLocation;
+  final String? contactInfo;
+  final double? rewardAmount;
+  final String? imageUrl;
+  final bool isActive;
+  final DateTime createdAt;
+
+  bool get hasReward => rewardAmount != null && rewardAmount! > 0;
 
   Map<String, dynamic> toInsertJson() => {
     'reporter_id': reporterId,

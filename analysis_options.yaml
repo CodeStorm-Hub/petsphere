@@ -81,3 +81,29 @@ linter:
     - use_function_type_syntax_for_parameters
     - use_rethrow_when_possible
     - valid_regexps
+    - sort_child_properties_last
+    - sort_constructors_first
+    - sort_unnamed_constructors_first
+    - prefer_final_in_for_each
+    - prefer_null_aware_operators
+    - unnecessary_await_in_return
+    - unnecessary_parenthesis
+    - use_super_parameters
+    - avoid_unused_constructor_parameters
+    - avoid_void_async
+    - await_only_futures
+    - empty_statements
+    - exhaustive_cases
+    - implementation_imports
+    - no_logic_in_create_state
+    - overridden_fields
+    - package_names
+    - package_prefixed_library_names
+    - prefer_void_to_null
+    - provide_deprecation_message
+    - test_types_in_equals
+    - throw_in_finally
+    - unnecessary_brace_in_string_interps
+    - unnecessary_overrides
+    - unnecessary_statements
+    - void_checks

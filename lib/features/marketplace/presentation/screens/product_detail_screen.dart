@@ -8,9 +8,9 @@ import '../controllers/marketplace_controller.dart';
 import 'package:petfolio/features/marketplace/data/models/product_model.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
-  final String productId;
 
   const ProductDetailScreen({super.key, required this.productId});
+  final String productId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -91,8 +91,8 @@ class ProductDetailScreen extends ConsumerWidget {
 }
 
 class _ProductDetailView extends ConsumerStatefulWidget {
-  final ProductModel product;
   const _ProductDetailView({required this.product});
+  final ProductModel product;
 
   @override
   ConsumerState<_ProductDetailView> createState() => _ProductDetailViewState();
@@ -711,13 +711,13 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
 
 // Fetches same-category products and shows a horizontal complementary scroll row
 class _ComplementaryProducts extends ConsumerWidget {
-  final String currentProductId;
-  final String category;
 
   const _ComplementaryProducts({
     required this.currentProductId,
     required this.category,
   });
+  final String currentProductId;
+  final String category;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

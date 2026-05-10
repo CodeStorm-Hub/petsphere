@@ -9,11 +9,6 @@ import 'package:petfolio/core/services/offline_cache.dart';
 /// - Fetch operations: Cache with 6-hour TTL, fallback to cache when offline
 /// - Write operations (logging doses, etc): Queue if offline
 class OfflineHealthRepository {
-  final HealthRepository _repository;
-  final OfflineCache _cache;
-  final ConnectivityService _connectivity;
-
-  static const Duration _healthDataCacheTTL = Duration(hours: 6);
 
   OfflineHealthRepository({
     required HealthRepository repository,
@@ -22,6 +17,11 @@ class OfflineHealthRepository {
   }) : _repository = repository,
        _cache = cache,
        _connectivity = connectivity;
+  final HealthRepository _repository;
+  final OfflineCache _cache;
+  final ConnectivityService _connectivity;
+
+  static const Duration _healthDataCacheTTL = Duration(hours: 6);
 
   /// Fetch medications for a pet
   Future<List<PetMedication>> fetchMedications(String petId) async {

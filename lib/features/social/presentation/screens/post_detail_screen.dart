@@ -7,9 +7,9 @@ import 'package:petfolio/features/social/presentation/controllers/feed_controlle
 import 'package:petfolio/features/social/presentation/widgets/post_card.dart';
 
 class PostDetailScreen extends ConsumerWidget {
-  final String postId;
 
   const PostDetailScreen({super.key, required this.postId});
+  final String postId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

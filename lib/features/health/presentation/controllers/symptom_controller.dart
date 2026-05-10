@@ -8,10 +8,6 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 
 @immutable
 class SymptomState {
-  final List<PetSymptom> symptoms;
-  final bool isLoading;
-  final String? error;
-  final String? activePetId;
 
   const SymptomState({
     this.symptoms = const [],
@@ -19,6 +15,10 @@ class SymptomState {
     this.error,
     this.activePetId,
   });
+  final List<PetSymptom> symptoms;
+  final bool isLoading;
+  final String? error;
+  final String? activePetId;
 
   List<PetSymptom> get activeSymptoms =>
       symptoms.where((s) => !s.isResolved).toList();

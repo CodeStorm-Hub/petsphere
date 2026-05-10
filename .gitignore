@@ -86,3 +86,4 @@ dist/petsphere-e6d8abd0.ipa
 /android/gradle.properties
 /scratch
 /.kiro
+.codex/config.toml

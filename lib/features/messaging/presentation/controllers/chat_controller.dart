@@ -119,11 +119,11 @@ final threadMessagesProvider =
 // Chat Threads List State
 // ---------------------------------------------------------------------------
 class ChatState {
+
+  ChatState({this.threads = const [], this.isLoading = false, this.error});
   final List<ChatThreadModel> threads;
   final bool isLoading;
   final String? error;
-
-  ChatState({this.threads = const [], this.isLoading = false, this.error});
 
   int get totalUnread => threads.fold(0, (sum, t) => sum + t.unreadCount);
 

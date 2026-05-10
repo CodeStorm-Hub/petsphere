@@ -167,9 +167,9 @@ class _AdoptionCenterScreenState extends ConsumerState<AdoptionCenterScreen> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ListingCard extends StatelessWidget {
+  const _ListingCard({required this.listing, required this.onApply});
   final AdoptionListing listing;
   final VoidCallback onApply;
-  const _ListingCard({required this.listing, required this.onApply});
 
   @override
   Widget build(BuildContext context) {
@@ -298,9 +298,9 @@ class _ListingCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ApplySheet extends StatefulWidget {
+  const _ApplySheet({required this.listing, required this.onApplied});
   final AdoptionListing listing;
   final VoidCallback onApplied;
-  const _ApplySheet({required this.listing, required this.onApplied});
 
   @override
   State<_ApplySheet> createState() => _ApplySheetState();

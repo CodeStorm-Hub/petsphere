@@ -9,11 +9,6 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 
 @immutable
 class VitalsState {
-  final List<PetWeightLog> weightLogs;
-  final List<PetActivityLog> activityLogs;
-  final bool isLoading;
-  final String? error;
-  final String? activePetId;
 
   const VitalsState({
     this.weightLogs = const [],
@@ -22,6 +17,11 @@ class VitalsState {
     this.error,
     this.activePetId,
   });
+  final List<PetWeightLog> weightLogs;
+  final List<PetActivityLog> activityLogs;
+  final bool isLoading;
+  final String? error;
+  final String? activePetId;
 
   PetWeightLog? get latestWeight =>
       weightLogs.isNotEmpty ? weightLogs.first : null;

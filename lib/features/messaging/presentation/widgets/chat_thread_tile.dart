@@ -5,9 +5,6 @@ import 'package:petfolio/core/utils/pet_navigation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ChatThreadTile extends ConsumerWidget {
-  final ChatThreadModel thread;
-  final String myPetId;
-  final VoidCallback onTap;
 
   const ChatThreadTile({
     super.key,
@@ -15,6 +12,9 @@ class ChatThreadTile extends ConsumerWidget {
     required this.myPetId,
     required this.onTap,
   });
+  final ChatThreadModel thread;
+  final String myPetId;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

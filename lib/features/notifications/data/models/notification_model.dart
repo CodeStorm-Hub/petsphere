@@ -1,14 +1,4 @@
 class NotificationModel {
-  final String id;
-  final String userId;
-  final String? actorPetId;
-  final String type;
-  final String title;
-  final String? body;
-  final String? entityType;
-  final String? entityId;
-  final bool isRead;
-  final DateTime createdAt;
 
   NotificationModel({
     required this.id,
@@ -39,6 +29,16 @@ class NotificationModel {
           DateTime.now(),
     );
   }
+  final String id;
+  final String userId;
+  final String? actorPetId;
+  final String type;
+  final String title;
+  final String? body;
+  final String? entityType;
+  final String? entityId;
+  final bool isRead;
+  final DateTime createdAt;
 
   NotificationModel copyWith({bool? isRead}) => NotificationModel(
     id: id,

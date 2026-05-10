@@ -229,13 +229,6 @@ bool isWeightCheckOverdue(
 
 /// Get health metrics summary for a pet
 class HealthMetricsSummary {
-  final String weightTrend; // 'increasing', 'decreasing', 'stable'
-  final double weightChangePercent;
-  final double medicationCompliancePercent;
-  final int daysUntilNextVaccination;
-  final int overdueVaccinationsCount;
-  final int overdueMedicationDosesCount;
-  final bool weightCheckOverdue;
 
   HealthMetricsSummary({
     required this.weightTrend,
@@ -246,6 +239,13 @@ class HealthMetricsSummary {
     required this.overdueMedicationDosesCount,
     required this.weightCheckOverdue,
   });
+  final String weightTrend; // 'increasing', 'decreasing', 'stable'
+  final double weightChangePercent;
+  final double medicationCompliancePercent;
+  final int daysUntilNextVaccination;
+  final int overdueVaccinationsCount;
+  final int overdueMedicationDosesCount;
+  final bool weightCheckOverdue;
 }
 
 /// Calculate comprehensive health metrics

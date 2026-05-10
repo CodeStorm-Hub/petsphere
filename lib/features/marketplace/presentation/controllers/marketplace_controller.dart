@@ -10,10 +10,6 @@ import 'package:petfolio/features/marketplace/data/models/product_model.dart';
 // State
 // ---------------------------------------------------------------------------
 class MarketplaceState {
-  final List<ProductModel> products;
-  final String? filterCategory;
-  final bool isLoading;
-  final String? error;
 
   MarketplaceState({
     this.products = const [],
@@ -21,6 +17,10 @@ class MarketplaceState {
     this.isLoading = false,
     this.error,
   });
+  final List<ProductModel> products;
+  final String? filterCategory;
+  final bool isLoading;
+  final String? error;
 
   MarketplaceState copyWith({
     List<ProductModel>? products,

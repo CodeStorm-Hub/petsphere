@@ -142,8 +142,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
 }
 
 class _PostsResultTab extends ConsumerWidget {
-  final SearchState searchState;
   const _PostsResultTab({required this.searchState});
+  final SearchState searchState;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -182,8 +182,8 @@ class _PostsResultTab extends ConsumerWidget {
 }
 
 class _PetsResultTab extends StatelessWidget {
-  final SearchState searchState;
   const _PetsResultTab({required this.searchState});
+  final SearchState searchState;
 
   @override
   Widget build(BuildContext context) {
@@ -223,8 +223,8 @@ class _PetsResultTab extends StatelessWidget {
 }
 
 class _ProductsResultTab extends ConsumerWidget {
-  final SearchState searchState;
   const _ProductsResultTab({required this.searchState});
+  final SearchState searchState;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -266,14 +266,14 @@ class _ProductsResultTab extends ConsumerWidget {
 }
 
 class _SearchPlaceholder extends StatelessWidget {
-  final IconData? icon;
-  final bool useBrandIcon;
-  final String label;
   const _SearchPlaceholder({
     this.icon,
     this.useBrandIcon = false,
     required this.label,
   });
+  final IconData? icon;
+  final bool useBrandIcon;
+  final String label;
 
   @override
   Widget build(BuildContext context) {

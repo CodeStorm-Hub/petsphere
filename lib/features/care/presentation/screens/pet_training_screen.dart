@@ -606,10 +606,10 @@ class _TrainerPromotionCard extends StatelessWidget {
 }
 
 class _LogSessionSheet extends ConsumerStatefulWidget {
-  final String petId;
-  final VoidCallback onLogged;
 
   const _LogSessionSheet({required this.petId, required this.onLogged});
+  final String petId;
+  final VoidCallback onLogged;
 
   @override
   ConsumerState<_LogSessionSheet> createState() => _LogSessionSheetState();

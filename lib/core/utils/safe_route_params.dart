@@ -17,9 +17,9 @@ String? safeQueryParam(GoRouterState state, String paramName) {
 
 /// Error screen displayed when required route parameters are missing.
 class InvalidRouteErrorScreen extends StatelessWidget {
-  final String missingParam;
 
   const InvalidRouteErrorScreen({super.key, required this.missingParam});
+  final String missingParam;
 
   @override
   Widget build(BuildContext context) {

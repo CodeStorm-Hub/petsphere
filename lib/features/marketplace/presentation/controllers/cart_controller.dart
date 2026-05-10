@@ -11,10 +11,6 @@ import 'package:petfolio/features/marketplace/data/models/cart_item_model.dart';
 import 'package:petfolio/features/marketplace/data/models/product_model.dart';
 
 class CartState {
-  final List<CartItemModel> items;
-  final bool isCheckingOut;
-  final bool orderSuccess;
-  final String? error;
 
   CartState({
     this.items = const [],
@@ -22,6 +18,10 @@ class CartState {
     this.orderSuccess = false,
     this.error,
   });
+  final List<CartItemModel> items;
+  final bool isCheckingOut;
+  final bool orderSuccess;
+  final String? error;
 
   double get totalPrice {
     return items.fold<double>(0.0, (sum, item) => sum + item.subtotal);

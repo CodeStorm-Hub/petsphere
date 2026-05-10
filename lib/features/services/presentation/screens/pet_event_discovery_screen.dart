@@ -85,10 +85,10 @@ class PetEventDiscoveryScreen extends ConsumerWidget {
 }
 
 class _TypeFilterBar extends StatelessWidget {
-  final WidgetRef ref;
-  final String selectedType;
 
   const _TypeFilterBar({required this.ref, required this.selectedType});
+  final WidgetRef ref;
+  final String selectedType;
 
   static const types = ['All', 'Meetup', 'Workshop', 'Show', 'Charity'];
 
@@ -132,9 +132,9 @@ class _TypeFilterBar extends StatelessWidget {
 }
 
 class _EventCard extends StatelessWidget {
-  final PetEvent event;
 
   const _EventCard({required this.event});
+  final PetEvent event;
 
   @override
   Widget build(BuildContext context) {

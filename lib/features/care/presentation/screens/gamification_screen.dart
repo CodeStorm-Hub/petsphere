@@ -77,15 +77,15 @@ class GamificationScreen extends ConsumerWidget {
 }
 
 class _LevelCard extends StatelessWidget {
-  final int level;
-  final int totalPoints;
-  final double progress;
 
   const _LevelCard({
     required this.level,
     required this.totalPoints,
     required this.progress,
   });
+  final int level;
+  final int totalPoints;
+  final double progress;
 
   @override
   Widget build(BuildContext context) {
@@ -178,10 +178,6 @@ class _LevelCard extends StatelessWidget {
 }
 
 class _StatBox extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
 
   const _StatBox({
     required this.label,
@@ -189,6 +185,10 @@ class _StatBox extends StatelessWidget {
     required this.icon,
     required this.color,
   });
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -220,8 +220,8 @@ class _StatBox extends StatelessWidget {
 }
 
 class _PathProgress extends StatelessWidget {
-  final int progress;
   const _PathProgress({required this.progress});
+  final int progress;
 
   @override
   Widget build(BuildContext context) {
@@ -283,8 +283,8 @@ class _PathProgress extends StatelessWidget {
 }
 
 class _BadgesGrid extends ConsumerWidget {
-  final List<PetCareBadgeUnlock> unlocks;
   const _BadgesGrid({required this.unlocks});
+  final List<PetCareBadgeUnlock> unlocks;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

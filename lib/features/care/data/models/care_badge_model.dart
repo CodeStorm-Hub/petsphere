@@ -9,12 +9,6 @@ class PetCareOnboarding {
     this.completedAt,
   });
 
-  final String petId;
-  final Map<String, dynamic> data;
-  final DateTime? completedAt;
-
-  bool get isComplete => completedAt != null;
-
   factory PetCareOnboarding.fromRow(Map<String, dynamic> row) {
     return PetCareOnboarding(
       petId: row['pet_id'] as String,
@@ -24,6 +18,12 @@ class PetCareOnboarding {
           : null,
     );
   }
+
+  final String petId;
+  final Map<String, dynamic> data;
+  final DateTime? completedAt;
+
+  bool get isComplete => completedAt != null;
 
   @override
   bool operator ==(Object other) =>
@@ -68,12 +68,6 @@ class CareBadgeDefinition {
     required this.sortOrder,
   });
 
-  final String slug;
-  final String title;
-  final String description;
-  final String iconEmoji;
-  final int sortOrder;
-
   factory CareBadgeDefinition.fromJson(Map<String, dynamic> json) {
     return CareBadgeDefinition(
       slug: json['slug'] as String,
@@ -83,6 +77,12 @@ class CareBadgeDefinition {
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
     );
   }
+
+  final String slug;
+  final String title;
+  final String description;
+  final String iconEmoji;
+  final int sortOrder;
 
   @override
   bool operator ==(Object other) =>
@@ -113,11 +113,6 @@ class PetCareBadgeUnlock {
     required this.unlockedAt,
   });
 
-  final String id;
-  final String petId;
-  final String badgeSlug;
-  final DateTime unlockedAt;
-
   factory PetCareBadgeUnlock.fromJson(Map<String, dynamic> json) {
     return PetCareBadgeUnlock(
       id: json['id'] as String,
@@ -126,6 +121,11 @@ class PetCareBadgeUnlock {
       unlockedAt: DateTime.parse(json['unlocked_at'] as String),
     );
   }
+
+  final String id;
+  final String petId;
+  final String badgeSlug;
+  final DateTime unlockedAt;
 
   @override
   bool operator ==(Object other) =>
@@ -162,30 +162,6 @@ class PetCareGamification {
     this.streakFreezeResetOn,
   });
 
-  final String petId;
-  final String userId;
-  final int totalCarePoints;
-  final int bestStreakDays;
-  final DateTime? weekStartMonday;
-  final int weekCompletedMask;
-  final DateTime? challenge30dStartedOn;
-  final int challenge30dProgress;
-  final DateTime? lastCarePointAwardedOn;
-  final DateTime? last30dIncrementOn;
-
-  /// Calendar day (date-only) for which [dailyPointAwardAccrued] is valid.
-  final DateTime? dailyPointAwardDate;
-  final int dailyPointAwardAccrued;
-
-  /// Streak freeze: number of freezes still available this week (max 2).
-  final int streakFreezesAvailable;
-
-  /// Number of streak freezes used in the current week.
-  final int streakFreezesUsedThisWeek;
-
-  /// Monday of the week when freeze counters were last reset.
-  final DateTime? streakFreezeResetOn;
-
   factory PetCareGamification.fromJson(Map<String, dynamic> json) {
     return PetCareGamification(
       petId: json['pet_id'] as String,
@@ -221,6 +197,30 @@ class PetCareGamification {
           : null,
     );
   }
+
+  final String petId;
+  final String userId;
+  final int totalCarePoints;
+  final int bestStreakDays;
+  final DateTime? weekStartMonday;
+  final int weekCompletedMask;
+  final DateTime? challenge30dStartedOn;
+  final int challenge30dProgress;
+  final DateTime? lastCarePointAwardedOn;
+  final DateTime? last30dIncrementOn;
+
+  /// Calendar day (date-only) for which [dailyPointAwardAccrued] is valid.
+  final DateTime? dailyPointAwardDate;
+  final int dailyPointAwardAccrued;
+
+  /// Streak freeze: number of freezes still available this week (max 2).
+  final int streakFreezesAvailable;
+
+  /// Number of streak freezes used in the current week.
+  final int streakFreezesUsedThisWeek;
+
+  /// Monday of the week when freeze counters were last reset.
+  final DateTime? streakFreezeResetOn;
 
   String _fmtDate(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';

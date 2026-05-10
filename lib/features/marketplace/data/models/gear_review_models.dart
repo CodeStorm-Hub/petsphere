@@ -2,21 +2,6 @@ import 'package:flutter/foundation.dart';
 
 @immutable
 class GearReview {
-  final String id;
-  final String userId;
-  final String productName;
-  final String brand;
-  final String category;
-  final double rating;
-  final int reviewCount;
-  final String price;
-  final String? reviewText;
-  final List<String>? pros;
-  final List<String>? cons;
-  final String? imageUrl;
-  final bool isVerifiedPurchase;
-  final bool isEditorChoice;
-  final DateTime createdAt;
 
   const GearReview({
     required this.id,
@@ -53,6 +38,21 @@ class GearReview {
     isEditorChoice: json['is_editor_choice'] as bool? ?? false,
     createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
   );
+  final String id;
+  final String userId;
+  final String productName;
+  final String brand;
+  final String category;
+  final double rating;
+  final int reviewCount;
+  final String price;
+  final String? reviewText;
+  final List<String>? pros;
+  final List<String>? cons;
+  final String? imageUrl;
+  final bool isVerifiedPurchase;
+  final bool isEditorChoice;
+  final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
     'id': id,
