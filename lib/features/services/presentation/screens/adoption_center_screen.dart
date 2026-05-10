@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:petfolio/features/community/data/adoption_repository.dart';
@@ -19,7 +20,6 @@ final _listingsProvider = FutureProvider.family<List<AdoptionListing>, String>((
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Adoption Center Screen — #37
-// ─────────────────────────────────────────────────────────────────────────────
 
 class AdoptionCenterScreen extends ConsumerStatefulWidget {
   const AdoptionCenterScreen({super.key});
@@ -46,58 +46,63 @@ class _AdoptionCenterScreenState extends ConsumerState<AdoptionCenterScreen> {
     final async = ref.watch(_listingsProvider(_species));
 
     return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (_, _) => [
-          SliverAppBar.large(
-            title: const Text(
-              'Adoption Center',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            actions: [
-              IconButton.filledTonal(
-                onPressed: () {},
-                icon: const Icon(Icons.tune_rounded),
-                tooltip: 'Filter',
+      extendBodyBehindAppBar: true,
+      body: PetFolioGradientBackground(
+        child: NestedScrollView(
+          headerSliverBuilder: (_, _) => [
+            SliverAppBar.large(
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              title: const Text(
+                'Adoption Center',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(width: 8),
-            ],
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(56),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 6,
+              actions: [
+                IconButton.filledTonal(
+                  onPressed: () {},
+                  icon: const Icon(Icons.tune_rounded),
+                  tooltip: 'Filter',
                 ),
-                child: SizedBox(
-                  height: 44,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _speciesList.length,
-                    itemBuilder: (_, i) {
-                      final s = _speciesList[i];
-                      final selected = _species == s;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          label: Text(_label(s)),
-                          selected: selected,
-                          onSelected: (_) => setState(() => _species = s),
-                          selectedColor: colorScheme.primary,
-                          labelStyle: TextStyle(
-                            color: selected
-                                ? colorScheme.onPrimary
-                                : colorScheme.onSurface,
-                            fontSize: 12,
+                const SizedBox(width: 8),
+              ],
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(56),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
+                  child: SizedBox(
+                    height: 44,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _speciesList.length,
+                      itemBuilder: (_, i) {
+                        final s = _speciesList[i];
+                        final selected = _species == s;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: FilterChip(
+                            label: Text(_label(s)),
+                            selected: selected,
+                            onSelected: (_) => setState(() => _species = s),
+                            selectedColor: colorScheme.primary,
+                            labelStyle: TextStyle(
+                              color: selected
+                                  ? colorScheme.onPrimary
+                                  : colorScheme.onSurface,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
         body: async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(child: Text('Error: $e')),
@@ -114,8 +119,8 @@ class _AdoptionCenterScreenState extends ConsumerState<AdoptionCenterScreen> {
                 )
               : GridView.builder(
                   padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 220,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                     childAspectRatio: 0.72,
@@ -128,8 +133,9 @@ class _AdoptionCenterScreenState extends ConsumerState<AdoptionCenterScreen> {
                 ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   String _label(String s) {
     if (s == 'All') return 'All';
@@ -176,6 +182,7 @@ class _ListingCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
+        key: ValueKey('adoption_listing_card_${listing.id}'),
         onTap: onApply,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -365,6 +372,7 @@ class _ApplySheetState extends State<_ApplySheet> {
             ),
           const SizedBox(height: 16),
           TextField(
+            key: const ValueKey('adoption_apply_message_field'),
             controller: _msgCtrl,
             maxLines: 4,
             decoration: const InputDecoration(
@@ -381,6 +389,7 @@ class _ApplySheetState extends State<_ApplySheet> {
             ),
           const SizedBox(height: 12),
           FilledButton(
+            key: const ValueKey('adoption_submit_button'),
             onPressed: _saving ? null : _apply,
             child: _saving
                 ? const SizedBox(

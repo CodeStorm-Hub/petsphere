@@ -340,6 +340,195 @@ Gaps:
 | E6 Notifications and integrity | Granular prefs, digests, fraud/safety | Notifications page exists; settings prefs missing | P1 |
 | E7 Accessibility and i18n | Screen reader, contrast, text scale, localization | Some semantics exist; no complete checklist/tests | P1/P2 |
 
+## Deep Action And Database Cross-Validation Update
+
+Additional pass date: 2026-05-11  
+Evidence folder: `docs/logs/ux-audit-2026-05-11-deep-actions/`
+
+### Tooling Constraints Found
+
+- Supabase CLI is not installed in this workspace, so `supabase db` and `supabase db advisors` could not be run locally.
+- The app is linked to project ref `foubokcqaxyqgjhtgzsx` in `supabase/.temp/project-ref`.
+- The Android manifest has only a launcher intent filter. There is no deep-link/app-link intent filter, so `adb am start` cannot open `/settings`, `/orders`, `/pet/:id`, or other GoRouter paths directly.
+- Several routes require `state.extra` objects, for example `/article_detail`; those cannot be opened by raw URL/path even inside GoRouter without a seeded object.
+- UI automation has no stable widget keys/test IDs. A coordinate-based deep action run missed app targets and ended up on Android launcher/calendar surfaces. This is a QA blocker: route traversal needs integration tests with stable keys and an app-only guard.
+
+### Live Supabase REST Checks
+
+Using the app's debug fallback Supabase URL and anon key, direct REST checks reproduced the same schema errors seen in logcat:
+
+| Live REST Check | Result |
+| --- | --- |
+| `pet_medication_doses?select=id,scheduled_for` | `400`, `column pet_medication_doses.scheduled_for does not exist` |
+| `pet_care_gamification?select=pet_id,total_care_points,best_streak_days` | `400`, `column pet_care_gamification.best_streak_days does not exist` |
+| `pet_care_badge_unlocks?select=id,user_id` | `400`, `column pet_care_badge_unlocks.user_id does not exist` |
+| `match_requests?select=id,rejected_at` | `400`, `column match_requests.rejected_at does not exist` |
+| `pet_care_gamification?select=pet_id,total_care_points,current_streak` | `200`, confirms the table exists but the app expects at least one wrong/missing column |
+| `pet_care_badge_unlocks?select=pet_id,badge_slug,unlocked_at` | `200`, confirms the table exists but the app expects `user_id` that is not in live schema |
+| `products?select=id,name,price` | `200 []`, anon can query shape but receives no rows |
+| `pets?select=id,name,user_id` | `200 []`, anon can query shape but receives no rows |
+
+Conclusion:
+
+- The runtime errors are not only client-side parsing mistakes. The live Supabase schema does not match the repository queries.
+- The repo contains standalone SQL files such as `supabase/health_tab_v2.sql`, `supabase/pet_care_tables.sql`, and `supabase/pet_care_gamification_onboarding_v1.sql` that define important tables/policies, but many are not in `supabase/migrations/`. They may not have been applied consistently to the linked project.
+- `supabase/migrations/20260503160000_match_requests_rejected_at.sql` exists locally, but the live REST API still reports `match_requests.rejected_at` missing. Either the migration was not applied to the active project, the app is pointing at a different database than expected, or a later migration/schema reset removed it.
+
+### CRUD Coverage Cross-Validation
+
+Static repository scan found 47 Supabase tables used by app code. The app has wide CRUD intent, but database/migration coverage is uneven.
+
+High-risk gaps where app repositories use tables but migrations/RLS/policies are not consistently represented in `supabase/migrations/`:
+
+| Feature Area | Tables Used By App | App CRUD Intent | Database Risk |
+| --- | --- | --- | --- |
+| Adoption | `adoption_listings`, `adoption_applications` | Listings read/create; applications create/update | No migration/RLS evidence in migrations; UI create/apply flow needs DB verification |
+| Community groups | `community_groups`, `community_group_members` | Create/read/update/delete/toggle membership | No migration/RLS evidence in migrations |
+| Lost and found | `lost_and_found_reports` | Create/read/update/delete | No migration/RLS evidence in migrations |
+| Knowledge base | `knowledge_base_articles` | Read | No migration/RLS evidence in migrations |
+| Gear reviews | `gear_reviews` | Create/read | No migration/RLS evidence in migrations |
+| Events | `pet_events`, `pet_event_rsvps` | Events read/create/update; RSVP upsert | No migration/RLS evidence in migrations |
+| Expenses | `pet_expenses` | Create/read/delete | No migration/RLS evidence in migrations |
+| Insurance | `pet_insurance_claims` | Create/read | No migration/RLS evidence in migrations |
+| Memorial | `pet_memorial_entries` | Create/read | No migration/RLS evidence in migrations |
+| Nutrition | `pet_nutrition_logs` | Create/read/delete | No migration/RLS evidence in migrations |
+| Sitter jobs | `pet_sitter_jobs` | Create/read | No migration/RLS evidence in migrations |
+| Training | `pet_training_progress` | Create/read/update/delete | No migration/RLS evidence in migrations |
+| Breed scans | `pet_breed_scans` | Create/read | No migration/RLS evidence in migrations |
+| Notifications | `notifications` | Create/read/update | Table appears in docs/history but migration/RLS evidence is incomplete in current migration folder |
+| Gamification | `pet_care_gamification`, `care_badge_definitions`, `pet_care_badge_unlocks` | Create/read/update | Live schema mismatch; standalone SQL/docs differ from app queries |
+
+Important CRUD incompleteness:
+
+- Pet profiles support create/read/update but no pet delete/archive operation exists in `PetRepository`; storage photo delete exists.
+- Owner profiles support create/read/update but no self-delete/account deletion flow exists client-side; auth repository explicitly notes this requires a server-side function.
+- Marketplace products are read-only in the app repository; seller/admin product create/update/delete is not present.
+- Orders support create/read and limited update policy, but no full buyer cancellation/return/dispute CRUD exists in UI.
+- Chat supports threads and messages create/read/update in repositories, but attachment/voice actions are fake or no-op.
+- Most service/community modules have repository CRUD but incomplete UI action wiring and uncertain database migrations.
+
+### Debug Log Errors From Action Pass
+
+Repeated app-owned errors:
+
+- `[MedicationNotifier] Failed to load health data`
+- `PostgrestException(message: column pet_medication_doses.scheduled_for does not exist, code: 42703)`
+- `Failed to sync gamification`
+- `PostgrestException(message: Could not find the 'best_streak_days' column of 'pet_care_gamification' in the schema cache, code: PGRST204/42703)`
+- Earlier stable pass also logged `match_requests.rejected_at does not exist`.
+
+Non-app/device noise observed:
+
+- Android XR package flag errors from emulator.
+- Google Calendar/launcher logs after the coordinate automation left the app.
+- Glide generated module warning.
+- SVG loader warnings for unsupported SVG elements.
+
+Action:
+
+1. Filter log review by app PID/package in future runs.
+2. Add an app foreground assertion before every automated tap.
+3. Add `Key`/semantic identifiers for all primary route controls.
+4. Build route smoke tests with `integration_test` instead of coordinate-only traversal.
+
+### Required Navigation Test Harness
+
+To genuinely visit every screen, tab, scroll state, and action without brittle coordinates, add a test-only route harness:
+
+1. Add `integration_test/route_smoke_test.dart`.
+2. Seed or fetch test IDs for one pet, one user, one post, one product, one chat thread, and one article.
+3. For every route in `AppRoutes`, pump or navigate with GoRouter and assert the screen landmark.
+4. For routes requiring `state.extra`, pass seeded model objects.
+5. For CRUD screens, perform reversible operations with test-prefixed data:
+   - create/update/delete pet draft or archive test pet
+   - create/update/delete post
+   - create/delete comment
+   - like/unlike post
+   - follow/unfollow pet/user
+   - create/update/delete care log
+   - create/update/delete weight log
+   - create/update/delete appointment
+   - create/delete expense
+   - create/delete lost-found report
+   - create/delete adoption application
+   - create/delete community group membership
+   - create/delete order in staging only
+6. Capture logcat per route and fail on `PostgrestException`, schema cache errors, `RenderFlex overflowed`, and uncaught Dart exceptions.
+
+## Fresh-Start Android QA Update
+
+Additional pass date: 2026-05-11  
+Evidence folders:
+
+- `docs/logs/fresh-start-qa-2026-05-11/`
+- `docs/logs/fresh-start-qa-2026-05-11-normal-debug/`
+
+### Fresh Install/Data Reset Result
+
+Steps performed:
+
+1. Cleared app logs with `adb logcat -c`.
+2. Cleared package data with `adb shell pm clear com.example.pet_dating_app`.
+3. Rebuilt a normal debug APK from `lib/main.dart`.
+4. Installed with `adb install -r`.
+5. Launched from the Android launcher intent.
+6. Captured UI hierarchy, screenshot, and app-PID logcat.
+
+Result:
+
+- The normal debug app starts from clean data and lands on the Login screen.
+- Visible fresh-start UI:
+  - `Pet Folio`
+  - `Welcome Back`
+  - Email field
+  - Password field
+  - `Forgot Password?`
+  - `Sign In`
+  - `Google`
+  - `Apple`
+  - `Register`
+- Startup app logs show Supabase initialization succeeded.
+- No app-owned `PostgrestException`, `RenderFlex overflowed`, uncaught Dart exception, or Flutter framework error appeared during the unauthenticated fresh-start action pass.
+
+### Fresh-Start Actions Tested
+
+| Action | Result |
+| --- | --- |
+| Empty `Sign In` | Inline validation appears: `Enter email`, `Password must be at least 6 characters` |
+| `Forgot Password?` | Opens `Reset Password` dialog with email field, `Cancel`, and `Send Reset Link` |
+| `Google` | Shows snackbar: `Google Sign-In coming soon!` |
+| `Apple` | Shows snackbar: `Apple Sign-In coming soon!` |
+| `Register` | Opens `Create Account` screen with full name, email, password, confirm password, terms checkbox, terms/privacy links, and create account button |
+| Register screen scroll | Screen is scrollable and content remains present |
+
+Fresh-start UX issues:
+
+- OAuth buttons are visible as real sign-in choices but only show "coming soon". These should be hidden behind feature flags or implemented end to end.
+- Password reset opens a dialog, but the app still needs deep-link recovery handling and a change-password screen.
+- Registration has terms/privacy buttons, but the audit did not verify that they open real legal documents; this remains a required action check.
+- The app brand still appears as `Pet Folio` while Android label/docs use `PetSphere`.
+
+### Existing Integration Test Finding
+
+`integration_test/petsphere_journey_test.dart` was run from a cleared app-data state with credentials sourced from the existing driver test file. The test command exited with success, but the log shows:
+
+- `[AuthNotifier] Login failed`
+- `AuthApiException(message: Invalid login credentials, statusCode: 400, code: invalid_credentials)`
+
+The test still passed because it returns early when login fails and the main shell is not reached. This is a false-positive test gap.
+
+Required fix:
+
+1. If `E2E_EMAIL` and `E2E_PASSWORD` are provided, login failure must fail the test.
+2. The test must assert either:
+   - logged-in shell is reached after login, or
+   - no credentials were supplied and unauthenticated flow is intentionally being tested.
+3. Test credentials must not be hardcoded in committed test files.
+4. Split tests into:
+   - `fresh_start_auth_smoke_test`
+   - `authenticated_shell_smoke_test`
+   - `route_crud_smoke_test`
+
 ## Architecture Remediation Plan
 
 Follow Flutter's recommended separation of concerns: UI layer, data layer, and optional domain/use-case layer. The existing Riverpod/repository shape is a good base, but feature completion requires stricter boundaries.

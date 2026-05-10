@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
+
 class PetEventDiscoveryScreen extends ConsumerWidget {
   const PetEventDiscoveryScreen({super.key});
 
@@ -18,33 +20,37 @@ class PetEventDiscoveryScreen extends ConsumerWidget {
     final selectedType = ref.watch(petEventTypeFilterProvider);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 120,
-            floating: true,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                'Discover Events',
-                style: GoogleFonts.playfairDisplay(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
+      extendBodyBehindAppBar: true,
+      body: PetFolioGradientBackground(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 120,
+              floating: true,
+              pinned: true,
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              flexibleSpace: FlexibleSpaceBar(
+                title: Text(
+                  'Discover Events',
+                  style: GoogleFonts.playfairDisplay(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
+                centerTitle: false,
+                titlePadding: const EdgeInsetsDirectional.only(start: 16, bottom: 16),
               ),
-              centerTitle: false,
-              titlePadding: const EdgeInsetsDirectional.only(start: 16, bottom: 16),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.filter_list),
+                  onPressed: () {
+                    // TODO: Advanced filters
+                  },
+                ),
+              ],
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.filter_list),
-                onPressed: () {
-                  // TODO: Advanced filters
-                },
-              ),
-            ],
-          ),
           SliverToBoxAdapter(
             child: _TypeFilterBar(ref: ref, selectedType: selectedType),
           ),
@@ -73,6 +79,7 @@ class PetEventDiscoveryScreen extends ConsumerWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

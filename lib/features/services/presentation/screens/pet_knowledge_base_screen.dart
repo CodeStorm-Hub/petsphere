@@ -9,6 +9,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
+
 class PetKnowledgeBaseScreen extends ConsumerWidget {
   const PetKnowledgeBaseScreen({super.key});
 
@@ -20,23 +22,28 @@ class PetKnowledgeBaseScreen extends ConsumerWidget {
     final articlesAsync = ref.watch(knowledgeBaseArticlesProvider);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: AppBar(
-        title: Text(
-          'Pet Knowledge Base',
-          style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bookmarks_outlined),
-            onPressed: () {
-              // TODO: Implement saved articles
-            },
-          ),
-        ],
-      ),
-      body: CustomScrollView(
-        slivers: [
+      extendBodyBehindAppBar: true,
+      body: PetFolioGradientBackground(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              title: Text(
+                'Pet Knowledge Base',
+                style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold),
+              ),
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              pinned: true,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.bookmarks_outlined),
+                  onPressed: () {
+                    // TODO: Implement saved articles
+                  },
+                ),
+              ],
+            ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -112,6 +119,7 @@ class PetKnowledgeBaseScreen extends ConsumerWidget {
           const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],
       ),
+    ),
     );
   }
 }

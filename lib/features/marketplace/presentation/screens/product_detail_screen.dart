@@ -138,11 +138,10 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                       Icons.share_outlined,
                       color: colorScheme.onSurface,
                     ),
-                    onPressed: () {
-                      SharePlus.instance.share(
+                    onPressed: () async {
+                      await SharePlus.instance.share(
                         ShareParams(
-                          text:
-                              'Check out ${product.name} on PetFolio — \$${product.price.toStringAsFixed(2)}\nhttps://petfolio.app/product/${product.id}',
+                          text: 'Check out ${product.name} on PetFolio — \$${product.price.toStringAsFixed(2)}\nhttps://petfolio.app/product/${product.id}',
                           subject: 'PetFolio — ${product.name}',
                         ),
                       );

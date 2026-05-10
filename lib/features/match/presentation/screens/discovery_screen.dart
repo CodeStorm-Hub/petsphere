@@ -583,6 +583,7 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                               children: [
                                 // Nope
                                 ActionButton(
+                                  key: const ValueKey('discovery_nope_button'),
                                   size: nopeSize,
                                   label: 'Nope',
                                   color: colorScheme.surface,
@@ -597,6 +598,7 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                                 SizedBox(width: btnGap),
                                 // Prominent View / Star
                                 ActionButton(
+                                  key: const ValueKey('discovery_view_profile_button'),
                                   size: infoSize,
                                   label: 'View Profile',
                                   color: colorScheme.surface,
@@ -618,6 +620,7 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                                 SizedBox(width: btnGap),
                                 // Like
                                 ActionButton(
+                                  key: const ValueKey('discovery_like_button'),
                                   size: likeSize,
                                   label: 'Like',
                                   gradient: LinearGradient(

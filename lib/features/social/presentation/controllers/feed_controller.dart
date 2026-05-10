@@ -223,3 +223,7 @@ final petStoriesProvider = FutureProvider.family<List<StoryModel>, String>((ref,
 final petPostsProvider = FutureProvider.family<List<PostModel>, String>((ref, petId) {
   return feedRepository.fetchPostsByPet(petId);
 });
+
+final userPostsProvider = FutureProvider.family<List<PostModel>, String>((ref, userId) {
+  return feedRepository.fetchPostsByUser(userId);
+});

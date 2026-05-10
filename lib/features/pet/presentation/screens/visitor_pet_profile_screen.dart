@@ -173,8 +173,8 @@ class _VisitorPetProfileScreenState extends ConsumerState<VisitorPetProfileScree
             shape: BoxShape.circle,
           ),
           child: IconButton(
-            onPressed: () {
-              SharePlus.instance.share(
+            onPressed: () async {
+              await SharePlus.instance.share(
                 ShareParams(
                   text: 'Check out ${pet.name} on PetFolio! ${pet.breed} looking for friends.',
                 ),
@@ -387,6 +387,7 @@ class _VisitorPetProfileScreenState extends ConsumerState<VisitorPetProfileScree
             child: isFollowingAsync.when(
               data:
                   (isFollowing) => PillButton(
+                    key: const ValueKey('visitor_pet_profile_follow_button'),
                     outlined: isFollowing,
                     onPressed: () async {
                       final userId = supabase.auth.currentUser?.id;
@@ -417,6 +418,7 @@ class _VisitorPetProfileScreenState extends ConsumerState<VisitorPetProfileScree
           ),
           const SizedBox(width: 12),
           PillButton(
+            key: const ValueKey('visitor_pet_profile_message_button'),
             onPressed: () => context.push('/chat/${pet.userId}'),
             icon: Icons.mail_outline_rounded,
             outlined: true,

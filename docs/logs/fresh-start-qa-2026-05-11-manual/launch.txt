@@ -1,0 +1,6 @@
+  bash arg: -p
+  bash arg: com.example.pet_dating_app
+  bash arg: -c
+  bash arg: android.intent.category.LAUNCHER
+  bash arg: 1
+** No activities found to run, monkey aborted.

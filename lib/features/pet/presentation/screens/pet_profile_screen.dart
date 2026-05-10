@@ -94,8 +94,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
       backgroundColor: cs.surface,
       actions: [
         IconButton(
-          onPressed: () {
-            SharePlus.instance.share(
+          onPressed: () async {
+            await SharePlus.instance.share(
               ShareParams(
                 text: 'Check out ${pet.name} on PetFolio! ${pet.breed} looking for friends.',
               ),
@@ -104,6 +104,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
           icon: const Icon(Icons.share_outlined),
         ),
         IconButton(
+          key: const ValueKey('pet_profile_settings_button'),
           onPressed: () => context.push('/settings'),
           icon: const Icon(Icons.settings_outlined),
         ),
@@ -291,6 +292,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
         children: [
           Expanded(
             child: FilledButton.icon(
+              key: const ValueKey('pet_profile_edit_button'),
               onPressed: () => context.push('/add_pet', extra: pet),
               style: FilledButton.styleFrom(
                 minimumSize: const Size(0, 48),
@@ -309,6 +311,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
+              key: const ValueKey('pet_profile_new_post_button'),
               onPressed: () => context.push('/create_post?petId=${pet.id}'),
               icon: Icon(Icons.add_a_photo_outlined, color: cs.primary),
               tooltip: 'New Post',

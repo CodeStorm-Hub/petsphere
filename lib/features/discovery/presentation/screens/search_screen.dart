@@ -62,6 +62,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         title: Padding(
           padding: const EdgeInsets.only(right: 16),
           child: TextField(
+            key: const ValueKey('search_text_field'),
             controller: _searchController,
             focusNode: _searchFocusNode,
             autofocus: true,
@@ -116,6 +117,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           ),
         ),
         bottom: TabBar(
+          key: const ValueKey('search_tabs'),
           controller: _tabController,
           indicatorSize: TabBarIndicatorSize.label,
           tabs: const [

@@ -1,0 +1,89 @@
+--------- beginning of main
+05-11 02:36:38.351 I/libprocessgroup(23005): Created cgroup /sys/fs/cgroup/apps/uid_10234/pid_23005
+05-11 02:36:38.357 I/Zygote  (23005): Process 23005 created for com.example.pet_dating_app
+05-11 02:36:38.357 I/.pet_dating_app(23005): Late-enabling -Xcheck:jni
+05-11 02:36:38.386 I/.pet_dating_app(23005): Using generational CollectorTypeCMC GC.
+05-11 02:36:38.387 W/.pet_dating_app(23005): Unexpected CPU variant for x86: x86_64.
+05-11 02:36:38.387 W/.pet_dating_app(23005): Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+05-11 02:36:38.409 D/nativeloader(23005): Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+05-11 02:36:38.485 D/ApplicationLoaders(23005): Returning zygote-cached class loader: /system_ext/framework/androidx.window.extensions.jar
+05-11 02:36:38.485 D/ApplicationLoaders(23005): Returning zygote-cached class loader: /system_ext/framework/androidx.window.sidecar.jar
+05-11 02:36:38.485 D/ApplicationLoaders(23005): Returning zygote-cached class loader: /system/framework/org.apache.http.legacy.jar
+05-11 02:36:39.138 D/nativeloader(23005): Configuring clns-9 for other apk /data/app/~~XALbTC1uyKaunQDPNv1yoQ==/com.example.pet_dating_app-HVQiz-qNcQmQCqdZQcBTvg==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~XALbTC1uyKaunQDPNv1yoQ==/com.example.pet_dating_app-HVQiz-qNcQmQCqdZQcBTvg==/lib/x86_64:/data/app/~~XALbTC1uyKaunQDPNv1yoQ==/com.example.pet_dating_app-HVQiz-qNcQmQCqdZQcBTvg==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.example.pet_dating_app
+05-11 02:36:39.154 V/GraphicsEnvironment(23005): Currently set values for:
+05-11 02:36:39.154 V/GraphicsEnvironment(23005):   angle_gl_driver_selection_pkgs=[]
+05-11 02:36:39.154 V/GraphicsEnvironment(23005):   angle_gl_driver_selection_values=[]
+05-11 02:36:39.154 V/GraphicsEnvironment(23005): com.example.pet_dating_app is not listed in per-application setting
+05-11 02:36:39.154 V/GraphicsEnvironment(23005): No special selections for ANGLE, returning default driver choice
+05-11 02:36:39.155 V/GraphicsEnvironment(23005): Neither updatable production driver nor prerelease driver is supported.
+05-11 02:36:39.180 I/FirebaseApp(23005): Device unlocked: initializing all Firebase APIs for app [DEFAULT]
+05-11 02:36:39.193 I/FirebaseInitProvider(23005): FirebaseApp initialization successful
+05-11 02:36:39.193 D/FLTFireContextHolder(23005): received application context.
+--------- beginning of system
+05-11 02:36:39.220 I/DisplayManager(23005): Choreographer implicitly registered for the refresh rate.
+05-11 02:36:39.277 I/GFXSTREAM(23005): [eglDisplay.cpp(297)] Opening libGLESv1_CM_emulation.so
+05-11 02:36:39.278 I/GFXSTREAM(23005): [eglDisplay.cpp(297)] Opening libGLESv2_emulation.so
+05-11 02:36:39.280 W/libc    (23005): Access denied finding property "vendor.mesa.virtgpu.kumquat"
+05-11 02:36:39.285 W/HWUI    (23005): Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+05-11 02:36:39.285 W/HWUI    (23005): Failed to initialize 101010-2 format, error = EGL_SUCCESS
+05-11 02:36:39.302 D/CompatChangeReporter(23005): Compat change id reported: 377864165; UID 10234; state: ENABLED
+05-11 02:36:39.336 D/FlutterJNI(23005): Beginning load of flutter...
+05-11 02:36:39.342 I/ResourceExtractor(23005): Resource version mismatch res_timestamp-1-1778445397128
+05-11 02:36:39.458 D/nativeloader(23005): Load /data/app/~~XALbTC1uyKaunQDPNv1yoQ==/com.example.pet_dating_app-HVQiz-qNcQmQCqdZQcBTvg==/base.apk!/lib/x86_64/libflutter.so using class loader ns clns-9 (caller=/data/app/~~XALbTC1uyKaunQDPNv1yoQ==/com.example.pet_dating_app-HVQiz-qNcQmQCqdZQcBTvg==/base.apk!classes19.dex): ok
+05-11 02:36:39.460 D/FlutterJNI(23005): flutter (null) was loaded normally!
+05-11 02:36:39.929 I/ResourceExtractor(23005): Extracted baseline resource assets/flutter_assets/kernel_blob.bin
+05-11 02:36:39.930 I/ResourceExtractor(23005): Extracted baseline resource assets/flutter_assets/vm_snapshot_data
+05-11 02:36:39.990 I/ResourceExtractor(23005): Extracted baseline resource assets/flutter_assets/isolate_snapshot_data
+05-11 02:36:39.999 W/.pet_dating_app(23005): type=1400 audit(0.0:98): avc:  denied  { read } for  name="max_map_count" dev="proc" ino=31527 scontext=u:r:untrusted_app_34:s0:c234,c256,c512,c768 tcontext=u:object_r:proc_max_map_count:s0 tclass=file permissive=0 app=com.example.pet_dating_app
+05-11 02:36:40.009 W/libc    (23005): Access denied finding property "vendor.mesa.virtgpu.kumquat"
+05-11 02:36:40.058 I/flutter (23005): [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+05-11 02:36:40.070 W/libc    (23005): Access denied finding property "vendor.mesa.virtgpu.kumquat"
+05-11 02:36:40.113 I/flutter (23005): The Dart VM service is listening on http://127.0.0.1:42133/FDrJRz2L6Yk=/
+05-11 02:36:40.365 D/com.llfbandit.app_links(23005): Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=com.example.pet_dating_app/.MainActivity }
+05-11 02:36:40.369 D/FLTFireContextHolder(23005): received application context.
+05-11 02:36:40.375 D/nativeloader(23005): Load /data/app/~~XALbTC1uyKaunQDPNv1yoQ==/com.example.pet_dating_app-HVQiz-qNcQmQCqdZQcBTvg==/base.apk!/lib/x86_64/libdartjni.so using class loader ns clns-9 (caller=/data/app/~~XALbTC1uyKaunQDPNv1yoQ==/com.example.pet_dating_app-HVQiz-qNcQmQCqdZQcBTvg==/base.apk!classes8.dex): ok
+05-11 02:36:40.386 W/Glide   (23005): Failed to find GeneratedAppGlideModule. You should include an annotationProcessor compile dependency on com.github.bumptech.glide:compiler in your application and a @GlideModule annotated AppGlideModule implementation or LibraryGlideModules will be silently ignored
+05-11 02:36:40.427 I/.pet_dating_app(23005): hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityNodeInfo;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported,test-api) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+05-11 02:36:40.427 I/.pet_dating_app(23005): hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+05-11 02:36:40.427 I/.pet_dating_app(23005): hiddenapi: Accessing hidden field Landroid/view/accessibility/AccessibilityNodeInfo;->mChildNodeIds:Landroid/util/LongArray; (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+05-11 02:36:40.428 I/.pet_dating_app(23005): hiddenapi: Accessing hidden method Landroid/util/LongArray;->get(I)J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+05-11 02:36:40.448 D/FlutterRenderer(23005): Width is zero. 0,0
+05-11 02:36:40.456 W/HWUI    (23005): Unknown dataspace 0
+05-11 02:36:40.474 W/libc    (23005): Access denied finding property "vendor.mesa.virtgpu.kumquat"
+05-11 02:36:40.662 I/flutter (23005): supabase.supabase_flutter: INFO: ***** Supabase init completed ***** 
+05-11 02:36:41.962 I/flutter (23005): unhandled element <sodipodi:namedview/>; Picture key: Svg loader
+05-11 02:36:41.968 I/flutter (23005): unhandled element <filter/>; Picture key: Svg loader
+05-11 02:36:42.073 I/Choreographer(23005): Skipped 95 frames!  The application may be doing too much work on its main thread.
+05-11 02:36:42.074 D/WindowOnBackDispatcher(23005): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@27921d8
+05-11 02:36:42.078 I/WindowExtensionsImpl(23005): Initializing Window Extensions, vendor API level=10, activity embedding enabled=true
+05-11 02:36:42.082 W/UiContextUtils(23005): Requested context is a non-UI Context. Creating a UI-Context with display: 0. Context: Context=android.app.Application@2de2b8c, of which baseContext=android.app.ContextImpl@6e4676d
+05-11 02:36:42.087 D/VRI[MainActivity](23005): WindowInsets changed: 1080x2424 statusBars:[0,142,0,0] navigationBars:[0,0,0,126] mandatorySystemGestures:[0,174,0,126] 
+05-11 02:36:42.088 D/FlutterRenderer(23005): Width is zero. 0,0
+05-11 02:36:42.092 I/Surface (23005): Creating surface for consumer unnamed-23005-0 with slotExpansion=1 for 64 slots
+05-11 02:36:42.093 I/Surface (23005): Creating surface for consumer VRI[MainActivity]#0(BLAST Consumer)0 with slotExpansion=1 for 64 slots
+05-11 02:36:42.095 D/FlutterJNI(23005): Sending viewport metrics to the engine.
+05-11 02:36:42.099 I/.pet_dating_app(23005): Compiler allocated 5250KB to compile void android.view.ViewRootImpl.performTraversals(long)
+05-11 02:36:42.103 I/Surface (23005): Creating surface for consumer unnamed-23005-1 with slotExpansion=1 for 64 slots
+05-11 02:36:42.104 I/Surface (23005): Creating surface for consumer e19c08f SurfaceView[com.example.pet_dating_app/com.example.pet_dating_app.MainActivity]#1(BLAST Consumer)1 with slotExpansion=1 for 64 slots
+05-11 02:36:42.625 I/flutter (23005): dynamic_color: Core palette detected.
+05-11 02:36:42.641 I/HWUI    (23005): Using FreeType backend (prop=Auto)
+05-11 02:36:42.716 D/DesktopExperienceFlags(23005): Toggle override initialized to: false
+05-11 02:36:42.737 D/WindowOnBackDispatcher(23005): setTopOnBackInvokedCallback (unwrapped): androidx.navigationevent.OnBackInvokedInput$createOnBackAnimationCallback$1@f31eb7f
+05-11 02:36:42.806 I/Choreographer(23005): Skipped 42 frames!  The application may be doing too much work on its main thread.
+05-11 02:36:42.850 D/WindowOnBackDispatcher(23005): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@27921d8
+05-11 02:36:42.853 D/WindowLayoutComponentImpl(23005): Register WindowLayoutInfoListener on Context=com.example.pet_dating_app.MainActivity@e7550fa, of which baseContext=android.app.ContextImpl@c53cb77
+05-11 02:36:42.862 I/FLTFireBGExecutor(23005): Creating background FlutterEngine instance, with args: []
+05-11 02:36:42.869 I/HWUI    (23005): Davey! duration=765ms; Flags=1, FrameTimelineVsyncId=376818, IntendedVsync=13123069281094, Vsync=13123769281066, InputEventId=0, HandleInputStart=13123783490687, AnimationStart=13123783491833, PerformTraversalsStart=13123783492818, DrawStart=13123788067567, FrameDeadline=13123085947760, FrameStartTime=13123782987815, FrameInterval=16666666, WorkloadTarget=16666666, AnimationTime=13123769281066, SyncQueued=13123789419071, SyncStart=13123790070873, IssueDrawCommandsStart=13123790313149, SwapBuffers=13123801527848, FrameCompleted=13123834961221, DequeueBufferDuration=22410912, QueueBufferDuration=207643, GpuCompleted=13123834961221, SwapBuffersCompleted=13123824817997, DisplayPresentTime=124074789794672, CommandSubmissionCompleted=13123801527848, 
+05-11 02:36:42.870 W/libc    (23005): Access denied finding property "vendor.mesa.virtgpu.kumquat"
+05-11 02:36:42.873 D/FLTFireContextHolder(23005): received application context.
+05-11 02:36:42.943 I/flutter (23005): [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+05-11 02:36:42.969 W/libc    (23005): Access denied finding property "vendor.mesa.virtgpu.kumquat"
+05-11 02:36:43.417 D/FlutterJNI(23005): Sending viewport metrics to the engine.
+05-11 02:36:43.594 I/FLTFireMsgService(23005): FlutterFirebaseMessagingBackgroundService started!
+05-11 02:36:43.602 D/InsetsController(23005): hide(ime())
+05-11 02:36:43.602 I/ImeTracker(23005): com.example.pet_dating_app:d046e9b2: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+05-11 02:36:44.703 D/ProfileInstaller(23005): Installing profile for com.example.pet_dating_app
+05-11 02:36:56.760 I/.pet_dating_app(23005): Background concurrent mark compact GC freed 4796KB AllocSpace bytes, 16(944KB) LOS objects, 49% free, 4551KB/9103KB, paused 245us,9.685ms total 25.695ms
+05-11 02:37:23.149 D/WindowOnBackDispatcher(23005): setTopOnBackInvokedCallback (unwrapped): androidx.navigationevent.OnBackInvokedInput$createOnBackAnimationCallback$1@f31eb7f
+05-11 02:37:27.328 D/WindowOnBackDispatcher(23005): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@27921d8
+05-11 02:37:36.926 D/WindowOnBackDispatcher(23005): setTopOnBackInvokedCallback (unwrapped): androidx.navigationevent.OnBackInvokedInput$createOnBackAnimationCallback$1@f31eb7f

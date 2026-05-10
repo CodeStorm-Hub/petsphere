@@ -1,0 +1,3 @@
+Installing app-release.apk to sdk gphone16k x86 64...
+"build\app\outputs\flutter-apk\app-release.apk" does not exist.
+Install failed

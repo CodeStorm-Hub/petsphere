@@ -7,17 +7,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
+
 class PetFriendlyPlacesScreen extends ConsumerWidget {
   const PetFriendlyPlacesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final category = ref.watch(petFriendlyPlaceCategoryProvider);
     final placesAsync = ref.watch(petFriendlyPlacesProvider);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         title: Text(
           'Pet-Friendly Places',
@@ -31,26 +31,38 @@ class PetFriendlyPlacesScreen extends ConsumerWidget {
             },
           ),
         ],
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: Column(
-        children: [
-          _CategoryHeader(ref: ref, selectedCategory: category),
-          Expanded(
-            child: AsyncValueWidget<List<PetFriendlyPlace>>(
-              value: placesAsync,
-              data: (List<PetFriendlyPlace> places) {
-                if (places.isEmpty) {
-                  return const _EmptyPlacesView();
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: places.length,
-                  itemBuilder: (context, index) => _PlaceCard(place: places[index]),
-                );
-              },
-            ),
+      extendBodyBehindAppBar: true,
+      body: PetFolioGradientBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              _CategoryHeader(ref: ref, selectedCategory: category),
+              Expanded(
+                child: AsyncValueWidget<List<PetFriendlyPlace>>(
+                  value: placesAsync,
+                  data: (List<PetFriendlyPlace> places) {
+                    if (places.isEmpty) {
+                      return const _EmptyPlacesView();
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: places.length,
+                      itemBuilder: (context, index) => _PlaceCard(place: places[index])
+                          .animate()
+                          .fadeIn(delay: (100 * index).ms)
+                          .slideY(begin: 0.1, curve: Curves.easeOutQuad),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

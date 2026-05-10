@@ -1,0 +1,3 @@
+FrameLayout id=android:id/content bounds=[0,0][1080,2424]
+  FrameLayout flags=focusable bounds=[0,0][1080,2424]
+View id=android:id/navigationBarBackground bounds=[0,2298][1080,2424]

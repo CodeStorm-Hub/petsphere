@@ -7,6 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
+
 class PetSitterDashboardScreen extends ConsumerWidget {
   const PetSitterDashboardScreen({super.key});
 
@@ -17,7 +19,6 @@ class PetSitterDashboardScreen extends ConsumerWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: theme.colorScheme.surface,
         appBar: AppBar(
           title: Text(
             'Pet Sitting',
@@ -26,17 +27,25 @@ class PetSitterDashboardScreen extends ConsumerWidget {
           bottom: TabBar(
             labelStyle: GoogleFonts.dmSans(fontWeight: FontWeight.bold),
             unselectedLabelStyle: GoogleFonts.dmSans(),
+            indicatorColor: theme.colorScheme.primary,
+            labelColor: theme.colorScheme.primary,
             tabs: const [
               Tab(text: 'My Requests'),
               Tab(text: 'Marketplace'),
             ],
           ),
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
         ),
-        body: TabBarView(
-          children: [
-            _MyRequestsTab(),
-            _MarketplaceTab(),
-          ],
+        extendBodyBehindAppBar: true,
+        body: PetFolioGradientBackground(
+          child: TabBarView(
+            children: [
+              _MyRequestsTab(),
+              _MarketplaceTab(),
+            ],
+          ),
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () {

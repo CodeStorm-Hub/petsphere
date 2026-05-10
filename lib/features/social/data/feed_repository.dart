@@ -49,6 +49,27 @@ class FeedRepository {
     return data.map((e) => PostModel.fromJson(e)).toList();
   }
 
+  Future<List<PostModel>> fetchPostsByUser(String userId) async {
+    final petIdsData = await supabase
+        .from('pets')
+        .select('id')
+        .eq('user_id', userId);
+    
+    final petIds = petIdsData.map((e) => e['id'] as String).toList();
+    if (petIds.isEmpty) return [];
+
+    final data = await supabase
+        .from('posts')
+        .select(
+          '*, pets!posts_pet_id_fkey(*), post_likes(pet_id), comments(*, $commentPetEmbed)',
+        )
+        .inFilter('pet_id', petIds)
+        .order('created_at', ascending: false)
+        .limit(100);
+
+    return data.map((e) => PostModel.fromJson(e)).toList();
+  }
+
   Future<List<StoryModel>> fetchStories(String userId) async {
     try {
       final data = await supabase

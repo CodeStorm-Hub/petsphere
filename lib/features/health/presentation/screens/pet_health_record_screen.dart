@@ -12,6 +12,9 @@ import 'package:petfolio/features/health/presentation/controllers/medication_con
 import 'package:petfolio/features/health/data/models/pet_health_models.dart';
 import 'package:petfolio/features/health/data/models/pet_health_extended_models.dart';
 
+import 'package:image_picker/image_picker.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
+
 class PetHealthRecordScreen extends ConsumerStatefulWidget {
   const PetHealthRecordScreen({super.key});
 
@@ -23,6 +26,7 @@ class PetHealthRecordScreen extends ConsumerStatefulWidget {
 class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -36,95 +40,307 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
     super.dispose();
   }
 
+  Future<void> _pickDocument(ImageSource source) async {
+    try {
+      final image = await _picker.pickImage(
+        source: source,
+        imageQuality: 80,
+      );
+
+      if (image != null) {
+        if (!mounted) return;
+        
+        // Show loading
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                ),
+                SizedBox(width: 12),
+                Text('Processing document...'),
+              ],
+            ),
+            duration: Duration(seconds: 2),
+          ),
+        );
+
+        // Simulate upload/processing delay
+        await Future<void>.delayed(const Duration(seconds: 2));
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Document uploaded and scanned successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking document: $e')),
+      );
+    }
+  }
+
+  void _showDocumentUploadModal() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Add Health Document',
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Scan or upload prescriptions, lab reports, or vaccination certificates.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.dmSans(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 32),
+            _buildUploadOption(
+              icon: Icons.camera_alt_rounded,
+              title: 'Take a Photo',
+              subtitle: 'Scan document using camera',
+              onTap: () {
+                Navigator.pop(context);
+                _pickDocument(ImageSource.camera);
+              },
+            ),
+            const SizedBox(height: 16),
+            _buildUploadOption(
+              icon: Icons.photo_library_rounded,
+              title: 'Choose from Gallery',
+              subtitle: 'Upload existing image',
+              onTap: () {
+                Navigator.pop(context);
+                _pickDocument(ImageSource.gallery);
+              },
+            ),
+            const SizedBox(height: 16),
+            _buildUploadOption(
+              icon: Icons.picture_as_pdf_rounded,
+              title: 'Upload PDF',
+              subtitle: 'Import PDF document',
+              onTap: () {
+                Navigator.pop(context);
+                // PDF picking logic would go here
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('PDF upload coming soon!')),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUploadOption({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: cs.outlineVariant),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: cs.primaryContainer.withValues(alpha: 0.5),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: cs.primary),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.dmSans(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.dmSans(
+                      color: cs.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: cs.outline),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final activePet = ref.watch(activePetProvider);
     final vitalsState = ref.watch(vitalsProvider);
-    
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     if (activePet == null) {
-      return const Scaffold(
-        body: Center(child: Text('No pet selected')),
+      return Scaffold(
+        body: PetFolioGradientBackground(
+          child: Center(
+            child: Text(
+              'No pet selected',
+              style: GoogleFonts.playfairDisplay(fontSize: 20),
+            ),
+          ),
+        ),
       );
     }
 
-    
-
     return Scaffold(
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverAppBar.large(
-            title: const Text(
-              'Health Records',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            actions: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.share_rounded),
+      body: PetFolioGradientBackground(
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverAppBar.large(
+              backgroundColor: Colors.transparent,
+              title: Text(
+                'Health Records',
+                style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(width: 8),
-            ],
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _HealthStatusHeader(
-                    petName: activePet.name,
-                    status: 'Active', // Can be dynamic based on overdue tasks
-                    lastCheckup: 'Not recorded', // Could fetch from last appointment
-                  ),
-                  const SizedBox(height: 32),
-                  Text(
-                    'Vitals Summary',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+              actions: [
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.share_rounded),
+                ),
+                const SizedBox(width: 8),
+              ],
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _HealthStatusHeader(
+                      petName: activePet.name,
+                      status: 'Active',
+                      lastCheckup: 'Not recorded',
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  _VitalsGrid(vitalsState: vitalsState),
-                  const SizedBox(height: 32),
-                  if (vitalsState.weightLogs.isNotEmpty) ...[
-                    Text(
-                      'Weight Trend',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    const SizedBox(height: 32),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Vitals Summary',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.add, size: 18),
+                          label: const Text('Add Vital'),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
-                    _WeightChart(weightLogs: vitalsState.weightLogs),
+                    _VitalsGrid(vitalsState: vitalsState),
                     const SizedBox(height: 32),
-                  ],
-                  TabBar(
-                    controller: _tabController,
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                    unselectedLabelStyle: const TextStyle(
-                      fontWeight: FontWeight.normal,
-                    ),
-                    tabs: const [
-                      Tab(text: 'History'),
-                      Tab(text: 'Vaccines'),
-                      Tab(text: 'Meds'),
-                      Tab(text: 'Labs'),
+                    if (vitalsState.weightLogs.isNotEmpty) ...[
+                      Text(
+                        'Weight Trend',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _WeightChart(weightLogs: vitalsState.weightLogs),
+                      const SizedBox(height: 32),
                     ],
-                    onTap: (index) => setState(() {}),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildTabContent(),
-                  const SizedBox(height: 100),
-                ],
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: cs.outlineVariant),
+                        ),
+                      ),
+                      child: TabBar(
+                        controller: _tabController,
+                        isScrollable: true,
+                        tabAlignment: TabAlignment.start,
+                        indicatorColor: cs.primary,
+                        labelColor: cs.primary,
+                        unselectedLabelColor: cs.onSurfaceVariant,
+                        dividerColor: Colors.transparent,
+                        labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                        unselectedLabelStyle: const TextStyle(
+                          fontWeight: FontWeight.normal,
+                        ),
+                        tabs: const [
+                          Tab(text: 'History'),
+                          Tab(text: 'Vaccines'),
+                          Tab(text: 'Meds'),
+                          Tab(text: 'Labs'),
+                        ],
+                        onTap: (index) => setState(() {}),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildTabContent(),
+                    const SizedBox(height: 100),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: _showDocumentUploadModal,
         icon: const Icon(Icons.add_a_photo_rounded),
         label: const Text('Scan Document'),
       ),

@@ -1,0 +1,45 @@
+Running Gradle task 'assembleDebug'...                          
+
+G:\Pet\petsphere\android>if "Windows_NT" == "Windows_NT" setlocal
+
+G:\Pet\petsphere\android>set DEFAULT_JVM_OPTS= 
+
+G:\Pet\petsphere\android>set DIRNAME=G:\Pet\petsphere\android\ 
+
+G:\Pet\petsphere\android>if "G:\Pet\petsphere\android\" == "" set DIRNAME=. 
+
+G:\Pet\petsphere\android>set APP_BASE_NAME=gradlew 
+
+G:\Pet\petsphere\android>set APP_HOME=G:\Pet\petsphere\android\ 
+
+G:\Pet\petsphere\android>if defined JAVA_HOME goto findJavaFromJavaHome 
+
+G:\Pet\petsphere\android>set JAVA_HOME=C:\Program Files\Android\Android Studio\jbr 
+
+G:\Pet\petsphere\android>set JAVA_EXE=C:\Program Files\Android\Android Studio\jbr/bin/java.exe 
+
+G:\Pet\petsphere\android>if exist "C:\Program Files\Android\Android Studio\jbr/bin/java.exe" goto init 
+
+G:\Pet\petsphere\android>if not "Windows_NT" == "Windows_NT" goto win9xME_args 
+
+G:\Pet\petsphere\android>if "@eval[2+2]" == "4" goto 4NT_args 
+
+G:\Pet\petsphere\android>set CMD_LINE_ARGS= 
+
+G:\Pet\petsphere\android>set _SKIP=2 
+
+G:\Pet\petsphere\android>if "x-q" == "x" goto execute 
+
+G:\Pet\petsphere\android>set CMD_LINE_ARGS=-q -Ptarget-platform=android-arm,android-arm64,android-x64 -Ptarget=lib/main.dart -Pbase-application-name=android.app.Application -Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTMuNDEuOQ==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MDBiMGM5MWYwNg==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049NDJkM2Q3NWE1Ng==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My4xMS41 -Pdart-obfuscation=false -Ptrack-widget-creation=true -Ptree-shake-icons=false assembleDebug 
+
+G:\Pet\petsphere\android>goto execute 
+
+G:\Pet\petsphere\android>set CLASSPATH=G:\Pet\petsphere\android\\gradle\wrapper\gradle-wrapper.jar 
+
+G:\Pet\petsphere\android>"C:\Program Files\Android\Android Studio\jbr/bin/java.exe"    "-Dorg.gradle.appname=gradlew" -classpath "G:\Pet\petsphere\android\\gradle\wrapper\gradle-wrapper.jar" org.gradle.wrapper.GradleWrapperMain -q -Ptarget-platform=android-arm,android-arm64,android-x64 -Ptarget=lib/main.dart -Pbase-application-name=android.app.Application -Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTMuNDEuOQ==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MDBiMGM5MWYwNg==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049NDJkM2Q3NWE1Ng==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My4xMS41 -Pdart-obfuscation=false -Ptrack-widget-creation=true -Ptree-shake-icons=false assembleDebug 
+
+G:\Pet\petsphere\android>if "0" == "0" goto mainEnd 
+
+G:\Pet\petsphere\android>if "Windows_NT" == "Windows_NT" endlocal
+Running Gradle task 'assembleDebug'...                             32.5s
+√ Built build\app\outputs\flutter-apk\app-debug.apk
