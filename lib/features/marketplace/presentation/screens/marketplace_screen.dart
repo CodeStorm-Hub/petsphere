@@ -7,6 +7,7 @@ import '../controllers/cart_controller.dart';
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:petfolio/features/marketplace/presentation/widgets/product_card.dart';
 import 'package:petfolio/core/utils/layout_utils.dart';
+import 'package:petfolio/core/widgets/petfolio_empty_state.dart';
 
 class MarketplaceScreen extends ConsumerWidget {
   const MarketplaceScreen({super.key});
@@ -250,7 +251,11 @@ class MarketplaceScreen extends ConsumerWidget {
                 // ── Product Grid ────────────────────────────────────────────────
                 if (marketState.products.isEmpty && !marketState.isLoading)
                   const SliverFillRemaining(
-                    child: Center(child: Text('No items found in this category')),
+                    child: PetfolioEmptyState(
+                      icon: Icons.inventory_2_outlined,
+                      title: 'No products found',
+                      message: 'Try selecting a different category or search term.',
+                    ),
                   )
                 else
                   SliverPadding(

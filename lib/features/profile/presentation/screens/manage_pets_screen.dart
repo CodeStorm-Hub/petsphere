@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:petfolio/core/constants/app_routes.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 
 /// Full-screen management view for all owned pets.
 class ManagePetsScreen extends ConsumerWidget {
@@ -62,38 +63,12 @@ class ManagePetsScreen extends ConsumerWidget {
   }
 
   Widget _buildEmptyState(BuildContext context, ColorScheme cs, TextTheme tt) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: cs.primaryContainer.withAlpha(60),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.pets_rounded, size: 56, color: cs.primary),
-            ),
-            const SizedBox(height: 24),
-            Text('No pets yet',
-                style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(
-              'Add your first pet to start building your PetFolio!',
-              textAlign: TextAlign.center,
-              style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: () => context.push(AppRoutes.addPet),
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Add Your First Pet'),
-            ),
-          ],
-        ),
-      ),
+    return PetfolioEmptyState(
+      icon: Icons.pets_rounded,
+      title: 'No pets yet',
+      message: 'Add your first pet to start building your PetFolio!',
+      buttonText: 'Add Your First Pet',
+      onButtonPressed: () => context.push(AppRoutes.addPet),
     );
   }
 }

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/features/care/presentation/controllers/pet_training_controller.dart';
-import 'package:petfolio/core/widgets/brand_logo.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:petfolio/core/widgets/skeleton_loader.dart';
 
@@ -26,36 +26,13 @@ class PetTrainingScreen extends ConsumerWidget {
             style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold),
           ),
         ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const BrandLogo(customSize: 64),
-                const SizedBox(height: 24),
-                Text(
-                  'No Active Pet',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Select a pet from the home screen to start their training journey.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: colorScheme.onSurfaceVariant),
-                ),
-                const SizedBox(height: 32),
-                FilledButton.icon(
-                  onPressed: () => context.go('/home'),
-                  icon: const Icon(Icons.home_rounded),
-                  label: const Text('Go to Home'),
-                ),
-              ],
-            ),
-          ),
+        body: PetfolioEmptyState(
+          icon: Icons.pets_rounded,
+          title: 'No Active Pet',
+          message: 'Select a pet from the home screen to start their training journey.',
+          buttonText: 'Go to Home',
+          onButtonPressed: () => context.go('/home'),
+          buttonIcon: Icons.home_rounded,
         ),
       );
     }
@@ -249,7 +226,14 @@ class PetTrainingScreen extends ConsumerWidget {
           );
         },
         loading: () => const TrainingSkeletonLoader(),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        error: (e, st) => PetfolioEmptyState(
+          icon: Icons.error_outline_rounded,
+          title: 'Could not load training data',
+          message: e.toString(),
+          buttonText: 'Retry',
+          onButtonPressed: () => ref.invalidate(petTrainingProgressProvider),
+          buttonIcon: Icons.refresh_rounded,
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {

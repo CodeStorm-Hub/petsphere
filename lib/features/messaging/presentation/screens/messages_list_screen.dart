@@ -7,6 +7,7 @@ import 'package:petfolio/features/messaging/data/models/chat_thread_model.dart';
 import 'package:petfolio/features/messaging/presentation/controllers/chat_controller.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/core/widgets/petfolio_empty_state.dart';
 
 class MessagesListScreen extends ConsumerStatefulWidget {
   const MessagesListScreen({super.key});
@@ -72,11 +73,10 @@ class _MessagesListScreenState extends ConsumerState<MessagesListScreen> {
             child: chatState.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : threads.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No conversations yet',
-                          style: TextStyle(color: cs.onSurfaceVariant),
-                        ),
+                    ? const PetfolioEmptyState(
+                        icon: Icons.chat_bubble_outline_rounded,
+                        title: 'No Messages',
+                        message: 'No conversations yet',
                       )
                     : ListView.separated(
                         itemCount: threads.length,

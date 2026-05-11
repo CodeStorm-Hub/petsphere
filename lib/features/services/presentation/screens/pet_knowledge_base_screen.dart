@@ -102,7 +102,11 @@ class PetKnowledgeBaseScreen extends ConsumerWidget {
             data: (articles) {
               if (articles.isEmpty) {
                 return const SliverFillRemaining(
-                  child: Center(child: Text('No articles found matching your criteria.')),
+                  child: PetfolioEmptyState(
+                    icon: Icons.article_outlined,
+                    title: 'No Articles Found',
+                    message: 'No articles found matching your criteria. Try a different category or search term.',
+                  ),
                 );
               }
               return SliverPadding(
@@ -385,7 +389,11 @@ class AsyncValueSliverWidget<T> extends StatelessWidget {
     return value.when(
       data: data,
       error: (e, st) => SliverToBoxAdapter(
-        child: Center(child: Text('Error: $e')),
+        child: PetfolioEmptyState(
+          icon: Icons.error_outline,
+          title: 'Something went wrong',
+          message: e.toString(),
+        ),
       ),
       loading: () => const SliverFillRemaining(
         child: Center(child: CircularProgressIndicator()),

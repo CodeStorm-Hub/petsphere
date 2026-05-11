@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 
 class PetProfileScreen extends ConsumerStatefulWidget {
   const PetProfileScreen({super.key, required this.petId});
@@ -464,51 +465,12 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
   Widget _buildEmptyState(BuildContext context, ColorScheme cs) {
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: cs.primaryContainer.withValues(alpha: 0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.pets_rounded, size: 64, color: cs.primary),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'No active pet selected',
-                style: GoogleFonts.playfairDisplay(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Add a pet to start building your PetFolio and connect with other pet lovers.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.dmSans(
-                  fontSize: 16,
-                  color: cs.onSurfaceVariant,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 32),
-              FilledButton.icon(
-                onPressed: () => context.push('/add_pet'),
-                style: FilledButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                ),
-                icon: const Icon(Icons.add_rounded),
-                label: const Text('Add Your First Pet'),
-              ),
-            ],
-          ),
-        ),
+      body: PetfolioEmptyState(
+        icon: Icons.pets_rounded,
+        title: 'No active pet selected',
+        message: 'Add a pet to start building your PetFolio and connect with other pet lovers.',
+        buttonText: 'Add Your First Pet',
+        onButtonPressed: () => context.push('/add_pet'),
       ),
     );
   }

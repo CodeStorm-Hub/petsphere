@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:petfolio/features/community/data/community_group_repository.dart';
+import 'package:petfolio/core/widgets/petfolio_empty_state.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Providers
@@ -95,8 +96,9 @@ class _CommunityGroupsScreenState extends ConsumerState<CommunityGroupsScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Error: $e')),
               data: (groups) => groups.isEmpty
-                  ? const _EmptyState(
+                  ? const PetfolioEmptyState(
                       icon: Icons.group_rounded,
+                      title: 'No Groups',
                       message: 'No groups yet.\nBe the first to create one!',
                     )
                   : ListView.builder(
@@ -417,36 +419,3 @@ class _CreateGroupSheetState extends State<_CreateGroupSheet> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Shared empty state
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.icon, required this.message});
-  final IconData icon;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

@@ -6,6 +6,8 @@ import 'package:petfolio/core/utils/pet_navigation.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/features/social/presentation/controllers/follow_controller.dart';
 
+import 'package:petfolio/core/widgets/petfolio_empty_state.dart';
+
 enum FollowListType { petFollowers, ownerFollowers, following }
 
 String _loadErrorMessage(FollowListType type) {
@@ -89,37 +91,25 @@ class PetFollowersScreen extends ConsumerWidget {
       ),
       body: listAsync.when(
         loading: () => _buildShimmer(colorScheme),
-        error: (e, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 48, color: colorScheme.error),
-              const SizedBox(height: 12),
-              Text(
-                _loadErrorMessage(type),
-                textAlign: TextAlign.center,
-                style: TextStyle(color: colorScheme.onSurface, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: () {
-                  switch (type) {
-                    case FollowListType.petFollowers:
-                      ref.invalidate(petFollowersListProvider(petId!));
-                      break;
-                    case FollowListType.ownerFollowers:
-                      ref.invalidate(ownerFollowersListProvider(userId!));
-                      break;
-                    case FollowListType.following:
-                      ref.invalidate(followingListProvider(userId!));
-                      break;
-                  }
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
-              ),
-            ],
-          ),
+        error: (e, _) => PetfolioEmptyState(
+          icon: Icons.error_outline_rounded,
+          title: _loadErrorMessage(type),
+          message: e.toString(),
+          buttonText: 'Retry',
+          onButtonPressed: () {
+            switch (type) {
+              case FollowListType.petFollowers:
+                ref.invalidate(petFollowersListProvider(petId!));
+                break;
+              case FollowListType.ownerFollowers:
+                ref.invalidate(ownerFollowersListProvider(userId!));
+                break;
+              case FollowListType.following:
+                ref.invalidate(followingListProvider(userId!));
+                break;
+            }
+          },
+          buttonIcon: Icons.refresh_rounded,
         ),
         data: (list) => list.isEmpty
             ? _buildEmpty(context, colorScheme)
@@ -182,46 +172,16 @@ class PetFollowersScreen extends ConsumerWidget {
   }
 
   Widget _buildEmpty(BuildContext context, ColorScheme colorScheme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer.withAlpha(80),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              type == FollowListType.following
-                  ? Icons.person_add_outlined
-                  : Icons.people_outline_rounded,
-              size: 36,
-              color: colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            type == FollowListType.following
-                ? 'Not following anyone yet'
-                : 'No followers yet',
-            style: TextStyle(
-              color: colorScheme.onSurface,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            type == FollowListType.following
-                ? 'Follow pets and owners to see them here!'
-                : 'Share profile to attract followers!',
-            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+    return PetfolioEmptyState(
+      icon: type == FollowListType.following
+          ? Icons.person_add_outlined
+          : Icons.people_outline_rounded,
+      title: type == FollowListType.following
+          ? 'Not following anyone yet'
+          : 'No followers yet',
+      message: type == FollowListType.following
+          ? 'Follow pets and owners to see them here!'
+          : 'Share profile to attract followers!',
     );
   }
 

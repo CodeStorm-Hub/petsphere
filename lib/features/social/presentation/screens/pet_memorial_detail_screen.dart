@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/pet_memorial_controller.dart';
 import 'package:petfolio/features/social/data/models/pet_memorial_models.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 
 class PetMemorialDetailScreen extends ConsumerWidget {
   const PetMemorialDetailScreen({super.key, required this.memorialId});
@@ -16,7 +17,11 @@ class PetMemorialDetailScreen extends ConsumerWidget {
         if (entry == null) {
           return Scaffold(
             appBar: AppBar(),
-            body: const Center(child: Text('Memorial not found')),
+            body: const PetfolioEmptyState(
+              icon: Icons.pets_rounded,
+              title: 'Memorial Not Found',
+              message: 'The requested memorial could not be located.',
+            ),
           );
         }
         return Scaffold(
@@ -84,7 +89,15 @@ class PetMemorialDetailScreen extends ConsumerWidget {
       },
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (err, stack) => Scaffold(body: Center(child: Text('Error: $err'))),
+      error: (err, stack) => Scaffold(
+        body: PetfolioEmptyState(
+          icon: Icons.error_outline_rounded,
+          title: 'Failed to Load Memorial',
+          message: err.toString(),
+          buttonText: 'Retry',
+          onButtonPressed: () => ref.invalidate(memorialEntryProvider(memorialId)),
+        ),
+      ),
     );
   }
 }

@@ -11,6 +11,7 @@ import 'package:petfolio/features/pet/data/models/pet_model.dart';
 import 'package:petfolio/features/social/presentation/controllers/follow_controller.dart';
 import 'package:petfolio/features/social/presentation/controllers/feed_controller.dart';
 import 'package:petfolio/features/profile/presentation/widgets/active_pet_switcher_modal.dart';
+import 'package:petfolio/core/widgets/petfolio_empty_state.dart';
 
 class OwnerProfileScreen extends ConsumerStatefulWidget {
   const OwnerProfileScreen({super.key});
@@ -561,25 +562,21 @@ class _PostsTab extends ConsumerWidget {
 
     return postsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => PetfolioEmptyState(
+        icon: Icons.error_outline,
+        title: 'Unable to Load Posts',
+        message: e.toString(),
+        buttonText: 'Retry',
+        onButtonPressed: () => ref.invalidate(userPostsProvider(userId)),
+      ),
       data: (posts) {
         if (posts.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.photo_library_outlined,
-                    size: 48, color: cs.onSurfaceVariant.withAlpha(120)),
-                const SizedBox(height: 12),
-                Text('No posts yet',
-                    style: Theme.of(context).textTheme.bodyLarge),
-                const SizedBox(height: 8),
-                FilledButton.tonal(
-                  onPressed: () => context.push(AppRoutes.createPost),
-                  child: const Text('Create your first post'),
-                ),
-              ],
-            ),
+          return PetfolioEmptyState(
+            icon: Icons.photo_library_outlined,
+            title: 'No Posts Yet',
+            message: 'Share your first pet moment with the community!',
+            buttonText: 'Create your first post',
+            onButtonPressed: () => context.push(AppRoutes.createPost),
           );
         }
         return GridView.builder(
@@ -623,22 +620,12 @@ class _AchievementsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.emoji_events_outlined,
-              size: 48, color: cs.onSurfaceVariant.withAlpha(120)),
-          const SizedBox(height: 12),
-          Text('Achievements coming soon',
-              style: Theme.of(context).textTheme.bodyLarge),
-          const SizedBox(height: 8),
-          FilledButton.tonal(
-            onPressed: () => context.push(AppRoutes.achievements),
-            child: const Text('View Care Badges'),
-          ),
-        ],
-      ),
+    return PetfolioEmptyState(
+      icon: Icons.emoji_events_outlined,
+      title: 'No Achievements',
+      message: 'Complete pet care goals to earn badges and achievements!',
+      buttonText: 'View Care Badges',
+      onButtonPressed: () => context.push(AppRoutes.achievements),
     );
   }
 }
@@ -652,17 +639,10 @@ class _ActivityTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.timeline_outlined,
-              size: 48, color: cs.onSurfaceVariant.withAlpha(120)),
-          const SizedBox(height: 12),
-          Text('Activity feed coming soon',
-              style: Theme.of(context).textTheme.bodyLarge),
-        ],
-      ),
+    return const PetfolioEmptyState(
+      icon: Icons.timeline_outlined,
+      title: 'No Activity',
+      message: 'Your recent pet activities and updates will appear here.',
     );
   }
 }

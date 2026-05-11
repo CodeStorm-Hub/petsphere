@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:petfolio/features/community/data/adoption_repository.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Providers
@@ -100,17 +101,18 @@ class _AdoptionCenterScreenState extends ConsumerState<AdoptionCenterScreen> {
         ],
         body: async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Error: $e')),
+          error: (e, _) => PetfolioEmptyState(
+            icon: Icons.error_outline_rounded,
+            title: 'Failed to Load Pets',
+            message: e.toString(),
+            buttonText: 'Retry',
+            onButtonPressed: () => ref.invalidate(_listingsProvider(_species)),
+          ),
           data: (listings) => listings.isEmpty
-              ? const Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.pets, size: 64, color: Colors.grey),
-                      SizedBox(height: 12),
-                      Text('No pets available for adoption right now.'),
-                    ],
-                  ),
+              ? const PetfolioEmptyState(
+                  icon: Icons.pets_rounded,
+                  title: 'No Pets Available',
+                  message: 'No pets available for adoption right now.',
                 )
               : GridView.builder(
                   padding: const EdgeInsets.all(16),

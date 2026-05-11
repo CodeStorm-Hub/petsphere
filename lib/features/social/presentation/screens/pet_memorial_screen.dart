@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/pet_memorial_controller.dart';
@@ -10,7 +11,6 @@ class PetMemorialScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final memorialsAsync = ref.watch(memorialEntriesProvider);
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: CustomScrollView(
@@ -45,26 +45,12 @@ class PetMemorialScreen extends ConsumerWidget {
             data: (memorials) => SliverPadding(
               padding: const EdgeInsets.all(16),
               sliver: memorials.isEmpty
-                  ? SliverFillRemaining(
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.auto_awesome_rounded,
-                              size: 64,
-                              color: colorScheme.outline,
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'No memorial entries yet.',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
+                  ? const SliverFillRemaining(
+                      child: PetfolioEmptyState(
+                        icon: Icons.auto_awesome_rounded,
+                        title: 'No Tributes Yet',
+                        message:
+                            'The Wall of Remembrance is currently peaceful. Create a tribute to honor a pet\'s memory.',
                       ),
                     )
                   : SliverGrid(

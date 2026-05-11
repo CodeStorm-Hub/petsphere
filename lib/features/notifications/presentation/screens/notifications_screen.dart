@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:petfolio/features/notifications/presentation/controllers/notification_controller.dart';
+import 'package:petfolio/core/widgets/petfolio_empty_state.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
@@ -34,11 +35,10 @@ class NotificationsScreen extends ConsumerWidget {
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : state.items.isEmpty
-              ? Center(
-                  child: Text(
-                    'No notifications yet',
-                    style: TextStyle(color: cs.onSurfaceVariant),
-                  ),
+              ? const PetfolioEmptyState(
+                  icon: Icons.notifications_off_rounded,
+                  title: 'No Notifications',
+                  message: 'No notifications yet',
                 )
               : ListView.separated(
                   itemCount: state.items.length,

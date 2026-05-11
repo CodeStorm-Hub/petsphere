@@ -68,7 +68,7 @@ class _MyRequestsTab extends ConsumerWidget {
       value: jobsAsync,
       data: (List<SitterJob> jobs) {
         if (jobs.isEmpty) {
-          return const _EmptyState(
+          return const PetfolioEmptyState(
             icon: Icons.assignment_outlined,
             title: 'No requests yet',
             message: 'Post a job to find the perfect sitter for your pet.',
@@ -93,7 +93,7 @@ class _MarketplaceTab extends ConsumerWidget {
       value: jobsAsync,
       data: (List<SitterJob> jobs) {
         if (jobs.isEmpty) {
-          return const _EmptyState(
+          return const PetfolioEmptyState(
             icon: Icons.search_off,
             title: 'No open jobs',
             message: 'There are no sitter requests in your area right now.',
@@ -236,43 +236,3 @@ class _JobCard extends StatelessWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-
-  const _EmptyState({
-    required this.icon,
-    required this.title,
-    required this.message,
-  });
-  final IconData icon;
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 64, color: Colors.grey[300]),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: GoogleFonts.playfairDisplay(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.dmSans(color: Colors.grey),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

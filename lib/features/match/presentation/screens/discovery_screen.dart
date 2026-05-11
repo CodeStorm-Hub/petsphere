@@ -8,6 +8,7 @@ import '../controllers/match_controller.dart';
 import 'package:petfolio/core/theme/app_theme.dart';
 import 'package:petfolio/core/utils/layout_utils.dart';
 import 'package:petfolio/core/widgets/brand_logo.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
@@ -91,36 +92,18 @@ class MyListingsTab extends ConsumerWidget {
       child: listedPets.isEmpty
           ? ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.only(bottom: navSpace),
+              padding: EdgeInsets.only(bottom: navSpace, top: 100),
               children: [
-                const SizedBox(height: 100),
-                BrandLogo(
-                  customSize: 64,
-                  color: colorScheme.outline.withAlpha(100),
-                ),
-                const SizedBox(height: 16),
-                const Center(
-                  child: Text(
-                    "You haven't listed any pets yet.",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Center(
-                  child: Text(
-                    'Tap "New Listing" to add your pet to discovery.',
-                    style: TextStyle(color: colorScheme.onSurfaceVariant),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Center(
-                  child: OutlinedButton(
-                    onPressed: () => showListPetSheet(context, ref),
-                    child: const Text('Start Listing'),
-                  ),
+                PetfolioEmptyState(
+                  icon: Icons.pets_outlined,
+                  title: "You haven't listed any pets yet.",
+                  message: 'Tap "New Listing" to add your pet to discovery.',
+                  buttonText: 'Start Listing',
+                  onButtonPressed: () => showListPetSheet(context, ref),
                 ),
               ],
             )
+
           : ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + navSpace),
@@ -366,66 +349,36 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
     }
 
     if (!widget.hasActivePet) {
-      return Builder(
-        builder: (context) {
-          final colorScheme = Theme.of(context).colorScheme;
-          return ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
-            children: [
-              BrandLogo(
-                customSize: 64,
-                color: colorScheme.outline.withAlpha(100),
-              ),
-              const SizedBox(height: 16),
-              const Center(
-                child: Text(
-                  'Add a pet to start discovering breeding matches.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Center(
-                child: FilledButton.icon(
-                  onPressed: () => context.push('/add_pet'),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Pet'),
-                ),
-              ),
-            ],
-          );
-        },
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
+        children: [
+          PetfolioEmptyState(
+            icon: Icons.pets_outlined,
+            title: 'No Active Pet',
+            message: 'Add a pet to start discovering breeding matches.',
+            buttonText: 'Add Pet',
+            onButtonPressed: () => context.push('/add_pet'),
+          ),
+        ],
       );
     }
 
     if (matchState.error != null && !hasPets) {
       return RefreshIndicator(
         onRefresh: () => ref.read(matchProvider.notifier).refresh(),
-        child: Builder(
-          builder: (context) {
-            final colorScheme = Theme.of(context).colorScheme;
-            return ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
-              children: [
-                Icon(Icons.error_outline, size: 64, color: colorScheme.error),
-                const SizedBox(height: 16),
-                Text(
-                  matchState.error!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: colorScheme.error),
-                ),
-                const SizedBox(height: 24),
-                Center(
-                  child: OutlinedButton(
-                    onPressed: () => ref.read(matchProvider.notifier).refresh(),
-                    child: const Text('Try Again'),
-                  ),
-                ),
-              ],
-            );
-          },
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
+          children: [
+            PetfolioEmptyState(
+              icon: Icons.error_outline,
+              title: 'Something went wrong',
+              message: matchState.error!,
+              buttonText: 'Try Again',
+              onButtonPressed: () => ref.read(matchProvider.notifier).refresh(),
+            ),
+          ],
         ),
       );
     }
@@ -530,18 +483,11 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                       child: ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
-                        children: [
-                          BrandLogo(
-                            customSize: 64,
-                            color: colorScheme.outline.withAlpha(100),
-                          ),
-                          const SizedBox(height: 16),
-                          Center(
-                            child: Text(
-                              'No more pets available. Check back soon!',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: colorScheme.onSurfaceVariant),
-                            ),
+                        children: const [
+                          PetfolioEmptyState(
+                            icon: Icons.search_off_rounded,
+                            title: 'All caught up!',
+                            message: 'No more pets available. Check back soon!',
                           ),
                         ],
                       ),
@@ -1089,9 +1035,15 @@ class NearbyTab extends ConsumerWidget {
           ? ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.only(bottom: navSpace),
-              children: const [
-                SizedBox(height: 120),
-                Center(child: Text('No nearby pets found.')),
+              children: [
+                const SizedBox(height: 120),
+                PetfolioEmptyState(
+                  icon: Icons.location_off_outlined,
+                  title: 'No Nearby Pets',
+                  message: 'No pets found in your area. Try refreshing or adjusting your search.',
+                  buttonText: 'Refresh',
+                  onButtonPressed: () => ref.read(matchProvider.notifier).refresh(),
+                ),
               ],
             )
           : ListView.builder(

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:petfolio/core/theme/app_theme.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+export 'petfolio_empty_state.dart';
+
 class GlassCard extends StatelessWidget {
 
   const GlassCard({

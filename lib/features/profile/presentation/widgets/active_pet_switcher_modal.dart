@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:petfolio/core/constants/app_routes.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/core/widgets/petfolio_empty_state.dart';
 
 /// Bottom sheet modal for quickly switching the active pet.
 class ActivePetSwitcherModal {
@@ -72,24 +73,15 @@ class _SwitcherContent extends ConsumerWidget {
             const SizedBox(height: 8),
             // Pet list
             if (pets.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  children: [
-                    Icon(Icons.pets_rounded, size: 48, color: cs.primary),
-                    const SizedBox(height: 12),
-                    Text('No pets yet', style: tt.bodyLarge),
-                    const SizedBox(height: 12),
-                    FilledButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        context.push(AppRoutes.addPet);
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text('Add Your First Pet'),
-                    ),
-                  ],
-                ),
+              PetfolioEmptyState(
+                icon: Icons.pets_rounded,
+                title: 'No Pets Found',
+                message: 'You haven\'t added any pets to your profile yet.',
+                buttonText: 'Add Your First Pet',
+                onButtonPressed: () {
+                  Navigator.pop(context);
+                  context.push(AppRoutes.addPet);
+                },
               )
             else
               ...pets.map((pet) => _PetTile(

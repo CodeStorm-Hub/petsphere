@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'petfolio_widgets.dart';
 
 typedef AsyncValueBuilder<T> = Widget Function(T data);
 typedef AsyncValueLoadingBuilder = Widget Function();
@@ -12,12 +13,14 @@ class AsyncValueWidget<T> extends StatelessWidget {
     required this.data,
     this.loading,
     this.error,
+    this.onRetry,
   });
 
   final AsyncValue<T> value;
   final AsyncValueBuilder<T> data;
   final AsyncValueLoadingBuilder? loading;
   final AsyncValueErrorBuilder? error;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -25,18 +28,13 @@ class AsyncValueWidget<T> extends StatelessWidget {
       data: data,
       error: (e, st) {
         if (error != null) return error!(e, st);
-        return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(e.toString(), style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {},
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
+        return PetfolioEmptyState(
+          icon: Icons.error_outline_rounded,
+          title: 'Oops! Something went wrong',
+          message: e.toString(),
+          buttonText: onRetry != null ? 'Retry' : null,
+          onButtonPressed: onRetry,
+          buttonIcon: Icons.refresh_rounded,
         );
       },
       loading: () {

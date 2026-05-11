@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petfolio/features/nutrition/data/nutrition_repository.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/features/care/presentation/controllers/pet_nutrition_controller.dart';
+import 'package:petfolio/core/widgets/async_value_widget.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 
 class PetNutritionPlannerScreen extends ConsumerStatefulWidget {
   const PetNutritionPlannerScreen({super.key});
@@ -34,8 +36,23 @@ class _PetNutritionPlannerScreenState
     final nutritionAsync = ref.watch(todayNutritionProvider);
     final activePet = petState.activePet;
 
+    if (activePet == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Nutrition & Diet'),
+        ),
+        body: const PetfolioEmptyState(
+          icon: Icons.pets_rounded,
+          title: 'No Active Pet',
+          message: 'Please select a pet to view and manage their nutrition plan.',
+        ),
+      );
+    }
+
     return Scaffold(
-      body: nutritionAsync.when(
+      body: AsyncValueWidget<List<NutritionLog>>(
+        value: nutritionAsync,
+        onRetry: () => ref.invalidate(todayNutritionProvider),
         data: (logs) {
           final totalConsumed = logs.fold<int>(
             0,
@@ -45,7 +62,7 @@ class _PetNutritionPlannerScreenState
             0,
             (sum, log) => sum + (log.waterMl ?? 0),
           );
-          final budget = (activePet?.weightLbs ?? 10) * 70; // Basic RER formula
+          final budget = (activePet.weightLbs ?? 10) * 70; // Basic RER formula
           const waterGoal = 800; // Hardcoded goal for now
 
           return CustomScrollView(
@@ -72,7 +89,7 @@ class _PetNutritionPlannerScreenState
                       _CalorieBudgetCard(
                         consumed: totalConsumed,
                         total: budget.toInt(),
-                        petName: activePet?.name ?? 'Pet',
+                        petName: activePet.name,
                         logs: logs,
                       ),
                       const SizedBox(height: 24),
@@ -80,16 +97,14 @@ class _PetNutritionPlannerScreenState
                         current: waterIntake,
                         goal: waterGoal,
                         onAdd: () async {
-                          if (activePet != null) {
-                            await ref
-                                .read(petNutritionControllerProvider.notifier)
-                                .addMeal(
-                                  petId: activePet.id,
-                                  mealName: 'Water',
-                                  mealType: 'Beverage',
-                                  waterMl: 100,
-                                );
-                          }
+                          await ref
+                              .read(petNutritionControllerProvider.notifier)
+                              .addMeal(
+                                petId: activePet.id,
+                                mealName: 'Water',
+                                mealType: 'Beverage',
+                                waterMl: 100,
+                              );
                         },
                       ),
                       const SizedBox(height: 32),
@@ -104,24 +119,21 @@ class _PetNutritionPlannerScreenState
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           TextButton.icon(
-                            onPressed: () => _showAddMealSheet(activePet?.id),
+                            onPressed: () => _showAddMealSheet(activePet.id),
                             icon: const Icon(Icons.add_rounded),
                             label: const Text('Add Meal'),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
-                      if (logs.isEmpty)
-                        Center(
+                      if (logs.where((l) => l.mealName != 'Water').isEmpty)
+                        const Center(
                           child: Padding(
-                            padding: const EdgeInsets.all(32),
-                            child: Text(
-                              'No meals logged today yet.',
-                              style: TextStyle(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
+                            padding: EdgeInsets.all(32),
+                            child: PetfolioEmptyState(
+                              icon: Icons.restaurant_menu_rounded,
+                              title: 'No Meals Logged',
+                              message: 'Log your first meal for today to track calories.',
                             ),
                           ),
                         )
@@ -139,8 +151,6 @@ class _PetNutritionPlannerScreenState
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
       ),
     );
   }

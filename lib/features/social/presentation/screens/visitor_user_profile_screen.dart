@@ -135,7 +135,13 @@ class _VisitorUserProfileScreenState extends ConsumerState<VisitorUserProfileScr
       error:
           (e, s) => Scaffold(
             body: PetFolioGradientBackground(
-              child: Center(child: Text('Error: $e')),
+              child: PetfolioEmptyState(
+                icon: Icons.error_outline,
+                title: 'Something went wrong',
+                message: e.toString(),
+                buttonText: 'Try Again',
+                onButtonPressed: () => ref.refresh(visitorUserProvider(widget.userId)),
+              ),
             ),
           ),
     );
@@ -322,15 +328,10 @@ class _VisitorUserProfileScreenState extends ConsumerState<VisitorUserProfileScr
     return petsAsync.when(
       data: (List<PetModel> pets) {
         if (pets.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.pets_outlined, size: 48, color: cs.outline),
-                const SizedBox(height: 12),
-                Text('No pets yet', style: GoogleFonts.dmSans(color: cs.onSurfaceVariant)),
-              ],
-            ),
+          return const PetfolioEmptyState(
+            icon: Icons.pets_rounded,
+            title: 'No Pets Yet',
+            message: 'This user hasn\'t added any pets to their profile yet.',
           );
         }
         return GridView.builder(
@@ -398,7 +399,13 @@ class _VisitorUserProfileScreenState extends ConsumerState<VisitorUserProfileScr
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, s) => Center(child: Text('Error: $e')),
+      error: (e, s) => PetfolioEmptyState(
+        icon: Icons.error_outline,
+        title: 'Error Loading Pets',
+        message: e.toString(),
+        buttonText: 'Retry',
+        onButtonPressed: () => ref.invalidate(visitorUserPetsProvider(widget.userId)),
+      ),
     );
   }
 
@@ -408,15 +415,10 @@ class _VisitorUserProfileScreenState extends ConsumerState<VisitorUserProfileScr
     return postsAsync.when(
       data: (List<PostModel> posts) {
         if (posts.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.photo_library_outlined, size: 48, color: cs.outline),
-                const SizedBox(height: 12),
-                Text('No posts yet', style: GoogleFonts.dmSans(color: cs.onSurfaceVariant)),
-              ],
-            ),
+          return const PetfolioEmptyState(
+            icon: Icons.photo_library_rounded,
+            title: 'No Posts Yet',
+            message: 'This user hasn\'t shared any posts yet.',
           );
         }
         return GridView.builder(
@@ -443,18 +445,25 @@ class _VisitorUserProfileScreenState extends ConsumerState<VisitorUserProfileScr
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, s) => Center(child: Text('Error: $e')),
+      error: (e, s) => PetfolioEmptyState(
+        icon: Icons.error_outline,
+        title: 'Error Loading Posts',
+        message: e.toString(),
+        buttonText: 'Retry',
+        onButtonPressed: () => ref.invalidate(userPostsProvider(widget.userId)),
+      ),
     );
   }
 
   Widget _buildNotFound(BuildContext context, ColorScheme cs) {
     return Scaffold(
       appBar: AppBar(),
-      body: Center(
-        child: Text(
-          'User not found',
-          style: GoogleFonts.playfairDisplay(fontSize: 24),
-        ),
+      body: PetfolioEmptyState(
+        icon: Icons.person_off_rounded,
+        title: 'User Not Found',
+        message: 'The user you are looking for does not exist or has a private profile.',
+        buttonText: 'Back to Discovery',
+        onButtonPressed: () => context.pop(),
       ),
     );
   }

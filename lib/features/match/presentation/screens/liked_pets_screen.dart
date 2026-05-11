@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:petfolio/features/match/presentation/controllers/match_requests_controller.dart';
-import 'package:petfolio/core/widgets/brand_logo.dart';
+import 'package:petfolio/core/widgets/petfolio_empty_state.dart';
 import 'package:petfolio/core/widgets/pet_avatar.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
 
 class LikedPetsScreen extends ConsumerWidget {
   const LikedPetsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
     final sentRequests = ref.watch(
       matchRequestsProvider.select((state) => state.sentRequests),
     );
@@ -22,33 +22,12 @@ class LikedPetsScreen extends ConsumerWidget {
         child: sentRequests.isEmpty
             ? ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  const SizedBox(height: 120),
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.favorite_border,
-                          size: 64,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No likes yet',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Pets you like will appear here.',
-                          style: TextStyle(color: colorScheme.onSurfaceVariant),
-                        ),
-                      ],
-                    ),
+                children: const [
+                  SizedBox(height: 120),
+                  PetfolioEmptyState(
+                    icon: Icons.favorite_border,
+                    title: 'No likes yet',
+                    message: 'Pets you like will appear here.',
                   ),
                 ],
               )

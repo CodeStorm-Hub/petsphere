@@ -236,43 +236,13 @@ class HomeScreen extends ConsumerWidget {
                 hasScrollBody: false,
                 child: Padding(
                   padding: EdgeInsets.only(bottom: navSpace),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.photo_camera_outlined,
-                          size: 56,
-                          color: colorScheme.outline.withAlpha(120),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No posts yet',
-                          style: TextStyle(
-                            color: colorScheme.onSurface,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Share your first moment.',
-                          style: TextStyle(
-                            color: colorScheme.onSurfaceVariant,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        FilledButton.icon(
-                          onPressed: () => context.push('/create_post'),
-                          icon: const Icon(
-                            Icons.add_a_photo_outlined,
-                            size: 18,
-                          ),
-                          label: const Text('Create Post'),
-                        ),
-                      ],
-                    ),
+                  child: PetfolioEmptyState(
+                    icon: Icons.photo_camera_outlined,
+                    title: 'No posts yet',
+                    message: 'Share your first moment.',
+                    buttonText: 'Create Post',
+                    buttonIcon: Icons.add_a_photo_outlined,
+                    onButtonPressed: () => context.push('/create_post'),
                   ),
                 ),
               )

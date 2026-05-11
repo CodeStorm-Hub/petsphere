@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:petfolio/features/community/data/lost_found_repository.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Lost & Found Screen — #34 backed by lost_and_found_reports table
@@ -88,28 +89,28 @@ class LostAndFoundScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  void _openReportSheet(BuildContext context, WidgetRef ref) {
-    final auth = ref.read(authProvider);
-    if (auth.user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sign in to report a lost/found pet')),
-      );
-      return;
-    }
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (_) => _ReportSheet(
-        reporterId: auth.user!.id,
-        onSaved: () {
-          ref.invalidate(_lostFoundProvider('lost'));
-          ref.invalidate(_lostFoundProvider('found'));
-        },
-      ),
+void _openReportSheet(BuildContext context, WidgetRef ref) {
+  final auth = ref.read(authProvider);
+  if (auth.user == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sign in to report a lost/found pet')),
     );
+    return;
   }
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (_) => _ReportSheet(
+      reporterId: auth.user!.id,
+      onSaved: () {
+        ref.invalidate(_lostFoundProvider('lost'));
+        ref.invalidate(_lostFoundProvider('found'));
+      },
+    ),
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -125,27 +126,21 @@ class _ReportList extends ConsumerWidget {
     final async = ref.watch(_lostFoundProvider(status));
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => PetfolioEmptyState(
+        icon: Icons.error_outline,
+        title: 'Unable to Load Reports',
+        message: e.toString(),
+        buttonText: 'Retry',
+        onButtonPressed: () => ref.invalidate(_lostFoundProvider(status)),
+      ),
       data: (reports) {
         if (reports.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.search_off,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'No ${status == 'lost' ? 'lost' : 'found'} pet reports',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                const Text('Tap the button below to add one'),
-              ],
-            ),
+          return PetfolioEmptyState(
+            icon: Icons.search_off,
+            title: 'No ${status == 'lost' ? 'Lost' : 'Found'} Pet Reports',
+            message: 'No reports found for this category. Have you found or lost a pet? Share it with the community.',
+            buttonText: 'Report a Pet',
+            onButtonPressed: () => _openReportSheet(context, ref),
           );
         }
         return ListView.builder(

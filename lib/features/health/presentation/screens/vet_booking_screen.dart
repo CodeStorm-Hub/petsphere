@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 
 import 'package:petfolio/features/health/presentation/controllers/appointment_controller.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
@@ -169,7 +170,11 @@ class _VetBookingScreenState extends ConsumerState<VetBookingScreen>
           // ── Vet list ──────────────────────────────────────────────────────
           Expanded(
             child: _filteredVets.isEmpty
-                ? const Center(child: Text('No vets match your search.'))
+              ? const PetfolioEmptyState(
+                  icon: Icons.search_off_rounded,
+                  title: 'No Vets Found',
+                  message: 'No vets match your search criteria. Try a different category or search term.',
+                )
                 : ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: _filteredVets.length,

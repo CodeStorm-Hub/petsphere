@@ -356,8 +356,10 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
       case 2:
         return const _MedicationList();
       default:
-        return const _EmptyState(
-          text: 'No specific records in this category yet.',
+        return const PetfolioEmptyState(
+          icon: Icons.folder_open_rounded,
+          title: 'No Records',
+          message: 'No specific records in this category yet.',
         );
     }
   }
@@ -589,7 +591,7 @@ class _MedicalTimeline extends ConsumerWidget {
     final appointments = ref.watch(appointmentProvider).pastAppointments;
     
     if (appointments.isEmpty) {
-      return const _EmptyState(text: 'No past medical events recorded.');
+      return const PetfolioEmptyState(icon: Icons.folder_open_rounded, title: 'No Events', message: 'No past medical events recorded.');
     }
 
     return Column(
@@ -723,7 +725,7 @@ class _VaccineList extends ConsumerWidget {
     final vaccinations = ref.watch(vaccinationProvider).vaccinations;
     
     if (vaccinations.isEmpty) {
-      return const _EmptyState(text: 'No vaccination records found.');
+      return const PetfolioEmptyState(icon: Icons.folder_open_rounded, title: 'No Records', message: 'No vaccination records found.');
     }
 
     return Column(
@@ -849,7 +851,7 @@ class _MedicationList extends ConsumerWidget {
     final medications = ref.watch(medicationProvider).activeMedications;
     
     if (medications.isEmpty) {
-      return const _EmptyState(text: 'No active medications.');
+      return const PetfolioEmptyState(icon: Icons.folder_open_rounded, title: 'No Medications', message: 'No active medications.');
     }
 
     return Column(
@@ -1048,33 +1050,3 @@ class _WeightChart extends StatelessWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.text});
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        child: Column(
-          children: [
-            Icon(
-              Icons.folder_open_rounded,
-              size: 64,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              text,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
