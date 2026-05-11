@@ -3,7 +3,7 @@
 **Date**: 2026-05-11
 **Version**: 1.0
 **Status**: In Progress — Phase 0 ✅ Phase 1 ✅ (partial)
-**Stitch Project**: `projects/9043096397543633864` — [PetFolio - Modern Pet Platform Redesign](https://stitch.google.com/projects/9043096397543633864)
+**Stitch Project**: `projects/9043096397543633864` — [PetFolio - Modern Pet Platform Redesign](https://stitch.withgoogle.com/projects/9043096397543633864)
 **Design System**: PetFolio Blue (`assets/627128633167849513`)
 
 ---
