@@ -12,6 +12,7 @@ Reviewed sources:
 
 Validation note:
 - Local lint/test/build tooling could not be executed in this environment because `dart` and `flutter` CLIs were unavailable.
+- Follow-up recommended: re-run `dart format --set-exit-if-changed .`, `flutter analyze`, and `flutter test` in a Flutter-enabled CI/dev environment before implementation work starts.
 
 ---
 
@@ -39,14 +40,14 @@ Validation note:
 ### A. Definite improper connections (functional bugs)
 
 1. **Broken discovery route from one Liked Pets screen**
-   - File: `lib/features/pet/presentation/screens/liked_pets_screen.dart:25`
+   - File: `lib/features/pet/presentation/screens/liked_pets_screen.dart` (Go to Discovery CTA)
    - Uses `context.go('/discovery')`, but router defines discover as `/discover` (`AppRoutes.discover`).
    - Impact: button can navigate to invalid path/error page.
 
 2. **Messaging CTA uses `userId` as `threadId`**
    - Files:
-     - `lib/features/social/presentation/screens/visitor_user_profile_screen.dart:313`
-     - `lib/features/pet/presentation/screens/visitor_pet_profile_screen.dart:438`
+     - `lib/features/social/presentation/screens/visitor_user_profile_screen.dart` (Message button action)
+     - `lib/features/pet/presentation/screens/visitor_pet_profile_screen.dart` (Message button action)
    - Both do `context.push('/chat/<userId>')` / `AppRoutes.chatByThreadId(pet.userId)`.
    - Chat route expects an actual thread ID (`/chat/:threadId` in router).
    - `chat_controller.createOrGetThread(...)` exists but is not used by UI.
