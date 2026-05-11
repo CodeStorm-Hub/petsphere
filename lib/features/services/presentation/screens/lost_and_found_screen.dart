@@ -91,20 +91,21 @@ class LostAndFoundScreen extends ConsumerWidget {
   }
 }
 
+
 void _openReportSheet(BuildContext context, WidgetRef ref) {
-  final auth = ref.read(authProvider);
-  if (auth.user == null) {
+  final user = ref.read(authProvider).user;
+  if (user == null) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Sign in to report a lost/found pet')),
+      const SnackBar(content: Text('Please login to report a pet')),
     );
     return;
   }
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    useSafeArea: true,
-    builder: (_) => _ReportSheet(
-      reporterId: auth.user!.id,
+    backgroundColor: Colors.transparent,
+    builder: (context) => _ReportSheet(
+      reporterId: user.id,
       onSaved: () {
         ref.invalidate(_lostFoundProvider('lost'));
         ref.invalidate(_lostFoundProvider('found'));

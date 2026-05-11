@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:petfolio/app/widgets/adaptive_navigation.dart';
+import 'package:petfolio/core/constants/app_routes.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MainLayout
@@ -28,7 +29,12 @@ class MainLayoutState extends ConsumerState<MainLayout> {
 
   void _onTap(int navBarIndex) {
     if (navBarIndex == 2) {
-      context.push('/pet_care');
+      final activePet = ref.read(activePetProvider);
+      if (activePet != null) {
+        context.push(AppRoutes.petCareById(activePet.id));
+      } else {
+        context.push(AppRoutes.managePets);
+      }
       return;
     }
 

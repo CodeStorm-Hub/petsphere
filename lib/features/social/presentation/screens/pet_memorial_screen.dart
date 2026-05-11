@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/pet_memorial_controller.dart';
 import 'package:petfolio/features/social/data/models/pet_memorial_models.dart';
+import 'package:petfolio/core/constants/app_routes.dart';
 
 class PetMemorialScreen extends ConsumerWidget {
   const PetMemorialScreen({super.key});
@@ -76,9 +77,14 @@ class PetMemorialScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
-        label: const Text('Create a Tribute'),
+        onPressed: () {
+          final petId = GoRouterState.of(context).pathParameters['id'];
+          if (petId != null) {
+            context.push(AppRoutes.createPetMemorialById(petId));
+          }
+        },
         icon: const Icon(Icons.add_rounded),
+        label: const Text('Create a Tribute'),
       ),
     );
   }

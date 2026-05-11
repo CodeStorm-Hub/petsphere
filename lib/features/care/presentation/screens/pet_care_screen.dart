@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:petfolio/core/constants/app_routes.dart';
 
 import 'package:petfolio/features/care/presentation/controllers/care_log_controller.dart';
 import 'package:petfolio/features/care/presentation/controllers/care_gamification_controller.dart';
@@ -99,7 +100,7 @@ class _PointsRow extends StatelessWidget {
         Text(
           n == 0
               ? 'Up to 10 care points on a full day; partial days earn 2 per task you check.'
-              : 'Today’s progress toward max 10: $done / $n tasks, target today +$todayWant (no penalty if you uncheck; totals never go down).',
+              : 'Todayâs progress toward max 10: $done / $n tasks, target today +$todayWant (no penalty if you uncheck; totals never go down).',
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
             height: 1.35,
@@ -718,141 +719,96 @@ class _DashboardTab extends ConsumerWidget {
               selected: todayLog.mood == 'Happy',
             ),
             _MoodButton(
-              emoji: '🤪',
-              label: 'Playful',
-              selected: todayLog.mood == 'Playful',
-            ),
-            _MoodButton(
-              emoji: '🤒',
-              label: 'Sick',
-              selected: todayLog.mood == 'Sick',
+              emoji: '🤩',
+              label: 'Excited',
+              selected: todayLog.mood == 'Excited',
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 32),
         Text('Care Resources', style: theme.textTheme.titleLarge),
-        const SizedBox(height: 12),
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 4,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 12,
-          childAspectRatio: 0.8,
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 12,
+          runSpacing: 16,
           children: [
             _QuickActionItem(
               label: 'Vet Booking',
               icon: Icons.calendar_month,
               color: colorScheme.primary,
-              onTap: () => context.push('/vet_booking'),
+              onTap: () => context.push(AppRoutes.petVetBookingById(activePet.id)),
             ),
             _QuickActionItem(
               label: 'Emergency',
               icon: Icons.emergency,
               color: colorScheme.error,
-              onTap: () => context.push('/emergency_care'),
+              onTap: () => context.push(AppRoutes.petEmergencyById(activePet.id)),
             ),
             _QuickActionItem(
               label: 'Nutrition',
               icon: Icons.restaurant,
               color: colorScheme.secondary,
-              onTap: () => context.push('/nutrition_planner'),
+              onTap: () => context.push(AppRoutes.petNutritionById(activePet.id)),
             ),
             _QuickActionItem(
               label: 'Expenses',
               icon: Icons.payments,
               color: colorScheme.tertiary,
-              onTap: () => context.push('/expenses'),
+              onTap: () => context.push(AppRoutes.petExpensesById(activePet.id)),
             ),
             _QuickActionItem(
               label: 'Growth',
               icon: Icons.show_chart,
               color: colorScheme.primary,
-              onTap: () => context.push('/growth_charts'),
+              onTap: () => context.push(AppRoutes.petGrowthById(activePet.id)),
             ),
             _QuickActionItem(
               label: 'Insurance',
               icon: Icons.security,
               color: colorScheme.secondary,
-              onTap: () => context.push('/insurance'),
+              onTap: () => context.push(AppRoutes.petInsuranceById(activePet.id)),
             ),
             _QuickActionItem(
               label: 'Training',
               icon: Icons.school,
               color: colorScheme.onSurfaceVariant,
-              onTap: () => context.push('/training'),
-            ),
-            _QuickActionItem(
-              label: 'Adoption',
-              icon: Icons.favorite,
-              color: colorScheme.error,
-              onTap: () => context.push('/adoption_center'),
-            ),
-            _QuickActionItem(
-              label: 'Places',
-              icon: Icons.map,
-              color: colorScheme.secondary,
-              onTap: () => context.push('/pet_friendly_places'),
-            ),
-            _QuickActionItem(
-              label: 'Events',
-              icon: Icons.event,
-              color: colorScheme.primary,
-              onTap: () => context.push('/events'),
-            ),
-            _QuickActionItem(
-              label: 'Medical',
-              icon: Icons.folder_shared_rounded,
-              color: colorScheme.tertiary,
-              onTap: () => context.push('/medical_records'),
-            ),
-            _QuickActionItem(
-              label: 'Sitters',
-              icon: Icons.person_search,
-              color: colorScheme.tertiary,
-              onTap: () => context.push('/sitters'),
-            ),
-            _QuickActionItem(
-              label: 'Timeline',
-              icon: Icons.history,
-              color: colorScheme.secondary,
-              onTap: () => context.push('/pet_timeline'),
-            ),
-            _QuickActionItem(
-              label: 'Identifier',
-              icon: Icons.camera_alt,
-              color: colorScheme.primary,
-              onTap: () => context.push('/breed_identifier'),
-            ),
-            _QuickActionItem(
-              label: 'Knowledge',
-              icon: Icons.menu_book,
-              color: colorScheme.secondary,
-              onTap: () => context.push('/knowledge_base'),
-            ),
-            _QuickActionItem(
-              label: 'Reviews',
-              icon: Icons.rate_review,
-              color: colorScheme.secondary,
-              onTap: () => context.push('/gear_reviews'),
-            ),
-            _QuickActionItem(
-              label: 'Groups',
-              icon: Icons.groups,
-              color: colorScheme.error,
-              onTap: () => context.push('/community_groups'),
-            ),
-            _QuickActionItem(
-              label: 'Lost/Found',
-              icon: Icons.location_searching,
-              color: colorScheme.error,
-              onTap: () => context.push('/lost_and_found'),
+              onTap: () => context.push(AppRoutes.petTrainingById(activePet.id)),
             ),
             _QuickActionItem(
               label: 'Memorial',
               icon: Icons.cloud,
               color: colorScheme.primary,
-              onTap: () => context.push('/memorial'),
+              onTap: () => context.push(AppRoutes.petMemorialById(activePet.id)),
+            ),
+            _QuickActionItem(
+              label: 'Adoption',
+              icon: Icons.favorite,
+              color: colorScheme.error,
+              onTap: () => context.push(AppRoutes.adoptionCenter),
+            ),
+            _QuickActionItem(
+              label: 'Places',
+              icon: Icons.map,
+              color: colorScheme.secondary,
+              onTap: () => context.push(AppRoutes.petFriendlyPlaces),
+            ),
+            _QuickActionItem(
+              label: 'Events',
+              icon: Icons.event,
+              color: colorScheme.primary,
+              onTap: () => context.push(AppRoutes.events),
+            ),
+            _QuickActionItem(
+              label: 'Medical',
+              icon: Icons.folder_shared_rounded,
+              color: colorScheme.tertiary,
+              onTap: () => context.push(AppRoutes.petMedicalRecordsById(activePet.id)),
+            ),
+            _QuickActionItem(
+              label: 'Timeline',
+              icon: Icons.history,
+              color: colorScheme.secondary,
+              onTap: () => context.push(AppRoutes.petTimelineById(activePet.id)),
             ),
           ],
         ),
@@ -1257,7 +1213,7 @@ class _MoodButton extends ConsumerWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2. HEALTH TAB — extracted to lib/views/health_tab.dart
+// 2. HEALTH TAB â extracted to lib/views/health_tab.dart
 // ─────────────────────────────────────────────────────────────────────────────
 // (HealthTab is imported above and used directly in TabBarView)
 
@@ -1338,7 +1294,7 @@ class _FeedingTab extends ConsumerWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // Outer ring — total calories
+                // Outer ring â total calories
                 TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0, end: todayLog.caloriesProgress),
                   duration: const Duration(milliseconds: 400),
@@ -1426,7 +1382,7 @@ class _FeedingTab extends ConsumerWidget {
             time: '12:00 PM',
             kcal: todayLog.snackKcal,
             food: todayLog.snackFood.isEmpty
-                ? 'Puppy meal — smaller portion'
+                ? 'Puppy meal â smaller portion'
                 : todayLog.snackFood,
             fed: todayLog.snackFed,
             onChanged: notifier.setSnackFed,
@@ -1447,7 +1403,7 @@ class _FeedingTab extends ConsumerWidget {
           children: [
             Text('Treats', style: theme.textTheme.titleLarge),
             Text(
-              '${todayLog.treatsCount} today · ${todayLog.treatsKcal} kcal',
+              '${todayLog.treatsCount} today • ${todayLog.treatsKcal} kcal',
               style: TextStyle(
                 color: todayLog.treatsOverBudget
                     ? colorScheme.error

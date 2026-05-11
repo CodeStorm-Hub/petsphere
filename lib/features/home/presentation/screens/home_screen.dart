@@ -13,6 +13,7 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:petfolio/features/notifications/presentation/controllers/notification_controller.dart';
 import 'package:petfolio/features/notifications/data/notification_repository.dart';
+import 'package:petfolio/core/constants/app_routes.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
 import 'package:petfolio/features/social/data/models/post_model.dart';
 import 'package:petfolio/features/social/data/models/story_model.dart';
@@ -68,15 +69,15 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             tooltip: 'Search',
             icon: const Icon(Icons.search),
-            onPressed: () => context.push('/search'),
+            onPressed: () => context.push(AppRoutes.search),
           ),
           IconButton(
             tooltip: 'New Post',
             icon: const Icon(Icons.add_box_outlined),
-            onPressed: () => context.push('/create_post'),
+            onPressed: () => context.push(AppRoutes.createPost),
           ),
-          _NotificationIconButton(onTap: () => context.push('/notifications')),
-          _MessageIconButton(onTap: () => context.push('/messages')),
+          _NotificationIconButton(onTap: () => context.push(AppRoutes.notifications)),
+          _MessageIconButton(onTap: () => context.push(AppRoutes.messages)),
           const SizedBox(width: 4),
         ],
       ),
@@ -209,7 +210,7 @@ class HomeScreen extends ConsumerWidget {
                       myPets,
                       currentPetId: currentPetId,
                     ),
-                    onStoryTap: (petId) => context.push('/story/$petId'),
+                    onStoryTap: (petId) => context.push(AppRoutes.storyByPetId(petId)),
                     onYourStoryTap: (petId) => _onYourStoryTap(
                       context,
                       myPets,
@@ -242,7 +243,7 @@ class HomeScreen extends ConsumerWidget {
                     message: 'Share your first moment.',
                     buttonText: 'Create Post',
                     buttonIcon: Icons.add_a_photo_outlined,
-                    onButtonPressed: () => context.push('/create_post'),
+                    onButtonPressed: () => context.push(AppRoutes.createPost),
                   ),
                 ),
               )
@@ -341,12 +342,12 @@ class HomeScreen extends ConsumerWidget {
     required String currentPetId,
   }) async {
     if (myPets.isEmpty) {
-      await context.push('/add_pet');
+      await context.push(AppRoutes.addPet);
       return;
     }
 
     if (myPets.length == 1) {
-      await context.push('/create_story?petId=${myPets.first.id}');
+      await context.push(AppRoutes.createStoryByPetId(myPets.first.id));
       return;
     }
 
@@ -503,7 +504,7 @@ class HomeScreen extends ConsumerWidget {
     );
 
     if (!context.mounted || selectedPetId == null) return;
-    await context.push('/create_story?petId=$selectedPetId');
+    await context.push(AppRoutes.createStoryByPetId(selectedPetId));
   }
 
   Future<void> _onYourStoryTap(
@@ -600,7 +601,7 @@ class HomeScreen extends ConsumerWidget {
 
     if (!context.mounted || action == null) return;
     if (action == 'view') {
-      await context.push('/story/$storyPetId');
+      await context.push(AppRoutes.storyByPetId(storyPetId));
       return;
     }
 

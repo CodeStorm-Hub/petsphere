@@ -5,10 +5,17 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:petfolio/core/theme/theme_controller.dart';
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/core/constants/app_routes.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showComingSoon(BuildContext context, String feature) {
     ScaffoldMessenger.of(context).clearSnackBars();
@@ -29,9 +36,10 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
     final themeMode = ref.watch(themeProvider);
+    final activePet = ref.watch(activePetProvider);
     final user = auth.user;
     final isDark = themeMode == ThemeMode.dark;
     final cs = Theme.of(context).colorScheme;
@@ -207,7 +215,20 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.download_outlined),
                 title: const Text('Export Records'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => context.push(AppRoutes.exportRecords),
+                onTap: () {
+                  if (activePet != null) {
+                    context.push(AppRoutes.petMedicalRecordsById(activePet.id));
+                  } else {
+                    context.push(AppRoutes.managePets);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.notifications_paused_outlined),
+                title: const Text('Care Reminders Frequency'),
+                subtitle: const Text('Daily, Weekly, or Custom'),
+                trailing: const Icon(Icons.chevron_right, size: 20),
+                onTap: () => _showComingSoon(context, 'Care Reminders Frequency'),
               ),
               ListTile(
                 leading: const Icon(Icons.share_outlined),

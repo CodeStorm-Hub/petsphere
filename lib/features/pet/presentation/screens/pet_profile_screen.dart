@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
 import 'package:petfolio/core/widgets/petfolio_widgets.dart';
+import 'package:petfolio/core/constants/app_routes.dart';
 
 class PetProfileScreen extends ConsumerStatefulWidget {
   const PetProfileScreen({super.key, required this.petId});
@@ -119,7 +120,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
         ),
         IconButton(
           key: const ValueKey('pet_profile_settings_button'),
-          onPressed: () => context.push('/settings'),
+          onPressed: () => context.push(AppRoutes.settings),
           icon: const Icon(Icons.settings_outlined),
         ),
       ],
@@ -307,7 +308,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
           Expanded(
             child: FilledButton.icon(
               key: const ValueKey('pet_profile_edit_button'),
-              onPressed: () => context.push('/add_pet', extra: pet),
+              onPressed: () => context.push(AppRoutes.addPet, extra: pet),
               style: FilledButton.styleFrom(
                 minimumSize: const Size(0, 48),
                 shape: RoundedRectangleBorder(
@@ -326,7 +327,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
             ),
             child: IconButton(
               key: const ValueKey('pet_profile_new_post_button'),
-              onPressed: () => context.push('/create_post?petId=${pet.id}'),
+              onPressed: () => context.push('${AppRoutes.createPost}?petId=${pet.id}'),
               icon: Icon(Icons.add_a_photo_outlined, color: cs.primary),
               tooltip: 'New Post',
             ),
@@ -405,7 +406,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
         ),
         const SizedBox(height: 16),
         OutlinedButton(
-          onPressed: () => context.push('/medical_records'),
+          onPressed: () => context.push(AppRoutes.petMedicalRecordsById(pet.id)),
           child: const Text('View Full Health Report'),
         ),
       ],
@@ -470,7 +471,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
         title: 'No active pet selected',
         message: 'Add a pet to start building your PetFolio and connect with other pet lovers.',
         buttonText: 'Add Your First Pet',
-        onButtonPressed: () => context.push('/add_pet'),
+        onButtonPressed: () => context.push(AppRoutes.addPet),
       ),
     );
   }

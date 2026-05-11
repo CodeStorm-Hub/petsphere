@@ -26,6 +26,10 @@ class AppRoutes {
   static const String petTimeline = '/pet/:id/timeline';
   static const String training = '/pet/:id/training';
   static const String memorial = '/pet/:id/memorial';
+  static const String createMemorial = '/pet/:id/memorial/create';
+  static const String vetBooking = '/pet/:id/vet_booking';
+  static const String emergencyCare = '/pet/:id/emergency_care';
+  static const String insurance = '/pet/:id/insurance';
   
   // Other features
   static const String userProfile = '/user/:id';
@@ -42,12 +46,9 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String search = '/search';
   
-  static const String vetBooking = '/vet_booking';
-  static const String emergencyCare = '/emergency_care';
   static const String communityGroups = '/community_groups';
   static const String lostAndFound = '/lost_and_found';
   static const String adoptionCenter = '/adoption_center';
-  static const String insurance = '/insurance';
   static const String petFriendlyPlaces = '/pet_friendly_places';
   static const String events = '/events';
   static const String sitters = '/sitters';
@@ -66,6 +67,14 @@ class AppRoutes {
   static String petMedicalRecordsById(String id) => '/pet/$id/medical_records';
   static String petExpensesById(String id) => '/pet/$id/expenses';
   static String petTimelineById(String id) => '/pet/$id/timeline';
+  static String petGrowthById(String id) => '/pet/$id/growth';
+  static String petNutritionById(String id) => '/pet/$id/nutrition';
+  static String petTrainingById(String id) => '/pet/$id/training';
+  static String petMemorialById(String id) => '/pet/$id/memorial';
+  static String createPetMemorialById(String id) => '/pet/$id/memorial/create';
+  static String petVetBookingById(String id) => '/pet/$id/vet_booking';
+  static String petEmergencyById(String id) => '/pet/$id/emergency_care';
+  static String petInsuranceById(String id) => '/pet/$id/insurance';
   
   static String userProfileById(String id) => '/user/$id';
   static String userFollowersById(String id) => '/user/$id/followers';
@@ -75,4 +84,5 @@ class AppRoutes {
   static String postById(String id) => '/post/$id';
   static String productById(String id) => '/product/$id';
   static String storyByPetId(String petId) => '/story/$petId';
+  static String createStoryByPetId(String petId) => '/create_story?petId=$petId';
 }

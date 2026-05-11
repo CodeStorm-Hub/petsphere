@@ -11,6 +11,7 @@ class PetMedication { // active | paused | completed
   const PetMedication({
     required this.id,
     required this.petId,
+    this.userId,
     required this.name,
     this.dose,
     required this.frequency,
@@ -26,8 +27,9 @@ class PetMedication { // active | paused | completed
     return PetMedication(
       id: json['id'] as String,
       petId: json['pet_id'] as String,
+      userId: json['user_id'] as String?,
       name: json['name'] as String,
-      dose: json['dose'] as String?,
+      dose: json['dosage'] as String?,
       frequency: json['frequency'] as String? ?? 'once_daily',
       timesOfDay:
           (json['times_of_day'] as List<dynamic>?)
@@ -45,6 +47,7 @@ class PetMedication { // active | paused | completed
   }
   final String id;
   final String petId;
+  final String? userId;
   final String name;
   final String? dose;
   final String frequency;
@@ -105,8 +108,9 @@ class PetMedication { // active | paused | completed
   Map<String, dynamic> toUpsertJson() => {
     if (id.isNotEmpty) 'id': id,
     'pet_id': petId,
+    if (userId != null) 'user_id': userId,
     'name': name,
-    if (dose != null) 'dose': dose,
+    if (dose != null) 'dosage': dose,
     'frequency': frequency,
     'times_of_day': timesOfDay,
     'start_date': startDate.toIso8601String().split('T').first,
@@ -122,6 +126,7 @@ class PetMedication { // active | paused | completed
   PetMedication copyWith({
     String? id,
     String? petId,
+    String? userId,
     String? name,
     String? dose,
     String? frequency,
@@ -135,6 +140,7 @@ class PetMedication { // active | paused | completed
   }) => PetMedication(
     id: id ?? this.id,
     petId: petId ?? this.petId,
+    userId: userId ?? this.userId,
     name: name ?? this.name,
     dose: dose ?? this.dose,
     frequency: frequency ?? this.frequency,
@@ -177,6 +183,7 @@ class MedicationDose {
     required this.id,
     required this.medicationId,
     required this.petId,
+    this.userId,
     required this.scheduledFor,
     this.givenAt,
     required this.skipped,
@@ -188,9 +195,10 @@ class MedicationDose {
       id: json['id'] as String,
       medicationId: json['medication_id'] as String,
       petId: json['pet_id'] as String,
+      userId: json['user_id'] as String?,
       scheduledFor: DateTime.parse(json['scheduled_for'] as String).toLocal(),
-      givenAt: json['given_at'] != null
-          ? DateTime.parse(json['given_at'] as String).toLocal()
+      givenAt: json['taken_at'] != null
+          ? DateTime.parse(json['taken_at'] as String).toLocal()
           : null,
       skipped: json['skipped'] as bool? ?? false,
       notes: json['notes'] as String?,
@@ -199,6 +207,7 @@ class MedicationDose {
   final String id;
   final String medicationId;
   final String petId;
+  final String? userId;
   final DateTime scheduledFor;
   final DateTime? givenAt;
   final bool skipped;
@@ -218,8 +227,9 @@ class MedicationDose {
     if (id.isNotEmpty) 'id': id,
     'medication_id': medicationId,
     'pet_id': petId,
+    if (userId != null) 'user_id': userId,
     'scheduled_for': scheduledFor.toUtc().toIso8601String(),
-    if (givenAt != null) 'given_at': givenAt!.toUtc().toIso8601String(),
+    if (givenAt != null) 'taken_at': givenAt!.toUtc().toIso8601String(),
     'skipped': skipped,
     if (notes != null) 'notes': notes,
   };
@@ -230,6 +240,7 @@ class MedicationDose {
     String? id,
     String? medicationId,
     String? petId,
+    String? userId,
     DateTime? scheduledFor,
     DateTime? givenAt,
     bool? skipped,
@@ -238,6 +249,7 @@ class MedicationDose {
     id: id ?? this.id,
     medicationId: medicationId ?? this.medicationId,
     petId: petId ?? this.petId,
+    userId: userId ?? this.userId,
     scheduledFor: scheduledFor ?? this.scheduledFor,
     givenAt: givenAt ?? this.givenAt,
     skipped: skipped ?? this.skipped,
@@ -271,6 +283,7 @@ class PetAllergy {
   const PetAllergy({
     required this.id,
     required this.petId,
+    this.userId,
     required this.allergen,
     required this.allergenType,
     required this.severity,
@@ -284,6 +297,7 @@ class PetAllergy {
     return PetAllergy(
       id: json['id'] as String,
       petId: json['pet_id'] as String,
+      userId: json['user_id'] as String?,
       allergen: json['allergen'] as String,
       allergenType: json['allergen_type'] as String? ?? 'food',
       severity: json['severity'] as String? ?? 'mild',
@@ -297,6 +311,7 @@ class PetAllergy {
   }
   final String id;
   final String petId;
+  final String? userId;
   final String allergen;
   final String allergenType; // food | environmental | drug | insect | other
   final String severity; // mild | moderate | severe | life_threatening
@@ -348,6 +363,7 @@ class PetAllergy {
 
   Map<String, dynamic> toInsertJson() => {
     'pet_id': petId,
+    if (userId != null) 'user_id': userId,
     'allergen': allergen,
     'allergen_type': allergenType,
     'severity': severity,
@@ -363,6 +379,7 @@ class PetAllergy {
   PetAllergy copyWith({
     String? id,
     String? petId,
+    String? userId,
     String? allergen,
     String? allergenType,
     String? severity,
@@ -373,6 +390,7 @@ class PetAllergy {
   }) => PetAllergy(
     id: id ?? this.id,
     petId: petId ?? this.petId,
+    userId: userId ?? this.userId,
     allergen: allergen ?? this.allergen,
     allergenType: allergenType ?? this.allergenType,
     severity: severity ?? this.severity,
@@ -410,6 +428,7 @@ class ParasitePrevention {
   const ParasitePrevention({
     required this.id,
     required this.petId,
+    this.userId,
     required this.productName,
     required this.productType,
     required this.administeredOn,
@@ -421,6 +440,7 @@ class ParasitePrevention {
     return ParasitePrevention(
       id: json['id'] as String,
       petId: json['pet_id'] as String,
+      userId: json['user_id'] as String?,
       productName: json['product_name'] as String,
       productType: json['product_type'] as String,
       administeredOn: DateTime.parse(json['administered_on'] as String),
@@ -432,6 +452,7 @@ class ParasitePrevention {
   }
   final String id;
   final String petId;
+  final String? userId;
   final String productName;
   final String productType; // flea|tick|flea_tick|heartworm|dewormer|other
   final DateTime administeredOn;
@@ -472,6 +493,7 @@ class ParasitePrevention {
 
   Map<String, dynamic> toInsertJson() => {
     'pet_id': petId,
+    if (userId != null) 'user_id': userId,
     'product_name': productName,
     'product_type': productType,
     'administered_on': administeredOn.toIso8601String().split('T').first,
@@ -485,6 +507,7 @@ class ParasitePrevention {
   ParasitePrevention copyWith({
     String? id,
     String? petId,
+    String? userId,
     String? productName,
     String? productType,
     DateTime? administeredOn,
@@ -494,6 +517,7 @@ class ParasitePrevention {
   }) => ParasitePrevention(
     id: id ?? this.id,
     petId: petId ?? this.petId,
+    userId: userId ?? this.userId,
     productName: productName ?? this.productName,
     productType: productType ?? this.productType,
     administeredOn: administeredOn ?? this.administeredOn,
@@ -529,6 +553,7 @@ class DentalLog {
   const DentalLog({
     required this.id,
     required this.petId,
+    this.userId,
     required this.logDate,
     required this.cleaningType,
     this.notes,
@@ -538,6 +563,7 @@ class DentalLog {
     return DentalLog(
       id: json['id'] as String,
       petId: json['pet_id'] as String,
+      userId: json['user_id'] as String?,
       logDate: DateTime.parse(json['log_date'] as String),
       cleaningType: json['cleaning_type'] as String,
       notes: json['notes'] as String?,
@@ -545,6 +571,7 @@ class DentalLog {
   }
   final String id;
   final String petId;
+  final String? userId;
   final DateTime logDate;
   final String
   cleaningType; // home_brushing|dental_chew|professional_cleaning|water_additive
@@ -580,6 +607,7 @@ class DentalLog {
 
   Map<String, dynamic> toInsertJson() => {
     'pet_id': petId,
+    if (userId != null) 'user_id': userId,
     'log_date': logDate.toIso8601String().split('T').first,
     'cleaning_type': cleaningType,
     if (notes != null) 'notes': notes,
@@ -590,12 +618,14 @@ class DentalLog {
   DentalLog copyWith({
     String? id,
     String? petId,
+    String? userId,
     DateTime? logDate,
     String? cleaningType,
     String? notes,
   }) => DentalLog(
     id: id ?? this.id,
     petId: petId ?? this.petId,
+    userId: userId ?? this.userId,
     logDate: logDate ?? this.logDate,
     cleaningType: cleaningType ?? this.cleaningType,
     notes: notes ?? this.notes,

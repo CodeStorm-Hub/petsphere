@@ -47,6 +47,7 @@ import 'package:petfolio/features/care/presentation/screens/pet_expense_tracker_
 import 'package:petfolio/features/health/presentation/screens/pet_growth_chart_screen.dart';
 import 'package:petfolio/features/social/presentation/screens/pet_memorial_screen.dart';
 import 'package:petfolio/features/social/presentation/screens/pet_memorial_detail_screen.dart';
+import 'package:petfolio/features/social/presentation/screens/create_memorial_tribute_screen.dart';
 import 'package:petfolio/features/services/presentation/screens/pet_friendly_places_screen.dart';
 import 'package:petfolio/features/services/presentation/screens/pet_event_discovery_screen.dart';
 import 'package:petfolio/features/health/presentation/screens/pet_health_record_export_screen.dart';
@@ -244,6 +245,46 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'training',
             builder: (context, state) => const PetTrainingScreen(),
           ),
+          GoRoute(
+            path: 'vet_booking',
+            builder: (context, state) => const VetBookingScreen(),
+          ),
+          GoRoute(
+            path: 'emergency_care',
+            builder: (context, state) => const EmergencyCareScreen(),
+          ),
+          GoRoute(
+            path: 'insurance',
+            builder: (context, state) => const PetInsuranceHubScreen(),
+          ),
+          GoRoute(
+            path: 'memorial',
+            builder: (context, state) => const PetMemorialScreen(),
+            routes: [
+              GoRoute(
+                path: 'create',
+                builder: (context, state) {
+                  final id = state.pathParameters['id'];
+                  if (id == null) {
+                    return const InvalidRouteErrorScreen(missingParam: 'pet ID');
+                  }
+                  return CreateMemorialTributeScreen(petId: id);
+                },
+              ),
+              GoRoute(
+                path: ':memorialId',
+                builder: (context, state) {
+                  final id = safePathParam(state, 'memorialId');
+                  if (id == null) {
+                    return const InvalidRouteErrorScreen(
+                      missingParam: 'memorial ID',
+                    );
+                  }
+                  return PetMemorialDetailScreen(memorialId: id);
+                },
+              ),
+            ],
+          ),
         ],
       ),
       GoRoute(
@@ -351,14 +392,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        path: AppRoutes.vetBooking,
-        builder: (context, state) => const VetBookingScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.emergencyCare,
-        builder: (context, state) => const EmergencyCareScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.communityGroups,
         builder: (context, state) => const CommunityGroupsScreen(),
       ),
@@ -371,26 +404,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AdoptionCenterScreen(),
       ),
       GoRoute(
-        path: AppRoutes.insurance,
-        builder: (context, state) => const PetInsuranceHubScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.memorial,
-        builder: (context, state) => const PetMemorialScreen(),
-        routes: [
-          GoRoute(
-            path: ':id',
-            builder: (context, state) {
-              final id = safePathParam(state, 'id');
-              if (id == null) {
-                return const InvalidRouteErrorScreen(
-                  missingParam: 'memorial ID',
-                );
-              }
-              return PetMemorialDetailScreen(memorialId: id);
-            },
-          ),
-        ],
+        path: AppRoutes.adoptionCenter,
+        builder: (context, state) => const AdoptionCenterScreen(),
       ),
       GoRoute(
         path: AppRoutes.petFriendlyPlaces,

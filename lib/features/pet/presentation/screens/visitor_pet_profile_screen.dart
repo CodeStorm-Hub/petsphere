@@ -11,6 +11,7 @@ import 'package:petfolio/features/social/data/follow_repository.dart';
 import 'package:petfolio/features/social/presentation/controllers/feed_controller.dart';
 import 'package:petfolio/core/constants/supabase_config.dart';
 import 'package:petfolio/core/widgets/petfolio_widgets.dart';
+import 'package:petfolio/core/constants/app_routes.dart';
 
 final visitorPetProvider =
     FutureProvider.family<PetModel?, String>((ref, petId) async {
@@ -386,7 +387,7 @@ class _VisitorPetProfileScreenState extends ConsumerState<VisitorPetProfileScree
         child: SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: () => context.push('/add_pet', extra: pet),
+            onPressed: () => context.push(AppRoutes.addPet, extra: pet),
             icon: const Icon(Icons.edit_outlined),
             label: const Text('Edit Pet Profile'),
           ),
@@ -407,7 +408,7 @@ class _VisitorPetProfileScreenState extends ConsumerState<VisitorPetProfileScree
                     onPressed: () async {
                       final userId = supabase.auth.currentUser?.id;
                       if (userId == null) {
-                        await context.push('/login');
+                        await context.push(AppRoutes.login);
                         return;
                       }
                       if (isFollowing) {
@@ -434,7 +435,7 @@ class _VisitorPetProfileScreenState extends ConsumerState<VisitorPetProfileScree
           const SizedBox(width: 12),
           PillButton(
             key: const ValueKey('visitor_pet_profile_message_button'),
-            onPressed: () => context.push('/chat/${pet.userId}'),
+            onPressed: () => context.push(AppRoutes.chatByThreadId(pet.userId)),
             icon: Icons.mail_outline_rounded,
             outlined: true,
             child: const Text('Message'),
@@ -477,7 +478,7 @@ class _VisitorPetProfileScreenState extends ConsumerState<VisitorPetProfileScree
           itemBuilder: (context, index) {
             final post = posts[index];
             return GestureDetector(
-              onTap: () => context.push('/post/${post.id}'),
+              onTap: () => context.push(AppRoutes.postById(post.id)),
               child: Hero(
                 tag: 'post_${post.id}',
                 child: Container(

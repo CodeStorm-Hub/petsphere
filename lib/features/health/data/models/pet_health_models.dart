@@ -10,6 +10,7 @@ class PetSymptom {
   const PetSymptom({
     required this.id,
     required this.petId,
+    this.userId,
     required this.observedAt,
     required this.symptomType,
     this.severity = 'mild',
@@ -21,6 +22,7 @@ class PetSymptom {
     return PetSymptom(
       id: json['id'] as String,
       petId: json['pet_id'] as String,
+      userId: json['user_id'] as String?,
       observedAt: DateTime.parse(json['observed_at'] as String).toLocal(),
       symptomType: json['symptom_type'] as String,
       severity: json['severity'] as String? ?? 'mild',
@@ -32,6 +34,7 @@ class PetSymptom {
   }
   final String id;
   final String petId;
+  final String? userId;
   final DateTime observedAt;
   final String symptomType;
   final String severity; // mild | moderate | severe
@@ -64,6 +67,7 @@ class PetSymptom {
 
   Map<String, dynamic> toInsertJson(String petId) => {
     'pet_id': petId,
+    if (userId != null) 'user_id': userId,
     'observed_at': observedAt.toUtc().toIso8601String(),
     'symptom_type': symptomType,
     'severity': severity,
@@ -73,6 +77,7 @@ class PetSymptom {
   Map<String, dynamic> toJson() => {
     'id': id,
     'pet_id': petId,
+    if (userId != null) 'user_id': userId,
     'observed_at': observedAt.toUtc().toIso8601String(),
     'symptom_type': symptomType,
     'severity': severity,
@@ -83,6 +88,7 @@ class PetSymptom {
   PetSymptom copyWith({
     String? id,
     String? petId,
+    String? userId,
     DateTime? observedAt,
     String? symptomType,
     String? severity,
@@ -92,6 +98,7 @@ class PetSymptom {
   }) => PetSymptom(
     id: id ?? this.id,
     petId: petId ?? this.petId,
+    userId: userId ?? this.userId,
     observedAt: observedAt ?? this.observedAt,
     symptomType: symptomType ?? this.symptomType,
     severity: severity ?? this.severity,
@@ -130,6 +137,7 @@ class PetWeightLog { // lbs | kg
   const PetWeightLog({
     this.id,
     required this.petId,
+    this.userId,
     required this.logDate,
     required this.weightLbs,
     this.notes,
@@ -141,6 +149,7 @@ class PetWeightLog { // lbs | kg
     return PetWeightLog(
       id: json['id'] as String?,
       petId: json['pet_id'] as String,
+      userId: json['user_id'] as String?,
       logDate: DateTime.parse(json['log_date'] as String),
       weightLbs: (json['weight_lbs'] as num).toDouble(),
       notes: json['notes'] as String?,
@@ -150,6 +159,7 @@ class PetWeightLog { // lbs | kg
   }
   final String? id;
   final String petId;
+  final String? userId;
   final DateTime logDate;
   final double weightLbs;
   final String? notes;
@@ -182,6 +192,7 @@ class PetWeightLog { // lbs | kg
 
   Map<String, dynamic> toUpsertJson() => {
     'pet_id': petId,
+    if (userId != null) 'user_id': userId,
     'log_date':
         '${logDate.year.toString().padLeft(4, '0')}-${logDate.month.toString().padLeft(2, '0')}-${logDate.day.toString().padLeft(2, '0')}',
     'weight_lbs': weightLbs,
@@ -195,6 +206,7 @@ class PetWeightLog { // lbs | kg
   PetWeightLog copyWith({
     String? id,
     String? petId,
+    String? userId,
     DateTime? logDate,
     double? weightLbs,
     String? notes,
@@ -203,6 +215,7 @@ class PetWeightLog { // lbs | kg
   }) => PetWeightLog(
     id: id ?? this.id,
     petId: petId ?? this.petId,
+    userId: userId ?? this.userId,
     logDate: logDate ?? this.logDate,
     weightLbs: weightLbs ?? this.weightLbs,
     notes: notes ?? this.notes,
@@ -240,6 +253,7 @@ class PetVetAppointment {
   const PetVetAppointment({
     required this.id,
     required this.petId,
+    this.userId,
     required this.title,
     this.doctor,
     required this.scheduledAt,
@@ -254,6 +268,7 @@ class PetVetAppointment {
     return PetVetAppointment(
       id: json['id'] as String,
       petId: json['pet_id'] as String,
+      userId: json['user_id'] as String?,
       title: json['title'] as String,
       doctor: json['doctor'] as String?,
       scheduledAt: DateTime.parse(json['scheduled_at'] as String).toLocal(),
@@ -266,6 +281,7 @@ class PetVetAppointment {
   }
   final String id;
   final String petId;
+  final String? userId;
   final String title;
   final String? doctor;
   final DateTime scheduledAt;
@@ -298,6 +314,7 @@ class PetVetAppointment {
   Map<String, dynamic> toUpsertJson() => {
     if (id.isNotEmpty) 'id': id,
     'pet_id': petId,
+    if (userId != null) 'user_id': userId,
     'title': title,
     if (doctor != null) 'doctor': doctor,
     'scheduled_at': scheduledAt.toUtc().toIso8601String(),
@@ -313,6 +330,7 @@ class PetVetAppointment {
   PetVetAppointment copyWith({
     String? id,
     String? petId,
+    String? userId,
     String? title,
     String? doctor,
     DateTime? scheduledAt,
@@ -324,6 +342,7 @@ class PetVetAppointment {
   }) => PetVetAppointment(
     id: id ?? this.id,
     petId: petId ?? this.petId,
+    userId: userId ?? this.userId,
     title: title ?? this.title,
     doctor: doctor ?? this.doctor,
     scheduledAt: scheduledAt ?? this.scheduledAt,
@@ -370,6 +389,7 @@ class PetVaccination {
   const PetVaccination({
     required this.id,
     required this.petId,
+    this.userId,
     required this.vaccineName,
     required this.status,
     this.scheduledFor,
@@ -386,6 +406,7 @@ class PetVaccination {
     return PetVaccination(
       id: json['id'] as String,
       petId: json['pet_id'] as String,
+      userId: json['user_id'] as String?,
       vaccineName: json['vaccine_name'] as String,
       status: json['status'] as String? ?? 'scheduled',
       scheduledFor: parseDate(json['scheduled_for']),
@@ -398,6 +419,7 @@ class PetVaccination {
   }
   final String id;
   final String petId;
+  final String? userId;
   final String vaccineName;
   final String status; // scheduled | completed
   final DateTime? scheduledFor;
@@ -417,6 +439,7 @@ class PetVaccination {
   Map<String, dynamic> toUpsertJson() => {
     if (id.isNotEmpty) 'id': id,
     'pet_id': petId,
+    if (userId != null) 'user_id': userId,
     'vaccine_name': vaccineName,
     'status': status,
     if (scheduledFor != null)
@@ -435,6 +458,7 @@ class PetVaccination {
   PetVaccination copyWith({
     String? id,
     String? petId,
+    String? userId,
     String? vaccineName,
     String? status,
     DateTime? scheduledFor,
@@ -446,6 +470,7 @@ class PetVaccination {
   }) => PetVaccination(
     id: id ?? this.id,
     petId: petId ?? this.petId,
+    userId: userId ?? this.userId,
     vaccineName: vaccineName ?? this.vaccineName,
     status: status ?? this.status,
     scheduledFor: scheduledFor ?? this.scheduledFor,
