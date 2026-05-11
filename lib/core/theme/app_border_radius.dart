@@ -12,8 +12,8 @@ class AppBorderRadius {
   static const double pill = 999.0;
 
   // Semantic Radius
-  static const double card = xl;
-  static const double button = lg;
+  static const double card = lg;
+  static const double button = md;
   static const double input = md;
   static const double image = lg;
 
@@ -22,10 +22,20 @@ class AppBorderRadius {
   static const BorderRadius circularMd = BorderRadius.all(Radius.circular(md));
   static const BorderRadius circularLg = BorderRadius.all(Radius.circular(lg));
   static const BorderRadius circularXl = BorderRadius.all(Radius.circular(xl));
-  static const BorderRadius circularXxl = BorderRadius.all(Radius.circular(xxl));
-  static const BorderRadius circularPill = BorderRadius.all(Radius.circular(pill));
+  static const BorderRadius circularXxl = BorderRadius.all(
+    Radius.circular(xxl),
+  );
+  static const BorderRadius circularPill = BorderRadius.all(
+    Radius.circular(pill),
+  );
 
-  static const BorderRadius cardRadius = BorderRadius.all(Radius.circular(card));
-  static const BorderRadius buttonRadius = BorderRadius.all(Radius.circular(button));
-  static const BorderRadius inputRadius = BorderRadius.all(Radius.circular(input));
+  static const BorderRadius cardRadius = BorderRadius.all(
+    Radius.circular(card),
+  );
+  static const BorderRadius buttonRadius = BorderRadius.all(
+    Radius.circular(button),
+  );
+  static const BorderRadius inputRadius = BorderRadius.all(
+    Radius.circular(input),
+  );
 }

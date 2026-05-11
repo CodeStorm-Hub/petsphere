@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:petfolio/core/constants/app_durations.dart';
 import 'package:petfolio/core/constants/app_strings.dart';
 import 'package:petfolio/core/utils/logger.dart';
 
@@ -10,7 +13,6 @@ import 'package:petfolio/features/pet/data/pet_repository.dart';
 // State
 // ---------------------------------------------------------------------------
 class PetState {
-
   PetState({
     this.myPets = const [],
     this.activePet,
@@ -75,13 +77,20 @@ class PetNotifier extends Notifier<PetState> {
     final gen = ++_loadGeneration;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final pets = await ref.read(petRepositoryProvider).fetchMyPets(userId);
+      final pets = await ref
+          .read(petRepositoryProvider)
+          .fetchMyPets(userId)
+          .timeout(AppDurations.defaultNetworkTimeout);
       if (gen != _loadGeneration) return;
       state = state.copyWith(
         myPets: pets,
         activePet: pets.isNotEmpty ? pets.first : null,
         isLoading: false,
       );
+    } on TimeoutException catch (e) {
+      if (gen != _loadGeneration) return;
+      AppLogger.error(AppStrings.timeoutError, tag: 'PetNotifier', error: e);
+      state = state.copyWith(isLoading: false, error: AppStrings.timeoutError);
     } catch (e) {
       if (gen != _loadGeneration) return;
       AppLogger.error(AppStrings.petLoadFailed, tag: 'PetNotifier', error: e);
@@ -149,7 +158,9 @@ class PetNotifier extends Notifier<PetState> {
   Future<bool> updatePet(String petId, Map<String, dynamic> fields) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final updatedPet = await ref.read(petRepositoryProvider).updatePet(petId, fields);
+      final updatedPet = await ref
+          .read(petRepositoryProvider)
+          .updatePet(petId, fields);
       state = state.copyWith(
         myPets: _replacePetInList(petId, updatedPet),
         activePet: state.activePet?.id == petId ? updatedPet : state.activePet,
@@ -170,9 +181,10 @@ class PetNotifier extends Notifier<PetState> {
   Future<bool> toggleBreedingListing(String petId, bool isListed) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final updatedPet = await ref.read(petRepositoryProvider).updatePet(petId, {
-        'is_breeding_listed': isListed,
-      });
+      final updatedPet = await ref.read(petRepositoryProvider).updatePet(
+        petId,
+        {'is_breeding_listed': isListed},
+      );
 
       state = state.copyWith(
         myPets: _replacePetInList(petId, updatedPet),
@@ -289,5 +301,8 @@ final breedSuggestionsProvider = FutureProvider.family<List<String>, String>((
   query,
 ) async {
   if (query.trim().length < 2) return [];
-  return ref.watch(petRepositoryProvider).fetchBreedSuggestions(query.trim());
+  return ref
+      .watch(petRepositoryProvider)
+      .fetchBreedSuggestions(query.trim())
+      .timeout(AppDurations.defaultNetworkTimeout);
 });

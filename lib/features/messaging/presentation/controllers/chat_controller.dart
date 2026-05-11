@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:petfolio/core/constants/app_durations.dart';
 import 'package:petfolio/features/messaging/data/models/chat_thread_model.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
 import 'package:petfolio/features/messaging/data/models/message_model.dart';
@@ -39,7 +40,9 @@ class ThreadMessagesNotifier extends Notifier<List<MessageModel>> {
 
     // Load initial messages
     try {
-      final messages = await chatRepository.fetchMessages(threadId);
+      final messages = await chatRepository
+          .fetchMessages(threadId)
+          .timeout(AppDurations.defaultNetworkTimeout);
       if (_threadId != threadId) return;
       state = messages;
     } catch (e, st) {
@@ -119,7 +122,6 @@ final threadMessagesProvider =
 // Chat Threads List State
 // ---------------------------------------------------------------------------
 class ChatState {
-
   ChatState({this.threads = const [], this.isLoading = false, this.error});
   final List<ChatThreadModel> threads;
   final bool isLoading;
@@ -172,14 +174,15 @@ class ChatController extends Notifier<ChatState> {
     final currentGen = ++_fetchGeneration;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final threads = await chatRepository.fetchThreads(myPetId);
+      final threads = await chatRepository
+          .fetchThreads(myPetId)
+          .timeout(AppDurations.defaultNetworkTimeout);
 
       // Fetch all unread counts in a single batch query
       final threadIds = threads.map((t) => t.id).toList();
-      final unreadCounts = await chatRepository.fetchUnreadCountsForThreads(
-        threadIds,
-        myPetId,
-      );
+      final unreadCounts = await chatRepository
+          .fetchUnreadCountsForThreads(threadIds, myPetId)
+          .timeout(AppDurations.defaultNetworkTimeout);
 
       if (_fetchGeneration != currentGen) return;
 
@@ -196,7 +199,10 @@ class ChatController extends Notifier<ChatState> {
         tag: 'ChatController',
         error: e,
       );
-      state = state.copyWith(isLoading: false, error: AppStrings.chatLoadFailed);
+      state = state.copyWith(
+        isLoading: false,
+        error: AppStrings.chatLoadFailed,
+      );
     }
   }
 
@@ -255,15 +261,14 @@ class ChatController extends Notifier<ChatState> {
     if (activePet == null) return;
 
     try {
-      final thread = await chatRepository.fetchThreadById(
-        threadId,
-        activePet.id,
-      );
+      final thread = await chatRepository
+          .fetchThreadById(threadId, activePet.id)
+          .timeout(AppDurations.defaultNetworkTimeout);
       if (thread == null) return;
 
-      final unreadCounts = await chatRepository.fetchUnreadCountsForThreads([
-        threadId,
-      ], activePet.id);
+      final unreadCounts = await chatRepository
+          .fetchUnreadCountsForThreads([threadId], activePet.id)
+          .timeout(AppDurations.defaultNetworkTimeout);
       final merged = thread.copyWith(
         unreadCount: unreadCounts[threadId] ?? thread.unreadCount,
       );

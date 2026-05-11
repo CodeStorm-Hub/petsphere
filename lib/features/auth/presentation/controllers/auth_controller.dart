@@ -15,7 +15,6 @@ import 'package:petfolio/features/care/data/care_cache.dart';
 enum AuthStatus { initial, unauthenticated, authenticated }
 
 class AuthState {
-
   AuthState({
     this.status = AuthStatus.initial,
     this.user,
@@ -147,8 +146,37 @@ class AuthNotifier extends Notifier<AuthState> {
         isLoading: false,
       );
     } on AuthException catch (e) {
-      AppLogger.warning('Login failed for $email', tag: 'AuthNotifier', error: e);
+      AppLogger.warning(
+        'Login failed for $email',
+        tag: 'AuthNotifier',
+        error: e,
+      );
       state = state.copyWith(isLoading: false, error: e.message);
+    } catch (e) {
+      AppLogger.error(
+        AppStrings.authLoginFailed,
+        tag: 'AuthNotifier',
+        error: e,
+      );
+      state = state.copyWith(
+        isLoading: false,
+        error: AppStrings.authLoginFailed,
+      );
+    } finally {
+      _isPerformingAuthAction = false;
+    }
+  }
+
+  Future<void> loginWithProvider(OAuthProvider provider) async {
+    _isPerformingAuthAction = true;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      await authRepository.signInWithOAuth(provider);
+      state = state.copyWith(isLoading: false);
+    } on AuthException catch (e) {
+      AppLogger.warning('OAuth login failed', tag: 'AuthNotifier', error: e);
+      state = state.copyWith(isLoading: false, error: e.message);
+      _isPerformingAuthAction = false;
     } catch (e) {
       AppLogger.error(
         AppStrings.authLoginFailed,
@@ -178,7 +206,11 @@ class AuthNotifier extends Notifier<AuthState> {
         isLoading: false,
       );
     } on AuthException catch (e) {
-      AppLogger.warning('Registration failed for $email', tag: 'AuthNotifier', error: e);
+      AppLogger.warning(
+        'Registration failed for $email',
+        tag: 'AuthNotifier',
+        error: e,
+      );
       state = state.copyWith(isLoading: false, error: e.message);
     } catch (e) {
       AppLogger.error(
@@ -215,7 +247,10 @@ class AuthNotifier extends Notifier<AuthState> {
         tag: 'AuthNotifier',
         error: e,
       );
-      state = state.copyWith(isLoading: false, error: AppStrings.profileUpdateFailed);
+      state = state.copyWith(
+        isLoading: false,
+        error: AppStrings.profileUpdateFailed,
+      );
       return false;
     } finally {
       _isPerformingAuthAction = false;

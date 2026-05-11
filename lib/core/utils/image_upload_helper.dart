@@ -80,11 +80,13 @@ class ImageUploadHelper {
 
     final contentType = _contentTypeFor(ext);
 
-    await supabase.storage.from(bucket).upload(
-      path,
-      uploadFile,
-      fileOptions: FileOptions(upsert: true, contentType: contentType),
-    );
+    await supabase.storage
+        .from(bucket)
+        .upload(
+          path,
+          uploadFile,
+          fileOptions: FileOptions(upsert: true, contentType: contentType),
+        );
 
     return supabase.storage.from(bucket).getPublicUrl(path);
   }
@@ -99,11 +101,20 @@ class ImageUploadHelper {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final path = 'avatars/${uid}_$timestamp.$ext';
 
-    return upload(
-      file: file,
-      bucket: kBucketAvatars,
-      path: path,
-    );
+    return upload(file: file, bucket: kBucketAvatars, path: path);
+  }
+
+  /// Specialized: Upload a user's profile image to the 'avatars' bucket.
+  /// Path: `avatars/uid_timestamp.ext` (Matches RLS policy)
+  static Future<String> uploadUserAvatar(File file) async {
+    final uid = supabase.auth.currentUser?.id;
+    if (uid == null) throw Exception('User not authenticated');
+
+    final ext = file.path.split('.').last.toLowerCase();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final path = 'avatars/${uid}_$timestamp.$ext';
+
+    return upload(file: file, bucket: kBucketAvatars, path: path);
   }
 
   /// Specialized: Upload post media to the 'post-media' bucket.
@@ -116,11 +127,7 @@ class ImageUploadHelper {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final path = '$uid/$timestamp.$ext';
 
-    return upload(
-      file: file,
-      bucket: kBucketPostMedia,
-      path: path,
-    );
+    return upload(file: file, bucket: kBucketPostMedia, path: path);
   }
 
   /// Specialized: Upload story media to the 'post-media' bucket.
@@ -130,11 +137,40 @@ class ImageUploadHelper {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final path = 'stories/$petId/$timestamp.$ext';
 
-    return upload(
-      file: file,
-      bucket: kBucketPostMedia,
-      path: path,
-    );
+    return upload(file: file, bucket: kBucketPostMedia, path: path);
+  }
+
+  /// Specialized: Upload chat media to the 'post-media' bucket.
+  /// Path: `chat/threadId/timestamp.ext`
+  static Future<String> uploadChatMedia(File file, String threadId) async {
+    final ext = file.path.split('.').last.toLowerCase();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final path = 'chat/$threadId/$timestamp.$ext';
+
+    return upload(file: file, bucket: kBucketPostMedia, path: path);
+  }
+
+  /// Specialized: Upload lost/found report images to the 'pet-images' bucket.
+  /// Path: `lost-found/uid_timestamp.ext`
+  static Future<String> uploadLostFoundImage(
+    File file,
+    String reporterId,
+  ) async {
+    final ext = file.path.split('.').last.toLowerCase();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final path = 'lost-found/${reporterId}_$timestamp.$ext';
+
+    return upload(file: file, bucket: kBucketPetImages, path: path);
+  }
+
+  /// Specialized: Upload product images to the 'product-images' bucket.
+  /// Path: `products/productId/timestamp.ext`
+  static Future<String> uploadProductImage(File file, String productId) async {
+    final ext = file.path.split('.').last.toLowerCase();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final path = 'products/$productId/$timestamp.$ext';
+
+    return upload(file: file, bucket: kBucketProductImages, path: path);
   }
 
   // ── Internals ─────────────────────────────────────────────────────────────

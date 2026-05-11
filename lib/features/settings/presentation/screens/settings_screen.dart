@@ -16,14 +16,110 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-
-  void _showComingSoon(BuildContext context, String feature) {
+  void _showInfo(BuildContext context, String message) {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$feature is coming soon!'),
+        content: Text(message),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _openActivePetHealthExport(BuildContext context) {
+    final activePet = ref.read(activePetProvider);
+    if (activePet != null) {
+      context.push(AppRoutes.petMedicalRecordsExportById(activePet.id));
+    } else {
+      context.push(AppRoutes.managePets);
+    }
+  }
+
+  void _showPreferenceSheet(
+    BuildContext context, {
+    required String title,
+    required List<String> options,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+            ),
+            for (final option in options)
+              ListTile(
+                title: Text(option),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showInfo(context, '$title set to $option');
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteCareDataDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete care data'),
+        content: const Text(
+          'Care data deletion requires a verified account action. Export records first, then contact support from your account email.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _openActivePetHealthExport(context);
+            },
+            child: const Text('Export Records'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete account'),
+        content: const Text(
+          'Account deletion is irreversible and must be completed through verified support.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _launchUrl(
+                'mailto:support@petsphere.app?subject=PetFolio%20account%20deletion',
+              );
+            },
+            child: const Text('Contact Support'),
+          ),
+        ],
       ),
     );
   }
@@ -39,7 +135,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
     final themeMode = ref.watch(themeProvider);
-    final activePet = ref.watch(activePetProvider);
     final user = auth.user;
     final isDark = themeMode == ThemeMode.dark;
     final cs = Theme.of(context).colorScheme;
@@ -55,7 +150,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             children: [
               if (user != null)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: [
                       CircleAvatar(
@@ -63,7 +161,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         backgroundColor: cs.primaryContainer,
                         child: Text(
                           user.initials,
-                          style: tt.headlineSmall?.copyWith(color: cs.onPrimaryContainer),
+                          style: tt.headlineSmall?.copyWith(
+                            color: cs.onPrimaryContainer,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -71,8 +171,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(user.name ?? 'Pet Parent', style: tt.titleLarge),
-                            Text(user.email, style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+                            Text(
+                              user.name ?? 'Pet Parent',
+                              style: tt.titleLarge,
+                            ),
+                            Text(
+                              user.email,
+                              style: tt.bodyMedium?.copyWith(
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -80,7 +188,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ),
               const SizedBox(height: 16),
-              
+
               const _SectionHeader(title: 'Account'),
               ListTile(
                 leading: const Icon(Icons.person_outline),
@@ -93,7 +201,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 leading: const Icon(Icons.link),
                 title: const Text('Linked Providers'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => _showComingSoon(context, 'Linked Providers'),
+                onTap: () => context.push(AppRoutes.securitySettings),
               ),
 
               const _SectionHeader(title: 'Security'),
@@ -127,13 +235,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 leading: const Icon(Icons.visibility_outlined),
                 title: const Text('Pet Visibility'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => _showComingSoon(context, 'Pet Visibility'),
+                onTap: () => context.push(AppRoutes.privacySettings),
               ),
               ListTile(
                 leading: const Icon(Icons.health_and_safety_outlined),
                 title: const Text('Health Sharing Permissions'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => _showComingSoon(context, 'Health Sharing'),
+                onTap: () => context.push(AppRoutes.privacySettings),
               ),
 
               const _SectionHeader(title: 'Notifications'),
@@ -181,13 +289,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 leading: const Icon(Icons.report_outlined),
                 title: const Text('Report History'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => _showComingSoon(context, 'Report History'),
+                onTap: () => _showInfo(
+                  context,
+                  'No safety reports are associated with this account.',
+                ),
               ),
               ListTile(
                 leading: const Icon(Icons.filter_alt_outlined),
                 title: const Text('Content Filters'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => _showComingSoon(context, 'Content Filters'),
+                onTap: () => context.push(AppRoutes.privacySettings),
               ),
 
               const _SectionHeader(title: 'Commerce'),
@@ -195,13 +306,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 leading: const Icon(Icons.local_shipping_outlined),
                 title: const Text('Shipping Addresses'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => _showComingSoon(context, 'Shipping Addresses'),
+                onTap: () => context.push(AppRoutes.checkout),
               ),
               ListTile(
                 leading: const Icon(Icons.payment_outlined),
                 title: const Text('Payment Methods'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => _showComingSoon(context, 'Payment Methods'),
+                onTap: () => context.push(AppRoutes.checkout),
               ),
               ListTile(
                 leading: const Icon(Icons.history_outlined),
@@ -215,32 +326,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 leading: const Icon(Icons.download_outlined),
                 title: const Text('Export Records'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {
-                  if (activePet != null) {
-                    context.push(AppRoutes.petMedicalRecordsById(activePet.id));
-                  } else {
-                    context.push(AppRoutes.managePets);
-                  }
-                },
+                onTap: () => _openActivePetHealthExport(context),
               ),
               ListTile(
                 leading: const Icon(Icons.notifications_paused_outlined),
                 title: const Text('Care Reminders Frequency'),
                 subtitle: const Text('Daily, Weekly, or Custom'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => _showComingSoon(context, 'Care Reminders Frequency'),
+                onTap: () => context.push(AppRoutes.notificationPreferences),
               ),
               ListTile(
                 leading: const Icon(Icons.share_outlined),
                 title: const Text('Share with Vet'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => _showComingSoon(context, 'Share with Vet'),
+                onTap: () => _openActivePetHealthExport(context),
               ),
               ListTile(
                 leading: const Icon(Icons.delete_sweep_outlined),
                 title: const Text('Delete Care Data'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => _showComingSoon(context, 'Delete Care Data'),
+                onTap: () => _showDeleteCareDataDialog(context),
               ),
 
               const _SectionHeader(title: 'App'),
@@ -254,19 +359,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 leading: const Icon(Icons.language_outlined),
                 title: const Text('Language'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => _showComingSoon(context, 'Language Settings'),
+                onTap: () => _showPreferenceSheet(
+                  context,
+                  title: 'Language',
+                  options: const ['English', 'Spanish', 'French'],
+                ),
               ),
               ListTile(
                 leading: const Icon(Icons.accessibility_new_outlined),
                 title: const Text('Accessibility Preferences'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => _showComingSoon(context, 'Accessibility Preferences'),
+                onTap: () => _showPreferenceSheet(
+                  context,
+                  title: 'Accessibility',
+                  options: const [
+                    'System defaults',
+                    'Reduce motion',
+                    'High contrast',
+                  ],
+                ),
               ),
               ListTile(
                 leading: const Icon(Icons.square_foot_outlined),
                 title: const Text('Units'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () => _showComingSoon(context, 'Units Settings'),
+                onTap: () => _showPreferenceSheet(
+                  context,
+                  title: 'Units',
+                  options: const ['Imperial', 'Metric'],
+                ),
               ),
 
               const _SectionHeader(title: 'Legal'),
@@ -296,12 +417,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 24),
               ListTile(
                 leading: Icon(Icons.delete_forever, color: cs.error),
-                title: Text('Delete Account', style: TextStyle(color: cs.error)),
-                onTap: () => _showComingSoon(context, 'Account Deletion'),
+                title: Text(
+                  'Delete Account',
+                  style: TextStyle(color: cs.error),
+                ),
+                onTap: () => _showDeleteAccountDialog(context),
               ),
               ListTile(
                 leading: Icon(Icons.logout, color: cs.error),
-                title: Text('Sign Out', style: TextStyle(color: cs.error, fontWeight: FontWeight.bold)),
+                title: Text(
+                  'Sign Out',
+                  style: TextStyle(
+                    color: cs.error,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 onTap: () => ref.read(authProvider.notifier).logout(),
               ),
               const SizedBox(height: 32),
@@ -325,10 +455,10 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         title.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: cs.primary,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-            ),
+          color: cs.primary,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+        ),
       ),
     );
   }

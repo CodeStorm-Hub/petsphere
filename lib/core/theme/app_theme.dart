@@ -81,6 +81,7 @@ class AppTheme {
       onPrimary: Colors.white,
       secondary: AppColors.secondary,
       onSecondary: Colors.white,
+      tertiary: AppColors.tertiary,
       surface: isDark ? AppColors.bgDark : AppColors.bgLight,
       error: AppColors.error,
     );
@@ -96,7 +97,7 @@ class AppTheme {
 
     const inputBorder = OutlineInputBorder(
       borderRadius: AppBorderRadius.inputRadius,
-      borderSide: BorderSide.none,
+      borderSide: BorderSide(color: AppColors.outline),
     );
 
     return ThemeData(
@@ -106,7 +107,7 @@ class AppTheme {
       scaffoldBackgroundColor: isDark ? AppColors.bgDark : AppColors.bgLight,
       textTheme: textTheme,
       extensions: [shadows],
-      
+
       appBarTheme: AppBarThemeData(
         backgroundColor: Colors.transparent,
         foregroundColor: isDark ? Colors.white : AppColors.textPrimary,
@@ -137,6 +138,7 @@ class AppTheme {
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
           ),
+          minimumSize: const Size.fromHeight(48),
           shape: const RoundedRectangleBorder(
             borderRadius: AppBorderRadius.buttonRadius,
           ),
@@ -152,6 +154,7 @@ class AppTheme {
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
           ),
+          minimumSize: const Size.fromHeight(48),
           shape: const RoundedRectangleBorder(
             borderRadius: AppBorderRadius.buttonRadius,
           ),
@@ -167,6 +170,7 @@ class AppTheme {
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
           ),
+          minimumSize: const Size.fromHeight(48),
           shape: const RoundedRectangleBorder(
             borderRadius: AppBorderRadius.buttonRadius,
           ),
@@ -191,9 +195,7 @@ class AppTheme {
           horizontal: AppSpacing.md,
           vertical: AppSpacing.m,
         ),
-        hintStyle: textTheme.bodyMedium?.copyWith(
-          color: AppColors.textMuted,
-        ),
+        hintStyle: textTheme.bodyMedium?.copyWith(color: AppColors.textMuted),
       ),
 
       bottomNavigationBarTheme: BottomNavigationBarThemeData(

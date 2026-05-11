@@ -61,7 +61,19 @@ Future<void> main() async {
 
       // Self-heal storage buckets (ensure they are public and exist)
       final storageService = StorageService(Supabase.instance.client);
-      await storageService.initializeBuckets();
+      unawaited(
+        storageService
+            .initializeBuckets()
+            .timeout(const Duration(seconds: 3))
+            .catchError((Object e, StackTrace st) {
+              developer.log(
+                'Storage bucket initialization skipped: $e',
+                name: 'main',
+                error: e,
+                stackTrace: st,
+              );
+            }),
+      );
 
       if (_kStripePublishableKey.isNotEmpty) {
         try {

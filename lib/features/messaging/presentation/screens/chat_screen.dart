@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,11 +9,11 @@ import 'package:petfolio/features/notifications/presentation/controllers/notific
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:petfolio/core/utils/pet_navigation.dart';
+import 'package:petfolio/core/utils/image_upload_helper.dart';
 import 'package:petfolio/features/messaging/presentation/widgets/message_bubble.dart';
 import 'package:petfolio/core/widgets/skeleton_loader.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
-
   const ChatScreen({super.key, required this.threadId});
   final String threadId;
 
@@ -29,8 +30,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     super.initState();
     // Initialize the per-thread messages notifier with real Supabase data + Realtime
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      unawaited(ref.read(threadMessagesProvider.notifier).init(widget.threadId));
-      unawaited(ref.read(chatProvider.notifier).markThreadAsRead(widget.threadId));
+      unawaited(
+        ref.read(threadMessagesProvider.notifier).init(widget.threadId),
+      );
+      unawaited(
+        ref.read(chatProvider.notifier).markThreadAsRead(widget.threadId),
+      );
       unawaited(ref.read(notificationProvider.notifier).markMessagesAsRead());
 
       var chats = ref.read(chatProvider);
@@ -96,15 +101,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     color: colorScheme.primary,
                     onTap: () {
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Camera sharing coming soon 📷'),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      );
+                      _pickAndSendCameraImage();
                     },
                   ),
                   _AttachOption(
@@ -113,36 +110,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     color: colorScheme.secondary,
                     onTap: () {
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text(
-                            'Gallery sharing coming soon 🖼️',
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      );
+                      _pickAndSendGalleryImage();
                     },
                   ),
                   _AttachOption(
-                    icon: Icons.insert_drive_file_outlined,
-                    label: 'Document',
+                    icon: Icons.videocam_outlined,
+                    label: 'Video',
                     color: colorScheme.tertiary,
                     onTap: () {
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text(
-                            'Document sharing coming soon 📄',
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      );
+                      _pickAndSendVideo();
                     },
                   ),
                 ],
@@ -153,6 +130,45 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _pickAndSendCameraImage() async {
+    final file = await ImageUploadHelper.pickFromCamera();
+    if (file == null || !mounted) return;
+    await _sendMediaMessage(file, 'image');
+  }
+
+  Future<void> _pickAndSendGalleryImage() async {
+    final file = await ImageUploadHelper.pickFromGallery();
+    if (file == null || !mounted) return;
+    await _sendMediaMessage(file, 'image');
+  }
+
+  Future<void> _pickAndSendVideo() async {
+    final file = await ImageUploadHelper.pickVideoFromGallery();
+    if (file == null || !mounted) return;
+    await _sendMediaMessage(file, 'video');
+  }
+
+  Future<void> _sendMediaMessage(File file, String type) async {
+    final myPetId = ref.read(activePetProvider)?.id ?? '';
+    if (myPetId.isEmpty) return;
+
+    try {
+      final mediaUrl = await ImageUploadHelper.uploadChatMedia(
+        file,
+        widget.threadId,
+      );
+      final text = 'media:$type:$mediaUrl';
+      await ref
+          .read(threadMessagesProvider.notifier)
+          .sendMessage(myPetId, text);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+    }
   }
 
   void _sendMessage() {
@@ -173,6 +189,50 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         );
       }
     });
+  }
+
+  void _showConversationOptions(dynamic otherPet) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.pets_outlined),
+              title: const Text('View pet profile'),
+              onTap: () {
+                Navigator.pop(ctx);
+                openPetProfile(
+                  context,
+                  ref,
+                  petId: otherPet.id as String,
+                  petUserId: otherPet.userId as String,
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.mark_chat_read_outlined),
+              title: const Text('Mark as read'),
+              onTap: () {
+                Navigator.pop(ctx);
+                ref
+                    .read(chatProvider.notifier)
+                    .markThreadAsRead(widget.threadId);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.refresh_outlined),
+              title: const Text('Refresh conversation'),
+              onTap: () {
+                Navigator.pop(ctx);
+                ref.read(threadMessagesProvider.notifier).init(widget.threadId);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -311,7 +371,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: IconButton(
               tooltip: 'More options',
               icon: Icon(Icons.more_vert, color: colorScheme.onSurface),
-              onPressed: () {},
+              onPressed: () => _showConversationOptions(otherPet),
             ),
           ),
         ],
@@ -321,7 +381,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async {
-                await ref.read(threadMessagesProvider.notifier).init(widget.threadId);
+                await ref
+                    .read(threadMessagesProvider.notifier)
+                    .init(widget.threadId);
               },
               child: messages.isEmpty
                   ? ListView(
@@ -481,35 +543,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                     foregroundColor: colorScheme.onPrimary,
                                     padding: const EdgeInsets.all(10),
                                   ),
-                                  icon: const Icon(Icons.send_rounded, size: 20),
+                                  icon: const Icon(
+                                    Icons.send_rounded,
+                                    size: 20,
+                                  ),
                                 ),
                               )
                             : Semantics(
-                                label: 'Voice message',
+                                label: 'Enter a message to send',
                                 button: true,
                                 child: IconButton(
-                                  key: const ValueKey('mic'),
-                                  onPressed: () => ScaffoldMessenger.of(context)
-                                      .showSnackBar(
-                                    SnackBar(
-                                      content: const Text(
-                                        'Voice messages coming soon 🎤',
-                                      ),
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                  ),
-                                  tooltip: 'Voice message',
+                                  key: const ValueKey('send-disabled'),
+                                  onPressed: null,
+                                  tooltip: 'Enter a message',
                                   style: IconButton.styleFrom(
                                     backgroundColor:
                                         colorScheme.surfaceContainerHighest,
-                                    foregroundColor: colorScheme.onSurfaceVariant,
+                                    foregroundColor:
+                                        colorScheme.onSurfaceVariant,
                                     padding: const EdgeInsets.all(10),
                                   ),
-                                  icon: const Icon(Icons.mic_none_rounded,
-                                      size: 22),
+                                  icon: const Icon(
+                                    Icons.send_outlined,
+                                    size: 22,
+                                  ),
                                 ),
                               ),
                       ),
@@ -526,7 +583,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 }
 
 class _AttachOption extends StatelessWidget {
-
   const _AttachOption({
     required this.icon,
     required this.label,
@@ -572,4 +628,3 @@ class _AttachOption extends StatelessWidget {
     );
   }
 }
-

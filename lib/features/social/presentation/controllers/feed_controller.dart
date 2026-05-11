@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:petfolio/core/constants/app_durations.dart';
+import 'package:petfolio/core/constants/app_strings.dart';
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
 import 'package:petfolio/features/social/data/feed_repository.dart';
@@ -7,7 +11,6 @@ import 'package:petfolio/features/social/data/models/post_model.dart';
 import 'package:petfolio/features/social/data/models/story_model.dart';
 
 class FeedState {
-
   FeedState({
     this.posts = const [],
     this.stories = const [],
@@ -39,6 +42,8 @@ class FeedState {
 }
 
 class FeedNotifier extends Notifier<FeedState> {
+  int _loadGeneration = 0;
+
   @override
   FeedState build() {
     Future.microtask(refresh);
@@ -52,13 +57,26 @@ class FeedNotifier extends Notifier<FeedState> {
       return;
     }
 
+    final generation = ++_loadGeneration;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final posts = await feedRepository.fetchPosts();
-      final stories = await feedRepository.fetchStories(auth.user!.id);
+      final results = await Future.wait<Object>([
+        feedRepository.fetchPosts(),
+        feedRepository.fetchStories(auth.user!.id),
+      ]).timeout(AppDurations.defaultNetworkTimeout);
+      if (generation != _loadGeneration) return;
+      final posts = results[0] as List<PostModel>;
+      final stories = results[1] as List<StoryModel>;
       state = state.copyWith(posts: posts, stories: stories, isLoading: false);
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+    } on TimeoutException {
+      if (generation != _loadGeneration) return;
+      state = state.copyWith(isLoading: false, error: AppStrings.timeoutError);
+    } catch (_) {
+      if (generation != _loadGeneration) return;
+      state = state.copyWith(
+        isLoading: false,
+        error: AppStrings.feedLoadFailed,
+      );
     }
   }
 
@@ -121,7 +139,10 @@ class FeedNotifier extends Notifier<FeedState> {
     }
   }
 
-  Future<bool> updatePost({required String postId, required String caption}) async {
+  Future<bool> updatePost({
+    required String postId,
+    required String caption,
+  }) async {
     try {
       final updatedPost = await feedRepository.updatePost(
         postId: postId,
@@ -214,16 +235,33 @@ class FeedNotifier extends Notifier<FeedState> {
   }
 }
 
-final feedProvider = NotifierProvider<FeedNotifier, FeedState>(FeedNotifier.new);
+final feedProvider = NotifierProvider<FeedNotifier, FeedState>(
+  FeedNotifier.new,
+);
 
-final petStoriesProvider = FutureProvider.family<List<StoryModel>, String>((ref, petId) {
-  return feedRepository.fetchStoriesByPet(petId);
+final petStoriesProvider = FutureProvider.family<List<StoryModel>, String>((
+  ref,
+  petId,
+) {
+  return feedRepository
+      .fetchStoriesByPet(petId)
+      .timeout(AppDurations.defaultNetworkTimeout);
 });
 
-final petPostsProvider = FutureProvider.family<List<PostModel>, String>((ref, petId) {
-  return feedRepository.fetchPostsByPet(petId);
+final petPostsProvider = FutureProvider.family<List<PostModel>, String>((
+  ref,
+  petId,
+) {
+  return feedRepository
+      .fetchPostsByPet(petId)
+      .timeout(AppDurations.defaultNetworkTimeout);
 });
 
-final userPostsProvider = FutureProvider.family<List<PostModel>, String>((ref, userId) {
-  return feedRepository.fetchPostsByUser(userId);
+final userPostsProvider = FutureProvider.family<List<PostModel>, String>((
+  ref,
+  userId,
+) {
+  return feedRepository
+      .fetchPostsByUser(userId)
+      .timeout(AppDurations.defaultNetworkTimeout);
 });

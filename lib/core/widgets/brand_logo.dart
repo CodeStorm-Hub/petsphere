@@ -16,7 +16,7 @@ enum BrandLogoSize {
 
 enum BrandLogoVariant {
   icon('assets/icon.svg'),
-  full('assets/logo_without_slogan.svg');
+  full('assets/petfolio_logo_blue.svg');
 
   const BrandLogoVariant(this.assetPath);
   final String assetPath;
@@ -47,16 +47,15 @@ class BrandLogo extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final textColor = isDark ? colorScheme.onSurface : AppColors.textPrimary;
 
-    // Use the existing blue logo if full variant is requested
-    final assetPath = variant == BrandLogoVariant.full 
-        ? 'assets/logo_without_slogan.svg' 
-        : 'assets/icon.svg';
+    final assetPath = variant.assetPath;
 
     final svg = SvgPicture.asset(
       assetPath,
       width: effectiveSize,
       height: effectiveSize,
-      colorFilter: ColorFilter.mode(effectiveColor, BlendMode.srcIn),
+      colorFilter: variant == BrandLogoVariant.icon
+          ? ColorFilter.mode(effectiveColor, BlendMode.srcIn)
+          : null,
     );
 
     if (withText && variant == BrandLogoVariant.icon) {
@@ -69,11 +68,7 @@ class BrandLogo extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ).createShader(bounds),
-            child: Icon(
-              Icons.pets,
-              size: effectiveSize,
-              color: Colors.white,
-            ),
+            child: Icon(Icons.pets, size: effectiveSize, color: Colors.white),
           ),
           const SizedBox(width: AppSpacing.sm),
           RichText(

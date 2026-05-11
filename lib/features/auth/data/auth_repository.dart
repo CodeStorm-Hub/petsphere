@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:petfolio/features/auth/data/models/user_model.dart';
 import 'package:petfolio/core/constants/supabase_config.dart';
@@ -60,6 +61,48 @@ class AuthRepository {
     await supabase.auth.signOut();
   }
 
+  Future<void> signOutOtherSessions() async {
+    await supabase.auth.signOut(scope: SignOutScope.others);
+  }
+
+  Future<void> signInWithOAuth(OAuthProvider provider) async {
+    final launched = await supabase.auth.signInWithOAuth(
+      provider,
+      redirectTo: kIsWeb ? null : 'petfolio://login-callback/',
+      authScreenLaunchMode: kIsWeb
+          ? LaunchMode.platformDefault
+          : LaunchMode.externalApplication,
+      queryParams: provider == OAuthProvider.google
+          ? const {'access_type': 'offline', 'prompt': 'consent'}
+          : null,
+    );
+    if (!launched) {
+      throw const AuthException('Could not open the sign-in flow.');
+    }
+  }
+
+  Future<AuthMFAListFactorsResponse> listMfaFactors() {
+    return supabase.auth.mfa.listFactors();
+  }
+
+  Future<AuthMFAEnrollResponse> enrollTotpMfa() {
+    return supabase.auth.mfa.enroll(
+      issuer: 'PetFolio',
+      friendlyName: 'PetFolio',
+    );
+  }
+
+  Future<void> verifyTotpMfa(String factorId, String code) async {
+    await supabase.auth.mfa.challengeAndVerify(
+      factorId: factorId,
+      code: code.trim(),
+    );
+  }
+
+  Future<void> unenrollMfa(String factorId) async {
+    await supabase.auth.mfa.unenroll(factorId);
+  }
+
   /// Password reset email (deep link / redirect URL must be configured per
   /// [Supabase Flutter setup](https://supabase.com/docs/guides/getting-started/quickstarts/flutter)).
   Future<void> requestPasswordReset(String email) async {
@@ -113,14 +156,14 @@ class AuthRepository {
         'avatars/${userId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
     await supabase.storage
-        .from(kBucketPetImages)
+        .from(kBucketAvatars)
         .upload(
           path,
           imageFile,
           fileOptions: FileOptions(contentType: contentType),
         );
 
-    return supabase.storage.from(kBucketPetImages).getPublicUrl(path);
+    return supabase.storage.from(kBucketAvatars).getPublicUrl(path);
   }
 
   // -------------------------------------------------------------------------

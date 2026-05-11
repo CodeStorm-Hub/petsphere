@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:petfolio/core/constants/app_routes.dart';
 import 'package:petfolio/core/theme/spacing.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'pet_avatar.dart';
@@ -27,17 +29,12 @@ class PetSwitcher extends ConsumerWidget {
         decoration: BoxDecoration(
           color: colorScheme.primaryContainer.withAlpha(100),
           borderRadius: BorderRadius.circular(100),
-          border: Border.all(
-            color: colorScheme.primary.withAlpha(50),
-          ),
+          border: Border.all(color: colorScheme.primary.withAlpha(50)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            PetAvatar(
-              imageUrl: activePet.profileImageUrl,
-              radius: 12,
-            ),
+            PetAvatar(imageUrl: activePet.profileImageUrl, radius: 12),
             const SizedBox(width: AppSpacing.xs),
             Text(
               activePet.name,
@@ -71,9 +68,7 @@ class PetSwitcher extends ConsumerWidget {
           ...myPets.map((pet) {
             final isSelected = pet.id == activePet?.id;
             return ListTile(
-              leading: PetAvatar(
-                imageUrl: pet.profileImageUrl,
-              ),
+              leading: PetAvatar(imageUrl: pet.profileImageUrl),
               title: Text(
                 pet.name,
                 style: TextStyle(
@@ -82,7 +77,10 @@ class PetSwitcher extends ConsumerWidget {
               ),
               subtitle: Text(pet.breed),
               trailing: isSelected
-                  ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary)
+                  ? Icon(
+                      Icons.check_circle,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
                   : null,
               onTap: () {
                 ref.read(petProvider.notifier).setActivePet(pet);
@@ -92,13 +90,11 @@ class PetSwitcher extends ConsumerWidget {
           }),
           const Divider(),
           ListTile(
-            leading: const CircleAvatar(
-              child: Icon(Icons.add),
-            ),
+            leading: const CircleAvatar(child: Icon(Icons.add)),
             title: const Text('Add New Pet'),
             onTap: () {
-              // TODO: Navigate to add pet screen
               Navigator.pop(context);
+              context.push(AppRoutes.addPet);
             },
           ),
         ],

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:petfolio/core/constants/app_durations.dart';
 import 'package:petfolio/core/constants/app_strings.dart';
 import 'package:petfolio/core/utils/logger.dart';
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
@@ -10,7 +13,6 @@ import 'package:petfolio/features/marketplace/data/models/product_model.dart';
 // State
 // ---------------------------------------------------------------------------
 class MarketplaceState {
-
   MarketplaceState({
     this.products = const [],
     this.filterCategory,
@@ -69,17 +71,27 @@ class MarketplaceController extends Notifier<MarketplaceState> {
   Future<void> _fetchProducts({String? category}) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final products = await marketplaceRepository.fetchProducts(
-        category: category,
-      );
+      final products = await marketplaceRepository
+          .fetchProducts(category: category)
+          .timeout(AppDurations.defaultNetworkTimeout);
       state = state.copyWith(products: products, isLoading: false);
+    } on TimeoutException catch (e) {
+      AppLogger.error(
+        AppStrings.timeoutError,
+        tag: 'MarketplaceController',
+        error: e,
+      );
+      state = state.copyWith(isLoading: false, error: AppStrings.timeoutError);
     } catch (e) {
       AppLogger.error(
         AppStrings.marketplaceLoadFailed,
         tag: 'MarketplaceController',
         error: e,
       );
-      state = state.copyWith(isLoading: false, error: AppStrings.marketplaceLoadFailed);
+      state = state.copyWith(
+        isLoading: false,
+        error: AppStrings.marketplaceLoadFailed,
+      );
     }
   }
 
@@ -120,5 +132,7 @@ final productByIdProvider = FutureProvider.family<ProductModel?, String>((
     ),
   );
   if (cached.isNotEmpty) return cached.first;
-  return marketplaceRepository.fetchProductById(id);
+  return marketplaceRepository
+      .fetchProductById(id)
+      .timeout(AppDurations.defaultNetworkTimeout);
 });

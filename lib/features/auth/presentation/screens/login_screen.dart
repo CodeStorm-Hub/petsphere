@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:petfolio/core/widgets/brand_logo.dart';
 import 'package:petfolio/features/auth/data/auth_repository.dart';
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:ui';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -51,6 +52,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           .read(authProvider.notifier)
           .login(_emailController.text.trim(), _passwordController.text.trim());
     }
+  }
+
+  void _loginWithProvider(OAuthProvider provider) {
+    ref.read(authProvider.notifier).loginWithProvider(provider);
   }
 
   void _forgotPassword() {
@@ -166,7 +171,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF0F4FF),
+                  isDark
+                      ? theme.scaffoldBackgroundColor
+                      : const Color(0xFFF0F4FF),
                   isDark ? const Color(0xFF0F1B2D) : Colors.white,
                 ],
               ),
@@ -174,29 +181,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           ),
           // Interactive Ambient Orbs
           Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 400,
-              height: 400,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colorScheme.primary.withAlpha(20),
+                top: -100,
+                right: -100,
+                child: Container(
+                  width: 400,
+                  height: 400,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colorScheme.primary.withAlpha(20),
+                  ),
+                ),
+              )
+              .animate(onPlay: (controller) => controller.repeat())
+              .moveY(
+                begin: -20,
+                end: 20,
+                duration: 4000.ms,
+                curve: Curves.easeInOut,
               ),
-            ),
-          ).animate(onPlay: (controller) => controller.repeat()).moveY(begin: -20, end: 20, duration: 4000.ms, curve: Curves.easeInOut),
           Positioned(
-            bottom: -50,
-            left: -50,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colorScheme.secondary.withAlpha(20),
+                bottom: -50,
+                left: -50,
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colorScheme.secondary.withAlpha(20),
+                  ),
+                ),
+              )
+              .animate(onPlay: (controller) => controller.repeat())
+              .moveX(
+                begin: -20,
+                end: 20,
+                duration: 5000.ms,
+                curve: Curves.easeInOut,
               ),
-            ),
-          ).animate(onPlay: (controller) => controller.repeat()).moveX(begin: -20, end: 20, duration: 5000.ms, curve: Curves.easeInOut),
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -215,9 +236,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             child: Container(
                               padding: const EdgeInsets.all(32),
                               decoration: BoxDecoration(
-                                color: isDark 
-                                  ? colorScheme.surface.withAlpha(160)
-                                  : Colors.white.withAlpha(180),
+                                color: isDark
+                                    ? colorScheme.surface.withAlpha(160)
+                                    : Colors.white.withAlpha(180),
                                 borderRadius: BorderRadius.circular(32),
                                 border: Border.all(
                                   color: colorScheme.outline.withAlpha(50),
@@ -243,11 +264,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   const SizedBox(height: 40),
                                   Text(
                                     'Welcome Back',
-                                    style: theme.textTheme.headlineLarge?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      color: colorScheme.onSurface,
-                                      letterSpacing: -1,
-                                    ),
+                                    style: theme.textTheme.headlineLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          color: colorScheme.onSurface,
+                                          letterSpacing: -1,
+                                        ),
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 8),
@@ -264,10 +286,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     Container(
                                       padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
-                                        color: colorScheme.errorContainer.withAlpha(30),
+                                        color: colorScheme.errorContainer
+                                            .withAlpha(30),
                                         borderRadius: BorderRadius.circular(16),
                                         border: Border.all(
-                                          color: colorScheme.error.withAlpha(40),
+                                          color: colorScheme.error.withAlpha(
+                                            40,
+                                          ),
                                         ),
                                       ),
                                       child: Row(
@@ -345,7 +370,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                           ),
                                           onPressed: () {
                                             setState(
-                                              () => _obscurePassword = !_obscurePassword,
+                                              () => _obscurePassword =
+                                                  !_obscurePassword,
                                             );
                                           },
                                         ),
@@ -365,7 +391,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   ),
                                   const SizedBox(height: 16),
                                   ElevatedButton(
-                                    onPressed: authState.isLoading ? null : _login,
+                                    onPressed: authState.isLoading
+                                        ? null
+                                        : _login,
                                     child: authState.isLoading
                                         ? SizedBox(
                                             height: 24,
@@ -382,7 +410,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     children: [
                                       Expanded(
                                         child: Divider(
-                                          color: colorScheme.outline.withAlpha(60),
+                                          color: colorScheme.outline.withAlpha(
+                                            60,
+                                          ),
                                         ),
                                       ),
                                       Padding(
@@ -399,7 +429,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                       ),
                                       Expanded(
                                         child: Divider(
-                                          color: colorScheme.outline.withAlpha(60),
+                                          color: colorScheme.outline.withAlpha(
+                                            60,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -409,16 +441,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     children: [
                                       Expanded(
                                         child: OutlinedButton.icon(
-                                          onPressed: () {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Google Sign-In coming soon!',
+                                          onPressed: authState.isLoading
+                                              ? null
+                                              : () => _loginWithProvider(
+                                                  OAuthProvider.google,
                                                 ),
-                                                behavior: SnackBarBehavior.floating,
-                                              ),
-                                            );
-                                          },
                                           icon: const Icon(
                                             Icons.g_mobiledata_rounded,
                                             size: 28,
@@ -429,10 +456,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                               vertical: 14,
                                             ),
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(16),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
                                             ),
                                             side: BorderSide(
-                                              color: colorScheme.outline.withAlpha(80),
+                                              color: colorScheme.outline
+                                                  .withAlpha(80),
                                             ),
                                           ),
                                         ),
@@ -440,27 +469,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: OutlinedButton.icon(
-                                          onPressed: () {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Apple Sign-In coming soon!',
+                                          onPressed: authState.isLoading
+                                              ? null
+                                              : () => _loginWithProvider(
+                                                  OAuthProvider.apple,
                                                 ),
-                                                behavior: SnackBarBehavior.floating,
-                                              ),
-                                            );
-                                          },
-                                          icon: const Icon(Icons.apple, size: 24),
+                                          icon: const Icon(
+                                            Icons.apple,
+                                            size: 24,
+                                          ),
                                           label: const Text('Apple'),
                                           style: OutlinedButton.styleFrom(
                                             padding: const EdgeInsets.symmetric(
                                               vertical: 14,
                                             ),
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(16),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
                                             ),
                                             side: BorderSide(
-                                              color: colorScheme.outline.withAlpha(80),
+                                              color: colorScheme.outline
+                                                  .withAlpha(80),
                                             ),
                                           ),
                                         ),
@@ -478,7 +507,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                         ),
                                       ),
                                       TextButton(
-                                        onPressed: () => context.push('/register'),
+                                        onPressed: () =>
+                                            context.push('/register'),
                                         child: const Text('Register'),
                                       ),
                                     ],

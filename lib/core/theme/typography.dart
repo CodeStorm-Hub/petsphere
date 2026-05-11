@@ -7,7 +7,7 @@ class AppTypography {
 
   static TextTheme getTextTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
-    
+
     // Unified Inter Typography
     final baseTheme = GoogleFonts.interTextTheme();
 
@@ -22,38 +22,38 @@ class AppTypography {
         fontSize: 56,
         height: 1.1,
         fontWeight: FontWeight.w900,
-        letterSpacing: -1.12,
+        letterSpacing: 0,
       ),
       displayMedium: baseTheme.displayMedium?.copyWith(
         color: textColor,
         fontSize: 44,
         height: 1.1,
         fontWeight: FontWeight.w900,
-        letterSpacing: -0.88,
+        letterSpacing: 0,
       ),
       displaySmall: baseTheme.displaySmall?.copyWith(
         color: textColor,
         fontSize: 36,
         height: 1.1,
         fontWeight: FontWeight.w800,
-        letterSpacing: -0.36,
+        letterSpacing: 0,
       ),
       headlineLarge: baseTheme.headlineLarge?.copyWith(
         color: textColor,
-        fontSize: 32,
+        fontSize: 30,
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.32,
+        letterSpacing: 0,
       ),
       headlineMedium: baseTheme.headlineMedium?.copyWith(
         color: textColor,
-        fontSize: 28,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.28,
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0,
       ),
       headlineSmall: baseTheme.headlineSmall?.copyWith(
         color: textColor,
-        fontSize: 24,
-        fontWeight: FontWeight.w700,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
       ),
       titleLarge: baseTheme.titleLarge?.copyWith(
         color: textColor,
@@ -72,14 +72,14 @@ class AppTypography {
       ),
       bodyLarge: baseTheme.bodyLarge?.copyWith(
         color: textColor,
-        fontSize: 18,
+        fontSize: 16,
         height: 1.5,
         fontWeight: FontWeight.w400,
       ),
       bodyMedium: baseTheme.bodyMedium?.copyWith(
         color: mutedColor,
-        fontSize: 16,
-        height: 1.5,
+        fontSize: 14,
+        height: 1.43,
         fontWeight: FontWeight.w400,
       ),
       bodySmall: baseTheme.bodySmall?.copyWith(
@@ -90,8 +90,8 @@ class AppTypography {
       labelLarge: baseTheme.labelLarge?.copyWith(
         color: textColor,
         fontSize: 14,
-        fontWeight: FontWeight.w500,
-        letterSpacing: 0.56,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0,
       ),
       labelMedium: baseTheme.labelMedium?.copyWith(
         color: mutedColor,

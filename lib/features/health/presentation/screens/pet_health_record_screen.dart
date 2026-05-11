@@ -1,9 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import 'package:petfolio/core/constants/app_routes.dart';
+import 'package:petfolio/core/constants/supabase_config.dart';
+import 'package:petfolio/core/utils/image_upload_helper.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/features/health/presentation/controllers/vitals_controller.dart';
 import 'package:petfolio/features/health/presentation/controllers/appointment_controller.dart';
@@ -27,6 +33,7 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   final ImagePicker _picker = ImagePicker();
+  bool _isUploadingDocument = false;
 
   @override
   void initState() {
@@ -42,15 +49,14 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
 
   Future<void> _pickDocument(ImageSource source) async {
     try {
-      final image = await _picker.pickImage(
-        source: source,
-        imageQuality: 80,
-      );
+      final activePet = ref.read(activePetProvider);
+      if (activePet == null) return;
+
+      final image = await _picker.pickImage(source: source, imageQuality: 80);
 
       if (image != null) {
         if (!mounted) return;
-        
-        // Show loading
+        setState(() => _isUploadingDocument = true);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Row(
@@ -58,7 +64,10 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
                 SizedBox(
                   height: 20,
                   width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
                 ),
                 SizedBox(width: 12),
                 Text('Processing document...'),
@@ -68,22 +77,34 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
           ),
         );
 
-        // Simulate upload/processing delay
-        await Future<void>.delayed(const Duration(seconds: 2));
+        final uid = supabase.auth.currentUser?.id;
+        if (uid == null || uid.isEmpty) {
+          throw StateError('Must be signed in to upload health documents');
+        }
+        final ext = image.path.split('.').last.toLowerCase();
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        final path = 'health-documents/$uid/${activePet.id}_$timestamp.$ext';
+        await ImageUploadHelper.upload(
+          file: File(image.path),
+          bucket: kBucketPetImages,
+          path: path,
+        );
 
         if (!mounted) return;
+        setState(() => _isUploadingDocument = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Document uploaded and scanned successfully!'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Text('Document uploaded to health records.'),
+            backgroundColor: Theme.of(context).colorScheme.tertiary,
           ),
         );
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking document: $e')),
-      );
+      setState(() => _isUploadingDocument = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error picking document: $e')));
     }
   }
 
@@ -105,7 +126,9 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.outline.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -148,14 +171,16 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
             const SizedBox(height: 16),
             _buildUploadOption(
               icon: Icons.picture_as_pdf_rounded,
-              title: 'Upload PDF',
-              subtitle: 'Import PDF document',
+              title: 'Export Records',
+              subtitle: 'Create a shareable health summary',
               onTap: () {
                 Navigator.pop(context);
-                // PDF picking logic would go here
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('PDF upload coming soon!')),
-                );
+                final activePet = ref.read(activePetProvider);
+                if (activePet != null) {
+                  context.push(
+                    AppRoutes.petMedicalRecordsExportById(activePet.id),
+                  );
+                }
               },
             ),
           ],
@@ -252,7 +277,9 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
               ),
               actions: [
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () => context.push(
+                    AppRoutes.petMedicalRecordsExportById(activePet.id),
+                  ),
                   icon: const Icon(Icons.share_rounded),
                 ),
                 const SizedBox(width: 8),
@@ -277,11 +304,12 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
                           'Vitals Summary',
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                            fontFamily:
+                                GoogleFonts.playfairDisplay().fontFamily,
                           ),
                         ),
                         TextButton.icon(
-                          onPressed: () {},
+                          onPressed: _showDocumentUploadModal,
                           icon: const Icon(Icons.add, size: 18),
                           label: const Text('Add Vital'),
                         ),
@@ -316,7 +344,9 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
                         labelColor: cs.primary,
                         unselectedLabelColor: cs.onSurfaceVariant,
                         dividerColor: Colors.transparent,
-                        labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                        labelStyle: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
                         unselectedLabelStyle: const TextStyle(
                           fontWeight: FontWeight.normal,
                         ),
@@ -340,9 +370,15 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showDocumentUploadModal,
-        icon: const Icon(Icons.add_a_photo_rounded),
-        label: const Text('Scan Document'),
+        onPressed: _isUploadingDocument ? null : _showDocumentUploadModal,
+        icon: _isUploadingDocument
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.add_a_photo_rounded),
+        label: Text(_isUploadingDocument ? 'Uploading' : 'Scan Document'),
       ),
     );
   }
@@ -366,7 +402,6 @@ class _PetHealthRecordScreenState extends ConsumerState<PetHealthRecordScreen>
 }
 
 class _HealthStatusHeader extends StatelessWidget {
-
   const _HealthStatusHeader({
     required this.petName,
     required this.status,
@@ -453,7 +488,6 @@ class _HealthStatusHeader extends StatelessWidget {
 }
 
 class _VitalsGrid extends StatelessWidget {
-
   const _VitalsGrid({required this.vitalsState});
   final VitalsState vitalsState;
 
@@ -509,7 +543,6 @@ class _VitalsGrid extends StatelessWidget {
 }
 
 class _VitalCard extends StatelessWidget {
-
   const _VitalCard({
     required this.label,
     required this.value,
@@ -589,24 +622,31 @@ class _MedicalTimeline extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appointments = ref.watch(appointmentProvider).pastAppointments;
-    
+
     if (appointments.isEmpty) {
-      return const PetfolioEmptyState(icon: Icons.folder_open_rounded, title: 'No Events', message: 'No past medical events recorded.');
+      return const PetfolioEmptyState(
+        icon: Icons.folder_open_rounded,
+        title: 'No Events',
+        message: 'No past medical events recorded.',
+      );
     }
 
     return Column(
-      children: appointments.map((appt) => _TimelineItem(
-        date: DateFormat('MMM d, yyyy').format(appt.scheduledAt),
-        title: appt.title,
-        doctor: appt.doctor ?? 'Unknown Veterinarian',
-        type: appt.appointmentTypeLabel,
-      )).toList(),
+      children: appointments
+          .map(
+            (appt) => _TimelineItem(
+              date: DateFormat('MMM d, yyyy').format(appt.scheduledAt),
+              title: appt.title,
+              doctor: appt.doctor ?? 'Unknown Veterinarian',
+              type: appt.appointmentTypeLabel,
+            ),
+          )
+          .toList(),
     );
   }
 }
 
 class _TimelineItem extends StatelessWidget {
-
   const _TimelineItem({
     required this.date,
     required this.title,
@@ -723,31 +763,40 @@ class _VaccineList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vaccinations = ref.watch(vaccinationProvider).vaccinations;
-    
+
     if (vaccinations.isEmpty) {
-      return const PetfolioEmptyState(icon: Icons.folder_open_rounded, title: 'No Records', message: 'No vaccination records found.');
+      return const PetfolioEmptyState(
+        icon: Icons.folder_open_rounded,
+        title: 'No Records',
+        message: 'No vaccination records found.',
+      );
     }
 
     return Column(
-      children: vaccinations.map((vax) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: _VaccineCard(
-          name: vax.vaccineName,
-          date: vax.completedOn != null 
-              ? DateFormat('MMM d, yyyy').format(vax.completedOn!)
-              : 'Scheduled',
-          nextDue: vax.nextDueDate != null 
-              ? DateFormat('MMM d, yyyy').format(vax.nextDueDate!)
-              : 'N/A',
-          status: vax.isCompleted ? 'Up to date' : (vax.isDueSoon ? 'Due Soon' : 'Upcoming'),
-        ),
-      )).toList(),
+      children: vaccinations
+          .map(
+            (vax) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _VaccineCard(
+                name: vax.vaccineName,
+                date: vax.completedOn != null
+                    ? DateFormat('MMM d, yyyy').format(vax.completedOn!)
+                    : 'Scheduled',
+                nextDue: vax.nextDueDate != null
+                    ? DateFormat('MMM d, yyyy').format(vax.nextDueDate!)
+                    : 'N/A',
+                status: vax.isCompleted
+                    ? 'Up to date'
+                    : (vax.isDueSoon ? 'Due Soon' : 'Upcoming'),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }
 
 class _VaccineCard extends StatelessWidget {
-
   const _VaccineCard({
     required this.name,
     required this.date,
@@ -779,15 +828,19 @@ class _VaccineCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: isDueSoon
                   ? colorScheme.errorContainer.withAlpha(100)
-                  : (isUpToDate ? colorScheme.tertiary.withAlpha(30) : colorScheme.secondary.withAlpha(30)),
+                  : (isUpToDate
+                        ? colorScheme.tertiary.withAlpha(30)
+                        : colorScheme.secondary.withAlpha(30)),
               shape: BoxShape.circle,
             ),
             child: Icon(
               isDueSoon
                   ? Icons.priority_high_rounded
-                  : (isUpToDate ? Icons.verified_user_rounded : Icons.schedule_rounded),
-              color: isDueSoon 
-                  ? colorScheme.error 
+                  : (isUpToDate
+                        ? Icons.verified_user_rounded
+                        : Icons.schedule_rounded),
+              color: isDueSoon
+                  ? colorScheme.error
                   : (isUpToDate ? colorScheme.tertiary : colorScheme.secondary),
             ),
           ),
@@ -828,9 +881,7 @@ class _VaccineCard extends StatelessWidget {
               Text(
                 nextDue,
                 style: TextStyle(
-                  color: isDueSoon
-                      ? colorScheme.error
-                      : colorScheme.onSurface,
+                  color: isDueSoon ? colorScheme.error : colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
@@ -849,9 +900,13 @@ class _MedicationList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final medications = ref.watch(medicationProvider).activeMedications;
-    
+
     if (medications.isEmpty) {
-      return const PetfolioEmptyState(icon: Icons.folder_open_rounded, title: 'No Medications', message: 'No active medications.');
+      return const PetfolioEmptyState(
+        icon: Icons.folder_open_rounded,
+        title: 'No Medications',
+        message: 'No active medications.',
+      );
     }
 
     return Column(
@@ -861,7 +916,6 @@ class _MedicationList extends ConsumerWidget {
 }
 
 class _MedicationCard extends StatelessWidget {
-
   const _MedicationCard({required this.med});
   final PetMedication med;
 
@@ -881,12 +935,19 @@ class _MedicationCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.medication_rounded, color: colorScheme.primary, size: 20),
+              Icon(
+                Icons.medication_rounded,
+                color: colorScheme.primary,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   med.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               Container(
@@ -897,7 +958,11 @@ class _MedicationCard extends StatelessWidget {
                 ),
                 child: Text(
                   med.statusLabel,
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colorScheme.primary),
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
                 ),
               ),
             ],
@@ -911,7 +976,11 @@ class _MedicationCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               'Purpose: ${med.purpose}',
-              style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12, fontStyle: FontStyle.italic),
+              style: TextStyle(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ],
         ],
@@ -921,14 +990,14 @@ class _MedicationCard extends StatelessWidget {
 }
 
 class _WeightChart extends StatelessWidget {
-
   const _WeightChart({required this.weightLogs});
   final List<PetWeightLog> weightLogs;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final sortedLogs = [...weightLogs]..sort((a, b) => a.logDate.compareTo(b.logDate));
+    final sortedLogs = [...weightLogs]
+      ..sort((a, b) => a.logDate.compareTo(b.logDate));
 
     if (sortedLogs.isEmpty) return const SizedBox.shrink();
 
@@ -953,8 +1022,14 @@ class _WeightChart extends StatelessWidget {
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
                   final index = value.toInt();
-                  if (index < 0 || index >= sortedLogs.length) return const SizedBox.shrink();
-                  if (index % (sortedLogs.length > 5 ? (sortedLogs.length / 3).ceil() : 1) != 0) {
+                  if (index < 0 || index >= sortedLogs.length) {
+                    return const SizedBox.shrink();
+                  }
+                  if (index %
+                          (sortedLogs.length > 5
+                              ? (sortedLogs.length / 3).ceil()
+                              : 1) !=
+                      0) {
                     return const SizedBox.shrink();
                   }
                   return Padding(
@@ -998,12 +1073,13 @@ class _WeightChart extends StatelessWidget {
               barWidth: 4,
               isStrokeCapRound: true,
               dotData: FlDotData(
-                getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
-                  radius: 4,
-                  color: Colors.white,
-                  strokeWidth: 3,
-                  strokeColor: colorScheme.primary,
-                ),
+                getDotPainter: (spot, percent, barData, index) =>
+                    FlDotCirclePainter(
+                      radius: 4,
+                      color: Colors.white,
+                      strokeWidth: 3,
+                      strokeColor: colorScheme.primary,
+                    ),
               ),
               belowBarData: BarAreaData(
                 show: true,
@@ -1031,7 +1107,9 @@ class _WeightChart extends StatelessWidget {
                     ),
                     children: [
                       TextSpan(
-                        text: DateFormat('MMM d').format(sortedLogs[spot.spotIndex].logDate),
+                        text: DateFormat(
+                          'MMM d',
+                        ).format(sortedLogs[spot.spotIndex].logDate),
                         style: TextStyle(
                           color: colorScheme.onPrimaryContainer.withAlpha(150),
                           fontSize: 11,
@@ -1049,4 +1127,3 @@ class _WeightChart extends StatelessWidget {
     );
   }
 }
-

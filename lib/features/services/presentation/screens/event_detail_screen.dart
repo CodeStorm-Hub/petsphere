@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:petfolio/features/services/presentation/controllers/pet_events_controller.dart';
 import 'package:petfolio/features/services/data/models/pet_event_models.dart';
 
@@ -34,20 +35,28 @@ class EventDetailScreen extends ConsumerWidget {
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
                   background: event.imageUrl != null
-                      ? CachedNetworkImage(imageUrl: event.imageUrl!, fit: BoxFit.cover)
+                      ? CachedNetworkImage(
+                          imageUrl: event.imageUrl!,
+                          fit: BoxFit.cover,
+                        )
                       : Container(
                           color: colorScheme.primaryContainer,
-                          child: Icon(Icons.event, size: 80, color: colorScheme.onPrimaryContainer),
+                          child: Icon(
+                            Icons.event,
+                            size: 80,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
                         ),
                 ),
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.share),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Share feature coming soon')),
-                      );
-                    },
+                    onPressed: () => SharePlus.instance.share(
+                      ShareParams(
+                        text:
+                            '${event.title}\n${dateFormat.format(event.eventDate)} at ${timeFormat.format(event.eventDate)}\n${event.location}',
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -58,7 +67,10 @@ class EventDetailScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(12),

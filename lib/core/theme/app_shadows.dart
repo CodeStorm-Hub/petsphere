@@ -15,7 +15,7 @@ class AppShadows {
 
   static List<BoxShadow> get md => [
     BoxShadow(
-      color: Colors.black.withValues(alpha: 0.08),
+      color: Colors.black.withValues(alpha: 0.05),
       blurRadius: 12,
       offset: const Offset(0, 4),
     ),
@@ -32,10 +32,10 @@ class AppShadows {
   // Premium Multi-layered shadows
   static List<BoxShadow> get premium => [
     BoxShadow(
-      color: const Color(0xFF2563EB).withValues(alpha: 0.08),
-      blurRadius: 40,
-      offset: const Offset(0, 20),
-      spreadRadius: -10,
+      color: const Color(0xFF2563EB).withValues(alpha: 0.15),
+      blurRadius: 20,
+      offset: const Offset(0, 8),
+      spreadRadius: -4,
     ),
     BoxShadow(
       color: Colors.black.withValues(alpha: 0.03),

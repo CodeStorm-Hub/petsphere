@@ -185,7 +185,9 @@ class _AchievementsBlock extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final defAsync = ref.watch(careBadgeDefinitionsProvider);
     final gamification = ref.watch(careGamificationProvider);
-    final unlocks = gamification.unlocks.where((u) => u.petId == activePetId).toList();
+    final unlocks = gamification.unlocks
+        .where((u) => u.petId == activePetId)
+        .toList();
     return defAsync.when(
       data: (defs) {
         if (unlocks.isEmpty) {
@@ -554,7 +556,7 @@ class _DashboardTab extends ConsumerWidget {
         if (needsSetup) ...[
           _SetupBanner(
             onTap: () async {
-              await context.push('/pet_care_onboarding?petId=${activePet.id}');
+              await context.push(AppRoutes.petCareOnboardingById(activePet.id));
               await ref.read(careLogProvider.notifier).refresh();
               await ref.read(careGoalsProvider.notifier).refresh();
             },
@@ -612,9 +614,7 @@ class _DashboardTab extends ConsumerWidget {
                     label: const Text('Edit Goals'),
                     style: TextButton.styleFrom(
                       foregroundColor: colorScheme.primary,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
@@ -728,25 +728,29 @@ class _DashboardTab extends ConsumerWidget {
               label: 'Vet Booking',
               icon: Icons.calendar_month,
               color: colorScheme.primary,
-              onTap: () => context.push(AppRoutes.petVetBookingById(activePet.id)),
+              onTap: () =>
+                  context.push(AppRoutes.petVetBookingById(activePet.id)),
             ),
             CareQuickActionCard(
               label: 'Emergency',
               icon: Icons.emergency,
               color: colorScheme.error,
-              onTap: () => context.push(AppRoutes.petEmergencyById(activePet.id)),
+              onTap: () =>
+                  context.push(AppRoutes.petEmergencyById(activePet.id)),
             ),
             CareQuickActionCard(
               label: 'Nutrition',
               icon: Icons.restaurant,
               color: colorScheme.secondary,
-              onTap: () => context.push(AppRoutes.petNutritionById(activePet.id)),
+              onTap: () =>
+                  context.push(AppRoutes.petNutritionById(activePet.id)),
             ),
             CareQuickActionCard(
               label: 'Expenses',
               icon: Icons.payments,
               color: colorScheme.tertiary,
-              onTap: () => context.push(AppRoutes.petExpensesById(activePet.id)),
+              onTap: () =>
+                  context.push(AppRoutes.petExpensesById(activePet.id)),
             ),
             CareQuickActionCard(
               label: 'Growth',
@@ -758,19 +762,22 @@ class _DashboardTab extends ConsumerWidget {
               label: 'Insurance',
               icon: Icons.security,
               color: colorScheme.secondary,
-              onTap: () => context.push(AppRoutes.petInsuranceById(activePet.id)),
+              onTap: () =>
+                  context.push(AppRoutes.petInsuranceById(activePet.id)),
             ),
             CareQuickActionCard(
               label: 'Training',
               icon: Icons.school,
               color: colorScheme.onSurfaceVariant,
-              onTap: () => context.push(AppRoutes.petTrainingById(activePet.id)),
+              onTap: () =>
+                  context.push(AppRoutes.petTrainingById(activePet.id)),
             ),
             CareQuickActionCard(
               label: 'Memorial',
               icon: Icons.cloud,
               color: colorScheme.primary,
-              onTap: () => context.push(AppRoutes.petMemorialById(activePet.id)),
+              onTap: () =>
+                  context.push(AppRoutes.petMemorialById(activePet.id)),
             ),
             CareQuickActionCard(
               label: 'Adoption',
@@ -794,13 +801,15 @@ class _DashboardTab extends ConsumerWidget {
               label: 'Medical',
               icon: Icons.folder_shared_rounded,
               color: colorScheme.tertiary,
-              onTap: () => context.push(AppRoutes.petMedicalRecordsById(activePet.id)),
+              onTap: () =>
+                  context.push(AppRoutes.petMedicalRecordsById(activePet.id)),
             ),
             CareQuickActionCard(
               label: 'Timeline',
               icon: Icons.history,
               color: colorScheme.secondary,
-              onTap: () => context.push(AppRoutes.petTimelineById(activePet.id)),
+              onTap: () =>
+                  context.push(AppRoutes.petTimelineById(activePet.id)),
             ),
           ],
         ),
@@ -809,11 +818,6 @@ class _DashboardTab extends ConsumerWidget {
     );
   }
 }
-
-
-
-
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. HEALTH TAB â extracted to lib/views/health_tab.dart

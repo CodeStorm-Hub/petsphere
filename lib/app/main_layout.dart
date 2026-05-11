@@ -5,12 +5,12 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:petfolio/app/widgets/adaptive_navigation.dart';
 import 'package:petfolio/core/constants/app_routes.dart';
+import 'package:petfolio/core/theme/app_breakpoints.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MainLayout
 // ─────────────────────────────────────────────────────────────────────────────
 class MainLayout extends ConsumerStatefulWidget {
-
   const MainLayout({super.key, required this.navigationShell});
   final StatefulNavigationShell navigationShell;
 
@@ -89,10 +89,11 @@ class MainLayoutState extends ConsumerState<MainLayout> {
     final authState = ref.watch(authProvider);
     final user = authState.user;
     final activePet = ref.watch(activePetProvider);
-    final displayImageUrl = activePet?.profileImageUrl ?? user?.profileImageUrl ?? '';
-    
-    final width = MediaQuery.of(context).size.width;
-    final isTablet = width > 600;
+    final displayImageUrl =
+        activePet?.profileImageUrl ?? user?.profileImageUrl ?? '';
+
+    final width = MediaQuery.sizeOf(context).width;
+    final isTablet = AppBreakpoints.isExpanded(width);
 
     return Scaffold(
       extendBody: true,
@@ -105,7 +106,7 @@ class MainLayoutState extends ConsumerState<MainLayout> {
               ),
               profileImageUrl: displayImageUrl,
               onTap: _onTap,
-              isExtended: width > 900,
+              isExtended: width >= AppBreakpoints.expanded,
             ),
           Expanded(
             child: Center(
@@ -120,14 +121,14 @@ class MainLayoutState extends ConsumerState<MainLayout> {
       bottomNavigationBar: isTablet
           ? null
           : RepaintBoundary(
-            child: PetFolioNavBar(
-              currentIndex: _calculateNavBarIndex(
-                widget.navigationShell.currentIndex,
+              child: PetFolioNavBar(
+                currentIndex: _calculateNavBarIndex(
+                  widget.navigationShell.currentIndex,
+                ),
+                profileImageUrl: displayImageUrl,
+                onTap: _onTap,
               ),
-              profileImageUrl: displayImageUrl,
-              onTap: _onTap,
             ),
-          ),
     );
   }
 }

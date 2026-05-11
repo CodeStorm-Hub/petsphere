@@ -35,7 +35,7 @@ class DiscoveryScreen extends ConsumerWidget {
           bottom: TabBar(
             tabs: const [
               Tab(text: 'Discover'),
-              Tab(text: 'Nearby'),
+              Tab(text: 'Verified'),
               Tab(text: 'My Listings'),
             ],
             labelColor: colorScheme.primary,
@@ -102,7 +102,6 @@ class MyListingsTab extends ConsumerWidget {
                 ),
               ],
             )
-
           : ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + navSpace),
@@ -167,7 +166,6 @@ class MyListingsTab extends ConsumerWidget {
 // Discover Tab  —  swipeable card stack
 // ─────────────────────────────────────────────────────────────────────────────
 class DiscoveryTab extends ConsumerStatefulWidget {
-
   const DiscoveryTab({
     super.key,
     required this.hasActivePet,
@@ -182,16 +180,29 @@ class DiscoveryTab extends ConsumerStatefulWidget {
 
 class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
   int currentIndex = 0;
-  String? filterType; // null = For You, 'breed' = Same Breed, 'nearby' = Nearby
+  String? filterType;
   final Set<String> dismissedPetIds = {};
   // Tracks pets whose discovery feeds are known to be empty after loading.
   final Set<String> allCaughtUpPetIds = {};
 
   final CardSwiperController _swiperController = CardSwiperController();
 
-  static const _filterLabels = ['For You', 'Social', 'Playdate', 'Breeding', 'Adoption', 'Nearby'];
-  // We use these locally for UI state; 'breed' and 'nearby' are special modes.
-  static const _filterValues = [null, 'social', 'playdate', 'breeding', 'adoption', 'nearby'];
+  static const _filterLabels = [
+    'For You',
+    'Social',
+    'Playdate',
+    'Breeding',
+    'Adoption',
+    'Verified',
+  ];
+  static const _filterValues = [
+    null,
+    'social',
+    'playdate',
+    'breeding',
+    'adoption',
+    'verified',
+  ];
 
   @override
   void initState() {
@@ -236,26 +247,28 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
           .read(matchProvider.notifier)
           .sendLikeRequest(pet.id, fromPetId: discoveryPetId)
           .then((success) {
-        if (!mounted) return;
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Liked ${pet.name}! 🐾'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        } else {
-          setState(() => dismissedPetIds.remove(pet.id));
-          final error = ref.read(matchProvider).error;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(error ?? 'Could not send like. Please try again.'),
-              backgroundColor: Theme.of(context).colorScheme.error,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      });
+            if (!mounted) return;
+            if (success) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Liked ${pet.name}! 🐾'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            } else {
+              setState(() => dismissedPetIds.remove(pet.id));
+              final error = ref.read(matchProvider).error;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    error ?? 'Could not send like. Please try again.',
+                  ),
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          });
     }
     return true;
   }
@@ -265,9 +278,8 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
         .where((p) => !dismissedPetIds.contains(p.id))
         .toList();
 
-    if (filterType == 'nearby') {
-      return [...visible]
-        ..sort((a, b) => _fakeDistanceMi(a).compareTo(_fakeDistanceMi(b)));
+    if (filterType == 'verified') {
+      return visible.where((pet) => pet.isVerified).toList();
     }
 
     return visible;
@@ -282,15 +294,13 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
     }
   }
 
-  int _fakeDistanceMi(PetModel pet) => (pet.id.hashCode.abs() % 25) + 1;
-
   void _selectPet(PetModel pet) {
     ref.read(discoveryActivePetIdProvider.notifier).select(pet.id);
     setState(() {
       dismissedPetIds.clear();
       currentIndex = 0;
       if (filterType != null &&
-          filterType != 'nearby' &&
+          filterType != 'verified' &&
           filterType != pet.animalType) {
         filterType = null;
       }
@@ -328,25 +338,38 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                   ),
                   const SizedBox(height: 24),
                   // Intent
-                  const Text('Intent', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Intent',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
-                    children: _filterLabels.map((l) => ChoiceChip(
-                      label: Text(l),
-                      selected: filterType == _filterValues[_filterLabels.indexOf(l)],
-                      onSelected: (val) {
-                        setState(() {
-                          filterType = _filterValues[_filterLabels.indexOf(l)];
-                          currentIndex = 0;
-                        });
-                        Navigator.pop(context);
-                      },
-                    )).toList(),
+                    children: _filterLabels
+                        .map(
+                          (l) => ChoiceChip(
+                            label: Text(l),
+                            selected:
+                                filterType ==
+                                _filterValues[_filterLabels.indexOf(l)],
+                            onSelected: (val) {
+                              setState(() {
+                                filterType =
+                                    _filterValues[_filterLabels.indexOf(l)];
+                                currentIndex = 0;
+                              });
+                              Navigator.pop(context);
+                            },
+                          ),
+                        )
+                        .toList(),
                   ),
                   const SizedBox(height: 16),
                   // Species
-                  const Text('Species', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Species',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   const TextField(
                     decoration: InputDecoration(
@@ -356,7 +379,10 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                   ),
                   const SizedBox(height: 16),
                   // Breed
-                  const Text('Breed', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Breed',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   const TextField(
                     decoration: InputDecoration(
@@ -366,7 +392,10 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                   ),
                   const SizedBox(height: 16),
                   // Distance
-                  const Text('Distance', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Distance',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   Slider(
                     value: 25,
@@ -377,7 +406,10 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                   ),
                   const SizedBox(height: 16),
                   // Age Range
-                  const Text('Age Range (Years)', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Age Range (Years)',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   RangeSlider(
                     values: const RangeValues(1, 10),
@@ -388,15 +420,22 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                   ),
                   const SizedBox(height: 16),
                   // Gender
-                  const Text('Gender', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Gender',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
-                    children: ['Any', 'Male', 'Female'].map((l) => ChoiceChip(
-                      label: Text(l),
-                      selected: l == 'Any',
-                      onSelected: (val) {},
-                    )).toList(),
+                    children: ['Any', 'Male', 'Female']
+                        .map(
+                          (l) => ChoiceChip(
+                            label: Text(l),
+                            selected: l == 'Any',
+                            onSelected: (val) {},
+                          ),
+                        )
+                        .toList(),
                   ),
                   const SizedBox(height: 32),
                   FilledButton(
@@ -524,75 +563,75 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                     ),
                   ),
                   ...List.generate(_filterLabels.length, (i) {
-                  final value = _filterValues[i];
-                  // Check selection: 'For You' is null/null, 'Same Breed' is 'breed' mode, 'Nearby' is 'nearby' mode
-                  final isSelected = filterType == value;
+                    final value = _filterValues[i];
+                    final isSelected = filterType == value;
 
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: GestureDetector(
-                      onTap: () {
-                        final selId =
-                            ref.read(discoveryActivePetIdProvider) ??
-                            ref.read(petProvider).activePet?.id;
-                        final myPets = ref.read(petProvider).myPets;
-                        PetModel? selPet;
-                        if (selId != null) {
-                          selPet = myPets.cast<PetModel?>().firstWhere(
-                            (p) => p?.id == selId,
-                            orElse: () => null,
-                          );
-                        }
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () {
+                          final selId =
+                              ref.read(discoveryActivePetIdProvider) ??
+                              ref.read(petProvider).activePet?.id;
+                          final myPets = ref.read(petProvider).myPets;
+                          PetModel? selPet;
+                          if (selId != null) {
+                            selPet = myPets.cast<PetModel?>().firstWhere(
+                              (p) => p?.id == selId,
+                              orElse: () => null,
+                            );
+                          }
 
-                        setState(() {
-                          filterType = value;
-                          currentIndex = 0;
-                        });
+                          setState(() {
+                            filterType = value;
+                            currentIndex = 0;
+                          });
 
-                        // Sync with controller
-                        if (value == 'breed') {
-                          if (selPet != null) {
+                          // Sync with controller
+                          if (value == 'breed') {
+                            if (selPet != null) {
+                              ref
+                                  .read(matchProvider.notifier)
+                                  .setFilterBreed(selPet.breed);
+                            }
+                          } else {
                             ref
                                 .read(matchProvider.notifier)
-                                .setFilterBreed(selPet.breed);
+                                .setFilterBreed(null);
                           }
-                        } else {
-                          // Reset breed filter for 'For You' and 'Nearby'
-                          ref.read(matchProvider.notifier).setFilterBreed(null);
-                        }
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? colorScheme.primary.withValues(alpha: 0.15)
-                              : colorScheme.surfaceContainerHighest,
-                          border: Border.all(
-                            color: isSelected
-                                ? colorScheme.primary
-                                : colorScheme.outline.withValues(alpha: 0.3),
-                            width: 1.5,
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
                           ),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          _filterLabels[i],
-                          style: TextStyle(
+                          decoration: BoxDecoration(
                             color: isSelected
-                                ? colorScheme.primary
-                                : colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                                ? colorScheme.primary.withValues(alpha: 0.15)
+                                : colorScheme.surfaceContainerHighest,
+                            border: Border.all(
+                              color: isSelected
+                                  ? colorScheme.primary
+                                  : colorScheme.outline.withValues(alpha: 0.3),
+                              width: 1.5,
+                            ),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            _filterLabels[i],
+                            style: TextStyle(
+                              color: isSelected
+                                  ? colorScheme.primary
+                                  : colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
                 ],
               ),
             ),
@@ -601,7 +640,8 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
             Expanded(
               child: !hasPets
                   ? RefreshIndicator(
-                      onRefresh: () => ref.read(matchProvider.notifier).refresh(),
+                      onRefresh: () =>
+                          ref.read(matchProvider.notifier).refresh(),
                       child: ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         padding: EdgeInsets.fromLTRB(24, 96, 24, 24 + navSpace),
@@ -633,30 +673,46 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                                   controller: _swiperController,
                                   cardsCount: filteredPets.length,
                                   onSwipe: _onSwipe,
-                                  numberOfCardsDisplayed: filteredPets.length > 1 ? 2 : 1,
+                                  numberOfCardsDisplayed:
+                                      filteredPets.length > 1 ? 2 : 1,
                                   isLoop: false,
                                   padding: EdgeInsets.zero,
-                                  cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-                                    return PetCard(
-                                      pet: filteredPets[index],
-                                      isBackground: false,
-                                      dragX: percentThresholdX.toDouble(),
-                                      followerCount: matchState.discoveryFollowerCounts[filteredPets[index].id],
-                                      onTap: () => context.push('/pet/${filteredPets[index].id}'),
-                                    );
-                                  },
+                                  cardBuilder:
+                                      (
+                                        context,
+                                        index,
+                                        percentThresholdX,
+                                        percentThresholdY,
+                                      ) {
+                                        return PetCard(
+                                          pet: filteredPets[index],
+                                          isBackground: false,
+                                          dragX: percentThresholdX.toDouble(),
+                                          followerCount:
+                                              matchState
+                                                  .discoveryFollowerCounts[filteredPets[index]
+                                                  .id],
+                                          onTap: () => context.push(
+                                            '/pet/${filteredPets[index].id}',
+                                          ),
+                                        );
+                                      },
                                 ),
                               ),
 
                               // ── Action buttons ────────────────────────
                               Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 24),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 24,
+                                ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     // Nope
                                     ActionButton(
-                                      key: const ValueKey('discovery_nope_button'),
+                                      key: const ValueKey(
+                                        'discovery_nope_button',
+                                      ),
                                       size: nopeSize,
                                       label: 'Nope',
                                       color: colorScheme.surface,
@@ -666,12 +722,16 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                                         size: nopeSize * 0.44,
                                         color: colorScheme.onSurfaceVariant,
                                       ),
-                                      onTap: () => _swiperController.swipe(CardSwiperDirection.left),
+                                      onTap: () => _swiperController.swipe(
+                                        CardSwiperDirection.left,
+                                      ),
                                     ),
                                     SizedBox(width: btnGap),
                                     // Prominent View / Star
                                     ActionButton(
-                                      key: const ValueKey('discovery_view_profile_button'),
+                                      key: const ValueKey(
+                                        'discovery_view_profile_button',
+                                      ),
                                       size: infoSize,
                                       label: 'View Profile',
                                       color: colorScheme.surface,
@@ -693,7 +753,9 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                                     SizedBox(width: btnGap),
                                     // Like
                                     ActionButton(
-                                      key: const ValueKey('discovery_like_button'),
+                                      key: const ValueKey(
+                                        'discovery_like_button',
+                                      ),
                                       size: likeSize,
                                       label: 'Like',
                                       gradient: LinearGradient(
@@ -706,15 +768,16 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                       ),
-                                      shadowColor: colorScheme.primary.withValues(
-                                        alpha: 0.4,
-                                      ),
+                                      shadowColor: colorScheme.primary
+                                          .withValues(alpha: 0.4),
                                       child: Icon(
                                         Icons.favorite_rounded,
                                         size: likeSize * 0.44,
                                         color: colorScheme.onPrimary,
                                       ),
-                                      onTap: () => _swiperController.swipe(CardSwiperDirection.right),
+                                      onTap: () => _swiperController.swipe(
+                                        CardSwiperDirection.right,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -729,12 +792,10 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
         ),
       ),
     );
-
   }
 }
 
 class PetCard extends StatelessWidget {
-
   const PetCard({
     super.key,
     required this.pet,
@@ -1134,7 +1195,7 @@ class PetCard extends StatelessWidget {
   }
 }
 
-// Nearby Tab
+// Verified Tab
 // ─────────────────────────────────────────────────────────────────────────────
 class NearbyTab extends ConsumerWidget {
   const NearbyTab({super.key});
@@ -1148,55 +1209,47 @@ class NearbyTab extends ConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final sorted = [...matchState.discoveryPets]
-      ..sort((a, b) => _distanceMi(a).compareTo(_distanceMi(b)));
+    final verifiedPets = matchState.discoveryPets
+        .where((pet) => pet.isVerified)
+        .toList();
 
     return RefreshIndicator(
       onRefresh: () => ref.read(matchProvider.notifier).refresh(),
-      child: sorted.isEmpty
+      child: verifiedPets.isEmpty
           ? ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.only(bottom: navSpace),
               children: [
                 const SizedBox(height: 120),
                 PetfolioEmptyState(
-                  icon: Icons.location_off_outlined,
-                  title: 'No Nearby Pets',
-                  message: 'No pets found in your area. Try refreshing or adjusting your search.',
+                  icon: Icons.verified_outlined,
+                  title: 'No Verified Pets',
+                  message: 'No verified pets are available right now.',
                   buttonText: 'Refresh',
-                  onButtonPressed: () => ref.read(matchProvider.notifier).refresh(),
+                  onButtonPressed: () =>
+                      ref.read(matchProvider.notifier).refresh(),
                 ),
               ],
             )
           : ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.fromLTRB(20, 16, 20, 24 + navSpace),
-              itemCount: sorted.length,
+              itemCount: verifiedPets.length,
               itemBuilder: (context, index) {
-                final pet = sorted[index];
-                final dist = _distanceMi(pet);
+                final pet = verifiedPets[index];
                 return _NearbyPetTile(
                   pet: pet,
-                  distanceMi: dist,
                   followerCount: matchState.discoveryFollowerCounts[pet.id],
                 );
               },
             ),
     );
   }
-
-  int _distanceMi(PetModel pet) => (pet.id.hashCode.abs() % 25) + 1;
 }
 
 class _NearbyPetTile extends StatelessWidget {
-
-  const _NearbyPetTile({
-    required this.pet,
-    required this.distanceMi,
-    this.followerCount,
-  });
+  const _NearbyPetTile({required this.pet, this.followerCount});
   final PetModel pet;
-  final int distanceMi;
   final int? followerCount;
 
   @override
@@ -1301,13 +1354,13 @@ class _NearbyPetTile extends StatelessWidget {
                           child: Row(
                             children: [
                               Icon(
-                                Icons.location_on_rounded,
+                                Icons.verified_rounded,
                                 size: 12,
                                 color: colorScheme.primary,
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '$distanceMi mi away',
+                                'Verified',
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
@@ -1367,7 +1420,6 @@ class _NearbyPetTile extends StatelessWidget {
 // Action Button
 // ─────────────────────────────────────────────────────────────────────────────
 class ActionButton extends StatelessWidget {
-
   const ActionButton({
     super.key,
     required this.size,
@@ -1398,10 +1450,7 @@ class ActionButton extends StatelessWidget {
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: 48,
-            minHeight: 48,
-          ),
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           child: Center(
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
@@ -1447,7 +1496,6 @@ class ActionButton extends StatelessWidget {
 /// Renders a horizontal scrollable row of pet chips.
 /// Hidden when the user has only one pet.
 class PetSelectorBar extends ConsumerWidget {
-
   const PetSelectorBar({
     super.key,
     required this.allCaughtUpPetIds,
@@ -1487,7 +1535,6 @@ class PetSelectorBar extends ConsumerWidget {
 }
 
 class _PetSelectorChip extends StatelessWidget {
-
   const _PetSelectorChip({
     required this.pet,
     required this.isSelected,
@@ -1533,9 +1580,7 @@ class _PetSelectorChip extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: isSelected
                     ? Border.all(color: selectedColor, width: 2)
-                    : Border.all(
-                        color: colorScheme.outline.withAlpha(60),
-                      ),
+                    : Border.all(color: colorScheme.outline.withAlpha(60)),
               ),
               child: ClipOval(
                 child: pet.profileImageUrl.isNotEmpty
@@ -1815,7 +1860,6 @@ class _ListPetSheetState extends State<_ListPetSheet> {
 }
 
 class _GlassBadge extends StatelessWidget {
-
   const _GlassBadge({required this.child, this.padding});
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -1833,9 +1877,7 @@ class _GlassBadge extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.25),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
           ),
           child: child,
         ),

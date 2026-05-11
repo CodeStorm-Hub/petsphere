@@ -115,11 +115,16 @@ class MarketplaceRepository {
         'payment_provider': paymentProvider,
       if (paymentIntentId != null && paymentIntentId.isNotEmpty)
         'payment_intent_id': paymentIntentId,
-      'shipping_name': ?shippingName,
-      'shipping_address': ?shippingLine1,
-      'shipping_city': ?shippingCity,
-      'shipping_state': ?shippingState,
-      'shipping_zip': ?shippingZip,
+      if (shippingName != null && shippingName.isNotEmpty)
+        'shipping_name': shippingName,
+      if (shippingLine1 != null && shippingLine1.isNotEmpty)
+        'shipping_address': shippingLine1,
+      if (shippingCity != null && shippingCity.isNotEmpty)
+        'shipping_city': shippingCity,
+      if (shippingState != null && shippingState.isNotEmpty)
+        'shipping_state': shippingState,
+      if (shippingZip != null && shippingZip.isNotEmpty)
+        'shipping_zip': shippingZip,
     };
 
     final result = await supabase

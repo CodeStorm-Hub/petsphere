@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:petfolio/core/constants/app_routes.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 
 class EmergencyCareScreen extends ConsumerStatefulWidget {
@@ -20,6 +22,30 @@ class _EmergencyCareScreenState extends ConsumerState<EmergencyCareScreen> {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     }
+  }
+
+  Future<void> _openEmergencyVetMap() async {
+    final query = Uri.encodeComponent('emergency veterinarian near me');
+    final url = Uri.parse('geo:0,0?q=$query');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+      return;
+    }
+    await launchUrl(
+      Uri.parse('https://www.google.com/maps/search/?api=1&query=$query'),
+      mode: LaunchMode.externalApplication,
+    );
+  }
+
+  void _openMedicalId() {
+    final activePet = ref.read(activePetProvider);
+    if (activePet == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Add a pet to open a medical ID.')),
+      );
+      return;
+    }
+    context.push(AppRoutes.petMedicalRecordsExportById(activePet.id));
   }
 
   @override
@@ -41,7 +67,7 @@ class _EmergencyCareScreenState extends ConsumerState<EmergencyCareScreen> {
             foregroundColor: colorScheme.error,
             actions: [
               IconButton.filledTonal(
-                onPressed: () {},
+                onPressed: _openEmergencyVetMap,
                 icon: const Icon(Icons.share_location_rounded),
                 style: IconButton.styleFrom(
                   backgroundColor: colorScheme.error.withAlpha(40),
@@ -56,9 +82,12 @@ class _EmergencyCareScreenState extends ConsumerState<EmergencyCareScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _EmergencyHero(),
+                  _EmergencyHero(onOpenMaps: _openEmergencyVetMap),
                   const SizedBox(height: 24),
-                  _MedicalIdCard(petName: pet.activePet?.name ?? 'Pet'),
+                  _MedicalIdCard(
+                    petName: pet.activePet?.name ?? 'Pet',
+                    onView: _openMedicalId,
+                  ),
                   const SizedBox(height: 32),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -70,7 +99,11 @@ class _EmergencyCareScreenState extends ConsumerState<EmergencyCareScreen> {
                         ),
                       ),
                       TextButton.icon(
-                        onPressed: () {},
+                        onPressed: () => _showFirstAidDialog(
+                          context,
+                          'Symptoms Checker',
+                          'Review breathing, gum color, alertness, bleeding, vomiting, seizures, pain, and temperature changes. Call a vet hotline for urgent guidance.',
+                        ),
                         icon: const Icon(Icons.search_rounded, size: 18),
                         label: const Text('Symptoms Checker'),
                       ),
@@ -139,7 +172,40 @@ class _EmergencyCareScreenState extends ConsumerState<EmergencyCareScreen> {
   }
 }
 
+void _showFirstAidDialog(BuildContext context, String title, String body) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(title),
+      content: Text(body),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Close'),
+        ),
+      ],
+    ),
+  );
+}
+
+String _firstAidCopy(String title) {
+  return switch (title) {
+    'CPR & Choking' =>
+      'Check breathing, clear visible airway blockage, and call a vet immediately. Begin pet CPR only if the pet is unresponsive and not breathing.',
+    'Bleeding' =>
+      'Apply firm pressure with clean gauze or cloth. Keep pressure steady and seek emergency care if bleeding does not slow quickly.',
+    'Heatstroke' =>
+      'Move to shade, use cool water on the body, offer small amounts of water if alert, and call an emergency vet.',
+    'Fractures' =>
+      'Limit movement, do not try to reset the limb, and transport carefully to an emergency clinic.',
+    _ => 'Call a veterinarian or emergency hotline for immediate guidance.',
+  };
+}
+
 class _EmergencyHero extends StatelessWidget {
+  const _EmergencyHero({required this.onOpenMaps});
+  final VoidCallback onOpenMaps;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -186,7 +252,7 @@ class _EmergencyHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 FilledButton(
-                  onPressed: () {},
+                  onPressed: onOpenMaps,
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: colorScheme.error,
@@ -221,8 +287,9 @@ class _EmergencyHero extends StatelessWidget {
 }
 
 class _MedicalIdCard extends StatelessWidget {
-  const _MedicalIdCard({required this.petName});
+  const _MedicalIdCard({required this.petName, required this.onView});
   final String petName;
+  final VoidCallback onView;
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +348,7 @@ class _MedicalIdCard extends StatelessWidget {
             ),
           ),
           IconButton.filledTonal(
-            onPressed: () {},
+            onPressed: onView,
             icon: const Icon(Icons.visibility_rounded),
             style: IconButton.styleFrom(
               backgroundColor: colorScheme.primaryContainer.withAlpha(150),
@@ -294,7 +361,6 @@ class _MedicalIdCard extends StatelessWidget {
 }
 
 class _EmergencyContactCard extends StatelessWidget {
-
   const _EmergencyContactCard({
     required this.title,
     required this.phone,
@@ -416,7 +482,11 @@ class _ActionGrid extends StatelessWidget {
           color: color.withAlpha(15),
           borderRadius: BorderRadius.circular(24),
           child: InkWell(
-            onTap: () {},
+            onTap: () => _showFirstAidDialog(
+              context,
+              action['title'] as String,
+              _firstAidCopy(action['title'] as String),
+            ),
             borderRadius: BorderRadius.circular(24),
             child: Container(
               padding: const EdgeInsets.all(20),

@@ -1,21 +1,21 @@
+import 'dart:async';
 import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
+import 'package:petfolio/core/constants/app_durations.dart';
+import 'package:petfolio/core/constants/supabase_config.dart'
+    show
+        kBucketAvatars,
+        kBucketPetImages,
+        kBucketPostMedia,
+        kBucketProductImages;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// A robust service for managing Supabase Storage buckets and file operations.
-/// 
-/// Provides self-healing capabilities by ensuring required buckets exist 
-/// and are correctly configured. Supports cross-platform uploads.
 class StorageService {
-
   StorageService(this._supabase);
   final SupabaseClient _supabase;
 
-  /// Initializes all required buckets if they don't exist.
-  /// 
-  /// This should be called during app bootstrap (Phase 1.1 Remediation).
   Future<void> initializeBuckets() async {
-    final requiredBuckets = [
+    const requiredBuckets = [
       kBucketAvatars,
       kBucketPetImages,
       kBucketPostMedia,
@@ -23,28 +23,30 @@ class StorageService {
     ];
 
     try {
-      final buckets = await _supabase.storage.listBuckets();
+      final buckets = await _supabase.storage.listBuckets().timeout(
+        AppDurations.realtimeSubscriptionTimeout,
+      );
       final existingIds = buckets.map((b) => b.id).toSet();
+      final missing = requiredBuckets
+          .where((bucketId) => !existingIds.contains(bucketId))
+          .toList(growable: false);
 
-      for (final bucketId in requiredBuckets) {
-        if (!existingIds.contains(bucketId)) {
-          developer.log('Creating missing bucket: $bucketId', name: 'StorageService');
-          await _supabase.storage.createBucket(
-            bucketId,
-            const BucketOptions(public: true),
-          );
-        }
+      if (missing.isNotEmpty) {
+        developer.log(
+          'Missing storage buckets: ${missing.join(', ')}',
+          name: 'StorageService',
+        );
       }
+    } on TimeoutException catch (e) {
+      developer.log(
+        'Bucket verification timed out: $e',
+        name: 'StorageService',
+      );
     } catch (e) {
-      // In production, users might not have permission to create buckets.
-      // We log but don't crash, as buckets are likely already there.
-      developer.log('Bucket initialization skipped: $e', name: 'StorageService');
+      developer.log('Bucket verification skipped: $e', name: 'StorageService');
     }
   }
 
-  /// Uploads binary data to a bucket and returns the public URL.
-  /// 
-  /// This is the preferred cross-platform upload method.
   Future<String> uploadBinary({
     required Uint8List bytes,
     required String bucket,
@@ -52,35 +54,36 @@ class StorageService {
     required String contentType,
   }) async {
     try {
-      await _supabase.storage.from(bucket).uploadBinary(
+      await _supabase.storage
+          .from(bucket)
+          .uploadBinary(
             path,
             bytes,
-            fileOptions: FileOptions(
-              upsert: true,
-              contentType: contentType,
-            ),
-          );
+            fileOptions: FileOptions(upsert: true, contentType: contentType),
+          )
+          .timeout(AppDurations.imageUploadTimeout);
 
       return _supabase.storage.from(bucket).getPublicUrl(path);
     } catch (e) {
-      developer.log('Upload failed for $path in $bucket: $e', name: 'StorageService');
+      developer.log(
+        'Upload failed for $path in $bucket: $e',
+        name: 'StorageService',
+      );
       rethrow;
     }
   }
 
-  /// Deletes a file from a bucket.
   Future<void> deleteFile(String bucket, String path) async {
     try {
-      await _supabase.storage.from(bucket).remove([path]);
+      await _supabase.storage
+          .from(bucket)
+          .remove([path])
+          .timeout(AppDurations.defaultNetworkTimeout);
     } catch (e) {
-      developer.log('Delete failed for $path in $bucket: $e', name: 'StorageService');
-      // Non-critical: don't rethrow unless necessary
+      developer.log(
+        'Delete failed for $path in $bucket: $e',
+        name: 'StorageService',
+      );
     }
   }
 }
-
-/// Constants for bucket names (aligned with supabase_config.dart)
-const kBucketAvatars = 'avatars';
-const kBucketPetImages = 'pet-images';
-const kBucketPostMedia = 'post-media';
-const kBucketProductImages = 'product-images';

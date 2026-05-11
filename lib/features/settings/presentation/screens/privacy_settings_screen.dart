@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +6,8 @@ class PrivacySettingsScreen extends ConsumerStatefulWidget {
   const PrivacySettingsScreen({super.key});
 
   @override
-  ConsumerState<PrivacySettingsScreen> createState() => _PrivacySettingsScreenState();
+  ConsumerState<PrivacySettingsScreen> createState() =>
+      _PrivacySettingsScreenState();
 }
 
 class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
@@ -25,8 +25,8 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
           RadioGroup<String>(
             groupValue: _visibilityLevel,
             onChanged: (v) => setState(() => _visibilityLevel = v!),
-            child: Column(
-              children: const [
+            child: const Column(
+              children: [
                 RadioListTile<String>(
                   title: Text('Public'),
                   subtitle: Text('Anyone can see your profile'),
@@ -57,7 +57,9 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
           const _SectionHeader(title: 'Discovery'),
           SwitchListTile(
             title: const Text('Visible in Search'),
-            subtitle: const Text('Allow your profile to appear in search results'),
+            subtitle: const Text(
+              'Allow your profile to appear in search results',
+            ),
             value: _searchVisible,
             onChanged: (v) => setState(() => _searchVisible = v),
           ),

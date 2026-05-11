@@ -12,6 +12,7 @@ class PetMemorialScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final memorialsAsync = ref.watch(memorialEntriesProvider);
+    final petId = GoRouterState.of(context).pathParameters['id'];
 
     return Scaffold(
       body: CustomScrollView(
@@ -64,7 +65,7 @@ class PetMemorialScreen extends ConsumerWidget {
                           ),
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final entry = memorials[index];
-                        return _MemorialGridCard(entry: entry);
+                        return _MemorialGridCard(entry: entry, petId: petId);
                       }, childCount: memorials.length),
                     ),
             ),
@@ -91,13 +92,18 @@ class PetMemorialScreen extends ConsumerWidget {
 }
 
 class _MemorialGridCard extends StatelessWidget {
-  const _MemorialGridCard({required this.entry});
+  const _MemorialGridCard({required this.entry, required this.petId});
   final PetMemorialEntry entry;
+  final String? petId;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => context.push('/memorial/${entry.id}'),
+      onTap: petId == null
+          ? null
+          : () => context.push(
+              '${AppRoutes.petMemorialById(petId!)}/${entry.id}',
+            ),
       borderRadius: BorderRadius.circular(24),
       child: Card(
         elevation: 0,

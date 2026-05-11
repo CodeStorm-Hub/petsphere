@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import 'dart:io';
 import 'package:petfolio/core/constants/app_routes.dart';
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:petfolio/features/community/data/lost_found_repository.dart';
+import 'package:petfolio/core/utils/image_upload_helper.dart';
 import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -93,7 +95,6 @@ class LostAndFoundScreen extends ConsumerWidget {
   }
 }
 
-
 void _openReportSheet(BuildContext context, WidgetRef ref) {
   final user = ref.read(authProvider).user;
   if (user == null) {
@@ -141,7 +142,8 @@ class _ReportList extends ConsumerWidget {
           return PetfolioEmptyState(
             icon: Icons.search_off,
             title: 'No ${status == 'lost' ? 'Lost' : 'Found'} Pet Reports',
-            message: 'No reports found for this category. Have you found or lost a pet? Share it with the community.',
+            message:
+                'No reports found for this category. Have you found or lost a pet? Share it with the community.',
             buttonText: 'Report a Pet',
             onButtonPressed: () => _openReportSheet(context, ref),
           );
@@ -413,6 +415,7 @@ class _ReportSheetState extends State<_ReportSheet> {
   final _descCtrl = TextEditingController();
   final _contactCtrl = TextEditingController();
   final _rewardCtrl = TextEditingController();
+  File? _selectedImage;
   String _status = 'lost';
   String _petType = 'dog';
   bool _saving = false;
@@ -428,9 +431,124 @@ class _ReportSheetState extends State<_ReportSheet> {
     super.dispose();
   }
 
+  Future<void> _pickImageFromGallery() async {
+    final file = await ImageUploadHelper.pickFromGallery();
+    if (file == null || !mounted) return;
+    setState(() => _selectedImage = file);
+  }
+
+  Future<void> _takePhoto() async {
+    final file = await ImageUploadHelper.pickFromCamera();
+    if (file == null || !mounted) return;
+    setState(() => _selectedImage = file);
+  }
+
+  void _showImageSourceSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.onPrimary,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Add Photo',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Help others identify this pet',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.photo_library_rounded,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+              ),
+              title: const Text(
+                'Choose from Gallery',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text('Select an existing photo'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickImageFromGallery();
+              },
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.camera_alt_rounded,
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                ),
+              ),
+              title: const Text(
+                'Take a Photo',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text('Use your camera'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _takePhoto();
+              },
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
+
+    String? imageUrl;
+    try {
+      if (_selectedImage != null) {
+        imageUrl = await ImageUploadHelper.uploadLostFoundImage(
+          _selectedImage!,
+          widget.reporterId,
+        );
+      }
+    } catch (e) {
+      setState(() => _saving = false);
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Image upload failed: $e')));
+      return;
+    }
 
     final report = LostFoundReport(
       id: '',
@@ -447,6 +565,7 @@ class _ReportSheetState extends State<_ReportSheet> {
           ? null
           : _contactCtrl.text.trim(),
       rewardAmount: double.tryParse(_rewardCtrl.text.trim()),
+      imageUrl: imageUrl,
       isActive: true,
       createdAt: DateTime.now(),
     );
@@ -461,6 +580,7 @@ class _ReportSheetState extends State<_ReportSheet> {
       );
     } catch (e) {
       setState(() => _saving = false);
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -511,6 +631,59 @@ class _ReportSheetState extends State<_ReportSheet> {
                 selected: {_status},
                 onSelectionChanged: (s) => setState(() => _status = s.first),
               ),
+              const SizedBox(height: 16),
+              Center(
+                child: GestureDetector(
+                  onTap: _showImageSourceSheet,
+                  child: Container(
+                    width: 140,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colorScheme.surfaceContainerHigh,
+                      border: Border.all(
+                        color: colorScheme.outlineVariant,
+                        width: 2,
+                      ),
+                      image: _selectedImage != null
+                          ? DecorationImage(
+                              image: FileImage(_selectedImage!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: _selectedImage == null
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_a_photo_outlined,
+                                size: 36,
+                                color: colorScheme.primary,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Add Photo',
+                                style: TextStyle(
+                                  color: colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+              if (_selectedImage != null)
+                Center(
+                  child: TextButton.icon(
+                    onPressed: _showImageSourceSheet,
+                    icon: const Icon(Icons.edit, size: 16),
+                    label: const Text('Change Photo'),
+                  ),
+                ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _petNameCtrl,

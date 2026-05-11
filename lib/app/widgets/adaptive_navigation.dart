@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:petfolio/core/widgets/brand_logo.dart';
 import 'package:petfolio/core/utils/layout_utils.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -15,7 +18,11 @@ class NavItem {
 const List<NavItem> _kNavItems = [
   NavItem(Icons.home_outlined, Icons.home_rounded, 'Home'),
   NavItem(Icons.search_rounded, Icons.search_rounded, 'Discover'),
-  NavItem(Icons.add_rounded, Icons.add_rounded, 'Pet Care'), // center FAB / Middle item
+  NavItem(
+    Icons.add_rounded,
+    Icons.add_rounded,
+    'Pet Care',
+  ), // center FAB / Middle item
   NavItem(Icons.storefront_outlined, Icons.storefront_rounded, 'Shop'),
   NavItem(Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
 ];
@@ -24,7 +31,6 @@ const List<NavItem> _kNavItems = [
 // PetFolioNavBar — mobile bottom navigation
 // ─────────────────────────────────────────────────────────────────────────────
 class PetFolioNavBar extends StatelessWidget {
-
   const PetFolioNavBar({
     super.key,
     required this.currentIndex,
@@ -43,104 +49,120 @@ class PetFolioNavBar extends StatelessWidget {
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    final barBg = isDark ? const Color(0xFF1C1C1C) : cs.surface;
-    final barBorder = isDark
-        ? const Color(0xFF2E2E2E)
-        : cs.outline.withAlpha(55);
+    final barBg = isDark
+        ? cs.surface.withValues(alpha: 0.72)
+        : cs.surface.withValues(alpha: 0.78);
+    final barBorder = cs.outline.withAlpha(isDark ? 80 : 45);
 
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    return SafeArea(
+      minimum: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(999),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            height: kBottomNavBarHeight,
+            decoration: BoxDecoration(
+              color: barBg,
+              border: Border.all(color: barBorder),
+              borderRadius: BorderRadius.circular(999),
+              boxShadow: [
+                BoxShadow(
+                  color: cs.primary.withValues(alpha: isDark ? 0.18 : 0.08),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Row(
+              children: List.generate(_kNavItems.length, (i) {
+                final isActive = currentIndex == i;
+                final isCenter = i == 2;
+                final isProfile = i == 4;
+                final iconColor = isActive ? cs.primary : cs.onSurfaceVariant;
 
-    return Container(
-      height: kBottomNavBarHeight + bottomInset,
-      padding: EdgeInsets.only(bottom: bottomInset),
-      decoration: BoxDecoration(
-        color: barBg,
-        border: Border(top: BorderSide(color: barBorder)),
-      ),
-      child: Row(
-        children: List.generate(_kNavItems.length, (i) {
-          final isActive = currentIndex == i;
-          final isCenter = i == 2;
-          final isProfile = i == 4;
-          final iconColor = isActive ? cs.primary : cs.onSurfaceVariant;
-
-          if (isCenter) {
-            return Expanded(
-              child: Semantics(
-                button: true,
-                label: 'Pet Care',
-                hint: 'Opens pet care diary, goals, and daily checklist',
-                onTap: () => onTap(i),
-                excludeSemantics: true,
-                child: GestureDetector(
-                  onTap: () => onTap(i),
-                  behavior: HitTestBehavior.opaque,
-                  child: Center(
-                    child: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [cs.primary, cs.primary.withAlpha(200)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: cs.primary.withAlpha(80),
-                            blurRadius: 14,
-                            offset: const Offset(0, 4),
+                if (isCenter) {
+                  return Expanded(
+                    child: Semantics(
+                      button: true,
+                      label: 'Pet Care',
+                      hint: 'Opens pet care diary, goals, and daily checklist',
+                      onTap: () => onTap(i),
+                      excludeSemantics: true,
+                      child: GestureDetector(
+                        onTap: () => onTap(i),
+                        behavior: HitTestBehavior.opaque,
+                        child: Center(
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [cs.primary, cs.primary.withAlpha(200)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: cs.primary.withAlpha(80),
+                                  blurRadius: 14,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.add_rounded,
+                              color: cs.onPrimary,
+                              size: 28,
+                            ),
                           ),
-                        ],
+                        ),
                       ),
-                      child: Icon(
-                        Icons.add_rounded,
-                        color: cs.onPrimary,
-                        size: 28,
+                    ),
+                  );
+                }
+
+                return Expanded(
+                  child: Semantics(
+                    button: true,
+                    selected: isActive,
+                    label: _kNavItems[i].label,
+                    onTap: () => onTap(i),
+                    excludeSemantics: true,
+                    child: GestureDetector(
+                      onTap: () => onTap(i),
+                      onLongPress: onLongTap != null
+                          ? () => onLongTap!(i)
+                          : null,
+                      behavior: HitTestBehavior.opaque,
+                      child: Center(
+                        child: AnimatedScale(
+                          scale: isActive ? 1.12 : 1.0,
+                          duration: const Duration(milliseconds: 230),
+                          curve: Curves.easeOutBack,
+                          child: isProfile
+                              ? NavProfileAvatar(
+                                  imageUrl: profileImageUrl,
+                                  isActive: isActive,
+                                  ringColor: cs.primary,
+                                )
+                              : Icon(
+                                  isActive
+                                      ? _kNavItems[i].active
+                                      : _kNavItems[i].inactive,
+                                  color: iconColor,
+                                  size: 26,
+                                ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            );
-          }
-
-          return Expanded(
-            child: Semantics(
-              button: true,
-              selected: isActive,
-              label: _kNavItems[i].label,
-              onTap: () => onTap(i),
-              excludeSemantics: true,
-              child: GestureDetector(
-                onTap: () => onTap(i),
-                onLongPress: onLongTap != null ? () => onLongTap!(i) : null,
-                behavior: HitTestBehavior.opaque,
-                child: Center(
-                  child: AnimatedScale(
-                    scale: isActive ? 1.12 : 1.0,
-                    duration: const Duration(milliseconds: 230),
-                    curve: Curves.easeOutBack,
-                    child: isProfile
-                        ? NavProfileAvatar(
-                            imageUrl: profileImageUrl,
-                            isActive: isActive,
-                            ringColor: cs.primary,
-                          )
-                        : Icon(
-                            isActive
-                                ? _kNavItems[i].active
-                                : _kNavItems[i].inactive,
-                            color: iconColor,
-                            size: 26,
-                          ),
-                  ),
-                ),
-              ),
+                );
+              }),
             ),
-          );
-        }),
+          ),
+        ),
       ),
     );
   }
@@ -150,7 +172,6 @@ class PetFolioNavBar extends StatelessWidget {
 // PetFolioNavRail — tablet/desktop side navigation
 // ─────────────────────────────────────────────────────────────────────────────
 class PetFolioNavRail extends StatelessWidget {
-
   const PetFolioNavRail({
     super.key,
     required this.currentIndex,
@@ -171,10 +192,10 @@ class PetFolioNavRail extends StatelessWidget {
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    final railBg = isDark ? const Color(0xFF1C1C1C) : cs.surface;
-    final railBorder = isDark
-        ? const Color(0xFF2E2E2E)
-        : cs.outline.withAlpha(55);
+    final railBg = isDark
+        ? cs.surface.withValues(alpha: 0.72)
+        : cs.surface.withValues(alpha: 0.82);
+    final railBorder = cs.outline.withAlpha(isDark ? 80 : 45);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -184,106 +205,120 @@ class PetFolioNavRail extends StatelessWidget {
         color: railBg,
         border: Border(right: BorderSide(color: railBorder)),
       ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 24),
-            // App Logo
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: isExtended ? 24 : 0),
-              child: Row(
-                mainAxisAlignment: isExtended
-                    ? MainAxisAlignment.start
-                    : MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.pets_rounded, color: cs.primary, size: 32),
-                  if (isExtended) ...[
-                    const SizedBox(width: 12),
-                    Text(
-                      'PetFolio',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface,
-                        letterSpacing: -0.5,
-                      ),
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 24),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isExtended ? 24 : 0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: isExtended
+                        ? MainAxisAlignment.start
+                        : MainAxisAlignment.center,
+                    children: [
+                      BrandLogo(customSize: isExtended ? 30 : 32),
+                      if (isExtended) ...[
+                        const SizedBox(width: 12),
+                        Text(
+                          'PetFolio',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: cs.onSurface,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _kNavItems.length,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isExtended ? 12 : 8,
                     ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: 40),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _kNavItems.length,
-                padding: EdgeInsets.symmetric(horizontal: isExtended ? 12 : 8),
-                itemBuilder: (context, i) {
-                  final isActive = currentIndex == i;
-                  final isProfile = i == 4;
-                  final iconColor = isActive ? cs.primary : cs.onSurfaceVariant;
+                    itemBuilder: (context, i) {
+                      final isActive = currentIndex == i;
+                      final isProfile = i == 4;
+                      final iconColor = isActive
+                          ? cs.primary
+                          : cs.onSurfaceVariant;
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: InkWell(
-                      onTap: () => onTap(i),
-                      onLongPress: onLongTap != null ? () => onLongTap!(i) : null,
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isExtended ? 16 : 0,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isActive
-                              ? cs.primaryContainer.withAlpha(isDark ? 40 : 150)
-                              : Colors.transparent,
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: InkWell(
+                          onTap: () => onTap(i),
+                          onLongPress: onLongTap != null
+                              ? () => onLongTap!(i)
+                              : null,
                           borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: isExtended
-                              ? MainAxisAlignment.start
-                              : MainAxisAlignment.center,
-                          children: [
-                            AnimatedScale(
-                              scale: isActive ? 1.1 : 1.0,
-                              duration: const Duration(milliseconds: 230),
-                              curve: Curves.easeOutBack,
-                              child: isProfile
-                                  ? NavProfileAvatar(
-                                      imageUrl: profileImageUrl,
-                                      isActive: isActive,
-                                      ringColor: cs.primary,
-                                    )
-                                  : Icon(
-                                      isActive
-                                          ? _kNavItems[i].active
-                                          : _kNavItems[i].inactive,
-                                      color: iconColor,
-                                      size: 24,
-                                    ),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isExtended ? 16 : 0,
+                              vertical: 12,
                             ),
-                            if (isExtended) ...[
-                              const SizedBox(width: 16),
-                              Text(
-                                _kNavItems[i].label,
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  fontWeight: isActive
-                                      ? FontWeight.w700
-                                      : FontWeight.w500,
-                                  color: isActive
-                                      ? cs.primary
-                                      : cs.onSurfaceVariant,
+                            decoration: BoxDecoration(
+                              color: isActive
+                                  ? cs.primaryContainer.withAlpha(
+                                      isDark ? 40 : 150,
+                                    )
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: isExtended
+                                  ? MainAxisAlignment.start
+                                  : MainAxisAlignment.center,
+                              children: [
+                                AnimatedScale(
+                                  scale: isActive ? 1.1 : 1.0,
+                                  duration: const Duration(milliseconds: 230),
+                                  curve: Curves.easeOutBack,
+                                  child: isProfile
+                                      ? NavProfileAvatar(
+                                          imageUrl: profileImageUrl,
+                                          isActive: isActive,
+                                          ringColor: cs.primary,
+                                        )
+                                      : Icon(
+                                          isActive
+                                              ? _kNavItems[i].active
+                                              : _kNavItems[i].inactive,
+                                          color: iconColor,
+                                          size: 24,
+                                        ),
                                 ),
-                              ),
-                            ],
-                          ],
+                                if (isExtended) ...[
+                                  const SizedBox(width: 16),
+                                  Text(
+                                    _kNavItems[i].label,
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      fontWeight: isActive
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                      color: isActive
+                                          ? cs.primary
+                                          : cs.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -294,7 +329,6 @@ class PetFolioNavRail extends StatelessWidget {
 // NavProfileAvatar — pet avatar with animated active ring
 // ─────────────────────────────────────────────────────────────────────────────
 class NavProfileAvatar extends StatelessWidget {
-
   const NavProfileAvatar({
     super.key,
     required this.imageUrl,

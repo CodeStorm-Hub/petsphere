@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:petfolio/core/constants/app_durations.dart';
 import 'package:petfolio/core/constants/app_strings.dart';
 import 'package:petfolio/core/utils/logger.dart';
 
@@ -8,7 +11,6 @@ import 'package:petfolio/features/notifications/data/models/notification_model.d
 import 'package:petfolio/features/notifications/data/notification_repository.dart';
 
 class NotificationState {
-
   const NotificationState({
     this.items = const [],
     this.isLoading = false,
@@ -81,15 +83,27 @@ class NotificationController extends Notifier<NotificationState> {
   Future<void> _fetch(String userId) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final items = await notificationRepository.fetchForUser(userId);
+      final items = await notificationRepository
+          .fetchForUser(userId)
+          .timeout(AppDurations.defaultNetworkTimeout);
       state = state.copyWith(items: items, isLoading: false);
+    } on TimeoutException catch (e) {
+      AppLogger.error(
+        AppStrings.timeoutError,
+        tag: 'NotificationController',
+        error: e,
+      );
+      state = state.copyWith(isLoading: false, error: AppStrings.timeoutError);
     } catch (e) {
       AppLogger.error(
         AppStrings.notificationLoadFailed,
         tag: 'NotificationController',
         error: e,
       );
-      state = state.copyWith(isLoading: false, error: AppStrings.notificationLoadFailed);
+      state = state.copyWith(
+        isLoading: false,
+        error: AppStrings.notificationLoadFailed,
+      );
     }
   }
 

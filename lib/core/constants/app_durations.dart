@@ -5,7 +5,7 @@ library;
 class AppDurations {
   // Network timeouts
   static const Duration authTimeout = Duration(seconds: 15);
-  static const Duration defaultNetworkTimeout = Duration(seconds: 30);
+  static const Duration defaultNetworkTimeout = Duration(seconds: 12);
   static const Duration imageUploadTimeout = Duration(seconds: 60);
   static const Duration realtimeSubscriptionTimeout = Duration(seconds: 10);
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:petfolio/features/community/data/lost_found_repository.dart';
 
@@ -35,18 +36,22 @@ class LostFoundDetailScreen extends ConsumerWidget {
                       ? Image.network(
                           report.imageUrl!,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => _Placeholder(isLost: isLost),
+                          errorBuilder: (_, _, _) =>
+                              _Placeholder(isLost: isLost),
                         )
                       : _Placeholder(isLost: isLost),
                 ),
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.share),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Share feature coming soon')),
-                      );
-                    },
+                    onPressed: () => SharePlus.instance.share(
+                      ShareParams(
+                        text:
+                            '${isLost ? 'Lost' : 'Found'} pet: ${report.petName}\n'
+                            'Last seen: ${report.lastSeenLocation ?? 'Location not listed'}\n'
+                            '${report.description ?? ''}',
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -59,9 +64,16 @@ class LostFoundDetailScreen extends ConsumerWidget {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
-                              color: (isLost ? colorScheme.error : colorScheme.tertiary).withAlpha(230),
+                              color:
+                                  (isLost
+                                          ? colorScheme.error
+                                          : colorScheme.tertiary)
+                                      .withAlpha(230),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -77,16 +89,17 @@ class LostFoundDetailScreen extends ConsumerWidget {
                           const Spacer(),
                           Text(
                             DateFormat('MMM d, yyyy').format(report.createdAt),
-                            style: TextStyle(color: colorScheme.onSurfaceVariant),
+                            style: TextStyle(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
                       Text(
                         report.petName,
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       if (report.breed != null) ...[
                         const SizedBox(height: 4),
@@ -111,9 +124,8 @@ class LostFoundDetailScreen extends ConsumerWidget {
                         const SizedBox(height: 16),
                         Text(
                           'Description',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -132,7 +144,10 @@ class LostFoundDetailScreen extends ConsumerWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.money, color: colorScheme.onSecondaryContainer),
+                              Icon(
+                                Icons.money,
+                                color: colorScheme.onSecondaryContainer,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'Reward: \$${report.rewardAmount!.toStringAsFixed(0)}',
@@ -148,7 +163,8 @@ class LostFoundDetailScreen extends ConsumerWidget {
                       const SizedBox(height: 24),
                       if (report.contactInfo != null) ...[
                         FilledButton.icon(
-                          onPressed: () => _contactReporter(context, report.contactInfo!),
+                          onPressed: () =>
+                              _contactReporter(context, report.contactInfo!),
                           icon: const Icon(Icons.phone),
                           label: const Text('Contact Reporter'),
                           style: FilledButton.styleFrom(
@@ -176,25 +192,34 @@ class LostFoundDetailScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _contactReporter(BuildContext context, String contactInfo) async {
+  Future<void> _contactReporter(
+    BuildContext context,
+    String contactInfo,
+  ) async {
     final uri = Uri.parse('tel:$contactInfo');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Contact: $contactInfo')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Contact: $contactInfo')));
       }
     }
   }
 
-  void _markResolved(BuildContext context, WidgetRef ref, LostFoundReport report) {
+  void _markResolved(
+    BuildContext context,
+    WidgetRef ref,
+    LostFoundReport report,
+  ) {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Mark as Resolved?'),
-        content: const Text('This will mark the report as resolved and hide it from the list.'),
+        content: const Text(
+          'This will mark the report as resolved and hide it from the list.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -223,7 +248,11 @@ final _reportProvider = FutureProvider<List<LostFoundReport>>((ref) async {
 });
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.icon, required this.label, required this.value});
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
   final IconData icon;
   final String label;
   final String value;
@@ -236,7 +265,12 @@ class _InfoRow extends StatelessWidget {
         Icon(icon, size: 20, color: colorScheme.primary),
         const SizedBox(width: 8),
         Text('$label: ', style: TextStyle(color: colorScheme.onSurfaceVariant)),
-        Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500))),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+        ),
       ],
     );
   }
@@ -250,12 +284,16 @@ class _Placeholder extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      color: isLost ? colorScheme.errorContainer : colorScheme.tertiaryContainer,
+      color: isLost
+          ? colorScheme.errorContainer
+          : colorScheme.tertiaryContainer,
       child: Center(
         child: Icon(
           isLost ? Icons.pets : Icons.search,
           size: 80,
-          color: isLost ? colorScheme.onErrorContainer : colorScheme.onTertiaryContainer,
+          color: isLost
+              ? colorScheme.onErrorContainer
+              : colorScheme.onTertiaryContainer,
         ),
       ),
     );

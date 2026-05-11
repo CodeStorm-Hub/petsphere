@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:petfolio/features/messaging/data/models/message_model.dart';
 
 class MessageBubble extends StatelessWidget {
-
   const MessageBubble({super.key, required this.message, required this.isMe});
   final MessageModel message;
   final bool isMe;
@@ -12,10 +11,12 @@ class MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final timeStr = DateFormat('h:mm a').format(message.createdAt.toLocal());
+    final media = _MediaPayload.tryParse(message.text);
 
     return Semantics(
-      label:
-          '${isMe ? 'You sent' : 'Received message'}: ${message.text} at $timeStr',
+      label: media == null
+          ? '${isMe ? 'You sent' : 'Received message'}: ${message.text} at $timeStr'
+          : '${isMe ? 'You sent' : 'Received'} a ${media.type} at $timeStr',
       excludeSemantics: true,
       child: Align(
         alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -67,14 +68,19 @@ class MessageBubble extends StatelessWidget {
                   : CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  message.text,
-                  style: TextStyle(
-                    color: isMe ? colorScheme.onPrimary : colorScheme.onSurface,
-                    fontSize: 15,
-                    height: 1.4,
-                  ),
-                ),
+                if (media == null)
+                  Text(
+                    message.text,
+                    style: TextStyle(
+                      color: isMe
+                          ? colorScheme.onPrimary
+                          : colorScheme.onSurface,
+                      fontSize: 15,
+                      height: 1.4,
+                    ),
+                  )
+                else
+                  _MediaMessagePreview(media: media, isMe: isMe),
                 const SizedBox(height: 5),
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -105,6 +111,86 @@ class MessageBubble extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _MediaPayload {
+  const _MediaPayload(this.type, this.url);
+  final String type;
+  final String url;
+
+  static _MediaPayload? tryParse(String text) {
+    if (!text.startsWith('media:')) return null;
+    final parts = text.split(':');
+    if (parts.length < 3) return null;
+    final type = parts[1];
+    final url = text.substring('media:$type:'.length);
+    if (url.isEmpty) return null;
+    return _MediaPayload(type, url);
+  }
+}
+
+class _MediaMessagePreview extends StatelessWidget {
+  const _MediaMessagePreview({required this.media, required this.isMe});
+  final _MediaPayload media;
+  final bool isMe;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    if (media.type == 'image') {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.network(
+          media.url,
+          width: 220,
+          height: 160,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              _mediaFallback(colorScheme),
+        ),
+      );
+    }
+
+    return Container(
+      width: 220,
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+      decoration: BoxDecoration(
+        color: isMe
+            ? colorScheme.onPrimary.withAlpha(30)
+            : colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colorScheme.outline.withAlpha(80)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.play_circle_fill_rounded, color: colorScheme.primary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Video message',
+              style: TextStyle(
+                color: isMe ? colorScheme.onPrimary : colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _mediaFallback(ColorScheme colorScheme) {
+    return Container(
+      width: 220,
+      height: 160,
+      color: colorScheme.surfaceContainerHigh,
+      child: Icon(
+        Icons.broken_image_outlined,
+        color: colorScheme.onSurfaceVariant,
+        size: 32,
       ),
     );
   }
