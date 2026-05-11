@@ -82,6 +82,9 @@ class MainLayoutState extends ConsumerState<MainLayout> {
 
     final authState = ref.watch(authProvider);
     final user = authState.user;
+    final activePet = ref.watch(activePetProvider);
+    final displayImageUrl = activePet?.profileImageUrl ?? user?.profileImageUrl ?? '';
+    
     final width = MediaQuery.of(context).size.width;
     final isTablet = width > 600;
 
@@ -94,7 +97,7 @@ class MainLayoutState extends ConsumerState<MainLayout> {
               currentIndex: _calculateNavBarIndex(
                 widget.navigationShell.currentIndex,
               ),
-              profileImageUrl: user?.profileImageUrl ?? '',
+              profileImageUrl: displayImageUrl,
               onTap: _onTap,
               isExtended: width > 900,
             ),
@@ -115,7 +118,7 @@ class MainLayoutState extends ConsumerState<MainLayout> {
               currentIndex: _calculateNavBarIndex(
                 widget.navigationShell.currentIndex,
               ),
-              profileImageUrl: user?.profileImageUrl ?? '',
+              profileImageUrl: displayImageUrl,
               onTap: _onTap,
             ),
           ),

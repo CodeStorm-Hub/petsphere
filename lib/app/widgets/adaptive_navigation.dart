@@ -30,10 +30,12 @@ class PetFolioNavBar extends StatelessWidget {
     required this.currentIndex,
     required this.profileImageUrl,
     required this.onTap,
+    this.onLongTap,
   });
   final int currentIndex;
   final String profileImageUrl;
   final ValueChanged<int> onTap;
+  final ValueChanged<int>? onLongTap;
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +115,7 @@ class PetFolioNavBar extends StatelessWidget {
               excludeSemantics: true,
               child: GestureDetector(
                 onTap: () => onTap(i),
+                onLongPress: onLongTap != null ? () => onLongTap!(i) : null,
                 behavior: HitTestBehavior.opaque,
                 child: Center(
                   child: AnimatedScale(
@@ -153,11 +156,13 @@ class PetFolioNavRail extends StatelessWidget {
     required this.currentIndex,
     required this.profileImageUrl,
     required this.onTap,
+    this.onLongTap,
     this.isExtended = false,
   });
   final int currentIndex;
   final String profileImageUrl;
   final ValueChanged<int> onTap;
+  final ValueChanged<int>? onLongTap;
   final bool isExtended;
 
   @override
@@ -220,6 +225,7 @@ class PetFolioNavRail extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: InkWell(
                       onTap: () => onTap(i),
+                      onLongPress: onLongTap != null ? () => onLongTap!(i) : null,
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
                         padding: EdgeInsets.symmetric(

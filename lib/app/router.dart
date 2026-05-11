@@ -166,31 +166,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        path: AppRoutes.petCare,
-        builder: (context, state) => const PetCareScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.petCareOnboarding,
+        path: AppRoutes.petProfile,
         builder: (context, state) {
-          final id = state.uri.queryParameters['petId'];
-          if (id == null || id.isEmpty) {
-            return const Scaffold(body: Center(child: Text('Missing pet')));
-          }
-          return PetCareOnboardingScreen(petId: id);
-        },
-      ),
-      GoRoute(
-        path: AppRoutes.notifications,
-        builder: (context, state) => const NotificationsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.likedPets,
-        builder: (context, state) => const LikedPetsScreen(),
-      ),
-      GoRoute(
-        path: '${AppRoutes.petProfile}/:id',
-        builder: (context, state) {
-          final petId = safePathParam(state, 'id');
+          final petId = state.pathParameters['id'];
           if (petId == null) {
             return const InvalidRouteErrorScreen(missingParam: 'pet ID');
           }
@@ -206,11 +184,80 @@ final routerProvider = Provider<GoRouter>((ref) {
             },
           );
         },
+        routes: [
+          GoRoute(
+            path: 'care',
+            builder: (context, state) => const PetCareScreen(),
+          ),
+          GoRoute(
+            path: 'care/onboarding',
+            builder: (context, state) {
+              final id = state.pathParameters['id'];
+              if (id == null || id.isEmpty) {
+                return const Scaffold(body: Center(child: Text('Missing pet')));
+              }
+              return PetCareOnboardingScreen(petId: id);
+            },
+          ),
+          GoRoute(
+            path: 'followers',
+            builder: (context, state) {
+              final petId = state.pathParameters['id'];
+              if (petId == null) {
+                return const InvalidRouteErrorScreen(missingParam: 'pet ID');
+              }
+              return PetFollowersScreen(
+                petId: petId,
+                type: FollowListType.petFollowers,
+              );
+            },
+          ),
+          GoRoute(
+            path: 'achievements',
+            builder: (context, state) => const GamificationScreen(),
+          ),
+          GoRoute(
+            path: 'medical_records',
+            builder: (context, state) => const PetHealthRecordScreen(),
+          ),
+          GoRoute(
+            path: 'medical_records/export',
+            builder: (context, state) => const PetHealthRecordExportScreen(),
+          ),
+          GoRoute(
+            path: 'expenses',
+            builder: (context, state) => const PetExpenseTrackerScreen(),
+          ),
+          GoRoute(
+            path: 'growth',
+            builder: (context, state) => const PetGrowthChartScreen(),
+          ),
+          GoRoute(
+            path: 'nutrition',
+            builder: (context, state) => const PetNutritionPlannerScreen(),
+          ),
+          GoRoute(
+            path: 'timeline',
+            builder: (context, state) => const PetSocialTimelineScreen(),
+          ),
+          GoRoute(
+            path: 'training',
+            builder: (context, state) => const PetTrainingScreen(),
+          ),
+        ],
       ),
       GoRoute(
-        path: '${AppRoutes.userProfile}/:id',
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.likedPets,
+        builder: (context, state) => const LikedPetsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.userProfile,
         builder: (context, state) {
-          final userId = safePathParam(state, 'id');
+          final userId = state.pathParameters['id'];
           if (userId == null) {
             return const InvalidRouteErrorScreen(missingParam: 'user ID');
           }
@@ -222,9 +269,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const MessagesListScreen(),
       ),
       GoRoute(
-        path: '${AppRoutes.chat}/:threadId',
+        path: AppRoutes.chat,
         builder: (context, state) {
-          final threadId = safePathParam(state, 'threadId');
+          final threadId = state.pathParameters['threadId'];
           if (threadId == null) {
             return const InvalidRouteErrorScreen(missingParam: 'thread ID');
           }
@@ -232,9 +279,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        path: '${AppRoutes.post}/:id',
+        path: AppRoutes.post,
         builder: (context, state) {
-          final postId = safePathParam(state, 'id');
+          final postId = state.pathParameters['id'];
           if (postId == null) {
             return const InvalidRouteErrorScreen(missingParam: 'post ID');
           }
@@ -242,9 +289,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        path: '${AppRoutes.story}/:petId',
+        path: AppRoutes.story,
         builder: (context, state) {
-          final petId = safePathParam(state, 'petId');
+          final petId = state.pathParameters['petId'];
           if (petId == null) {
             return const InvalidRouteErrorScreen(missingParam: 'pet ID');
           }
@@ -260,9 +307,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const OrderHistoryScreen(),
       ),
       GoRoute(
-        path: '${AppRoutes.product}/:id',
+        path: AppRoutes.product,
         builder: (context, state) {
-          final productId = safePathParam(state, 'id');
+          final productId = state.pathParameters['id'];
           if (productId == null) {
             return const InvalidRouteErrorScreen(missingParam: 'product ID');
           }
@@ -278,22 +325,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SearchScreen(),
       ),
       GoRoute(
-        path: AppRoutes.petFollowers,
-        builder: (context, state) {
-          final petId = safePathParam(state, 'id');
-          if (petId == null) {
-            return const InvalidRouteErrorScreen(missingParam: 'pet ID');
-          }
-          return PetFollowersScreen(
-            petId: petId,
-            type: FollowListType.petFollowers,
-          );
-        },
-      ),
-      GoRoute(
         path: AppRoutes.userFollowers,
         builder: (context, state) {
-          final userId = safePathParam(state, 'id');
+          final userId = state.pathParameters['id'];
           if (userId == null) {
             return const InvalidRouteErrorScreen(missingParam: 'user ID');
           }
@@ -306,7 +340,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.userFollowing,
         builder: (context, state) {
-          final userId = safePathParam(state, 'id');
+          final userId = state.pathParameters['id'];
           if (userId == null) {
             return const InvalidRouteErrorScreen(missingParam: 'user ID');
           }
@@ -315,10 +349,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             type: FollowListType.following,
           );
         },
-      ),
-      GoRoute(
-        path: AppRoutes.achievements,
-        builder: (context, state) => const GamificationScreen(),
       ),
       GoRoute(
         path: AppRoutes.vetBooking,
@@ -341,20 +371,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AdoptionCenterScreen(),
       ),
       GoRoute(
-        path: AppRoutes.training,
-        builder: (context, state) => const PetTrainingScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.insurance,
         builder: (context, state) => const PetInsuranceHubScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.expenses,
-        builder: (context, state) => const PetExpenseTrackerScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.growthCharts,
-        builder: (context, state) => const PetGrowthChartScreen(),
       ),
       GoRoute(
         path: AppRoutes.memorial,
@@ -383,24 +401,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const PetEventDiscoveryScreen(),
       ),
       GoRoute(
-        path: AppRoutes.medicalRecords,
-        builder: (context, state) => const PetHealthRecordScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.exportRecords,
-        builder: (context, state) => const PetHealthRecordExportScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.sitters,
         builder: (context, state) => const PetSitterDashboardScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.nutritionPlanner,
-        builder: (context, state) => const PetNutritionPlannerScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.petTimeline,
-        builder: (context, state) => const PetSocialTimelineScreen(),
       ),
       GoRoute(
         path: AppRoutes.breedIdentifier,
