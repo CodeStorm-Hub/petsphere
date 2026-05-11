@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:petfolio/core/theme/theme_controller.dart';
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
@@ -8,6 +9,24 @@ import 'package:petfolio/core/constants/app_routes.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
+
+  void _showComingSoon(BuildContext context, String feature) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$feature is coming soon!'),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Future<void> _launchUrl(String urlString) async {
+    final url = Uri.parse(urlString);
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -60,13 +79,13 @@ class SettingsScreen extends ConsumerWidget {
                 title: const Text('Edit Owner Profile'),
                 subtitle: const Text('Name, email, phone, bio'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Edit Owner Profile'),
               ),
               ListTile(
                 leading: const Icon(Icons.link),
                 title: const Text('Linked Providers'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Linked Providers'),
               ),
 
               const _SectionHeader(title: 'Security'),
@@ -74,19 +93,19 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.password_outlined),
                 title: const Text('Password'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Password settings'),
               ),
               ListTile(
                 leading: const Icon(Icons.security_outlined),
                 title: const Text('Two-Factor Authentication (MFA)'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Two-Factor Authentication'),
               ),
               ListTile(
                 leading: const Icon(Icons.devices_outlined),
                 title: const Text('Active Sessions & Devices'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Active Sessions'),
               ),
 
               const _SectionHeader(title: 'Pets'),
@@ -100,13 +119,13 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.visibility_outlined),
                 title: const Text('Pet Visibility'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Pet Visibility'),
               ),
               ListTile(
                 leading: const Icon(Icons.health_and_safety_outlined),
                 title: const Text('Health Sharing Permissions'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Health Sharing'),
               ),
 
               const _SectionHeader(title: 'Notifications'),
@@ -114,19 +133,19 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.notifications_active_outlined),
                 title: const Text('Push Notifications'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Push Notifications'),
               ),
               ListTile(
                 leading: const Icon(Icons.email_outlined),
                 title: const Text('Email Notifications'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Email Notifications'),
               ),
               ListTile(
                 leading: const Icon(Icons.alarm_outlined),
                 title: const Text('Reminders & Digests'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Reminders'),
               ),
 
               const _SectionHeader(title: 'Privacy'),
@@ -134,19 +153,19 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.lock_outline),
                 title: const Text('Profile Visibility'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Profile Visibility'),
               ),
               ListTile(
                 leading: const Icon(Icons.location_on_outlined),
                 title: const Text('Location Sharing'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Location Sharing'),
               ),
               ListTile(
                 leading: const Icon(Icons.block_outlined),
                 title: const Text('Blocked Users'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Blocked Users'),
               ),
 
               const _SectionHeader(title: 'Safety'),
@@ -154,13 +173,13 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.report_outlined),
                 title: const Text('Report History'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Report History'),
               ),
               ListTile(
                 leading: const Icon(Icons.filter_alt_outlined),
                 title: const Text('Content Filters'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Content Filters'),
               ),
 
               const _SectionHeader(title: 'Commerce'),
@@ -168,19 +187,19 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.local_shipping_outlined),
                 title: const Text('Shipping Addresses'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Shipping Addresses'),
               ),
               ListTile(
                 leading: const Icon(Icons.payment_outlined),
                 title: const Text('Payment Methods'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Payment Methods'),
               ),
               ListTile(
                 leading: const Icon(Icons.history_outlined),
                 title: const Text('Order Preferences & History'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => context.push(AppRoutes.orders),
               ),
 
               const _SectionHeader(title: 'Care Data'),
@@ -188,19 +207,19 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.download_outlined),
                 title: const Text('Export Records'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => context.push(AppRoutes.exportRecords),
               ),
               ListTile(
                 leading: const Icon(Icons.share_outlined),
                 title: const Text('Share with Vet'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Share with Vet'),
               ),
               ListTile(
                 leading: const Icon(Icons.delete_sweep_outlined),
                 title: const Text('Delete Care Data'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Delete Care Data'),
               ),
 
               const _SectionHeader(title: 'App'),
@@ -214,19 +233,19 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.language_outlined),
                 title: const Text('Language'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Language Settings'),
               ),
               ListTile(
                 leading: const Icon(Icons.accessibility_new_outlined),
                 title: const Text('Accessibility Preferences'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Accessibility Preferences'),
               ),
               ListTile(
                 leading: const Icon(Icons.square_foot_outlined),
                 title: const Text('Units'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Units Settings'),
               ),
 
               const _SectionHeader(title: 'Legal'),
@@ -234,26 +253,30 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.article_outlined),
                 title: const Text('Terms of Service'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _launchUrl('https://petsphere.app/terms'),
               ),
               ListTile(
                 leading: const Icon(Icons.privacy_tip_outlined),
                 title: const Text('Privacy Policy'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => _launchUrl('https://petsphere.app/privacy'),
               ),
               ListTile(
                 leading: const Icon(Icons.receipt_long_outlined),
                 title: const Text('Open Source Licenses'),
                 trailing: const Icon(Icons.chevron_right, size: 20),
-                onTap: () {},
+                onTap: () => showLicensePage(
+                  context: context,
+                  applicationName: 'PetFolio',
+                  applicationVersion: '1.0.0',
+                ),
               ),
 
               const SizedBox(height: 24),
               ListTile(
                 leading: Icon(Icons.delete_forever, color: cs.error),
                 title: Text('Delete Account', style: TextStyle(color: cs.error)),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, 'Account Deletion'),
               ),
               ListTile(
                 leading: Icon(Icons.logout, color: cs.error),

@@ -9,7 +9,8 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
 
 class PetProfileScreen extends ConsumerStatefulWidget {
-  const PetProfileScreen({super.key});
+  const PetProfileScreen({super.key, required this.petId});
+  final String petId;
 
   @override
   ConsumerState<PetProfileScreen> createState() => _PetProfileScreenState();
@@ -34,7 +35,8 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
   @override
   Widget build(BuildContext context) {
     final petState = ref.watch(petProvider);
-    final pet = petState.activePet;
+    // Find the pet by ID from myPets
+    final pet = petState.myPets.where((p) => p.id == widget.petId).firstOrNull;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 

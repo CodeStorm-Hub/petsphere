@@ -21,6 +21,7 @@ import 'package:petfolio/features/marketplace/presentation/screens/cart_screen.d
 import 'package:petfolio/features/marketplace/presentation/screens/order_history_screen.dart';
 import 'package:petfolio/features/social/presentation/screens/pet_followers_screen.dart';
 import 'package:petfolio/features/pet/presentation/screens/visitor_pet_profile_screen.dart';
+import 'package:petfolio/features/pet/presentation/screens/pet_profile_screen.dart';
 import 'package:petfolio/features/social/presentation/screens/visitor_user_profile_screen.dart';
 import 'package:petfolio/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:petfolio/features/pet/presentation/screens/liked_pets_screen.dart';
@@ -57,6 +58,7 @@ import 'package:petfolio/features/services/presentation/screens/pet_breed_identi
 import 'package:petfolio/features/services/presentation/screens/pet_knowledge_base_screen.dart';
 import 'package:petfolio/features/marketplace/presentation/screens/pet_gear_reviews_screen.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authNotifier = ValueNotifier<AuthState>(ref.read(authProvider));
@@ -192,7 +194,17 @@ final routerProvider = Provider<GoRouter>((ref) {
           if (petId == null) {
             return const InvalidRouteErrorScreen(missingParam: 'pet ID');
           }
-          return VisitorPetProfileScreen(petId: petId);
+          return Consumer(
+            builder: (context, ref, child) {
+              final myPets = ref.watch(petProvider).myPets;
+              final isMyPet = myPets.any((p) => p.id == petId);
+              
+              if (isMyPet) {
+                return PetProfileScreen(petId: petId);
+              }
+              return VisitorPetProfileScreen(petId: petId);
+            },
+          );
         },
       ),
       GoRoute(
