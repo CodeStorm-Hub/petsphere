@@ -299,7 +299,7 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
   }
 
   void _showFilterSheet(BuildContext context) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
