@@ -386,7 +386,6 @@ class MarketplaceSkeletonLoader extends StatelessWidget {
                   child: ShimmerLoader(
                     width: 80,
                     height: 40,
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
                     shouldAnimate: false,
                   ),
                 ),
@@ -431,14 +430,12 @@ class HealthSkeletonLoader extends StatelessWidget {
           // Overview Card Skeleton
           const ShimmerLoader(
             height: 120,
-            borderRadius: BorderRadius.all(Radius.circular(20)),
             shouldAnimate: false,
           ),
           const SizedBox(height: 16),
           // Vitals Section Skeleton
           const ShimmerLoader(
             height: 180,
-            borderRadius: BorderRadius.all(Radius.circular(20)),
             shouldAnimate: false,
           ),
           const SizedBox(height: 16),
@@ -449,7 +446,6 @@ class HealthSkeletonLoader extends StatelessWidget {
               padding: EdgeInsets.only(bottom: 12),
               child: ShimmerLoader(
                 height: 100,
-                borderRadius: BorderRadius.all(Radius.circular(20)),
                 shouldAnimate: false,
               ),
             ),
@@ -653,7 +649,6 @@ class TrainingSkeletonLoader extends StatelessWidget {
               separatorBuilder: (_, _) => const SizedBox(height: 16),
               itemBuilder: (_, _) => const ShimmerLoader(
                 height: 90,
-                borderRadius: BorderRadius.all(Radius.circular(20)),
                 shouldAnimate: false,
               ),
             ),

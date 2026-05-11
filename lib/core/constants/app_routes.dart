@@ -49,6 +49,7 @@ class AppRoutes {
   static const String knowledgeBase = '/knowledge_base';
   static const String articleDetail = '/article_detail';
   static const String gearReviews = '/gear_reviews';
+  static const String managePets = '/manage_pets';
 
   static String petProfileById(String id) => '$petProfile/$id';
   static String userProfileById(String id) => '$userProfile/$id';

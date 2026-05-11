@@ -378,6 +378,21 @@ class _VisitorPetProfileScreenState extends ConsumerState<VisitorPetProfileScree
     ColorScheme cs,
   ) {
     final isFollowingAsync = ref.watch(isFollowingPetProvider(pet.id));
+    final isOwner = pet.userId == supabase.auth.currentUser?.id;
+
+    if (isOwner) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: () => context.push('/add_pet', extra: pet),
+            icon: const Icon(Icons.edit_outlined),
+            label: const Text('Edit Pet Profile'),
+          ),
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),

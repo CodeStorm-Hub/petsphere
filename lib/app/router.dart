@@ -8,7 +8,8 @@ import 'package:petfolio/app/main_layout.dart';
 import 'package:petfolio/features/home/presentation/screens/home_screen.dart';
 import 'package:petfolio/features/match/presentation/screens/discovery_screen.dart';
 import 'package:petfolio/features/marketplace/presentation/screens/marketplace_screen.dart';
-import 'package:petfolio/features/pet/presentation/screens/pet_profile_screen.dart';
+import 'package:petfolio/features/profile/presentation/screens/owner_profile_screen.dart';
+import 'package:petfolio/features/profile/presentation/screens/manage_pets_screen.dart';
 import 'package:petfolio/features/social/presentation/screens/create_post_screen.dart';
 import 'package:petfolio/features/social/presentation/screens/create_story_screen.dart';
 import 'package:petfolio/features/pet/presentation/screens/add_pet_screen.dart';
@@ -135,7 +136,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.profile,
-                builder: (context, state) => const PetProfileScreen(),
+                builder: (context, state) => const OwnerProfileScreen(),
               ),
             ],
           ),
@@ -410,6 +411,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.gearReviews,
         builder: (context, state) => const PetGearReviewsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.managePets,
+        builder: (context, state) => const ManagePetsScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

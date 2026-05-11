@@ -40,24 +40,44 @@ class PetFolioShadows extends ThemeExtension<PetFolioShadows> {
 class AppTheme {
   const AppTheme._();
 
-  // Brand color: PetFolio Amber (#D4845A)
-  static const primary = Color(0xFFD4845A);
-  static const secondary = Color(0xFF47B4FF); // Sky Blue Accent
-  static const bgLight = Color(0xFFFCFAF8); // Off-white/cream
-  static const bgDark = Color(0xFF121212); // Deep black
+  // =========================================================================
+  // PetFolio Blue Palette — Trust, Reliability, Calm
+  // =========================================================================
+  static const primary = Color(0xFF2563EB);          // Vibrant Blue
+  static const secondary = Color(0xFF14B8A6);         // Teal — health/care
+  static const bgLight = Color(0xFFF7FAFF);           // Cool off-white
+  static const bgDark = Color(0xFF07111F);            // Deep navy-black
 
   // Semantic Colors
-  static const primaryAccent = Color(0xFFD4845A); // Brand Primary
-  static const secondaryAccent = Color(
-    0xFF47B4FF,
-  ); // Light Blue (for active/given statuses)
-  static const alertAccent = Color(
-    0xFFFF5252,
-  ); // Material Red Accent (for overdue/alerts)
-  static const textPrimary = Color(0xFF1C1C2E); // Deep Navy/Black from logo
-  static const textSecondary = Color(0xFF737373);
+  static const primaryAccent = Color(0xFF2563EB);     // Brand Primary
+  static const secondaryAccent = Color(0xFF14B8A6);   // Teal for care/health
+  static const petWarmth = Color(0xFFFFB020);         // Warm accent for pet moments
+  static const success = Color(0xFF22C55E);           // Healthy / completed
+  static const warning = Color(0xFFF59E0B);           // Attention / due soon
+  static const alertAccent = Color(0xFFEF4444);       // Overdue / urgent / delete
+  static const textPrimary = Color(0xFF0F172A);       // Slate 900
+  static const textSecondary = Color(0xFF64748B);     // Slate 500
 
   static const white = Colors.white;
+
+  // Light-mode surfaces
+  static const surfaceLight = Color(0xFFFFFFFF);
+  static const surfaceAltLight = Color(0xFFEEF4FF);
+  static const outlineLight = Color(0xFFCBD5E1);      // Slate 300
+
+  // Dark-mode surfaces
+  static const surfaceDark = Color(0xFF0F1B2D);
+  static const surfaceAltDark = Color(0xFF1A2A42);
+  static const outlineDark = Color(0xFF334155);        // Slate 700
+
+  // Dark-mode text
+  static const textPrimaryDark = Color(0xFFF1F5F9);   // Slate 100
+  static const textSecondaryDark = Color(0xFF94A3B8);  // Slate 400
+
+  // Dark-mode primary
+  static const primaryDark = Color(0xFF7AA2FF);        // Lighter blue for dark bg
+  static const primaryContainerLight = Color(0xFFDCE8FF);
+  static const primaryContainerDark = Color(0xFF1E3A5F);
 
   // Layout Constants
   static const double xs = 4.0;
@@ -67,7 +87,7 @@ class AppTheme {
   static const double xl = 32.0;
   static const double xxl = 48.0;
 
-  static const double cardRadius = 24.0;
+  static const double cardRadius = 20.0;
   static const double inputRadius = 12.0;
   static const double pillRadius = 100.0;
 
@@ -77,132 +97,137 @@ class AppTheme {
   static ThemeData _buildTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
 
+    final effectivePrimary = isDark ? primaryDark : primary;
+
     final scheme =
         ColorScheme.fromSeed(
           seedColor: primary,
           brightness: brightness,
-          primary: primary,
+          primary: effectivePrimary,
           onPrimary: white,
           secondary: secondary,
           onSecondary: white,
-          surface: isDark ? const Color(0xFF1A1A1A) : bgLight,
+          surface: isDark ? surfaceDark : bgLight,
           surfaceContainerLowest: isDark ? bgDark : white,
           surfaceContainerHighest: isDark
-              ? const Color(0xFF252525)
-              : const Color(0xFFF0F4F8),
+              ? surfaceAltDark
+              : surfaceAltLight,
+          primaryContainer: isDark ? primaryContainerDark : primaryContainerLight,
         ).copyWith(
-          outline: isDark ? const Color(0xFF333333) : const Color(0xFFE1E8F0),
+          outline: isDark ? outlineDark : outlineLight,
         );
 
-    final display = GoogleFonts.playfairDisplayTextTheme();
-    final body = GoogleFonts.dmSansTextTheme();
-    final textColor = isDark ? const Color(0xFFF5F5F5) : textPrimary;
-    final mutedColor = isDark
-        ? const Color(0xFFA8A8A8)
-        : const Color(0xFF737373);
+    // Typography: Inter — clean, modern, universal
+    final inter = GoogleFonts.interTextTheme();
+    final textColor = isDark ? textPrimaryDark : textPrimary;
+    final mutedColor = isDark ? textSecondaryDark : textSecondary;
 
     final cardShadow = [
       BoxShadow(
         color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
         blurRadius: 24,
-        offset: const Offset(0, 8),
+        offset: const Offset(0, 4),
       ),
     ];
     final buttonShadow = [
       BoxShadow(
-        color: primary.withValues(alpha: 0.2),
+        color: (isDark ? primaryDark : primary).withValues(alpha: 0.2),
         blurRadius: 16,
         offset: const Offset(0, 4),
       ),
     ];
-    const hoverLiftShadow = [
-      BoxShadow(color: Color(0x26000000), blurRadius: 24, offset: Offset(0, 8)),
+    final hoverLiftShadow = [
+      BoxShadow(
+        color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.15),
+        blurRadius: 24,
+        offset: const Offset(0, 8),
+      ),
     ];
 
-    final textTheme = body.copyWith(
-      displayLarge: display.displayLarge?.copyWith(
+    final textTheme = inter.copyWith(
+      displayLarge: inter.displayLarge?.copyWith(
         color: textColor,
         fontSize: 56,
         height: 1,
         fontWeight: FontWeight.w900,
         letterSpacing: -1.12,
       ),
-      displayMedium: display.displayMedium?.copyWith(
+      displayMedium: inter.displayMedium?.copyWith(
         color: textColor,
         fontSize: 44,
         height: 1,
         fontWeight: FontWeight.w900,
         letterSpacing: -0.88,
       ),
-      displaySmall: display.displaySmall?.copyWith(
+      displaySmall: inter.displaySmall?.copyWith(
         color: textColor,
         fontSize: 40,
         height: 1,
         fontWeight: FontWeight.w900,
         letterSpacing: -0.8,
       ),
-      headlineLarge: display.headlineLarge?.copyWith(
+      headlineLarge: inter.headlineLarge?.copyWith(
         color: textColor,
         fontSize: 36,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.36,
       ),
-      headlineMedium: display.headlineMedium?.copyWith(
+      headlineMedium: inter.headlineMedium?.copyWith(
         color: textColor,
         fontSize: 32,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.32,
       ),
-      headlineSmall: display.headlineSmall?.copyWith(
+      headlineSmall: inter.headlineSmall?.copyWith(
         color: textColor,
         fontSize: 28,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.28,
       ),
-      titleLarge: body.titleLarge?.copyWith(
+      titleLarge: inter.titleLarge?.copyWith(
         color: textColor,
         fontSize: 18,
         fontWeight: FontWeight.w700,
       ),
-      titleMedium: body.titleMedium?.copyWith(
+      titleMedium: inter.titleMedium?.copyWith(
         color: textColor,
         fontSize: 16,
         fontWeight: FontWeight.w600,
       ),
-      titleSmall: body.titleSmall?.copyWith(
+      titleSmall: inter.titleSmall?.copyWith(
         color: textColor,
         fontSize: 15,
         fontWeight: FontWeight.w500,
       ),
-      bodyLarge: body.bodyLarge?.copyWith(
+      bodyLarge: inter.bodyLarge?.copyWith(
         color: mutedColor,
         fontSize: 18,
         height: 1.7,
         fontWeight: FontWeight.w400,
       ),
-      bodyMedium: body.bodyMedium?.copyWith(
+      bodyMedium: inter.bodyMedium?.copyWith(
         color: mutedColor,
         fontSize: 16,
         height: 1.7,
         fontWeight: FontWeight.w400,
       ),
-      bodySmall: body.bodySmall?.copyWith(
+      bodySmall: inter.bodySmall?.copyWith(
         color: mutedColor,
         fontSize: 13,
         fontWeight: FontWeight.w400,
       ),
-      labelLarge: body.labelLarge?.copyWith(
+      labelLarge: inter.labelLarge?.copyWith(
         color: textColor,
         fontSize: 14,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.56,
       ),
-      labelMedium: body.labelMedium?.copyWith(
+      labelMedium: inter.labelMedium?.copyWith(
         color: mutedColor,
         fontSize: 12,
         fontWeight: FontWeight.w500,
       ),
-      labelSmall: body.labelSmall?.copyWith(
+      labelSmall: inter.labelSmall?.copyWith(
         color: mutedColor,
         fontSize: 11,
         fontWeight: FontWeight.w500,
@@ -221,8 +246,8 @@ class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: isDark ? bgDark : bgLight,
       canvasColor: isDark ? bgDark : bgLight,
-      cardColor: isDark ? const Color(0xFF1E1E1E) : white,
-      primaryColor: primary,
+      cardColor: isDark ? surfaceDark : white,
+      primaryColor: effectivePrimary,
       textTheme: textTheme,
       extensions: [
         PetFolioShadows(
@@ -244,12 +269,12 @@ class AppTheme {
         backgroundColor: isDark
             ? bgDark.withValues(alpha: 0.85)
             : bgLight.withValues(alpha: 0.85),
-        foregroundColor: isDark ? textColor : textPrimary,
+        foregroundColor: textColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         surfaceTintColor: Colors.transparent,
-        iconTheme: IconThemeData(color: isDark ? textColor : textPrimary),
+        iconTheme: IconThemeData(color: textColor),
         titleTextStyle: textTheme.titleLarge,
       ),
       cardTheme: CardThemeData(
@@ -287,8 +312,8 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: primary,
-          side: const BorderSide(color: primary, width: 1.5),
+          foregroundColor: effectivePrimary,
+          side: BorderSide(color: effectivePrimary, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
           shape: const StadiumBorder(),
           textStyle: textTheme.labelLarge,
@@ -296,7 +321,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: primary,
+          foregroundColor: effectivePrimary,
           elevation: 0,
           shape: const StadiumBorder(),
           textStyle: textTheme.labelLarge,
@@ -304,12 +329,12 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? const Color(0xFF262626) : const Color(0xFFF5F5F5),
+        fillColor: isDark ? const Color(0xFF1A2A42) : surfaceAltLight,
         border: inputBorder,
         enabledBorder: inputBorder,
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppTheme.inputRadius),
-          borderSide: const BorderSide(color: primary, width: 1.5),
+          borderSide: BorderSide(color: effectivePrimary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppTheme.inputRadius),
@@ -328,14 +353,14 @@ class AppTheme {
           fontSize: 14,
         ),
         labelStyle: textTheme.bodySmall,
-        floatingLabelStyle: textTheme.bodySmall?.copyWith(color: primary),
+        floatingLabelStyle: textTheme.bodySmall?.copyWith(color: effectivePrimary),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: isDark
             ? bgDark.withValues(alpha: 0.96)
             : bgLight.withValues(alpha: 0.96),
-        selectedItemColor: primary,
-        unselectedItemColor: isDark ? mutedColor : const Color(0xFF737373),
+        selectedItemColor: effectivePrimary,
+        unselectedItemColor: mutedColor,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
       ),
@@ -344,28 +369,28 @@ class AppTheme {
             ? bgDark.withValues(alpha: 0.96)
             : bgLight.withValues(alpha: 0.96),
         elevation: 0,
-        indicatorColor: primary.withValues(alpha: 0.10),
+        indicatorColor: effectivePrimary.withValues(alpha: 0.10),
         labelTextStyle: WidgetStatePropertyAll(textTheme.labelSmall),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: scheme.surfaceContainerHigh,
-        selectedColor: primary.withValues(alpha: 0.12),
+        selectedColor: effectivePrimary.withValues(alpha: 0.12),
         disabledColor: scheme.surfaceContainerHigh.withValues(alpha: 0.5),
         labelStyle: textTheme.labelMedium,
-        secondaryLabelStyle: textTheme.labelMedium?.copyWith(color: primary),
+        secondaryLabelStyle: textTheme.labelMedium?.copyWith(color: effectivePrimary),
         side: BorderSide(color: scheme.outline),
         shape: const StadiumBorder(),
         elevation: 0,
         pressElevation: 0,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: primary,
+        color: effectivePrimary,
         linearTrackColor: isDark
-            ? const Color(0xFF1C1C1C)
-            : const Color(0xFFF5F5F5),
+            ? const Color(0xFF1A2A42)
+            : surfaceAltLight,
         circularTrackColor: isDark
-            ? const Color(0xFF1C1C1C)
-            : const Color(0xFFF5F5F5),
+            ? const Color(0xFF1A2A42)
+            : surfaceAltLight,
       ),
       dividerTheme: DividerThemeData(
         color: scheme.outlineVariant,
@@ -382,10 +407,10 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: isDark
-            ? const Color(0xFF1C1C1C)
-            : const Color(0xFF1D1D1F),
+            ? const Color(0xFF1A2A42)
+            : const Color(0xFF0F172A),
         contentTextStyle: textTheme.bodySmall?.copyWith(color: white),
-        actionTextColor: primary,
+        actionTextColor: isDark ? primaryDark : const Color(0xFF93C5FD),
         elevation: 0,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -393,14 +418,14 @@ class AppTheme {
         ),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: isDark ? const Color(0xFF121212) : white,
+        backgroundColor: isDark ? surfaceDark : white,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(cardRadius),
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: isDark ? const Color(0xFF121212) : white,
+        backgroundColor: isDark ? surfaceDark : white,
         elevation: 0,
         modalElevation: 0,
         surfaceTintColor: Colors.transparent,

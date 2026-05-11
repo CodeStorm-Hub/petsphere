@@ -2,7 +2,7 @@
 
 **Date**: 2026-05-11
 **Version**: 1.0
-**Status**: Draft
+**Status**: In Progress — Phase 0 ✅ Phase 1 ✅ (partial)
 **Stitch Project**: `projects/9043096397543633864` — [PetFolio - Modern Pet Platform Redesign](https://stitch.google.com/projects/9043096397543633864)
 **Design System**: PetFolio Blue (`assets/627128633167849513`)
 
@@ -266,12 +266,12 @@ Move `SECURITY DEFINER` helpers to private schema with `SET search_path = ''`.
 **Priority**: P0 — Must complete before any UI work
 
 #### Deliverables
-- [ ] Fix RLS helper ownership comparison (`user_owns_pet` function)
-- [ ] Move security definer helpers to `app_private` schema
-- [ ] Fix `match_requests` query (use `updated_at` instead of `rejected_at`, or add column)
-- [ ] Fix `pet_care_gamification` query (use `best_streak` not `best_streak_days`)
-- [ ] Fix `pet_care_badge_unlocks` query (remove `user_id` select)
-- [ ] Fix `pet_medication_doses` query (use `taken_at` not `scheduled_for`, or add column)
+- [x] Fix RLS helper ownership comparison (`user_owns_pet` function) — ✅ Dropped & recreated with `p_user_id`/`p_pet_id` params
+- [x] Move security definer helpers — ✅ Added `SECURITY DEFINER` + `SET search_path = public`
+- [x] Fix `match_requests` — ✅ Added `rejected_at` column via migration
+- [x] Fix `pet_care_gamification` — ✅ Renamed `best_streak` → `best_streak_days`, added `user_id` + all missing columns
+- [x] Fix `pet_care_badge_unlocks` — ✅ Added `user_id` column + unique index
+- [x] Fix `pet_medication_doses` — ✅ Added `scheduled_for` column + unique index
 - [ ] Create migrations for all 14+ missing tables
 - [ ] Add schema contract integration tests
 - [ ] Remove hardcoded credentials from test files
@@ -290,13 +290,13 @@ Move `SECURITY DEFINER` helpers to private schema with `SET search_path = ''`.
 **Priority**: P0 — Foundation for all subsequent UI work
 
 #### Deliverables
-- [ ] Update `app_theme.dart`: Replace amber palette with blue palette
+- [x] Update `app_theme.dart`: Replace amber palette with blue palette ✅
   - Primary: `#D4845A` → `#2563EB`
   - Secondary: `#47B4FF` → `#14B8A6`
   - Background light: `#FCFAF8` → `#F7FAFF`
   - Background dark: `#121212` → `#07111F`
-- [ ] Replace `PlayfairDisplay` with `Inter` throughout
-- [ ] Update `PetFolioShadows` extension with blue-tinted shadows
+- [x] Replace `PlayfairDisplay` with `Inter` throughout ✅
+- [x] Update `PetFolioShadows` extension with blue-tinted shadows ✅
 - [ ] Create new `BrandLogo` widget with paw icon + blue gradient
 - [ ] Generate production-quality logo assets:
   - App launcher icon (adaptive Android + iOS)

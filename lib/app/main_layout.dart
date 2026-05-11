@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
+import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:petfolio/app/widgets/adaptive_navigation.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -79,7 +80,8 @@ class MainLayoutState extends ConsumerState<MainLayout> {
       ref.read(mainLayoutTabRequestProvider.notifier).clear();
     });
 
-    final activePet = ref.watch(activePetProvider);
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
     final width = MediaQuery.of(context).size.width;
     final isTablet = width > 600;
 
@@ -92,7 +94,7 @@ class MainLayoutState extends ConsumerState<MainLayout> {
               currentIndex: _calculateNavBarIndex(
                 widget.navigationShell.currentIndex,
               ),
-              profileImageUrl: activePet?.profileImageUrl ?? '',
+              profileImageUrl: user?.profileImageUrl ?? '',
               onTap: _onTap,
               isExtended: width > 900,
             ),
@@ -113,7 +115,7 @@ class MainLayoutState extends ConsumerState<MainLayout> {
               currentIndex: _calculateNavBarIndex(
                 widget.navigationShell.currentIndex,
               ),
-              profileImageUrl: activePet?.profileImageUrl ?? '',
+              profileImageUrl: user?.profileImageUrl ?? '',
               onTap: _onTap,
             ),
           ),
