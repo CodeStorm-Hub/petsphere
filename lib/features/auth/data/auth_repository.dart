@@ -124,6 +124,13 @@ class AuthRepository {
   }
 
   // -------------------------------------------------------------------------
+  // Update user password
+  // -------------------------------------------------------------------------
+  Future<void> updatePassword(String newPassword) async {
+    await supabase.auth.updateUser(UserAttributes(password: newPassword));
+  }
+
+  // -------------------------------------------------------------------------
   // Stream of auth state changes
   // -------------------------------------------------------------------------
   Stream<AuthState> get authStateChanges => supabase.auth.onAuthStateChange;

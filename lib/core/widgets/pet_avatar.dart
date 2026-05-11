@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:petfolio/core/theme/icon_sizes.dart';
+import 'package:petfolio/core/theme/spacing.dart';
 import 'brand_logo.dart';
 
 class PetAvatar extends StatelessWidget {
-
   const PetAvatar({
     super.key,
     required this.imageUrl,
-    this.radius = 20,
+    this.radius = AppIconSizes.s,
     this.hasStory = false,
   });
+
   final String imageUrl;
   final double radius;
   final bool hasStory;
@@ -22,12 +24,12 @@ class PetAvatar extends StatelessWidget {
           ? BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Theme.of(context).colorScheme.primary,
+                color: colorScheme.primary,
                 width: 2.5,
               ),
             )
           : null,
-      padding: hasStory ? const EdgeInsets.all(2) : EdgeInsets.zero,
+      padding: hasStory ? const EdgeInsets.all(AppSpacing.tiny) : EdgeInsets.zero,
       child: CircleAvatar(
         radius: radius,
         backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
@@ -39,3 +41,4 @@ class PetAvatar extends StatelessWidget {
     );
   }
 }
+

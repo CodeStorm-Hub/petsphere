@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:petfolio/core/widgets/brand_logo.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,7 +23,6 @@ import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 import 'package:petfolio/features/social/presentation/widgets/post_card.dart';
 import 'package:petfolio/core/utils/layout_utils.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:petfolio/core/widgets/skeleton_loader.dart';
 
 // Maximum feed column width on wide screens (tablets, foldables, web).
 // Below this, the feed is full-width edge-to-edge like the Instagram phone app.

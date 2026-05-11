@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 
 @immutable
 class OrderModel {
-
   const OrderModel({
     required this.id,
     required this.userId,
@@ -10,6 +9,11 @@ class OrderModel {
     required this.total,
     required this.status,
     required this.createdAt,
+    this.shippingName,
+    this.shippingAddress,
+    this.shippingCity,
+    this.shippingState,
+    this.shippingZip,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +28,11 @@ class OrderModel {
       total: (json['total'] as num).toDouble(),
       status: json['status'] as String? ?? 'pending',
       createdAt: DateTime.parse(json['created_at'] as String),
+      shippingName: json['shipping_name'] as String?,
+      shippingAddress: json['shipping_address'] as String?,
+      shippingCity: json['shipping_city'] as String?,
+      shippingState: json['shipping_state'] as String?,
+      shippingZip: json['shipping_zip'] as String?,
     );
   }
   final String id;
@@ -32,6 +41,11 @@ class OrderModel {
   final double total;
   final String status;
   final DateTime createdAt;
+  final String? shippingName;
+  final String? shippingAddress;
+  final String? shippingCity;
+  final String? shippingState;
+  final String? shippingZip;
 
   String get statusLabel {
     return switch (status) {
@@ -51,6 +65,11 @@ class OrderModel {
     'total': total,
     'status': status,
     'created_at': createdAt.toIso8601String(),
+    'shipping_name': shippingName,
+    'shipping_address': shippingAddress,
+    'shipping_city': shippingCity,
+    'shipping_state': shippingState,
+    'shipping_zip': shippingZip,
   };
 
   OrderModel copyWith({
@@ -60,6 +79,11 @@ class OrderModel {
     double? total,
     String? status,
     DateTime? createdAt,
+    String? shippingName,
+    String? shippingAddress,
+    String? shippingCity,
+    String? shippingState,
+    String? shippingZip,
   }) => OrderModel(
     id: id ?? this.id,
     userId: userId ?? this.userId,
@@ -67,6 +91,11 @@ class OrderModel {
     total: total ?? this.total,
     status: status ?? this.status,
     createdAt: createdAt ?? this.createdAt,
+    shippingName: shippingName ?? this.shippingName,
+    shippingAddress: shippingAddress ?? this.shippingAddress,
+    shippingCity: shippingCity ?? this.shippingCity,
+    shippingState: shippingState ?? this.shippingState,
+    shippingZip: shippingZip ?? this.shippingZip,
   );
 
   @override
@@ -79,7 +108,12 @@ class OrderModel {
           items == other.items &&
           total == other.total &&
           status == other.status &&
-          createdAt == other.createdAt;
+          createdAt == other.createdAt &&
+          shippingName == other.shippingName &&
+          shippingAddress == other.shippingAddress &&
+          shippingCity == other.shippingCity &&
+          shippingState == other.shippingState &&
+          shippingZip == other.shippingZip;
 
   @override
   int get hashCode =>
@@ -88,13 +122,16 @@ class OrderModel {
       items.hashCode ^
       total.hashCode ^
       status.hashCode ^
-      createdAt.hashCode;
+      createdAt.hashCode ^
+      shippingName.hashCode ^
+      shippingAddress.hashCode ^
+      shippingCity.hashCode ^
+      shippingState.hashCode ^
+      shippingZip.hashCode;
 }
-
 
 @immutable
 class OrderLineItem {
-
   const OrderLineItem({
     required this.productId,
     required this.name,

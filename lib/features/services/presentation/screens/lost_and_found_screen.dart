@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import 'package:petfolio/core/constants/app_routes.dart';
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:petfolio/features/community/data/lost_found_repository.dart';
 import 'package:petfolio/core/widgets/petfolio_widgets.dart';
@@ -162,158 +164,164 @@ class _ReportCard extends StatelessWidget {
   const _ReportCard({required this.report});
   final LostFoundReport report;
 
+  void _navigateToDetail(BuildContext context) {
+    context.push(AppRoutes.lostFoundDetailById(report.id));
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isLost = report.status == 'lost';
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colorScheme.outlineVariant.withAlpha(100)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(5),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image or placeholder
-          Stack(
-            children: [
-              SizedBox(
-                height: 200,
-                width: double.infinity,
-                child: report.imageUrl != null
-                    ? Image.network(
-                        report.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) =>
-                            _PetImagePlaceholder(isLost: isLost),
-                      )
-                    : _PetImagePlaceholder(isLost: isLost),
-              ),
-              Positioned(
-                top: 12,
-                left: 12,
-                child: _StatusBadge(isLost: isLost),
-              ),
-              if (report.hasReward)
-                Positioned(
-                  bottom: 12,
-                  right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.secondary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '\$${report.rewardAmount!.toStringAsFixed(0)} REWARD',
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: () => _navigateToDetail(context),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 24),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: colorScheme.outlineVariant.withAlpha(100)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(5),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        report.petName,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 20,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      DateFormat('MMM d').format(report.createdAt),
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+                SizedBox(
+                  height: 200,
+                  width: double.infinity,
+                  child: report.imageUrl != null
+                      ? Image.network(
+                          report.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) =>
+                              _PetImagePlaceholder(isLost: isLost),
+                        )
+                      : _PetImagePlaceholder(isLost: isLost),
                 ),
-                if (report.breed != null)
-                  Text(
-                    report.breed!,
-                    style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                if (report.lastSeenLocation != null) ...[
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_rounded,
-                        size: 16,
-                        color: colorScheme.primary,
+                Positioned(
+                  top: 12,
+                  left: 12,
+                  child: _StatusBadge(isLost: isLost),
+                ),
+                if (report.hasReward)
+                  Positioned(
+                    bottom: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          report.lastSeenLocation!,
-                          style: const TextStyle(fontSize: 13),
+                      decoration: BoxDecoration(
+                        color: colorScheme.secondary,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '\$${report.rewardAmount!.toStringAsFixed(0)} REWARD',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 11,
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-                if (report.description != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    report.description!,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                if (report.contactInfo != null)
-                  FilledButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.phone_rounded, size: 16),
-                    label: const Text('Contact Reporter'),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 44),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
               ],
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          report.petName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 20,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        DateFormat('MMM d').format(report.createdAt),
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (report.breed != null)
+                    Text(
+                      report.breed!,
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  if (report.lastSeenLocation != null) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on_rounded,
+                          size: 16,
+                          color: colorScheme.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            report.lastSeenLocation!,
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (report.description != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      report.description!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  if (report.contactInfo != null)
+                    FilledButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.phone_rounded, size: 16),
+                      label: const Text('Contact Reporter'),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 44),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

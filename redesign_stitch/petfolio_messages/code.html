@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Messages - PetFolio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#ffb2b7",
+                    "on-tertiary-fixed": "#40000d",
+                    "outline-variant": "#c3c6d7",
+                    "inverse-primary": "#b4c5ff",
+                    "surface-dim": "#d2d9f4",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "secondary": "#006686",
+                    "surface-tint": "#0053db",
+                    "on-secondary-container": "#005b78",
+                    "inverse-surface": "#283044",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed-variant": "#004d66",
+                    "surface-bright": "#faf8ff",
+                    "error-container": "#ffdad6",
+                    "surface-container-high": "#e2e7ff",
+                    "on-tertiary-fixed-variant": "#92002a",
+                    "inverse-on-surface": "#eef0ff",
+                    "surface-container-highest": "#dae2fd",
+                    "background": "#faf8ff",
+                    "on-secondary": "#ffffff",
+                    "tertiary-fixed": "#ffdadb",
+                    "tertiary": "#ad0033",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "secondary-container": "#7ed4fd",
+                    "surface": "#faf8ff",
+                    "outline": "#737686",
+                    "on-tertiary-container": "#ffecec",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-low": "#f2f3ff",
+                    "primary-fixed": "#dbe1ff",
+                    "primary-container": "#2563eb",
+                    "surface-container": "#eaedff",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#c0e8ff",
+                    "secondary-fixed-dim": "#7bd1fa",
+                    "primary": "#004ac6",
+                    "tertiary-container": "#d22348",
+                    "error": "#ba1a1a",
+                    "on-primary-container": "#eeefff",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#001e2b",
+                    "on-surface-variant": "#434655",
+                    "on-surface": "#131b2e",
+                    "on-primary-fixed": "#00174b",
+                    "on-background": "#131b2e",
+                    "surface-variant": "#dae2fd"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter-grid": "16px",
+                    "margin-page": "20px",
+                    "base": "8px",
+                    "stack-md": "12px",
+                    "stack-sm": "4px",
+                    "stack-lg": "24px",
+                    "section-padding": "32px"
+            },
+            "fontFamily": {
+                    "headline-sm": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .message-swipe-container {
+            position: relative;
+            overflow: hidden;
+        }
+        .message-swipe-action {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            z-index: 0;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-20">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-surface dark:bg-surface-dim z-50">
+<div class="flex items-center justify-between px-margin-page h-16 w-full border-b border-outline-variant/10">
+<button class="text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-100">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim"><div class="flex items-center gap-2">
+<img alt="PetFolio Logo" class="w-8 h-8 object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0ujvZD2gG6_7p8u9lN6hiCLhaN-1FUH4rRGPFIZFxpsYLnLUTpkTFvsjyetvh4jiPCxFuSXlqQXVZa6Bs2Rouc2HO-9t9wERV7odsSItp7UO1Dgldeg5YK580eojayypaOecWrZa_zhSpni6L-Kw4ehgDHIHOUPWh1Lr08x1PbEXu8eUQavzWcCN5z8H9M7QXL5oW_pBYNDo-xVz3UUAOjcTzWdzIa6UdETAe7CeRYuXzbHDLHAuNJy5buk"/>
+<span class="font-headline-md text-headline-md">PetFolio</span>
+</div></h1>
+<button class="text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-100">
+<span class="material-symbols-outlined">edit_square</span>
+</button>
+</div>
+</header>
+<main class="flex flex-col">
+<!-- Search Bar -->
+<section class="px-margin-page pt-stack-md pb-stack-lg">
+<div class="relative flex items-center group">
+<span class="material-symbols-outlined absolute left-4 text-outline group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full h-12 pl-12 pr-4 bg-surface-container-low border border-outline-variant rounded-full text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-outline-variant" placeholder="Search messages..." type="text"/>
+</div>
+</section>
+<!-- Message List -->
+<section class="flex flex-col">
+<!-- Row 1: Buddy -->
+<div class="message-swipe-container group">
+<div class="message-swipe-action bg-primary-container text-on-primary-container">
+<span class="material-symbols-outlined">archive</span>
+</div>
+<div class="relative z-10 flex items-center px-margin-page py-stack-lg bg-surface hover:bg-surface-container-low transition-colors cursor-pointer border-b border-outline-variant/30">
+<div class="relative flex-shrink-0 w-14 h-14 rounded-full overflow-hidden border-2 border-primary/10">
+<img alt="Buddy" class="w-full h-full object-cover" data-alt="A professional, high-quality portrait of a friendly Golden Retriever looking directly into the camera with a warm expression. The lighting is soft and natural, emphasizing its golden fur textures. The background is a clean, slightly out-of-focus modern living room with bright white walls and minimal decor, matching a high-end corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4JBpBAZbGeiOPmY8XwNZfx-vCP3MYO-8UfksiQlag-zMgKxQgsdUyClgW6zBzOxbq9k6-oCccl4AuWrZxPzXDfoH91HO1yfS5f-gg6Frez2cGm1nkqBMe--1dQO1CLirYcLBV5MC21J5uovJb1B87WEAGgv9nwuXIB_jJZ8tfnUhq9rsUqVumUamzKzI5lhgpnwK7aq9Nbdqi_K71HqXes0Vkj25unwX-EE-XX12pb0dRTDeBlo6PmfOcdx9dOxtGDeSras3m0LA"/>
+<div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-surface rounded-full"></div>
+</div>
+<div class="ml-stack-md flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-headline-sm text-on-surface truncate">Buddy</h3>
+<span class="font-label-sm text-primary">10:45 AM</span>
+</div>
+<div class="flex justify-between items-center">
+<p class="font-body-sm text-on-surface-variant truncate pr-4">Hey Alex! Is Luna free for a playdate?</p>
+<span class="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-primary-container text-white font-label-sm">2</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Row 2: Luna -->
+<div class="message-swipe-container group">
+<div class="message-swipe-action bg-primary-container text-on-primary-container">
+<span class="material-symbols-outlined">archive</span>
+</div>
+<div class="relative z-10 flex items-center px-margin-page py-stack-lg bg-surface hover:bg-surface-container-low transition-colors cursor-pointer border-b border-outline-variant/30">
+<div class="relative flex-shrink-0 w-14 h-14 rounded-full overflow-hidden border-2 border-primary/10">
+<img alt="Luna" class="w-full h-full object-cover" data-alt="A sophisticated close-up of a Siamese cat with striking blue eyes and elegant cream-and-chocolate markings. The lighting is crisp and studio-quality, highlighting the sleekness of its fur. The environment is minimalist and bright, following a clean corporate lifestyle aesthetic with soft depth of field and premium cool-toned accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBb8ESljSgSAqu1jviYS01HMyeysqpafe2AiZ3xayrWMH6Pux8HktgW-WlT9kFZ5Lxv-BLYif9VYc3xSl0wvHym_GqzkaxfWOGvaYJbZngl-31Zhzufb9QOv4ctsgqYCBnDCj4ZRvjFd-TSnNzRu0ykwFqMDk1VYYh5aqTPdVT_LfX2kTKhKSQ_byaKmtWkQMs8rnlZSK6b7vvgwau1eadzVvt-VACqHMkkR5QNjnY21ru9AjcnKlQJnmKD1J5cV5p_2oU7hMJ0LJY"/>
+</div>
+<div class="ml-stack-md flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-headline-sm text-on-surface truncate">Luna</h3>
+<span class="font-label-sm text-outline">9:12 AM</span>
+</div>
+<div class="flex justify-between items-center">
+<p class="font-body-sm text-on-surface-variant truncate">The new treats you recommended are a hit!</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Row 3: Milo -->
+<div class="message-swipe-container group">
+<div class="message-swipe-action bg-primary-container text-on-primary-container">
+<span class="material-symbols-outlined">archive</span>
+</div>
+<div class="relative z-10 flex items-center px-margin-page py-stack-lg bg-surface hover:bg-surface-container-low transition-colors cursor-pointer border-b border-outline-variant/30">
+<div class="relative flex-shrink-0 w-14 h-14 rounded-full overflow-hidden border-2 border-primary/10">
+<img alt="Milo" class="w-full h-full object-cover" data-alt="A vibrant, high-resolution photo of a cheerful Beagle dog outdoors. The setting is a lush, sun-drenched park during the golden hour, providing warm, professional lighting. The Beagle has an energetic expression with ears floppy in the wind. The visual style is modern, sharp, and celebratory of pets in active, healthy environments." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYbVaS2NCmg54WM5QQk8qk4HY84HV47Pu-zNtquU6zFAIsD2b4D-d2Jhcj8oZnaik93753it_fX0q1WTMm2O08Js67DPeEBzpzIUU10EXZ-EgVsK9TmL6Eo6yyhIqmRtGo3fI1iVWo2_nbsosEB7aK1tQ1RPCqkn6OtkWTa3GDgWeJSp64wKpfAKXlkzAyxe2EBWWOuwG9XpgEbFEShlvc147Sf_hrZNXOxHhUq0ZrWE6S3Pjs7NMYIjC4Gc4wxfMhDgaEFbgcl9Y"/>
+</div>
+<div class="ml-stack-md flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-headline-sm text-on-surface truncate">Milo</h3>
+<span class="font-label-sm text-outline">Yesterday</span>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-1 min-w-0">
+<span class="material-symbols-outlined text-[16px] text-outline">image</span>
+<p class="font-body-sm text-on-surface-variant truncate">Just posted a photo of our morning walk!</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Empty State (Hidden by default logic, but styled for layout) -->
+<section class="hidden flex-col items-center justify-center px-margin-page py-section-padding text-center">
+<div class="w-64 h-64 mb-stack-lg bg-surface-container-high rounded-full flex items-center justify-center overflow-hidden">
+<img alt="Empty messages" class="w-full h-full object-cover opacity-50 grayscale" data-alt="A poetic, minimalist digital illustration of an empty, sunlit room with a single dog bowl and a shadow of a tail. The scene uses a soft, light-mode palette of pristine whites and very light blues. The atmosphere is peaceful and serene, with clean lines and generous negative space to represent a fresh start or quiet moment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDezBreYvueeVNmccTJY5F10coNEBnwOhgU5_Lx1jqz2NT9wDz0DoIgQB5CBDnp35ZpJi4Qi0bUG0FvmPnmWcCJaD9tiMwvmN54pUxZgCNlyMMtsg-waT_YY7NWO113SyyANAGB_t2lNCx5CbIFqP8Pqvr7gJGAm5keDg1LZ_k02wWtUTvppZRaPt2R37p9iP_L4H9KmUe81B_Uyd98rPK1KNkArRSE7k_9C8KWWLOgxwQBovFovQ8bkSBlKZ2ugbTw6_bvpKpYxsQ"/>
+</div>
+<h2 class="font-headline-md text-on-surface mb-stack-md">No messages yet</h2>
+<p class="font-body-md text-on-surface-variant mb-stack-lg">Connect with other pet owners to share stories and schedule playdates!</p>
+<button class="px-stack-lg py-3 bg-primary text-white font-label-md rounded-xl shadow-sm hover:opacity-90 active:scale-95 transition-all">
+                Start Chatting
+            </button>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface dark:bg-surface-container-lowest shadow-[0px_-4px_12px_rgba(15,23,42,0.05)]">
+<div class="flex justify-around items-center w-full px-2 py-3">
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined">rss_feed</span>
+<span class="font-label-md text-label-md">Feed</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined">pets</span>
+<span class="font-label-md text-label-md">Match</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-label-md text-label-md">Care</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined">shopping_bag</span>
+<span class="font-label-md text-label-md">Shop</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant p-2 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-90 duration-200">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</button>
+</div>
+</nav>
+</body></html>

@@ -11,7 +11,6 @@ import 'package:petfolio/features/marketplace/data/models/cart_item_model.dart';
 import 'package:petfolio/features/marketplace/data/models/product_model.dart';
 
 class CartState {
-
   CartState({
     this.items = const [],
     this.isCheckingOut = false,
@@ -138,9 +137,15 @@ class CartController extends Notifier<CartState> {
   // -------------------------------------------------------------------------
   // Place order — submits to Supabase then clears cart
   // -------------------------------------------------------------------------
-  Future<bool> placeOrder() async {
+  Future<String?> placeOrder({
+    String? shippingName,
+    String? shippingLine1,
+    String? shippingCity,
+    String? shippingState,
+    String? shippingZip,
+  }) async {
     final userId = ref.read(authProvider).user?.id;
-    if (userId == null || state.items.isEmpty) return false;
+    if (userId == null || state.items.isEmpty) return null;
 
     state = state.copyWith(
       isCheckingOut: true,
@@ -168,16 +173,21 @@ class CartController extends Notifier<CartState> {
       await Stripe.instance.presentPaymentSheet();
 
       // 3) Create order only after successful payment
-      await marketplaceRepository.placeOrder(
+      final orderId = await marketplaceRepository.placeOrder(
         userId: userId,
         items: state.items,
         paymentProvider: 'stripe',
         paymentIntentId: intent.paymentIntentId,
+        shippingName: shippingName,
+        shippingLine1: shippingLine1,
+        shippingCity: shippingCity,
+        shippingState: shippingState,
+        shippingZip: shippingZip,
       );
       // Clear cart after successful order
       state = CartState(orderSuccess: true);
       await _clearPersistedCart(userId);
-      return true;
+      return orderId;
     } on StripeException catch (e) {
       AppLogger.error(
         AppStrings.cartCheckoutFailed,
@@ -188,14 +198,14 @@ class CartController extends Notifier<CartState> {
         isCheckingOut: false,
         error: e.error.localizedMessage ?? AppStrings.cartCheckoutFailed,
       );
-      return false;
+      return null;
     } on MarketplaceOutOfStockException {
-      AppLogger.warning(
-        'Out of stock during checkout',
-        tag: 'CartController',
+      AppLogger.warning('Out of stock during checkout', tag: 'CartController');
+      state = state.copyWith(
+        isCheckingOut: false,
+        error: AppStrings.cartCheckoutFailed,
       );
-      state = state.copyWith(isCheckingOut: false, error: AppStrings.cartCheckoutFailed);
-      return false;
+      return null;
     } catch (e) {
       AppLogger.error(
         AppStrings.cartCheckoutFailed,
@@ -206,7 +216,7 @@ class CartController extends Notifier<CartState> {
         isCheckingOut: false,
         error: AppStrings.cartCheckoutFailed,
       );
-      return false;
+      return null;
     }
   }
 
@@ -231,9 +241,7 @@ class CartController extends Notifier<CartState> {
       if (decoded is! List) return;
       final items = decoded
           .whereType<Map<String, dynamic>>()
-          .map(
-            (e) => CartItemModel.fromJson(e),
-          )
+          .map((e) => CartItemModel.fromJson(e))
           .toList();
       state = state.copyWith(items: items);
     } catch (_) {

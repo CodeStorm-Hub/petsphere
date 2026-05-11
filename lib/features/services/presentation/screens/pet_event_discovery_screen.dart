@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:petfolio/features/services/presentation/controllers/pet_events_controller.dart';
-import 'package:petfolio/features/services/data/models/pet_event_models.dart';
-import 'package:petfolio/core/widgets/async_value_widget.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import 'package:petfolio/core/constants/app_routes.dart';
 import 'package:petfolio/core/widgets/petfolio_widgets.dart';
+import 'package:petfolio/features/services/presentation/controllers/pet_events_controller.dart';
+import 'package:petfolio/features/services/data/models/pet_event_models.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class PetEventDiscoveryScreen extends ConsumerWidget {
   const PetEventDiscoveryScreen({super.key});
@@ -155,9 +156,7 @@ class _EventCard extends StatelessWidget {
         ],
       ),
       child: InkWell(
-        onTap: () {
-          // TODO: Navigate to event details
-        },
+        onTap: () => context.push(AppRoutes.eventDetailById(event.id)),
         borderRadius: BorderRadius.circular(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

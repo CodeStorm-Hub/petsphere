@@ -1,5 +1,6 @@
 class AppRoutes {
   static const String splash = '/splash';
+  static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/home';
@@ -41,16 +42,27 @@ class AppRoutes {
   static const String post = '/post/:id';
   static const String story = '/story/:petId';
   static const String cart = '/cart';
+  static const String checkout = '/checkout';
   static const String orders = '/orders';
+  static const String orderDetail = '/orders/:orderId';
   static const String product = '/product/:id';
   static const String settings = '/settings';
+  static const String editProfile = '/settings/edit_profile';
+  static const String changePassword = '/change_password';
+  static const String notificationPreferences = '/notification_preferences';
+  static const String privacySettings = '/privacy_settings';
+  static const String blockedUsers = '/blocked_users';
+  static const String securitySettings = '/security';
   static const String search = '/search';
   
   static const String communityGroups = '/community_groups';
   static const String lostAndFound = '/lost_and_found';
+  static const String lostFoundDetail = '/lost_and_found/:reportId';
   static const String adoptionCenter = '/adoption_center';
+  static const String adoptionDetail = '/adoption/:listingId';
   static const String petFriendlyPlaces = '/pet_friendly_places';
   static const String events = '/events';
+  static const String eventDetail = '/events/:eventId';
   static const String sitters = '/sitters';
   static const String breedIdentifier = '/breed_identifier';
   static const String knowledgeBase = '/knowledge_base';
@@ -81,8 +93,12 @@ class AppRoutes {
   static String userFollowingById(String id) => '/user/$id/following';
   
   static String chatByThreadId(String threadId) => '/chat/$threadId';
+  static String orderDetailById(String orderId) => '/orders/$orderId';
   static String postById(String id) => '/post/$id';
   static String productById(String id) => '/product/$id';
   static String storyByPetId(String petId) => '/story/$petId';
   static String createStoryByPetId(String petId) => '/create_story?petId=$petId';
+  static String lostFoundDetailById(String reportId) => '/lost_and_found/$reportId';
+  static String adoptionDetailById(String listingId) => '/adoption/$listingId';
+  static String eventDetailById(String eventId) => '/events/$eventId';
 }

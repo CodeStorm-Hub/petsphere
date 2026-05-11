@@ -78,11 +78,17 @@ class MarketplaceRepository {
   // Submit an order (called at checkout)
   // Cart stays local; only the final order lands in Supabase
   // -------------------------------------------------------------------------
-  Future<void> placeOrder({
+  /// Places an order and returns the created order's UUID.
+  Future<String> placeOrder({
     required String userId,
     required List<CartItemModel> items,
     String? paymentProvider,
     String? paymentIntentId,
+    String? shippingName,
+    String? shippingLine1,
+    String? shippingCity,
+    String? shippingState,
+    String? shippingZip,
   }) async {
     await _validateStockOrThrow(items);
 
@@ -109,9 +115,19 @@ class MarketplaceRepository {
         'payment_provider': paymentProvider,
       if (paymentIntentId != null && paymentIntentId.isNotEmpty)
         'payment_intent_id': paymentIntentId,
+      'shipping_name': ?shippingName,
+      'shipping_address': ?shippingLine1,
+      'shipping_city': ?shippingCity,
+      'shipping_state': ?shippingState,
+      'shipping_zip': ?shippingZip,
     };
 
-    await supabase.from('orders').insert(payload);
+    final result = await supabase
+        .from('orders')
+        .insert(payload)
+        .select('id')
+        .single();
+    return result['id'] as String;
   }
 
   Future<CreatePaymentIntentResult> createStripePaymentIntent({

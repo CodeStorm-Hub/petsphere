@@ -6,7 +6,6 @@ import 'package:petfolio/features/pet/presentation/controllers/pet_controller.da
 import 'package:petfolio/features/care/presentation/controllers/pet_training_controller.dart';
 import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:petfolio/core/widgets/skeleton_loader.dart';
 
 class PetTrainingScreen extends ConsumerWidget {
   const PetTrainingScreen({super.key});

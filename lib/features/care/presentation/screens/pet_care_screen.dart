@@ -22,6 +22,12 @@ import 'package:petfolio/features/health/presentation/controllers/vitals_control
 import 'package:petfolio/features/health/presentation/screens/health_tab.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/core/widgets/brand_logo.dart';
+import 'package:petfolio/features/care/presentation/widgets/care_task_card.dart';
+import 'package:petfolio/features/care/presentation/widgets/care_goal_progress_ring.dart';
+import 'package:petfolio/features/care/presentation/widgets/care_streak_banner.dart';
+import 'package:petfolio/features/care/presentation/widgets/care_mood_selector.dart';
+import 'package:petfolio/features/care/presentation/widgets/care_quick_action_card.dart';
+import 'package:petfolio/features/care/presentation/widgets/care_week_mask.dart';
 import 'care_goal_editor_modal.dart';
 
 class _SetupBanner extends StatelessWidget {
@@ -562,7 +568,8 @@ class _DashboardTab extends ConsumerWidget {
             todayLog: todayLog,
           ),
           const SizedBox(height: 8),
-          _WeekMaskRow(
+          const SizedBox(height: 8),
+          CareWeekMask(
             weekStartMonday: gamificationState.gamification!.weekStartMonday,
             mask: gamificationState.gamification!.weekCompletedMask,
           ),
@@ -618,19 +625,19 @@ class _DashboardTab extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _ProgressRing(
+                  CareGoalProgressRing(
                     label: 'Tasks',
                     progress: totalTasks == 0 ? 0 : completedTasks / totalTasks,
                     color: colorScheme.primary,
                     centerText: '$completedTasks/$totalTasks',
                   ),
-                  _ProgressRing(
+                  CareGoalProgressRing(
                     label: 'Calories',
                     progress: todayLog.caloriesProgress,
                     color: colorScheme.secondary,
                     centerText: '${todayLog.consumedKcal}\nkcal',
                   ),
-                  _ProgressRing(
+                  CareGoalProgressRing(
                     label: 'Water',
                     progress: todayLog.waterProgress,
                     color: colorScheme.primary,
@@ -644,7 +651,7 @@ class _DashboardTab extends ConsumerWidget {
         ),
         const SizedBox(height: 24),
 
-        _StreakBanner(
+        CareStreakBanner(
           streakDays: gamificationState.streakDays,
           flags: careLogState.recentLogs.reversed
               .map((l) => l.isCompleteForStreak)
@@ -694,7 +701,7 @@ class _DashboardTab extends ConsumerWidget {
         const SizedBox(height: 16),
 
         for (final task in todayLog.tasks)
-          _TaskCard(
+          CareTaskCard(
             task: task,
             onToggle: () =>
                 ref.read(careLogProvider.notifier).toggleTask(task.key),
@@ -705,25 +712,10 @@ class _DashboardTab extends ConsumerWidget {
         const SizedBox(height: 24),
         Text('How is your pet feeling?', style: theme.textTheme.titleMedium),
         const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _MoodButton(
-              emoji: '😴',
-              label: 'Sleepy',
-              selected: todayLog.mood == 'Sleepy',
-            ),
-            _MoodButton(
-              emoji: '😊',
-              label: 'Happy',
-              selected: todayLog.mood == 'Happy',
-            ),
-            _MoodButton(
-              emoji: '🤩',
-              label: 'Excited',
-              selected: todayLog.mood == 'Excited',
-            ),
-          ],
+        CareMoodSelector(
+          selectedMood: todayLog.mood,
+          onMoodSelected: (mood) =>
+              ref.read(careLogProvider.notifier).setMood(mood),
         ),
         const SizedBox(height: 32),
         Text('Care Resources', style: theme.textTheme.titleLarge),
@@ -732,79 +724,79 @@ class _DashboardTab extends ConsumerWidget {
           spacing: 12,
           runSpacing: 16,
           children: [
-            _QuickActionItem(
+            CareQuickActionCard(
               label: 'Vet Booking',
               icon: Icons.calendar_month,
               color: colorScheme.primary,
               onTap: () => context.push(AppRoutes.petVetBookingById(activePet.id)),
             ),
-            _QuickActionItem(
+            CareQuickActionCard(
               label: 'Emergency',
               icon: Icons.emergency,
               color: colorScheme.error,
               onTap: () => context.push(AppRoutes.petEmergencyById(activePet.id)),
             ),
-            _QuickActionItem(
+            CareQuickActionCard(
               label: 'Nutrition',
               icon: Icons.restaurant,
               color: colorScheme.secondary,
               onTap: () => context.push(AppRoutes.petNutritionById(activePet.id)),
             ),
-            _QuickActionItem(
+            CareQuickActionCard(
               label: 'Expenses',
               icon: Icons.payments,
               color: colorScheme.tertiary,
               onTap: () => context.push(AppRoutes.petExpensesById(activePet.id)),
             ),
-            _QuickActionItem(
+            CareQuickActionCard(
               label: 'Growth',
               icon: Icons.show_chart,
               color: colorScheme.primary,
               onTap: () => context.push(AppRoutes.petGrowthById(activePet.id)),
             ),
-            _QuickActionItem(
+            CareQuickActionCard(
               label: 'Insurance',
               icon: Icons.security,
               color: colorScheme.secondary,
               onTap: () => context.push(AppRoutes.petInsuranceById(activePet.id)),
             ),
-            _QuickActionItem(
+            CareQuickActionCard(
               label: 'Training',
               icon: Icons.school,
               color: colorScheme.onSurfaceVariant,
               onTap: () => context.push(AppRoutes.petTrainingById(activePet.id)),
             ),
-            _QuickActionItem(
+            CareQuickActionCard(
               label: 'Memorial',
               icon: Icons.cloud,
               color: colorScheme.primary,
               onTap: () => context.push(AppRoutes.petMemorialById(activePet.id)),
             ),
-            _QuickActionItem(
+            CareQuickActionCard(
               label: 'Adoption',
               icon: Icons.favorite,
               color: colorScheme.error,
               onTap: () => context.push(AppRoutes.adoptionCenter),
             ),
-            _QuickActionItem(
+            CareQuickActionCard(
               label: 'Places',
               icon: Icons.map,
               color: colorScheme.secondary,
               onTap: () => context.push(AppRoutes.petFriendlyPlaces),
             ),
-            _QuickActionItem(
+            CareQuickActionCard(
               label: 'Events',
               icon: Icons.event,
               color: colorScheme.primary,
               onTap: () => context.push(AppRoutes.events),
             ),
-            _QuickActionItem(
+            CareQuickActionCard(
               label: 'Medical',
               icon: Icons.folder_shared_rounded,
               color: colorScheme.tertiary,
               onTap: () => context.push(AppRoutes.petMedicalRecordsById(activePet.id)),
             ),
-            _QuickActionItem(
+            CareQuickActionCard(
               label: 'Timeline',
               icon: Icons.history,
               color: colorScheme.secondary,
@@ -818,399 +810,10 @@ class _DashboardTab extends ConsumerWidget {
   }
 }
 
-// ───────────── Week mask (Mon–Sun, this ISO week) ─────────────
-class _WeekMaskRow extends StatelessWidget {
-  const _WeekMaskRow({required this.weekStartMonday, required this.mask});
 
-  final DateTime? weekStartMonday;
-  final int mask;
 
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final start = weekStartMonday ?? _mondayOf(DateTime.now());
-    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'This week (care day complete)',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              for (var i = 0; i < 7; i++)
-                _WeekDayCell(
-                  label: labels[i],
-                  done: (mask & (1 << i)) != 0,
-                  isToday: _isSameDate(
-                    start.add(Duration(days: i)),
-                    DateTime.now(),
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
 
-DateTime _mondayOf(DateTime d) {
-  final x = DateTime(d.year, d.month, d.day);
-  return x.subtract(Duration(days: x.weekday - 1));
-}
 
-bool _isSameDate(DateTime a, DateTime b) {
-  return a.year == b.year && a.month == b.month && a.day == b.day;
-}
-
-class _WeekDayCell extends StatelessWidget {
-  const _WeekDayCell({
-    required this.label,
-    required this.done,
-    required this.isToday,
-  });
-
-  final String label;
-  final bool done;
-  final bool isToday;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: isToday ? colorScheme.primary : colorScheme.onSurfaceVariant,
-            fontWeight: isToday ? FontWeight.w600 : FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: done
-                ? colorScheme.primary.withValues(alpha: 0.2)
-                : colorScheme.surface,
-            border: Border.all(
-              color: done ? colorScheme.primary : colorScheme.outlineVariant,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: done
-              ? Icon(Icons.check, size: 16, color: colorScheme.primary)
-              : const SizedBox.shrink(),
-        ),
-      ],
-    );
-  }
-}
-
-// ───────────── Streak banner ─────────────
-class _StreakBanner extends StatelessWidget {
-  const _StreakBanner({required this.streakDays, required this.flags});
-
-  final int streakDays;
-  final List<bool> flags;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.local_fire_department,
-                color: colorScheme.secondary,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                streakDays > 0
-                    ? '$streakDays-Day Streak!'
-                    : 'Start today\u2019s streak',
-                style: theme.textTheme.titleMedium,
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              for (var i = 0; i < flags.length; i++)
-                _StreakDot(label: 'D${i + 1}', complete: flags[i]),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StreakDot extends StatelessWidget {
-  const _StreakDot({required this.label, required this.complete});
-
-  final String label;
-  final bool complete;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: complete
-            ? colorScheme.primary.withValues(alpha: 0.2)
-            : colorScheme.surface,
-        border: Border.all(
-          color: complete ? colorScheme.primary : colorScheme.outlineVariant,
-        ),
-      ),
-      alignment: Alignment.center,
-      child: complete
-          ? Icon(Icons.check, size: 16, color: colorScheme.primary)
-          : Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-    );
-  }
-}
-
-// ───────────── Progress ring ─────────────
-class _ProgressRing extends StatelessWidget {
-  const _ProgressRing({
-    required this.label,
-    required this.progress,
-    required this.color,
-    required this.centerText,
-  });
-
-  final String label;
-  final double progress;
-  final Color color;
-  final String centerText;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final valueDescription = centerText.replaceAll('\n', ' ');
-    final pctRounded = (progress.clamp(0.0, 1.0) * 100).round();
-    return Semantics(
-      label: '$label, $valueDescription, $pctRounded percent',
-      excludeSemantics: true,
-      child: Column(
-        children: [
-          SizedBox(
-            width: 72,
-            height: 72,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0, end: progress.clamp(0.0, 1.0)),
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeOutCubic,
-                  builder: (_, value, _) => CircularProgressIndicator(
-                    value: value,
-                    strokeWidth: 8,
-                    backgroundColor: colorScheme.outlineVariant,
-                    color: color,
-                  ),
-                ),
-                Center(
-                  child: Text(
-                    centerText,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ───────────── Task card ─────────────
-class _TaskCard extends StatelessWidget {
-  const _TaskCard({required this.task, required this.onToggle});
-
-  final DailyTask task;
-  final VoidCallback onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDone = task.done;
-    return GestureDetector(
-      onTap: onToggle,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isDone
-              ? colorScheme.secondary.withValues(alpha: 0.1)
-              : colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDone ? colorScheme.secondary : colorScheme.outlineVariant,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isDone ? colorScheme.secondary : colorScheme.surface,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isDone
-                      ? colorScheme.secondary
-                      : colorScheme.outlineVariant,
-                ),
-              ),
-              child: Icon(
-                task.icon,
-                color: isDone
-                    ? colorScheme.onPrimary
-                    : colorScheme.onSurfaceVariant,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    task.title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      decoration: isDone ? TextDecoration.lineThrough : null,
-                      color: isDone
-                          ? colorScheme.onSurfaceVariant
-                          : colorScheme.onSurface,
-                    ),
-                  ),
-                  Text(
-                    task.subtitle,
-                    style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              isDone ? Icons.check_circle : Icons.radio_button_unchecked,
-              color: isDone
-                  ? colorScheme.secondary
-                  : colorScheme.outlineVariant,
-              size: 28,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ───────────── Mood button ─────────────
-class _MoodButton extends ConsumerWidget {
-  const _MoodButton({
-    required this.emoji,
-    required this.label,
-    required this.selected,
-  });
-
-  final String emoji;
-  final String label;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: () =>
-          ref.read(careLogProvider.notifier).setMood(selected ? null : label),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: selected
-              ? colorScheme.primary.withValues(alpha: 0.2)
-              : colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? colorScheme.primary : colorScheme.outlineVariant,
-          ),
-        ),
-        child: Column(
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 24)),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                color: selected
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. HEALTH TAB â extracted to lib/views/health_tab.dart
@@ -1668,48 +1271,6 @@ class _MealCard extends StatelessWidget {
               ),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _QuickActionItem extends StatelessWidget {
-
-  const _QuickActionItem({
-    required this.label,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-  final String label;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withAlpha(25),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
         ],
       ),
     );

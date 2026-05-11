@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>PetFolio - Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#151c27",
+                        "primary": "#004ac6",
+                        "surface-container-high": "#e2e8f8",
+                        "on-secondary-fixed": "#0e1d2b",
+                        "secondary-fixed-dim": "#b9c8db",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "surface-container": "#e7eefe",
+                        "outline-variant": "#c3c6d7",
+                        "on-error-container": "#93000a",
+                        "surface": "#f9f9ff",
+                        "primary-container": "#2563eb",
+                        "inverse-primary": "#b4c5ff",
+                        "on-surface-variant": "#434655",
+                        "on-tertiary-container": "#ebf1ff",
+                        "surface-variant": "#dce2f3",
+                        "inverse-surface": "#2a313d",
+                        "on-tertiary-fixed-variant": "#004883",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#a4c9ff",
+                        "tertiary": "#00569c",
+                        "surface-bright": "#f9f9ff",
+                        "surface-container-low": "#f0f3ff",
+                        "primary-fixed": "#dbe1ff",
+                        "on-primary-container": "#eeefff",
+                        "surface-container-highest": "#dce2f3",
+                        "tertiary-fixed": "#d4e3ff",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#001c39",
+                        "secondary-container": "#d5e4f8",
+                        "surface-dim": "#d3daea",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "tertiary-container": "#196fc0",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#00174b",
+                        "surface-tint": "#0053db",
+                        "on-surface": "#151c27",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#737686",
+                        "secondary": "#516070",
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-secondary-fixed-variant": "#3a4858",
+                        "on-secondary-container": "#576676",
+                        "secondary-fixed": "#d5e4f8",
+                        "background": "#f9f9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "container-margin": "20px",
+                        "stack-tight": "4px",
+                        "element-gap": "12px",
+                        "section-gap": "24px"
+                    },
+                    "fontFamily": {
+                        "label-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        .shadow-soft { box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-on-background flex items-center px-container-margin h-16 transition-colors duration-200">
+<button class="mr-4 p-2 rounded-full hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim"><div class="flex items-center gap-2"><img alt="PetFolio Logo" class="w-8 h-8 object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0ujvZD2gG6_7p8u9lN6hiCLhaN-1FUH4rRGPFIZFxpsYLnLUTpkTFvsjyetvh4jiPCxFuSXlqQXVZa6Bs2Rouc2HO-9t9wERV7odsSItp7UO1Dgldeg5YK580eojayypaOecWrZa_zhSpni6L-Kw4ehgDHIHOUPWh1Lr08x1PbEXu8eUQavzWcCN5z8H9M7QXL5oW_pBYNDo-xVz3UUAOjcTzWdzIa6UdETAe7CeRYuXzbHDLHAuNJy5buk"/><span class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim">PetFolio</span></div></h1>
+</header>
+<!-- Main Content Canvas -->
+<main class="px-container-margin mt-24 space-y-8">
+<!-- Profile Header Card -->
+<section class="bg-surface-container-lowest rounded-xl shadow-soft flex items-center gap-4 border border-[#E5E7EB] p-6">
+<img alt="Profile" class="w-16 h-16 rounded-full object-cover" data-alt="A professional headshot of a friendly man named Alex Johnson with short hair and a clean-shaven face. The background is a soft, out-of-focus modern apartment interior. The lighting is bright and natural, reflecting a warm, reliable, and corporate-modern aesthetic with clear skin tones and sharp detail." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoBgKCZLq3xFTFx10L8KbPm-RZ9_tz65wl53FFN51dKzZCOeStkSZ91xh6MAixe4NcgvD73t_ycfZ5BKsi9D4_O-Co-lBWHWrqyn3hUtoAkhoRYSk3_1H6ivBTqU0JJZCM_42BBzM-M4UU0ex5C4LpLcDZmNwD_drVT8PVUzGHvlbWQ4bFy6oTHz4KQkCky_ffcHC9n-hkqB0SOGz8SILiu4Zph-6N9KGeuHDzsVN5r10GuLpYoueTUF2bCWNj9hbYiz7Wo-OzDps"/>
+<div class="flex-1">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Alex Johnson</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">alex@example.com</p>
+<button class="mt-1 font-label-lg text-label-lg text-primary hover:underline transition-all">Edit Profile</button>
+</div>
+</section>
+<!-- Grouped List: Account -->
+<section>
+<h3 class="font-label-sm text-label-sm text-outline mb-2 ml-1">Account</h3>
+<div class="bg-surface-container-lowest rounded-xl shadow-soft border border-[#E5E7EB] overflow-hidden px-2">
+<div class="flex items-center justify-between p-4 border-b border-[#F3F4F6] active:bg-surface-container-low transition-colors">
+<span class="font-body-lg text-body-lg text-on-surface">Email</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 border-b border-[#F3F4F6] active:bg-surface-container-low transition-colors">
+<span class="font-body-lg text-body-lg text-on-surface">Phone</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 border-b border-[#F3F4F6] active:bg-surface-container-low transition-colors">
+<span class="font-body-lg text-body-lg text-on-surface">Password</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 active:bg-surface-container-low transition-colors">
+<span class="font-body-lg text-body-lg text-on-surface">Linked Accounts</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Grouped List: My Pets -->
+<section>
+<h3 class="font-label-sm text-label-sm text-outline mb-2 ml-1">My Pets</h3>
+<div class="bg-surface-container-lowest rounded-xl shadow-soft border border-[#E5E7EB] overflow-hidden px-2">
+<div class="flex items-center justify-between p-4 border-b border-[#F3F4F6] active:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A close-up portrait of a cheerful Golden Retriever named Buddy, looking directly at the camera with a playful expression. The background is a soft green park setting. The lighting is warm and sun-drenched, fitting a friendly and professional pet care brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAg5nElSmcSEn5RUCGH4yyxUFliNw7zvxOOT6GPGDW1uIVnnMW6LZTAUrYienfDB5dkcy99XBbBTkGkwmeBemftK5L9DmYzjeh0cE01kHd7K01bH3yTUcuScAq2zYM-sUL4oBGZPS5nD-44FAVMKjoZ2GQdFz3QBnewmc853wS2KErZFrjsF9We2DxhpeneFsrO1Ii2PpT0wWGnkh3anh_EvzOUr4Nvw0epBDxDy3IiFaEuOsDGFrzxhp647My49kY1L3L2kac1c84"/>
+<span class="font-body-lg text-body-lg text-on-surface">Buddy</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 active:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A portrait of a majestic black and white cat named Luna sitting elegantly on a light-colored rug. The lighting is soft and diffused from a window, emphasizing her sleek fur. The aesthetic is clean, modern, and serene." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcRVuN7pZIFgvzCYrORlnguhUcsA6avo-M2nThQNNUrCNx2kSqyFFxlVvoYgXk8t_ecZ-mQlq_-vdKS1nRfyaA0g6SZtbQ7eUAONKS9Ufj17UJzWNA3GA_Hav9cunTg9qX_hoYJnN9qND3z3oZCA4erzkFQCoCUVWj-np96fiwdpxjshiSKCORSclAEHz0nUBFm4Hp5P2_MG3-WseVPB7XHgkxHWHA1ARzA-oLKRLsZn75fBqugWbBBiM5lNeDxZ4ab-KVESp3ZZ4"/>
+<span class="font-body-lg text-body-lg text-on-surface">Luna</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Grouped List: Notifications -->
+<section>
+<h3 class="font-label-sm text-label-sm text-outline mb-2 ml-1">Notifications</h3>
+<div class="bg-surface-container-lowest rounded-xl shadow-soft border border-[#E5E7EB] overflow-hidden px-2">
+<div class="flex items-center justify-between p-4 border-b border-[#F3F4F6]">
+<span class="font-body-lg text-body-lg text-on-surface">Push</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4 border-b border-[#F3F4F6]">
+<span class="font-body-lg text-body-lg text-on-surface">Email</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4">
+<span class="font-body-lg text-body-lg text-on-surface">Reminders</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Grouped List: Privacy & Security -->
+<section>
+<h3 class="font-label-sm text-label-sm text-outline mb-2 ml-1">Privacy &amp; Security</h3>
+<div class="bg-surface-container-lowest rounded-xl shadow-soft border border-[#E5E7EB] overflow-hidden px-2">
+<div class="flex items-center justify-between p-4 border-b border-[#F3F4F6] active:bg-surface-container-low transition-colors">
+<span class="font-body-lg text-body-lg text-on-surface">Profile Visibility</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 border-b border-[#F3F4F6] active:bg-surface-container-low transition-colors">
+<span class="font-body-lg text-body-lg text-on-surface">Blocked Users</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 active:bg-surface-container-low transition-colors">
+<span class="font-body-lg text-body-lg text-on-surface">Two-Factor Auth</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Grouped List: Pet Care -->
+<section>
+<h3 class="font-label-sm text-label-sm text-outline mb-2 ml-1">Pet Care</h3>
+<div class="bg-surface-container-lowest rounded-xl shadow-soft border border-[#E5E7EB] overflow-hidden px-2">
+<div class="flex items-center justify-between p-4 border-b border-[#F3F4F6] active:bg-surface-container-low transition-colors">
+<span class="font-body-lg text-body-lg text-on-surface">Data Export</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 border-b border-[#F3F4F6] active:bg-surface-container-low transition-colors">
+<span class="font-body-lg text-body-lg text-on-surface">Share with Vet</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 active:bg-surface-container-low transition-colors">
+<span class="font-body-lg text-body-lg text-on-surface">Delete Care Data</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Grouped List: App Settings -->
+<section>
+<h3 class="font-label-sm text-label-sm text-outline mb-2 ml-1">App</h3>
+<div class="bg-surface-container-lowest rounded-xl shadow-soft border border-[#E5E7EB] overflow-hidden px-2">
+<div class="flex items-center justify-between p-4 border-b border-[#F3F4F6]">
+<span class="font-body-lg text-body-lg text-on-surface">Theme</span>
+<div class="flex items-center bg-surface-container rounded-full p-1">
+<button class="px-3 py-1 bg-white shadow-sm rounded-full font-label-sm text-label-sm text-primary">Light</button>
+<button class="px-3 py-1 font-label-sm text-label-sm text-on-surface-variant">Dark</button>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 border-b border-[#F3F4F6] active:bg-surface-container-low transition-colors">
+<span class="font-body-lg text-body-lg text-on-surface">Language</span>
+<div class="flex items-center text-on-surface-variant">
+<span class="font-body-md text-body-md mr-1">English</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 active:bg-surface-container-low transition-colors">
+<span class="font-body-lg text-body-lg text-on-surface">Cache</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Action Button -->
+<div class="flex flex-col items-center pt-4">
+<button class="w-full max-w-xs border-2 border-error text-error py-3 rounded-lg font-label-lg text-label-lg active:bg-error-container transition-colors">
+                Sign Out
+            </button>
+<span class="mt-4 font-label-sm text-label-sm text-outline">Version 2.4.0</span>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe bg-surface dark:bg-on-background shadow-sm z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 transition-all duration-200 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 transition-all duration-200 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="pets">pets</span>
+<span class="font-label-sm text-label-sm">Pets</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 transition-all duration-200 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="medical_services">medical_services</span>
+<span class="font-label-sm text-label-sm">Care</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-tertiary-container text-on-primary-container dark:text-on-tertiary-container rounded-full px-4 py-1 transition-all duration-200 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="settings">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</nav>
+</body></html>

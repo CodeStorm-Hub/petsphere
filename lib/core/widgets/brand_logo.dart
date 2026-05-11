@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:petfolio/core/theme/app_theme.dart';
+import 'package:petfolio/core/theme/colors.dart';
+import 'package:petfolio/core/theme/icon_sizes.dart';
+import 'package:petfolio/core/theme/spacing.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 enum BrandLogoSize {
-  small(24),
-  medium(48),
+  small(AppIconSizes.m),
+  medium(AppIconSizes.xxl),
   large(120);
 
   const BrandLogoSize(this.size);
@@ -21,7 +23,6 @@ enum BrandLogoVariant {
 }
 
 class BrandLogo extends StatelessWidget {
-
   const BrandLogo({
     super.key,
     this.size = BrandLogoSize.medium,
@@ -30,6 +31,7 @@ class BrandLogo extends StatelessWidget {
     this.withText = false,
     this.variant = BrandLogoVariant.icon,
   });
+
   final BrandLogoSize? size;
   final double? customSize;
   final Color? color;
@@ -43,11 +45,15 @@ class BrandLogo extends StatelessWidget {
     final effectiveSize = customSize ?? size?.size ?? BrandLogoSize.medium.size;
     final effectiveColor = color ?? colorScheme.primary;
     final isDark = theme.brightness == Brightness.dark;
-    const textPrimary = AppTheme.textPrimary;
-    final textColor = isDark ? const Color(0xFFF5F5F5) : textPrimary;
+    final textColor = isDark ? colorScheme.onSurface : AppColors.textPrimary;
+
+    // Use the existing blue logo if full variant is requested
+    final assetPath = variant == BrandLogoVariant.full 
+        ? 'assets/logo_without_slogan.svg' 
+        : 'assets/icon.svg';
 
     final svg = SvgPicture.asset(
-      variant.assetPath,
+      assetPath,
       width: effectiveSize,
       height: effectiveSize,
       colorFilter: ColorFilter.mode(effectiveColor, BlendMode.srcIn),
@@ -57,27 +63,38 @@ class BrandLogo extends StatelessWidget {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          svg,
-          const SizedBox(width: 10),
+          ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ).createShader(bounds),
+            child: Icon(
+              Icons.pets,
+              size: effectiveSize,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
           RichText(
             text: TextSpan(
               children: [
                 TextSpan(
                   text: 'Pet',
-                  style: GoogleFonts.playfairDisplay(
+                  style: GoogleFonts.inter(
                     fontWeight: FontWeight.w900,
-                    color: isDark ? textColor : textPrimary,
+                    color: textColor,
                     fontSize: effectiveSize * 0.7,
-                    letterSpacing: -0.5,
+                    letterSpacing: -1.0,
                   ),
                 ),
                 TextSpan(
                   text: 'Folio',
-                  style: GoogleFonts.playfairDisplay(
+                  style: GoogleFonts.inter(
                     fontWeight: FontWeight.w900,
                     color: effectiveColor,
                     fontSize: effectiveSize * 0.7,
-                    letterSpacing: -0.5,
+                    letterSpacing: -1.0,
                   ),
                 ),
               ],

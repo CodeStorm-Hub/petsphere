@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/cart_controller.dart';
 import 'package:petfolio/features/marketplace/presentation/widgets/cart_item_tile.dart';
+import 'package:petfolio/core/constants/app_routes.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
@@ -114,8 +115,7 @@ class CartScreen extends ConsumerWidget {
                   itemCount: cartState.totalItemCount,
                   isCheckingOut: cartState.isCheckingOut,
                   currencyFormat: currencyFormat,
-                  onCheckout: () =>
-                      ref.read(cartProvider.notifier).placeOrder(),
+                  onCheckout: () => context.push(AppRoutes.checkout),
                 ),
               ],
             ),

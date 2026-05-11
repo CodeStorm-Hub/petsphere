@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PetFolio - Care Diary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#89ceff",
+                    "inverse-surface": "#2e3039",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed": "#00174b",
+                    "secondary-fixed": "#71f8e4",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#005a82",
+                    "on-surface": "#191b23",
+                    "on-secondary-fixed": "#00201c",
+                    "primary-fixed": "#dbe1ff",
+                    "surface-container-high": "#e7e7f3",
+                    "on-tertiary-container": "#e4f2ff",
+                    "surface-bright": "#faf8ff",
+                    "on-secondary-fixed-variant": "#005048",
+                    "secondary": "#006b5f",
+                    "secondary-container": "#6df5e1",
+                    "surface": "#faf8ff",
+                    "surface-variant": "#e1e2ed",
+                    "on-tertiary-fixed-variant": "#004c6e",
+                    "inverse-on-surface": "#f0f0fb",
+                    "surface-container-highest": "#e1e2ed",
+                    "tertiary-container": "#0074a6",
+                    "primary-container": "#2563eb",
+                    "secondary-fixed-dim": "#4fdbc8",
+                    "on-background": "#191b23",
+                    "on-tertiary-fixed": "#001e2f",
+                    "tertiary-fixed": "#c9e6ff",
+                    "primary": "#004ac6",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#b4c5ff",
+                    "background": "#faf8ff",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "on-primary-container": "#eeefff",
+                    "surface-container-low": "#f3f3fe",
+                    "on-surface-variant": "#434655",
+                    "on-secondary-container": "#006f64",
+                    "outline-variant": "#c3c6d7",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "surface-container": "#ededf9",
+                    "surface-dim": "#d9d9e5",
+                    "on-error": "#ffffff",
+                    "surface-tint": "#0053db",
+                    "outline": "#737686",
+                    "on-secondary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-error-container": "#93000a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base_unit": "4px",
+                    "stack_gap": "8px",
+                    "gutter": "12px",
+                    "card_padding": "16px",
+                    "margin_mobile": "16px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter"],
+                    "label-bold": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "title-lg": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-bold": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                    "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .bento-card {
+            background-color: white;
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0px 4px 20px rgba(37, 99, 235, 0.04);
+        }
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background font-body-md text-on-background min-h-screen pb-24">
+<!-- TopAppBar Component -->
+<header class="sticky top-0 z-40 bg-surface dark:bg-inverse-surface shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center w-full px-4 h-16 max-w-7xl mx-auto">
+<div class="flex items-center gap-4 flex items-center gap-2">
+<button class="p-2 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary dark:text-inverse-primary" data-icon="menu">menu</span>
+</button>
+<img alt="PetFolio Logo" class="w-8 h-8 object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0ujvZD2gG6_7p8u9lN6hiCLhaN-1FUH4rRGPFIZFxpsYLnLUTpkTFvsjyetvh4jiPCxFuSXlqQXVZa6Bs2Rouc2HO-9t9wERV7odsSItp7UO1Dgldeg5YK580eojayypaOecWrZa_zhSpni6L-Kw4ehgDHIHOUPWh1Lr08x1PbEXu8eUQavzWcCN5z8H9M7QXL5oW_pBYNDo-xVz3UUAOjcTzWdzIa6UdETAe7CeRYuXzbHDLHAuNJy5buk"/><h1 class="font-title-lg text-title-lg font-bold text-on-surface dark:text-inverse-on-surface">PetFolio</h1>
+</div>
+<div class="flex items-center gap-3 bg-surface-container-low px-3 py-1.5 rounded-full border border-outline-variant/30">
+<span class="font-label-bold text-label-bold text-on-surface">Buddy</span>
+<img alt="Pet Profile" class="w-8 h-8 rounded-full object-cover" data-alt="A close-up studio portrait of a friendly golden retriever dog with a soft, warm lighting setup. The dog has a shiny coat and gentle eyes, positioned against a minimalist light grey background that matches the professional UI aesthetic. The overall mood is calm, trustworthy, and premium." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSO2YSt01mlCkSTHGpGnrCnmayrpLeQ0I5MNK9w-QDuU1Xd0t9yo0k3CtLu4zMOn74_xxBMID2BKM1A-7M_O5NEtd4_cHoc__mjPk6ANiW1KHooChMJoTyyMQvjj3WMqQei1OyxJvjjWWfPioT7w9o_DxJGAGWt4bhcmP7s0LGgInk6K3S7kRxvZ-bjDbHxRiiF5L6P_KqDgPDrJ6OVZerXU5_P1vjTtALQf49i_wGLyf8b0AhG2CPoqDpqNAzEcTHAU0DPxo93ss"/>
+</div>
+</div>
+</header>
+<!-- Tab Navigation -->
+<nav class="bg-surface px-4 mt-2">
+<div class="flex space-x-1 max-w-7xl mx-auto border-b border-outline-variant/20">
+<button class="flex-1 py-3 text-center border-b-2 border-primary text-primary font-bold font-label-bold">Care Diary</button>
+<button class="flex-1 py-3 text-center text-on-surface-variant font-label-bold hover:bg-surface-container-low transition-colors">Health</button>
+<button class="flex-1 py-3 text-center text-on-surface-variant font-label-bold hover:bg-surface-container-low transition-colors">Feeding</button>
+</div>
+</nav>
+<main class="px-4 py-6 max-w-7xl mx-auto space-y-6">
+<!-- Today's Overview Bento Grid -->
+<section>
+<h2 class="font-title-lg text-title-lg text-on-surface mb-4">Today's Overview</h2>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+<!-- Tasks Ring Card -->
+<div class="bento-card flex flex-col items-center justify-center space-y-2">
+<div class="relative w-20 h-20">
+<svg class="w-full h-full">
+<circle class="text-slate-100" cx="40" cy="40" fill="transparent" r="32" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-[#2563EB] progress-ring-circle" cx="40" cy="40" fill="transparent" r="32" stroke="currentColor" stroke-dasharray="201" stroke-dashoffset="67" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-[#2563EB]" data-icon="task_alt">task_alt</span>
+</div>
+</div>
+<span class="font-label-bold text-label-bold text-on-surface-variant">Tasks</span>
+</div>
+<!-- Calories Ring Card -->
+<div class="bento-card flex flex-col items-center justify-center space-y-2">
+<div class="relative w-20 h-20">
+<svg class="w-full h-full">
+<circle class="text-slate-100" cx="40" cy="40" fill="transparent" r="32" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-[#14B8A6] progress-ring-circle" cx="40" cy="40" fill="transparent" r="32" stroke="currentColor" stroke-dasharray="201" stroke-dashoffset="40" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-[#14B8A6]" data-icon="nutrition">nutrition</span>
+</div>
+</div>
+<span class="font-label-bold text-label-bold text-on-surface-variant">Calories</span>
+</div>
+<!-- Water Ring Card -->
+<div class="bento-card col-span-2 md:col-span-1 flex flex-col items-center justify-center space-y-2">
+<div class="relative w-20 h-20">
+<svg class="w-full h-full">
+<circle class="text-slate-100" cx="40" cy="40" fill="transparent" r="32" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-[#0EA5E9] progress-ring-circle" cx="40" cy="40" fill="transparent" r="32" stroke="currentColor" stroke-dasharray="201" stroke-dashoffset="100" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-[#0EA5E9]" data-icon="water_drop">water_drop</span>
+</div>
+</div>
+<span class="font-label-bold text-label-bold text-on-surface-variant">Hydration</span>
+</div>
+</div>
+</section>
+<!-- Current Streak Banner -->
+<section class="bento-card bg-gradient-to-r from-primary-container to-blue-600 !text-white overflow-hidden relative">
+<div class="relative z-10">
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-title-lg text-title-lg">Current Streak</h2>
+<span class="bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">4 Days 🔥</span>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-primary-container font-bold" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-bold opacity-80 uppercase">Mon</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-primary-container font-bold" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-bold opacity-80 uppercase">Tue</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-primary-container font-bold" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-bold opacity-80 uppercase">Wed</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-md border-2 border-white/40">
+<span class="material-symbols-outlined text-primary-container font-bold" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-bold uppercase">Thu</span>
+</div>
+<div class="flex flex-col items-center gap-2 opacity-50">
+<div class="w-10 h-10 rounded-full border-2 border-white/60 flex items-center justify-center">
+<span class="text-xs font-bold">Fri</span>
+</div>
+<span class="text-[10px] font-bold uppercase">Fri</span>
+</div>
+<div class="flex flex-col items-center gap-2 opacity-50">
+<div class="w-10 h-10 rounded-full border-2 border-white/60 flex items-center justify-center">
+<span class="text-xs font-bold">Sat</span>
+</div>
+<span class="text-[10px] font-bold uppercase">Sat</span>
+</div>
+<div class="flex flex-col items-center gap-2 opacity-50">
+<div class="w-10 h-10 rounded-full border-2 border-white/60 flex items-center justify-center">
+<span class="text-xs font-bold">Sun</span>
+</div>
+<span class="text-[10px] font-bold uppercase">Sun</span>
+</div>
+</div>
+</div>
+<!-- Decorative circle -->
+<div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+</section>
+<!-- Daily Checklist Section -->
+<section class="space-y-4">
+<div class="flex justify-between items-end">
+<h2 class="font-title-lg text-title-lg text-on-surface">Daily Checklist</h2>
+<span class="text-primary font-bold font-label-bold">66% Complete</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2">
+<div class="bg-primary h-2 rounded-full" style="width: 66%"></div>
+</div>
+<div class="space-y-3">
+<!-- Walk -->
+<div class="bento-card flex items-center gap-4 py-4">
+<div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="directions_walk">directions_walk</span>
+</div>
+<div class="flex-1">
+<h3 class="font-bold text-on-surface">Morning Walk</h3>
+<p class="text-body-sm text-on-surface-variant">30 mins in the park</p>
+</div>
+<div class="w-6 h-6 rounded-md bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[18px]" data-icon="done">done</span>
+</div>
+</div>
+<!-- Medication -->
+<div class="bento-card flex items-center gap-4 py-4">
+<div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+<span class="material-symbols-outlined" data-icon="medication">medication</span>
+</div>
+<div class="flex-1">
+<h3 class="font-bold text-on-surface">Give Medication</h3>
+<p class="text-body-sm text-on-surface-variant">Post-breakfast tablet</p>
+</div>
+<div class="w-6 h-6 rounded-md bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[18px]" data-icon="done">done</span>
+</div>
+</div>
+<!-- Grooming -->
+<div class="bento-card flex items-center gap-4 py-4">
+<div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+<span class="material-symbols-outlined" data-icon="content_cut">content_cut</span>
+</div>
+<div class="flex-1">
+<h3 class="font-bold text-on-surface">Brush Coat</h3>
+<p class="text-body-sm text-on-surface-variant">5-minute grooming session</p>
+</div>
+<div class="w-6 h-6 rounded-md border-2 border-outline-variant bg-transparent"></div>
+</div>
+</div>
+<button class="w-full py-4 rounded-xl border-2 border-primary text-primary font-bold hover:bg-primary-container/5 transition-colors active:scale-95 duration-150">
+                Edit Goals
+            </button>
+</section>
+<!-- Quick Resources Grid -->
+<section>
+<h2 class="font-title-lg text-title-lg text-on-surface mb-4">Quick Resources</h2>
+<div class="grid grid-cols-3 gap-3">
+<button class="bento-card flex flex-col items-center gap-2 py-4 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="medical_information">medical_information</span>
+<span class="text-[11px] font-bold text-on-surface-variant">Vet Booking</span>
+</button>
+<button class="bento-card flex flex-col items-center gap-2 py-4 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-error" data-icon="emergency">emergency</span>
+<span class="text-[11px] font-bold text-on-surface-variant">Emergency</span>
+</button>
+<button class="bento-card flex flex-col items-center gap-2 py-4 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-orange-500" data-icon="restaurant">restaurant</span>
+<span class="text-[11px] font-bold text-on-surface-variant">Nutrition</span>
+</button>
+<button class="bento-card flex flex-col items-center gap-2 py-4 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-green-600" data-icon="payments">payments</span>
+<span class="text-[11px] font-bold text-on-surface-variant">Expenses</span>
+</button>
+<button class="bento-card flex flex-col items-center gap-2 py-4 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-blue-500" data-icon="monitoring">monitoring</span>
+<span class="text-[11px] font-bold text-on-surface-variant">Growth</span>
+</button>
+<button class="bento-card flex flex-col items-center gap-2 py-4 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-amber-600" data-icon="school">school</span>
+<span class="text-[11px] font-bold text-on-surface-variant">Training</span>
+</button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Component -->
+<nav class="fixed bottom-0 left-0 w-full z-50 rounded-t-xl bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-md shadow-[0px_-4px_20px_rgba(37,99,235,0.04)]">
+<div class="flex justify-around items-center px-4 py-3 pb-safe max-w-7xl mx-auto">
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-2 hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-all">
+<span class="material-symbols-outlined" data-icon="rss_feed">rss_feed</span>
+<span class="font-label-bold text-label-bold">Feed</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-2 scale-90 duration-150 ease-in-out">
+<span class="material-symbols-outlined" data-icon="favorite" data-weight="fill" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="font-label-bold text-label-bold">Care</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-2 hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-all">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+<span class="font-label-bold text-label-bold">Health</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-2 hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-all">
+<span class="material-symbols-outlined" data-icon="pets">pets</span>
+<span class="font-label-bold text-label-bold">Match</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-2 hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-all">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-bold text-label-bold">Profile</span>
+</button>
+</div>
+</nav>
+</body></html>

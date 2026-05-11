@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petfolio/features/services/presentation/controllers/pet_sitter_controller.dart';
 import 'package:petfolio/features/services/data/sitter_repository.dart';
-import 'package:petfolio/core/widgets/async_value_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';

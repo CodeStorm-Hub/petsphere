@@ -46,6 +46,15 @@ void main() {
         );
         await tester.tap(find.text('Sign In'));
         await tester.pumpAndSettle(const Duration(seconds: 35));
+        final reachedShell =
+            find.text('Atelier').evaluate().isNotEmpty ||
+            find.text('PetFolio').evaluate().isNotEmpty;
+        expect(
+          reachedShell,
+          isTrue,
+          reason:
+              'E2E credentials were supplied, so login must reach the main shell.',
+        );
       } else {
         await tester.tap(find.text('Register'));
         await tester.pumpAndSettle(const Duration(seconds: 8));
@@ -56,7 +65,7 @@ void main() {
 
     if (find.text('Atelier').evaluate().isEmpty &&
         find.text('PetFolio').evaluate().isEmpty) {
-      return;
+      fail('Expected the authenticated shell before exercising bottom nav.');
     }
 
     await exerciseMainShell(tester);

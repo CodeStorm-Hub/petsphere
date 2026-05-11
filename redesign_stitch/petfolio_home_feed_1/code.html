@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-secondary-fixed": "#001e2b",
+                        "on-tertiary-container": "#ffecec",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#faf8ff",
+                        "secondary": "#006686",
+                        "surface-tint": "#0053db",
+                        "on-secondary-container": "#005b78",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-surface": "#131b2e",
+                        "secondary-fixed-dim": "#7bd1fa",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#faf8ff",
+                        "outline-variant": "#c3c6d7",
+                        "primary-container": "#2563eb",
+                        "on-tertiary-fixed": "#40000d",
+                        "surface-container": "#eaedff",
+                        "outline": "#737686",
+                        "tertiary-fixed-dim": "#ffb2b7",
+                        "inverse-surface": "#283044",
+                        "surface-container-highest": "#dae2fd",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#7ed4fd",
+                        "tertiary-fixed": "#ffdadb",
+                        "primary-fixed": "#dbe1ff",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#d2d9f4",
+                        "surface-container-high": "#e2e7ff",
+                        "inverse-primary": "#b4c5ff",
+                        "surface-variant": "#dae2fd",
+                        "on-primary-fixed": "#00174b",
+                        "tertiary-container": "#d22348",
+                        "secondary-fixed": "#c0e8ff",
+                        "on-background": "#131b2e",
+                        "primary": "#004ac6",
+                        "on-surface-variant": "#434655",
+                        "on-tertiary-fixed-variant": "#92002a",
+                        "tertiary": "#ad0033",
+                        "background": "#faf8ff",
+                        "surface-container-low": "#f2f3ff",
+                        "inverse-on-surface": "#eef0ff",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#eeefff",
+                        "on-secondary-fixed-variant": "#004d66",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "20px",
+                        "unit": "4px",
+                        "margin-desktop": "48px",
+                        "container-max-width": "1200px",
+                        "feed-max-width": "640px",
+                        "gutter-desktop": "24px",
+                        "gutter-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface-bright text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim shadow-[0px_4px_20px_rgba(37,99,235,0.08)] sticky top-0 z-50">
+<div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 w-full max-w-container-max-width mx-auto">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors p-2 rounded-full cursor-pointer active:scale-95 transition-transform duration-200" data-icon="search">search</span>
+</div>
+<div class="flex items-center gap-2">
+<img alt="PetFolio Logo" class="w-8 h-8 object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0ujvZD2gG6_7p8u9lN6hiCLhaN-1FUH4rRGPFIZFxpsYLnLUTpkTFvsjyetvh4jiPCxFuSXlqQXVZa6Bs2Rouc2HO-9t9wERV7odsSItp7UO1Dgldeg5YK580eojayypaOecWrZa_zhSpni6L-Kw4ehgDHIHOUPWh1Lr08x1PbEXu8eUQavzWcCN5z8H9M7QXL5oW_pBYNDo-xVz3UUAOjcTzWdzIa6UdETAe7CeRYuXzbHDLHAuNJy5buk"/>
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed-dim tracking-tight">PetFolio</h1>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors p-2 rounded-full cursor-pointer active:scale-95 transition-transform duration-200" data-icon="add_box">add_box</span>
+</div>
+</div>
+</header>
+<main class="max-w-feed-max-width mx-auto pb-24">
+<!-- Greeting Section -->
+<section class="px-margin-mobile pt-6 pb-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">Good morning, Sarah! 🐾</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">See what your furry friends are up to today.</p>
+</section>
+<!-- Story Row -->
+<section class="mb-6">
+<div class="flex overflow-x-auto no-scrollbar gap-4 px-margin-mobile py-2">
+<!-- Your Story -->
+<div class="flex flex-col items-center gap-2 flex-shrink-0">
+<div class="relative p-0.5 rounded-full bg-gradient-to-tr from-primary-container to-secondary-container">
+<div class="bg-surface rounded-full p-1">
+<div class="w-16 h-16 rounded-full overflow-hidden bg-surface-container relative">
+<img class="w-full h-full object-cover" data-alt="A portrait of a smiling young woman with light brown hair in a bright, airy setting. The style is clean and professional with soft, natural lighting, fitting a premium social media aesthetic for a pet-focused platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPUecH2bC1yz1c1rwGZc5hRWxy2gr6qXYgEPRIY06-2Y3oZm6jX59-ebCnv4cSt6mGABk3ynlb7unAt2wYve-3RV5hx91ilD4eP3vmNEQKiS8UZzxVNnKnhRIEoHscPQdT2D4tAKfAe6fvbyG44R55LLVrOibG8zp2i1kdfsiJzzb-p-HCvKiNc5RK663V9pKoGLgfmLM8JYGq_Qd9ItoYPNtFtgT2JK47Ow9swyqVODCcs7XwVwnmKvMoYR0K3tbuz5sc5O2I4WQ"/>
+<div class="absolute bottom-0 right-0 bg-primary-container text-on-primary rounded-full w-6 h-6 flex items-center justify-center border-2 border-surface">
+<span class="material-symbols-outlined text-[16px]" data-icon="add">add</span>
+</div>
+</div>
+</div>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Your Story</span>
+</div>
+<!-- Pet Story 1 -->
+<div class="flex flex-col items-center gap-2 flex-shrink-0">
+<div class="p-0.5 rounded-full bg-gradient-to-tr from-primary-container to-secondary-container">
+<div class="bg-surface rounded-full p-1">
+<div class="w-16 h-16 rounded-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close up of a cute yellow Labrador puppy looking directly into the camera with big brown eyes. The background is a soft-focus garden, and the lighting is warm golden hour sunlight, creating a joyful and premium feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8hxtLgAY8W6kfTo_9zpWl9vqHP0nx8pHGW5EiFMl2Siut-YUWYJvl84Cd2L-kp6MX7Mx0tf8cfWCKLBuixocAz0TeczkvpBl7C6cHjBVAFvSd1-kmjbp2GAb-eMtIGi5eiOrVxlCN6Cth4yptNBgU_cnVFEZjaPs9VhN0DT1h0yXhHIz2lX3tCRoiFYFG29WHjllGQiVgy4TG7V0oUP-DfSMU0wigqtukBlINsyN3gO7J8eDEDjvin47mK4grtGvtMADgMc015Qs"/>
+</div>
+</div>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Max</span>
+</div>
+<!-- Pet Story 2 -->
+<div class="flex flex-col items-center gap-2 flex-shrink-0">
+<div class="p-0.5 rounded-full bg-gradient-to-tr from-primary-container to-secondary-container">
+<div class="bg-surface rounded-full p-1">
+<div class="w-16 h-16 rounded-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A ginger tabby cat wearing stylish sunglasses, sitting on a colorful rug. The image is bright, high-definition, and whimsical, capturing a premium editorial pet photography style with vibrant accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD64bE1kbEdiUiTA8CW7nP8e0r19Sg5WbZTmIZJt2vp-0osSQmpHN7ftu161EQUoLnXM8l5ybH9LZ0vzz6Tx_ImIwILXRcD2L91yFazPcandc6mcdHbSePn-3giPBIC67Jl-_ITxmpcn3iaUWTuV6szDI4Ud3s8pPb1zvPJU55ggDpgAw65djLzQcHiEHzoR9bca6-bc424S3L4saUZuT3y8OHaDELYa2KH7wy15rY3J8cdWqjKOjRNmpuepRg6KSU9Vbf3l8r367Q"/>
+</div>
+</div>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Oliver</span>
+</div>
+<!-- Pet Story 3 -->
+<div class="flex flex-col items-center gap-2 flex-shrink-0">
+<div class="p-0.5 rounded-full bg-gradient-to-tr from-primary-container to-secondary-container">
+<div class="bg-surface rounded-full p-1">
+<div class="w-16 h-16 rounded-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A portrait of a regal beagle puppy sitting elegantly in a modern minimalist living room. The lighting is soft and diffused, creating a high-end feel consistent with a premium pet lifestyle application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiL3wu6O1osAd9d7Huh-oXJJ88K2XHHU71hzEGigok_85NHkn8BKmZUFKfMAWOiv4PLuT9xhYgEj9OpF8PLct_v9JUtAQz14vN5SUCBCduhNI5A0Yxz3dRk19p1xJ2Jf8TiiB6JALDCSJ3vWYiwFs6qYiF8Rki9qlYdaA0fKMwdRxACSUqpk36zVLUE5tdAsaZMXS_-j1NnSL6_0Sc4IUxu1sIqALXZLPH4mQieluPM-VAj0bS3_-qfTjRJnDFnTDEKjpLQvBqm6c"/>
+</div>
+</div>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Bella</span>
+</div>
+<!-- Pet Story 4 -->
+<div class="flex flex-col items-center gap-2 flex-shrink-0">
+<div class="p-0.5 rounded-full bg-gradient-to-tr from-primary-container to-secondary-container">
+<div class="bg-surface rounded-full p-1">
+<div class="w-16 h-16 rounded-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A fluffy white Pomeranian dog in a designer harness sitting on a sleek marble floor. High-key lighting highlights the texture of the fur, emphasizing a luxury pet brand aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9AhnuMy-XcmtdpVEUL0GsmrkP1LlO9iKNECYphAPnaSJcNoSypFH0it11fXdoHPovevoBIGPgc9j_4tiIYFi9OG7EgZllSG59W8348kabd6DuZzyY8eAT_VD_OVaAIZ8EbZuME3VFeTfDbJq1B9qJTjek3Ol6u5TLanZbfV-lbtEMHlreBcHoIiOAjnJTT6MBEmTseNxxtL6YmJ8hNBGTagJ5suaXDkh-ip76teXxxgsvJ6_mjIhq5Hx1rN3ayyDZfBncRs_OkUk"/>
+</div>
+</div>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Coco</span>
+</div>
+</div>
+</section>
+<!-- Feed Posts -->
+<section class="space-y-6 px-margin-mobile">
+<!-- Post Card 1 -->
+<article class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(37,99,235,0.08)] overflow-hidden">
+<div class="p-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="Avatar of a French Bulldog with a curious expression. The lighting is professional studio quality with a soft blue-tinted background, aligning with the premium digital brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuwwW7uuUrc7LwBrwRX4FkmJ4CGoF641kqO4Ubs9Zxq5SZ2PLoF_HO-OpNwws7sKi4kpOX519qdzOrqdW97Ouvgag1JEvr3sedx8RXyXI3igUKrXyuDHxgeZ7n1Khsk23yQ1gqXGFb6uePdJmy6SPupeIhW2fIplgf6TFoa47KGTlHDDVI6RfYKx5Ctfx-6IWKayJ_BV__89MlIUWArJFq8zbLLyLbVW1-P7DJSiVM4f8xNm2Tl4lgXpWf6nNI72kUnBFhHggjX9k"/>
+</div>
+<div>
+<h3 class="font-label-lg text-label-lg text-on-surface">Luna the Frenchie</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">2 hours ago</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="more_vert">more_vert</span>
+</div>
+<div class="aspect-square w-full">
+<img class="w-full h-full object-cover" data-alt="A high-quality editorial shot of a French Bulldog lounging on a plush navy blue velvet sofa. The lighting is dramatic yet soft, highlighting the dog's features. The overall mood is sophisticated and cozy, using the primary blue brand colors for accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwkjegChZBNTWTgxnfCkA8DWrkRCKu2YDZk5HRBSFj5gl_fHkBV-STYoqXpnNkppFPd3cvQEiBnasvqF2cidAijwGzxWPyILp64Ygszg2MPR6pecPZFkdPgiYlOjgnWDi-Wj0ksfbrm2xEtByrnla3a1q1wG4WXsCvr6R37nslmC6NdiieHryr8bUFfowWJbGIatoeOYAsf1J7jj0J7SabrrH2eRKizh0fNYFW_hBSmzDsmKoyryMPYCLl0r95clnqwPq8bkXmv1o"/>
+</div>
+<div class="p-4">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-[28px] hover:scale-110 transition-transform cursor-pointer" data-icon="favorite">favorite</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[28px] hover:scale-110 transition-transform cursor-pointer" data-icon="chat_bubble">chat_bubble</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[28px] hover:scale-110 transition-transform cursor-pointer" data-icon="send">send</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[28px] hover:scale-110 transition-transform cursor-pointer" data-icon="bookmark">bookmark</span>
+</div>
+<p class="font-label-lg text-label-lg text-on-surface mb-1">1,284 likes</p>
+<p class="font-body-sm text-body-sm text-on-surface">
+<span class="font-bold mr-1">Luna the Frenchie</span> Sunday afternoon vibes... Just need my snacks and a long nap 🦴💤
+                    </p>
+</div>
+</article>
+<!-- Post Card 2 -->
+<article class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(37,99,235,0.08)] overflow-hidden">
+<div class="p-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="An adorable domestic shorthair cat with striking green eyes, presented in a clean, minimalist profile shot. The lighting is bright and modern, consistent with a professional social app for pet lovers." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZc3fQuQWLoaN1cU7gb8-w4RqTivO2C2k1XFFqoHrUtT4E2Qc5oLnSpaGSQJFSLtCDq9W1ppQabQBHz2NrQyKNY2oUa1ZAFCAvn-nInIVgjPO3q1fzbA4m-TQDhkubUBLHvxlOby6cst0YdLy_-cFM_IxuuvZH_ez4_vWBnYNWm4XLTko11hwLLAH-ocE-R69zS222McaSpjp1uzD067-OJeNfhSJRRfEgHQRugDM7PZZLm1iZnssf77EPzqtJHfPE9u3MGb52Mqo"/>
+</div>
+<div>
+<h3 class="font-label-lg text-label-lg text-on-surface">Simba</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">5 hours ago</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="more_vert">more_vert</span>
+</div>
+<div class="aspect-[4/5] w-full">
+<img class="w-full h-full object-cover" data-alt="A stunning cat silhouette sitting on a windowsill during a bright morning. The scene is filled with soft, clean light and features a minimalist interior design with touches of blue decor. The composition is artistic and premium, emphasizing tranquil elegance." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWi7BqDFyIu8wP96Mq1P7pJFkZLymtar1ShQLEmx5DM4pDpfgMGTa--jxjB0vxVhwIXTowNn5FtPBpjqk82dVjBbO2gZxpl9hqeQ5ehDgwri983E34RVvqf8-_W8Hq7l4ZwyalfdpiVOqU1ZGwvF6NvWnXDKVZanoJMKAGY-xdu_t2Kn_I46P1Ai6_vpVPH6c95-yQgxd92cl3BB7JCEy1UXQF_fdix1_sadlDOAi41vT6voGA0IfNBu9V3SjrXZdOVZCYXPmpiac"/>
+</div>
+<div class="p-4">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant text-[28px] hover:scale-110 transition-transform cursor-pointer" data-icon="favorite">favorite</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[28px] hover:scale-110 transition-transform cursor-pointer" data-icon="chat_bubble">chat_bubble</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[28px] hover:scale-110 transition-transform cursor-pointer" data-icon="send">send</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[28px] hover:scale-110 transition-transform cursor-pointer" data-icon="bookmark">bookmark</span>
+</div>
+<p class="font-label-lg text-label-lg text-on-surface mb-1">856 likes</p>
+<p class="font-body-sm text-body-sm text-on-surface">
+<span class="font-bold mr-1">Simba</span> Watching the birds is a full-time job. 🕊️
+                    </p>
+</div>
+</article>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full bg-surface dark:bg-surface-dim border-t border-outline-variant dark:border-outline shadow-[0px_-4px_20px_rgba(37,99,235,0.08)] flex justify-around items-center py-2 pb-safe px-4 z-50">
+<!-- Feed Tab (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-on-primary-fixed-variant text-on-primary-container dark:text-primary-fixed rounded-xl px-4 py-1 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="rss_feed" style="font-variation-settings: 'FILL' 1;">rss_feed</span>
+<span class="font-label-md text-label-md">Feed</span>
+</a>
+<!-- Match Tab -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:text-primary dark:hover:text-primary-fixed transition-colors active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="pets">pets</span>
+<span class="font-label-md text-label-md">Match</span>
+</a>
+<!-- Care Tab -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:text-primary dark:hover:text-primary-fixed transition-colors active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+<span class="font-label-md text-label-md">Care</span>
+</a>
+<!-- Shop Tab -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:text-primary dark:hover:text-primary-fixed transition-colors active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span>
+<span class="font-label-md text-label-md">Shop</span>
+</a>
+<!-- Profile Tab -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-4 py-1 hover:text-primary dark:hover:text-primary-fixed transition-colors active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+</body></html>

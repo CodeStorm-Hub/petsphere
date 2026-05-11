@@ -1,0 +1,8 @@
+FrameLayout id=android:id/content bounds=[0,0][1080,2424]
+  FrameLayout flags=focusable bounds=[0,0][1080,2424]
+    Button desc="Back" flags=clickable,focusable bounds=[11,153][137,279]
+    View desc="Liked Pets" flags=focusable bounds=[189,177][496,254]
+    View desc="No liked pets yet" flags=focusable bounds=[353,1178][727,1238]
+    View desc="Explore discovery to like pets and they’ll show up here." flags=focusable bounds=[84,1265][996,1391]
+    Button desc="Go to Discovery" flags=clickable,focusable bounds=[275,1475][805,1603]
+View id=android:id/navigationBarBackground bounds=[0,2298][1080,2424]

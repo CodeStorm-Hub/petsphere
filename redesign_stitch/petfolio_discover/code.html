@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PetFolio - Discover</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#ffffff",
+                    "secondary-container": "#86f2e4",
+                    "on-tertiary-container": "#ffecec",
+                    "tertiary": "#ac0031",
+                    "surface-variant": "#d3e4fe",
+                    "on-surface": "#0b1c30",
+                    "background": "#f8f9ff",
+                    "on-tertiary-fixed": "#40000c",
+                    "surface-container": "#e5eeff",
+                    "secondary-fixed": "#89f5e7",
+                    "on-background": "#0b1c30",
+                    "on-primary-fixed": "#00174b",
+                    "on-error": "#ffffff",
+                    "primary-fixed": "#dbe1ff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "primary-container": "#2563eb",
+                    "tertiary-fixed": "#ffdada",
+                    "surface-container-high": "#dce9ff",
+                    "outline-variant": "#c3c6d7",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "error-container": "#ffdad6",
+                    "on-primary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "primary": "#004ac6",
+                    "outline": "#737686",
+                    "surface": "#f8f9ff",
+                    "surface-bright": "#f8f9ff",
+                    "on-tertiary-fixed-variant": "#920028",
+                    "surface-tint": "#0053db",
+                    "on-surface-variant": "#434655",
+                    "surface-container-highest": "#d3e4fe",
+                    "inverse-primary": "#b4c5ff",
+                    "error": "#ba1a1a",
+                    "secondary": "#006a61",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb3b6",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#006f66",
+                    "on-primary-container": "#eeefff",
+                    "inverse-surface": "#213145",
+                    "on-secondary-fixed": "#00201d",
+                    "secondary-fixed-dim": "#6bd8cb",
+                    "tertiary-container": "#d71142",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "surface-container-low": "#eff4ff",
+                    "surface-dim": "#cbdbf5",
+                    "on-secondary-fixed-variant": "#005049"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-lg": "2rem",
+                    "section-gap": "3rem",
+                    "stack-sm": "0.5rem",
+                    "container-margin": "1.5rem",
+                    "gutter": "1rem",
+                    "stack-md": "1rem"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-xl": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .swipe-card-gradient {
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.8) 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-on-surface docked full-width top-0 z-50 sticky">
+<div class="flex justify-between items-center w-full px-container-margin h-16">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed hover:bg-surface-variant/50 dark:hover:bg-surface-variant/10 rounded-full p-2 transition-transform active:scale-95 duration-200 cursor-pointer" data-icon="tune">tune</span>
+</div>
+<div class="flex items-center gap-2">
+<img alt="PetFolio Logo" class="w-8 h-8 object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0ujvZD2gG6_7p8u9lN6hiCLhaN-1FUH4rRGPFIZFxpsYLnLUTpkTFvsjyetvh4jiPCxFuSXlqQXVZa6Bs2Rouc2HO-9t9wERV7odsSItp7UO1Dgldeg5YK580eojayypaOecWrZa_zhSpni6L-Kw4ehgDHIHOUPWh1Lr08x1PbEXu8eUQavzWcCN5z8H9M7QXL5oW_pBYNDo-xVz3UUAOjcTzWdzIa6UdETAe7CeRYuXzbHDLHAuNJy5buk"/>
+<span class="font-headline-md text-headline-md text-primary dark:text-primary-fixed">PetFolio</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed hover:bg-surface-variant/50 dark:hover:bg-surface-variant/10 rounded-full p-2 transition-transform active:scale-95 duration-200 cursor-pointer" data-icon="favorite">favorite</span>
+</div>
+</div>
+</header>
+<!-- Tabs & Filters -->
+<section class="px-container-margin mt-4 space-y-4">
+<!-- Main Tabs -->
+<div class="flex border-b border-outline-variant">
+<button class="flex-1 py-3 text-center font-label-md text-label-md border-b-2 border-primary text-primary">Discover</button>
+<button class="flex-1 py-3 text-center font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors">Nearby</button>
+<button class="flex-1 py-3 text-center font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors">My Listings</button>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+<span class="px-4 py-2 rounded-full bg-primary text-on-primary font-label-sm text-label-sm whitespace-nowrap cursor-pointer">All</span>
+<span class="px-4 py-2 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm whitespace-nowrap cursor-pointer">Same Breed</span>
+<span class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm whitespace-nowrap cursor-pointer">Playdate</span>
+<span class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm whitespace-nowrap cursor-pointer">Adoption</span>
+</div>
+</section>
+<!-- Card Stack Container -->
+<main class="px-container-margin mt-6 relative max-w-md mx-auto aspect-[3/4] md:aspect-[4/5]">
+<!-- Main Swipe Card -->
+<div class="relative w-full h-full rounded-xl overflow-hidden shadow-lg bg-surface-container-lowest transition-transform active:scale-[0.98] cursor-grab">
+<img alt="Golden Retriever" class="absolute inset-0 w-full h-full object-cover" data-alt="A professional, high-resolution portrait of a friendly Golden Retriever sitting in a sun-drenched park with soft green grass. The lighting is warm and natural, creating a cheerful and trustworthy atmosphere. The dog has a bright, happy expression with its tongue slightly out. The overall aesthetic is clean and modern, following a bright light-mode UI style with soft-focus background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbFUAiwaKJv5HMeqLrrsshlJ8rBggVVnj2MgnUNcBgV235eBIn5ZcttuZIj5aJcBk7C0QKebevIemy43XnxdUQr-E1Gny6CdrjXmKLsMB6gRHUzaQx-tcAA0t7uYCDsuqwp04E1DH39FrEj-aGufk_XKCX44Stw9cyk6Du9bsTBpYgLevF-iqrw2n-sJQDBE07zvRv_1e0NA9tbLd_DYlDik1BihaaGlPZU8VHRort7d423N4aePh0qP0iHNFCmGhKyRTHyzOM6eI"/>
+<!-- Gradient Overlay for Legibility -->
+<div class="absolute inset-0 swipe-card-gradient"></div>
+<!-- Card Content Overlay -->
+<div class="absolute bottom-0 left-0 right-0 p-6 text-white space-y-3">
+<div class="flex items-end justify-between">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-lg text-headline-lg leading-none">Cooper, 2</h2>
+<span class="material-symbols-outlined text-primary-fixed text-lg" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<p class="font-body-md text-body-md opacity-90">Golden Retriever • 1.2 miles away</p>
+</div>
+</div>
+<!-- Badges -->
+<div class="flex flex-wrap gap-2">
+<span class="flex items-center gap-1 px-3 py-1 rounded-lg bg-white/20 backdrop-blur-md text-[12px] font-semibold">
+<span class="material-symbols-outlined text-sm" data-icon="vaccines">vaccines</span>
+                        Vaccinated
+                    </span>
+<span class="flex items-center gap-1 px-3 py-1 rounded-lg bg-white/20 backdrop-blur-md text-[12px] font-semibold">
+<span class="material-symbols-outlined text-sm" data-icon="house">house</span>
+                        House-trained
+                    </span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="absolute -bottom-10 left-0 right-0 flex justify-center items-center gap-8">
+<!-- Pass Button -->
+<button class="w-16 h-16 rounded-full border-2 border-error text-error flex items-center justify-center bg-white shadow-lg transition-all active:scale-90 hover:bg-error/5">
+<span class="material-symbols-outlined text-3xl" data-icon="close">close</span>
+</button>
+<!-- Super Like Button -->
+<button class="w-14 h-14 rounded-full border-2 border-secondary text-secondary flex items-center justify-center bg-white shadow-lg transition-all active:scale-90 hover:bg-secondary/5">
+<span class="material-symbols-outlined text-2xl" data-icon="star">star</span>
+</button>
+<!-- Like Button -->
+<button class="w-16 h-16 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg transition-all active:scale-90 hover:brightness-110">
+<span class="material-symbols-outlined text-3xl" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-surface-container-lowest dark:bg-on-surface shadow-[0_-4px_12px_rgba(0,0,0,0.05)] rounded-t-xl">
+<!-- Discover Tab -->
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-surface-variant/20 transition-all duration-300 ease-in-out active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="pets">pets</span>
+<span class="font-label-sm text-label-sm">Discover</span>
+</div>
+<!-- Match Tab (Active as per instruction "highlighted in blue") -->
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container dark:bg-primary-fixed dark:text-on-primary-fixed rounded-full px-4 py-1 transition-all duration-300 ease-in-out active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="volunteer_activism" style="font-variation-settings: 'FILL' 1;">volunteer_activism</span>
+<span class="font-label-sm text-label-sm">Match</span>
+</div>
+<!-- Likes Tab -->
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-surface-variant/20 transition-all duration-300 ease-in-out active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="font-label-sm text-label-sm">Likes</span>
+</div>
+<!-- Inbox Tab -->
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-surface-variant/20 transition-all duration-300 ease-in-out active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-sm text-label-sm">Inbox</span>
+</div>
+<!-- Profile Tab -->
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-surface-variant/20 transition-all duration-300 ease-in-out active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</div>
+</nav>
+</body></html>

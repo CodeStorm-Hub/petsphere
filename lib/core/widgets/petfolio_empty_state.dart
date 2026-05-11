@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:petfolio/core/theme/icon_sizes.dart';
 import 'package:petfolio/core/theme/spacing.dart';
 
 class PetfolioEmptyState extends StatelessWidget {
@@ -21,7 +22,9 @@ class PetfolioEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     
     return Center(
       child: Padding(
@@ -38,7 +41,7 @@ class PetfolioEmptyState extends StatelessWidget {
               ),
               child: Icon(
                 icon,
-                size: 64,
+                size: AppIconSizes.huge,
                 color: colorScheme.primary.withAlpha(200),
               ),
             ),
@@ -46,27 +49,24 @@ class PetfolioEmptyState extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: colorScheme.onSurface,
-                fontSize: 20,
+              style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
-                fontSize: 15,
-                height: 1.4,
               ),
             ),
             if (buttonText != null && onButtonPressed != null) ...[
               const SizedBox(height: AppSpacing.xl),
               FilledButton.icon(
                 onPressed: onButtonPressed,
-                icon: Icon(buttonIcon ?? Icons.add, size: 18),
+                icon: Icon(buttonIcon ?? Icons.add, size: AppIconSizes.xs),
                 label: Text(buttonText!),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
@@ -82,3 +82,4 @@ class PetfolioEmptyState extends StatelessWidget {
     );
   }
 }
+

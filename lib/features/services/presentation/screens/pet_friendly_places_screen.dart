@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petfolio/features/services/presentation/controllers/pet_friendly_places_controller.dart';
 import 'package:petfolio/features/services/data/models/pet_friendly_place_model.dart';
-import 'package:petfolio/core/widgets/async_value_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';

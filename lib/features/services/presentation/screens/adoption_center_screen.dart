@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:petfolio/core/constants/app_routes.dart';
 import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 
 import 'package:petfolio/features/auth/presentation/controllers/auth_controller.dart';
@@ -184,7 +186,7 @@ class _ListingCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         key: ValueKey('adoption_listing_card_${listing.id}'),
-        onTap: onApply,
+        onTap: () => context.push(AppRoutes.adoptionDetailById(listing.id)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

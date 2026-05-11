@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-bright": "#faf8ff",
+                      "surface-container-low": "#f3f3fe",
+                      "on-primary": "#ffffff",
+                      "tertiary-fixed-dim": "#ffb596",
+                      "tertiary": "#943700",
+                      "on-tertiary-container": "#ffede6",
+                      "surface-variant": "#e1e2ed",
+                      "inverse-surface": "#2e3039",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#7d2d00",
+                      "primary-container": "#2563eb",
+                      "inverse-primary": "#b4c5ff",
+                      "on-surface-variant": "#434655",
+                      "surface": "#faf8ff",
+                      "on-secondary-fixed": "#0b1c30",
+                      "secondary-fixed-dim": "#b7c8e1",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "surface-container": "#ededf9",
+                      "on-error-container": "#93000a",
+                      "outline-variant": "#c3c6d7",
+                      "on-background": "#191b23",
+                      "surface-container-high": "#e7e7f3",
+                      "primary": "#004ac6",
+                      "on-secondary-container": "#54647a",
+                      "secondary-fixed": "#d3e4fe",
+                      "background": "#faf8ff",
+                      "outline": "#737686",
+                      "secondary": "#505f76",
+                      "inverse-on-surface": "#f0f0fb",
+                      "on-secondary-fixed-variant": "#38485d",
+                      "on-tertiary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "on-primary-fixed": "#00174b",
+                      "surface-tint": "#0053db",
+                      "on-surface": "#191b23",
+                      "surface-dim": "#d9d9e5",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "tertiary-container": "#bc4800",
+                      "on-secondary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-fixed": "#360f00",
+                      "secondary-container": "#d0e1fb",
+                      "surface-container-highest": "#e1e2ed",
+                      "tertiary-fixed": "#ffdbcd",
+                      "on-error": "#ffffff",
+                      "primary-fixed": "#dbe1ff",
+                      "on-primary-container": "#eeefff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "gutter": "12px",
+                      "md": "16px",
+                      "sm": "8px",
+                      "xs": "4px",
+                      "lg": "24px",
+                      "container-margin": "16px",
+                      "xl": "32px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "label-lg": ["Inter"],
+                      "headline-sm": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "body-md": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                      "label-lg": ["14px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                      "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #F7FAFF; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .story-ring { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="text-on-surface">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky shadow-sm bg-surface dark:bg-on-background z-40 flex justify-between items-center px-gutter py-sm w-full z-40">
+<div class="flex items-center gap-md">
+<img alt="PetFolio Logo" class="w-10 h-10 object-cover rounded-full" src="https://lh3.googleusercontent.com/aida/ADBb0ujvZD2gG6_7p8u9lN6hiCLhaN-1FUH4rRGPFIZFxpsYLnLUTpkTFvsjyetvh4jiPCxFuSXlqQXVZa6Bs2Rouc2HO-9t9wERV7odsSItp7UO1Dgldeg5YK580eojayypaOecWrZa_zhSpni6L-Kw4ehgDHIHOUPWh1Lr08x1PbEXu8eUQavzWcCN5z8H9M7QXL5oW_pBYNDo-xVz3UUAOjcTzWdzIa6UdETAe7CeRYuXzbHDLHAuNJy5buk"/>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">PetFolio</h1>
+</div>
+<div class="flex items-center gap-gutter">
+<button class="hover:bg-surface-container-low transition-colors p-2 rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+</button>
+<button class="hover:bg-surface-container-low transition-colors p-2 rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined text-on-surface-variant">add_box</span>
+</button>
+<div class="relative">
+<button class="hover:bg-surface-container-low transition-colors p-2 rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+<span class="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
+</div>
+<button class="hover:bg-surface-container-low transition-colors p-2 rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined text-on-surface-variant">chat_bubble</span>
+</button>
+</div>
+</header>
+<main class="pb-24 max-w-lg mx-auto">
+<!-- Pull to Refresh Spinner -->
+<div class="flex justify-center py-sm">
+<div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+</div>
+<!-- Active Pet Switcher -->
+<section class="px-container-margin mb-md">
+<div class="inline-flex items-center gap-sm bg-primary-container text-on-primary-container rounded-full pl-xs pr-md py-xs shadow-sm hover:bg-opacity-90 transition-all cursor-pointer">
+<img alt="Buddy" class="w-8 h-8 rounded-full border-2 border-on-primary" data-alt="A close-up portrait of a cheerful Beagle named Buddy, looking directly at the camera with bright, expressive eyes and a gentle smile. The setting is a bright, sun-drenched modern living room with soft natural lighting. The photography style is professional, high-clarity, and warm, emphasizing the high-end, friendly community spirit of the PetFolio brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBigqRYG3CDV1keK9Y_xx2YobnNKOXtTgxJt0yNzmRsXvzfXeYRmZkilARvI4F89GnwwHovK2VTW8uiSYUq8-kpyvNEjrCdYoa8wOE8Xn3snO0d9FCGNhcKHvreHaF8oUPueVXkiXb2Xs0-hkKO0C5VDnhFIN8vwlRk6SYN1d0eiGXWn_aqLUnma04m-IvG4WJKsg2E2Hy0rEI7Q2sBT6dhJUHtT10b0Lb9EWYTvJ7ZaoRlDAmQVpel5CnYVa19U0ai8tw9m6_CraA"/>
+<span class="font-label-lg text-label-lg">Buddy</span>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</div>
+</section>
+<!-- Story Tray -->
+<section class="mb-lg overflow-x-auto no-scrollbar flex px-container-margin gap-md py-sm">
+<!-- User Story -->
+<div class="flex flex-col items-center gap-xs flex-shrink-0">
+<div class="relative p-[2px] rounded-full bg-surface-container-high">
+<img alt="My Story" class="w-16 h-16 rounded-full border-2 border-surface object-cover" data-alt="A profile photo of a playful Beagle, used for the user's own story. The image is bright and cheerful, captured in a modern home environment with soft morning light. The composition focuses on the puppy's face, conveying a sense of joy and daily adventure within a premium lifestyle context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNPxOxddXNaWkKJcPMayrxuksVRU9YtsEMzgGoutb_C8phbHw2fUwhBM1CxgflnxbHl0HHBUQ9eA0hpN2C9zA_NPUSCX0HuMJfB73S9wZC4HayOhcXlunQhQ-VODNYyxsoZnnjjS8rqA8xFqqeQsACMyZL_CM1CETTLfbmoUIsYRTnByJv6TZK7MstdQguOHElewu8J3iJoVtjnE3f44VEqWeJ8bxiiGPL9RLU3q4vDpVw5koSakF4xfrJnpVa8KHc3NCC8PYnHRg"/>
+<div class="absolute bottom-0 right-0 bg-primary text-on-primary rounded-full w-5 h-5 flex items-center justify-center border-2 border-surface">
+<span class="material-symbols-outlined text-[14px]">add</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Your story</span>
+</div>
+<!-- Followed Stories -->
+<div class="flex flex-col items-center gap-xs flex-shrink-0">
+<div class="p-[3px] rounded-full story-ring">
+<img alt="Luna" class="w-16 h-16 rounded-full border-2 border-surface object-cover" data-alt="A stylish portrait of a French Bulldog named Luna, wearing a chic yellow bandana. The background is a blurred city park with vibrant green grass and soft afternoon sunlight. The image has a gallery-first aesthetic with rich colors and sharp focus on the dog's characteristic features, fitting for a high-end social utility." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDV06wtmD6C_mLAgyXi1JYSA_-5ungPb1kASNO1YiMy_tF5Ad9nvd12yPhfltZfaUpxKdi8J4UZxS9UAinVeCYvzhxcV4wQaNbfijFn-m29Si6sMTEJ9_LFitaHaewhDeegLxDjEjS_vQYZAgaz0N3JBs6DRpRcCrSqm1Kan-LsE9mL_XnnxVMX6RYh7edFQrLSBDqr2jAubFz6qPyZPJ6m60V4t_i5-Rdl8MJjx1R9hDOQDZM6tMMdfVgUp4aQjz6l-bFJZYBSX08"/>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Luna</span>
+</div>
+<div class="flex flex-col items-center gap-xs flex-shrink-0">
+<div class="p-[3px] rounded-full story-ring">
+<img alt="Milo" class="w-16 h-16 rounded-full border-2 border-surface object-cover" data-alt="A regal Ginger Tabby cat named Milo sitting elegantly on a minimalist grey sofa. Soft, indirect light from a large window creates a peaceful, premium atmosphere. The photography is high-end and clean, highlighting the cat's vibrant orange fur against the neutral interior design palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwVDsfWqrFPpq4q9aqlZUZR3dcxZPYoytCWW5jDD3WTNhR1_YrxUnxfvd9tyvVR8khp84wj_uTdfC6Dyx8nEZJoTg063C_j1H7Vxxa9NmS5CbjnDziQKsOu4y-K7ts3ndmf2MmM2Pwr_KE3nzCL9wKsU_epxIYlWWN1PaLEuLoymtuPJZfGWi7akH79RiS5c2HRRSjf2WdyyFFSP82LBksfO16N1ezBxwWiG7nfUV-ZDuhBfO7o0d-uwGVrrNL8-Cru3o73HHTXOk"/>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Milo</span>
+</div>
+<div class="flex flex-col items-center gap-xs flex-shrink-0">
+<div class="p-[3px] rounded-full story-ring">
+<img alt="Cooper" class="w-16 h-16 rounded-full border-2 border-surface object-cover" data-alt="A Golden Retriever puppy named Cooper playing in a field of daisies. The lighting is golden hour, creating a warm and nostalgic mood. The shot is wide enough to show the beautiful landscape, maintaining a premium lifestyle vibe that emphasizes high-quality visual content and pet happiness." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLR9tiu3jn6wKbkyf8nVZk9u2nSTEgbo9EZ2a2nn4LkvmV9yxuX7J821I_7welpnbzBdEEIwHuJ2U6b0oM2Rlz1aMfIwk9G-ksHYXtkBxMJ9kSoG7tayXRJsMijp4MH98rsq68EhHVUA-AlkWnZprZw2feVfiBMum2ZMqQ5SyrtdGnxQoTKOX3TQ02v25ODTFrqb13wrIU1NI5JdKvY988quGw2C-b2jsJPa8-TvZiKkKkC9JGwn3jU0U4uT33Q_ML870De7buQFg"/>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Cooper</span>
+</div>
+<div class="flex flex-col items-center gap-xs flex-shrink-0">
+<div class="p-[3px] rounded-full story-ring">
+<img alt="Bella" class="w-16 h-16 rounded-full border-2 border-surface object-cover" data-alt="A fluffy Persian cat named Bella looking curious while perched on a designer wooden table. The lighting is crisp and modern, with a cool blue-tinted neutral background that matches the PetFolio brand aesthetic. The focus is sharp on the cat's striking eyes and luxurious fur texture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBq5H9qPsGPJI9xC5gUHPrEZHCnEC5mkxHqkMqB9KJPESX_-8DxGvlVxzQabXGWoytls9lwnjr7bDHz_JLnVrg-tVoN1U1z-gizAUx2rXyY2ZhTf8rRbjTpD5748rluHDxqm_yP744IKkfURZnEcnpgdPcI6mlASKHNIg9N77RiI3rB5wuE82ngF7AL9-qR8RoCqu_ez616IOVG69kZMKqIJluSzaxq9EoiXQh2sz4PFVxdvYwe7svw_bs-DrCRPk4jDOEjLCicYxE"/>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Bella</span>
+</div>
+</section>
+<!-- Feed Cards -->
+<div class="flex flex-col gap-lg px-container-margin">
+<!-- Feed Card 1 -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-surface-container">
+<div class="p-md flex justify-between items-center">
+<div class="flex items-center gap-sm">
+<img alt="Owner Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="A profile picture of a young, happy pet owner in a stylish outdoor setting. The image is brightly lit with a clean, modern aesthetic, reflecting the trustworthy and community-centric personality of the platform. The background is a soft-focus urban park." src="https://lh3.googleusercontent.com/aida-public/AB6AXuARt6senXSmf8LRzS8aQ0PWcAmPTybmFHJZjWUgySSavTzwxs4rqwv_eetEaGeOutDCNn57jWGCzxuiKLWS_5EIiwZucPH4HmMm10JnzOkmTC1ZNrMrQMLrczUX9-ZdWxDVoveLGvAQtBp9B357IEYebzoRwyy6F8TVJbuVbTI6oJ7IyoMd2Bo3wJdSX0TNL84YMPNXc4c9gjrpZQBG97UlVAN817J8XWUbbNiTU1-cxHJXaPLYO96XpzcJRu0UBMgaY8aRfT5k9Hw"/>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface">Luna the Frenchie</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">2 hours ago</p>
+</div>
+</div>
+<button class="hover:bg-surface-container-low rounded-full p-2">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<div class="relative aspect-square w-full">
+<img alt="Feed Post" class="w-full h-full object-cover" data-alt="A high-resolution photograph of a French Bulldog sitting proudly on a sleek, modern balcony overlooking a city skyline at dusk. The lighting is dramatic yet soft, highlighting the dog's coat and the luxury environment. The composition is balanced and follows the gallery-first philosophy of the brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsiRltcSt_zSK_k-8-iUk9UEtV3pn59ni27ex_OgjrZ5akeKFFeGC7E42AtJM9LddVnuZFEmISyZoenvkMWHttmCS62hXeb5fEffIUiavr3ZITPJypZPJwXH_SdIzJQPH1wFPumg3odEkQsHZO2FeCdgfxnUWUFwDRX7k9LaYYexmiJV4HYPcZ09ZdPdf5pAoDysaOnH5CZGJsTK2iQY-2x9J7Pvk6VVOkVXZkQSS65Oqud26JH943slThJu_lNRc3u8ICa6j8qaM"/>
+</div>
+<div class="p-md">
+<div class="flex justify-between items-center mb-sm">
+<div class="flex gap-md">
+<button class="active:scale-90 duration-150"><span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">favorite</span></button>
+<button class="active:scale-90 duration-150"><span class="material-symbols-outlined">chat_bubble</span></button>
+<button class="active:scale-90 duration-150"><span class="material-symbols-outlined">share</span></button>
+</div>
+<button class="active:scale-90 duration-150"><span class="material-symbols-outlined">bookmark</span></button>
+</div>
+<p class="font-label-lg text-label-lg text-on-surface mb-xs">1,248 likes</p>
+<p class="font-body-md text-body-md text-on-surface">
+<span class="font-bold">Luna the Frenchie</span> Sunday afternoon vibes at our favorite spot in the city! 🏙️🐾 #PetFolio #FrenchieLife
+                    </p>
+</div>
+</article>
+<!-- Feed Card 2 -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-surface-container">
+<div class="p-md flex justify-between items-center">
+<div class="flex items-center gap-sm">
+<img alt="Milo Profile" class="w-10 h-10 rounded-full object-cover" data-alt="A small circular profile avatar of Milo the Ginger Tabby. The image is clean and professional, focusing on the cat's face with a soft-focus background that creates a sense of depth and organization within the feed." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBc7ZK9p0aK5FRKriHZq2occ0zpe3qssoeJtGaRbPBPvROcMzSJCcjwizr5sllpP2MlJEwQW2FBTMX-gntupBPivW0JSgnMNJ51434rFSy35Ll09cKeeGnAuePMOw0BnUxN94M-gMP2iPuSIJAaW67a_1nNNpNkUfwE1K7HoKACPPrjH9jQYEG4PdySrBNOaG80LOov1-Vf_Ql3asYqkoJpu7UMMei5JEuJZD-Hx1_vzQaKRHHbQaFRlhDgtX5u-mIGWp2U3lNf5iY"/>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface">Milo &amp; Co.</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">5 hours ago</p>
+</div>
+</div>
+<button class="hover:bg-surface-container-low rounded-full p-2">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<div class="relative aspect-[4/5] w-full">
+<img alt="Feed Post" class="w-full h-full object-cover" data-alt="A stunning vertical photograph of an orange tabby cat looking out of a sunlit window through sheer white curtains. The light is diffused and ethereal, creating a peaceful, high-end atmosphere. The image emphasizes texture and clarity, fitting the premium social platform's visual standards." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXwjPChhs8RQRcxMCCM9rsY39zhfMqk2a0zP7bD7S9XLuYB61lFybbX9vUSy54ApGWKdyY9yWHDRcKoKePg2hxdiSPOfCEJwKQLqbWNFl1BPeF1c5SLigOEoH-NhHjASN15yvcp_axExVUIA1AfYCmGnSKrrlp2QqqO6mk3snmBpOC2hW-Vm8YOYWZS0oQvaEyYspZYf2AwvmPiyE7REmlbAq7W610wYBVUglKRB3GGRvAoKpY89PogL9piZOyY9nBY-wZ6hOEuYY"/>
+<div class="absolute top-4 right-4 bg-on-background/20 backdrop-blur-md px-3 py-1 rounded-full">
+<span class="text-white font-label-sm text-label-sm">1/3</span>
+</div>
+</div>
+<div class="p-md">
+<div class="flex justify-between items-center mb-sm">
+<div class="flex gap-md">
+<button class="active:scale-90 duration-150"><span class="material-symbols-outlined">favorite</span></button>
+<button class="active:scale-90 duration-150"><span class="material-symbols-outlined">chat_bubble</span></button>
+<button class="active:scale-90 duration-150"><span class="material-symbols-outlined">share</span></button>
+</div>
+<button class="active:scale-90 duration-150"><span class="material-symbols-outlined">bookmark</span></button>
+</div>
+<p class="font-label-lg text-label-lg text-on-surface mb-xs">856 likes</p>
+<p class="font-body-md text-body-md text-on-surface">
+<span class="font-bold">Milo &amp; Co.</span> Just watching the birds from my favorite throne. Hope everyone is having a lazy Sunday! 🧶✨
+                    </p>
+</div>
+</article>
+</div>
+</main>
+<!-- NavigationDrawer (Hidden by default, structure for context) -->
+<aside class="hidden fixed inset-y-0 left-0 z-[60] flex flex-col p-md bg-surface dark:bg-surface-dim shadow-xl h-full w-80 rounded-r-xl transition-transform duration-300">
+<div class="mb-lg flex items-center gap-md p-md border-b border-surface-container">
+<img alt="Active Pet Avatar" class="w-12 h-12 rounded-full object-cover" data-alt="A high-quality avatar image of Buddy the Beagle, used in the sidebar navigation. The lighting is warm and welcoming, perfectly aligned with the app's trustworthy and community-centric brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7YuIPfXkibLCpn-Zxpxr2Ey492kpixzmQnlG3KbisZ_rrGr4cxR4_6gzkLT37P8w2UnsVfbjMQsDp2yuttcD1UFLWyZzqc1ftJXeOrVZVecefSCGy6q1-0whxBltoY8JVBbAslTi3fGpWVe1zir3aH-J_vVD5XUpLkKj6eAlTIvjb8TizDKXwTYuACxI0eCp6n3Vn_Tas8jC87GHiHYSXfSeDVKfrqggHkCm90P7K6un9r35pE2J7otgKVUnoQpxoLfqYG1Hz46U"/>
+<div>
+<h3 class="font-label-lg text-label-lg">Active Pet</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Switch Pet Profile</p>
+</div>
+</div>
+<nav class="flex flex-col gap-sm">
+<a class="flex items-center gap-md p-md text-primary font-bold bg-primary-container rounded-lg font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined">settings</span> Pet Settings
+            </a>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-container-high font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined">group</span> Switch Profile
+            </a>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-container-high font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined">help</span> Help
+            </a>
+</nav>
+</aside>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface-container-lowest dark:bg-inverse-surface shadow-lg rounded-t-xl">
+<!-- Feed Tab (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-on-primary-fixed-variant text-on-primary-container dark:text-primary-fixed rounded-full px-4 py-1 transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-sm text-label-sm">Feed</span>
+</a>
+<!-- Match Tab -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 transition-all hover:bg-surface-container-high active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-label-sm text-label-sm">Match</span>
+</a>
+<!-- Care Tab -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 transition-all hover:bg-surface-container-high active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">pets</span>
+<span class="font-label-sm text-label-sm">Care</span>
+</a>
+<!-- Shop Tab -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 transition-all hover:bg-surface-container-high active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">shopping_bag</span>
+<span class="font-label-sm text-label-sm">Shop</span>
+</a>
+<!-- Profile Tab -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 transition-all hover:bg-surface-container-high active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+<!-- FAB Contextual Suppression: On Feed, we can have a global add button, but it's already in TopAppBar per instruction -->
+</body></html>

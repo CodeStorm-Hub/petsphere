@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed-variant": "#004c6e",
+                    "on-background": "#191c1e",
+                    "error": "#ba1a1a",
+                    "on-secondary-fixed": "#0b1c30",
+                    "surface-container-low": "#f2f4f6",
+                    "surface-tint": "#0053db",
+                    "on-tertiary-fixed": "#001e2f",
+                    "on-secondary-container": "#54647a",
+                    "on-tertiary-container": "#e4f2ff",
+                    "inverse-primary": "#b4c5ff",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "surface-bright": "#f7f9fb",
+                    "on-primary-container": "#eeefff",
+                    "on-primary-fixed": "#00174b",
+                    "inverse-surface": "#2d3133",
+                    "primary": "#004ac6",
+                    "primary-container": "#2563eb",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#e0e3e5",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "tertiary-fixed": "#c9e6ff",
+                    "surface": "#f7f9fb",
+                    "outline-variant": "#c3c6d7",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "surface-container-high": "#e6e8ea",
+                    "tertiary-container": "#0074a6",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "background": "#f7f9fb",
+                    "on-secondary": "#ffffff",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-surface": "#191c1e",
+                    "tertiary-fixed-dim": "#89ceff",
+                    "secondary-container": "#d0e1fb",
+                    "surface-container": "#eceef0",
+                    "error-container": "#ffdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#005a82",
+                    "inverse-on-surface": "#eff1f3",
+                    "secondary-fixed": "#d3e4fe",
+                    "outline": "#737686",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#d8dadc",
+                    "secondary": "#505f76",
+                    "on-primary": "#ffffff",
+                    "primary-fixed": "#dbe1ff",
+                    "on-surface-variant": "#434655"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-sm": "0.5rem",
+                    "gutter-mobile": "1rem",
+                    "margin-mobile": "1.25rem",
+                    "stack-md": "1rem",
+                    "stack-lg": "1.5rem",
+                    "section-gap": "2rem"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top App Bar -->
+<header class="bg-surface dark:bg-on-background shadow-sm w-full top-0 sticky flex items-center justify-between px-margin-mobile h-16 w-full z-40 transition-all duration-200 active:scale-95">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center bg-white shadow-sm">
+<img alt="PetFolio Logo" class="w-full h-full object-contain p-1" src="https://lh3.googleusercontent.com/aida/ADBb0ujvZD2gG6_7p8u9lN6hiCLhaN-1FUH4rRGPFIZFxpsYLnLUTpkTFvsjyetvh4jiPCxFuSXlqQXVZa6Bs2Rouc2HO-9t9wERV7odsSItp7UO1Dgldeg5YK580eojayypaOecWrZa_zhSpni6L-Kw4ehgDHIHOUPWh1Lr08x1PbEXu8eUQavzWcCN5z8H9M7QXL5oW_pBYNDo-xVz3UUAOjcTzWdzIa6UdETAe7CeRYuXzbHDLHAuNJy5buk"/>
+</div>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim tracking-tight">PetFolio</span>
+</div>
+<button class="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-surface-container transition-all duration-200 active:scale-95 text-secondary dark:text-secondary-fixed-dim">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</header>
+<main class="pb-24">
+<!-- Profile Header Section -->
+<section class="px-margin-mobile pt-stack-lg">
+<div class="flex flex-col items-center">
+<div class="relative mb-stack-md">
+<div class="w-20 h-20 rounded-full border-4 border-surface-container-lowest shadow-md overflow-hidden">
+<img alt="Alex Johnson" class="w-full h-full object-cover" data-alt="A detailed headshot of Alex Johnson, a stylish pet owner with a kind expression, captured in bright daylight. The image is circular and professional, reflecting a premium social media profile aesthetic. The background is a soft-focus urban greenery typical of San Francisco. High-key lighting highlights the subject's features clearly." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvnH6fQui_kfEJpjgsd1RX-TvKqM1stXOckHlTAVOIWiqpeXpzELNFJSuRiUXiFPrwwtYl3JSB-oWc7AcTwzaRgCoZMXukk4HYzWJG-FaZsPTldF1877JJu5vY_wo6T6TNXGJm1oz2w3Igl_wr8QdShKFaHH91AwnWG4q_sBe5IijRVidRET12S62Nxl9njKevUC5npfBZjmEGt0NyF7dcppftNFaMKDEUrW7FU_FGKpxfKMNQqK1NBoquM7pysqPlqYKHmvPEVEA"/>
+</div>
+<button class="absolute bottom-0 right-0 bg-primary text-on-primary p-1.5 rounded-full border-2 border-surface-container-lowest shadow-lg active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[16px]" data-icon="photo_camera" style="font-variation-settings: 'FILL' 1;">photo_camera</span>
+</button>
+</div>
+<h1 class="font-headline-sm text-headline-sm mb-1 text-on-surface">Alex Johnson</h1>
+<div class="flex items-center gap-1 text-secondary mb-stack-md">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on">location_on</span>
+<span class="font-label-md text-label-md">San Francisco, CA</span>
+</div>
+<p class="text-center font-body-md text-on-surface-variant max-w-xs mb-stack-lg">
+                    Proud dog mom and pet photography enthusiast. 🐾 | Exploring the best parks in SF.
+                </p>
+<!-- Stats Row -->
+<div class="w-full grid grid-cols-3 gap-4 mb-stack-lg border-y border-outline-variant py-stack-md">
+<div class="flex flex-col items-center">
+<span class="font-headline-sm text-headline-sm text-on-surface">124</span>
+<span class="font-label-md text-label-md text-secondary">Posts</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-headline-sm text-headline-sm text-on-surface">1.2k</span>
+<span class="font-label-md text-label-md text-secondary">Followers</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-headline-sm text-headline-sm text-on-surface">856</span>
+<span class="font-label-md text-label-md text-secondary">Following</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="w-full flex gap-3 mb-section-gap">
+<button class="flex-1 bg-primary-container text-on-primary h-[48px] rounded-2xl font-label-md flex items-center justify-center shadow-[0px_8px_20px_rgba(37,99,235,0.15)] active:scale-95 transition-all">
+                        Edit Profile
+                    </button>
+<button class="flex-1 border border-outline text-primary h-[48px] rounded-2xl font-label-md flex items-center justify-center hover:bg-surface-container transition-all active:scale-95">
+                        Share Profile
+                    </button>
+</div>
+</div>
+</section>
+<!-- My Pets Section -->
+<section class="mb-section-gap">
+<div class="flex justify-between items-center px-margin-mobile mb-stack-md">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">My Pets</h2>
+<button class="text-primary font-label-md">View All</button>
+</div>
+<div class="flex overflow-x-auto no-scrollbar gap-4 px-margin-mobile">
+<!-- Buddy -->
+<div class="flex-shrink-0 w-36 bg-surface-container-lowest rounded-2xl p-3 shadow-[0px_4px_12px_rgba(15,23,42,0.05)] border border-outline-variant">
+<div class="w-full aspect-square rounded-xl overflow-hidden mb-2">
+<img alt="Buddy" class="w-full h-full object-cover" data-alt="A beautiful Golden Retriever named Buddy sitting gracefully in a sunny garden. The lighting is warm and golden, highlighting his soft fur and gentle eyes. The image is high-fidelity and modern, fitting perfectly into a pet care application's clean, gallery-style interface. The background is a lush, vibrant green." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0JzQil1Jho-gWpRPMwIeDPieuE2_J4dyFF0HDY1VfU09GPcMoz7urtre-O0DR1AITcclVzkG9nrMcL7vUrHimt4qafIDcno4ANh4jo7BYutU68yodhPOlJmnQYIDjf7_PFuCvTMmXNrALOSDGVIX5FVraKBzVLREzfNWdPSFpbeEYEc8QRt4E0R_yr6JNOztGjyJ2Ru_8AhDc7F5HM8pIAozSQF_ImM35FOiE7REA72S4NDpShKCf4nSY3JXAeoct1se_B_pzq3g"/>
+</div>
+<p class="font-label-md text-on-surface truncate">Buddy</p>
+<p class="text-[10px] text-secondary">Golden Retriever</p>
+</div>
+<!-- Luna -->
+<div class="flex-shrink-0 w-36 bg-surface-container-lowest rounded-2xl p-3 shadow-[0px_4px_12px_rgba(15,23,42,0.05)] border border-outline-variant">
+<div class="w-full aspect-square rounded-xl overflow-hidden mb-2">
+<img alt="Luna" class="w-full h-full object-cover" data-alt="A sleek Siamese cat named Luna with striking blue eyes perched on a modern white interior surface. The lighting is cool and minimalist, casting soft shadows that emphasize her elegant profile. The overall aesthetic is professional and clean, using a palette of soft neutrals and high-contrast feline features." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZ4siiO-V5YVKAn87k_jR_xRzvqvFO1P0MefkSWVfh4c0xSy4uGc5_gU7WKg6YXA6ZBD1gAEBWYbUnaP5WkQY5H32VYPT_BoAFdlj6zqWdLkI1gt0nebl6vZvGyYJmAQg6NnpyVM-gPelWNBMKKeezgHe1CL1umkfMeSral04qfmbPptwumCEf6sCCsgMe0fHXfxUX2Wz54TnM_xNacyR3Y7y9mHZsQwigHrfVp7J9Az-gyD-pjr_l1IL8MIP8eStJMMdNCZFBkE0"/>
+</div>
+<p class="font-label-md text-on-surface truncate">Luna</p>
+<p class="text-[10px] text-secondary">Siamese Cat</p>
+</div>
+<!-- Add Pet -->
+<button class="flex-shrink-0 w-36 bg-surface-container dashed border-2 border-dashed border-outline-variant rounded-2xl flex flex-col items-center justify-center p-3 active:scale-95 transition-all">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center mb-2 shadow-sm">
+<span class="material-symbols-outlined text-primary" data-icon="add">add</span>
+</div>
+<p class="font-label-md text-secondary">Add Pet</p>
+</button>
+</div>
+</section>
+<!-- Content Tabs -->
+<section>
+<div class="flex border-b border-outline-variant px-margin-mobile">
+<button class="flex-1 py-4 flex flex-col items-center gap-1 border-b-2 border-primary text-primary">
+<span class="material-symbols-outlined" data-icon="grid_on" style="font-variation-settings: 'FILL' 1;">grid_on</span>
+<span class="font-label-sm text-label-sm">Posts</span>
+</button>
+<button class="flex-1 py-4 flex flex-col items-center gap-1 text-secondary opacity-60">
+<span class="material-symbols-outlined" data-icon="trophy">trophy</span>
+<span class="font-label-sm text-label-sm">Achievements</span>
+</button>
+<button class="flex-1 py-4 flex flex-col items-center gap-1 text-secondary opacity-60">
+<span class="material-symbols-outlined" data-icon="list">list</span>
+<span class="font-label-sm text-label-sm">Activity</span>
+</button>
+</div>
+<!-- Posts Grid -->
+<div class="grid grid-cols-3 gap-0.5 mt-0.5">
+<div class="aspect-square bg-surface-container-high overflow-hidden">
+<img alt="Pet Post 1" class="w-full h-full object-cover" data-alt="A joyful dog wearing a colorful bandana playing at a San Francisco park with the Golden Gate Bridge visible in the hazy, sun-drenched background. The photo is vibrant and captures a moment of pure happiness and outdoor adventure. Professional quality with a shallow depth of field." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD106j0oQv87OhKCqW0iClGOnXV05UhN-eDxXA_EbIGJ9Fz2bgFYvGqHCHIcewD0p0_DMhia4NYvqrwcLF1_1GSYMZf2eeJ0tstdRJ4j6U1RvHfU7lH5hmPuvg7yDKLLz74EIGDv5qfaqGAywDzfjHapMSVG0qC0CLMsEUVtxvrkEw1fxZXS7QoaXEYfhsSILEU623AksjHCvMufHV0WIqb3W66bnMxmVQu98x1PQYh7Tp6wbS1djmffZHs_5uR0ykNsGPseoLuLBA"/>
+</div>
+<div class="aspect-square bg-surface-container-high overflow-hidden">
+<img alt="Pet Post 2" class="w-full h-full object-cover" data-alt="Two adorable puppies playing together on a pristine white floor in a bright, modern living room. The lighting is high-key and clean, creating a sense of warmth and professional domesticity. The colors are soft and natural, with a focus on the joyful interaction between the pets." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEV4yU1hFHlHI0NR3q7GXHbxBW68hgCHNGjcgisKTyd0JzHchc9f4Fpze_Es5sD_xE0sSU2qw15bYJU2nBNnwk3SGTUmox0qgerHewVDHWfI7FNk3Mi7RreVEukJAdIJu2OulK5EgS4oGfvXVFqtDJcP14sgAJ7fcp9OcJlxBqz42AJphFofSVGzIiiCzWS8L8OnLBiSICe4lCYPHF3_7iPozaCuG4wNZbbFBu_DNsZpQ8-XhWtBrY1NFrR7GAYAkmhBetSBFYVJQ"/>
+</div>
+<div class="aspect-square bg-surface-container-high overflow-hidden">
+<img alt="Pet Post 3" class="w-full h-full object-cover" data-alt="A cinematic close-up of a domestic cat looking through a window at sunset. The warm, orange glow of the golden hour light illuminates the cat's whiskers and fur texture. The mood is peaceful and contemplative, with high-fidelity detail in the lighting and atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrLMlyjwkZ8VaoVezbxHLwgmLrEb0OA9bRl0InSFaBdmw3ywrSw-tN4C3dIrnRuIUQ5viqcvPaVSkXt3HX3CNT8w0oooVXr38ogprVPd1_yCA3IpHhC1VCFvXPvhXx_2iW4LtuiwmNZlcgw0vPA7eksmeWjTllntwWbrVIW1mowFz_CTHvhRI1eGBBQQPU5dLIu5KjkN0S763w4N1FNF2ecHMYeNKHW7Jr6dboVGBzGWY_nRuTuKDc4bx2qea_6MNcuq3dxZdXhYk"/>
+</div>
+<div class="aspect-square bg-surface-container-high overflow-hidden">
+<img alt="Pet Post 4" class="w-full h-full object-cover" data-alt="A lifestyle photo of a pet owner and their dog hiking on a foggy San Francisco trail. The composition is wide and dramatic, showing the relationship between human and pet in nature. The lighting is diffused and moody, emphasizing a professional, outdoorsy aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgj_vtlvKRC0NuHeqhEEeKHBWWCrCtjJCpwy010XTBlfQuFnz5BQFvrOqMW4vVxV-IEJOGgklGp5-d0NCaI8vMk7A56S0dr54CkcAaOeY5Z9Fu0IOacsqKXpZvUtiqDlkVoSi3Qmh7Q9ds7pBlgafYUjhIbqhNE-pt1r5XQgz_jpyG-4kEdgCD7qaMRf9Q8Oeo9I1Ndm4mNY8LlWO86Ic5ANklgadKDS2z-yGOLjnUT71fmDit3whAfc-Q5uTJmAmsRir688GiKCQ"/>
+</div>
+<div class="aspect-square bg-surface-container-high overflow-hidden">
+<img alt="Pet Post 5" class="w-full h-full object-cover" data-alt="A creative shot of a pet's paws on a modern geometric rug. The photography focuses on texture and pattern, with a sophisticated color palette of blues and creams. The lighting is sharp and intentional, creating a high-end designer feel for a modern pet lifestyle profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCL41xUcNkdcBAOjx0xh8RRrFLxMUTixKfrTOT7xubRQRFdaEKi_BfAZdM8EoYupvJCJy9csgp7M9RJu0ZygAyZ6oahnillbkS-h97T_ZZIq-SGbKb7fr4E1q4RWjOBXlt93r1RioO5jIywlOcNphlmfmoTdH9TcS2uHl_KFhRoMaPTtVLy8yp36YEfp7rfdJdss6COZzX1nVLZpmHEEIRJ82j1NMfhT46uT6vJQSTtR-qqhJew1f9QTq7HPGLZZxAD7vXOCrb65iY"/>
+</div>
+<div class="aspect-square bg-surface-container-high overflow-hidden">
+<img alt="Pet Post 6" class="w-full h-full object-cover" data-alt="A portrait of a small dog sitting in a trendy city cafe. The background features modern industrial decor and soft lighting. The dog is looking directly at the camera with a curious expression. The overall style is urban, professional, and lifestyle-oriented." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbhbKv3BoMqQd7cgQQGRaTZHE1h3AVPHOef0zE_XTgZUs8scjaIHAKPWP9gXISs70c1i1rkUTEoHIgwCUIlelMSBwULHUQzeU5csyjJ0xclanL1Tp9Bu1lhCFLNf-cS2b1qpqgxNuWZIqop1_RJa9Amo4ZFdTGWww5lN5ZtXXznY2ej1O6MMmQCUpMvjFQHc0gbz5k8mADsdflGcbmFxT1iRetaUvsBWz8QheVuOEr5W_2wnTRIf-PeLD5wvuf3s1O3QiMwbnuAj0"/>
+</div>
+<div class="aspect-square bg-surface-container-high overflow-hidden">
+<img alt="Pet Post 7" class="w-full h-full object-cover" data-alt="A group of cats interacting in a bright, modern cat-tree installation. The setting is clean and minimalist with plenty of white space. The lighting is even and soft, showcasing the playful behavior in a high-clarity, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbboO5CgMBanyWSkshQN320C9L9OE37xcagxNc3K2jXPMgRsqggQu0shPiq_7N1jIlLm7SjQwjjIsIJvxq3Z7KEJCDhRkx2PzGdSGFYsJDqH-pAZuY7VWaT6x7ZgiYrbEa7M36LQFD37spgyRVV55-zO1Mecdb0NzMhc3cpp8kQBYS8eiXOek96gFpZTFeLQH8FjKwIryhxloo7cuorExTHZaFPLwsMGlSGY5U7ZXMywpEOAt2kWSjwlPg_ODzTuZ9pozMgwZ_FLs"/>
+</div>
+<div class="aspect-square bg-surface-container-high overflow-hidden">
+<img alt="Pet Post 8" class="w-full h-full object-cover" data-alt="A charming shot of a dog looking up at its owner during a walk. The low-angle perspective captures the emotional bond between them. The setting is a clean suburban street with soft afternoon light. The aesthetic is warm, inviting, and professional." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4g3IuLDQL3f2D2_hlkdHx1LJOA2at2GTE1Nfz3eNNuF2yAFEoVNKNTeWYq0xc_XnA9fPf-uO6Yrxz-CI-YstU3mLj2Exiq0tFVBa_45b6QzozJ1obLuAsB9xFOYzRhW4BLyYS_AAI6lg8LHncsa4SF521to-GdzfKlhathOKBz2fQ0Cij_hHKxdQBhzgcrT6l7O-xrPfHeRYcp9hR_9lsrOnq2AgNs3IKqvplNoKxyVy79tf7lcMjxkpJKP-dS0DMY9yC3xaI3e0"/>
+</div>
+<div class="aspect-square bg-surface-container-high overflow-hidden">
+<img alt="Pet Post 9" class="w-full h-full object-cover" data-alt="A collection of pet toys arranged artistically on a hardwood floor. The photo uses high-end product photography techniques, with crisp focus and professional studio lighting. The colors are vibrant yet harmonious with the overall brand palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXKDCCGWnw-8arx4dLbKKlsogUN9cUCrWSRJNT8llACf_R1qXt_KM-4YiMHUIquqTUoh7EwjkGb8pQ9lZR57IgDTLjOxU2_J9IKZC4Or0W-hW6P_e3yMYvlDfbzrMomh5LWgmGZUIxnc8dLqKSDewJ6xFLdn7N6yMfXPQTZn6JMr8jnSnjnp1tp3ueKHT3GW4SxMLVDzWmjW1j5qpqMSoU5RHDb-qps1rBfIPG1pALDtmmbOBH_8S9nnZHYIXqa6B0NusryXLkihY"/>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 pb-safe bg-surface-container-lowest dark:bg-on-background shadow-[0px_-4px_12px_rgba(15,23,42,0.05)] z-50 rounded-t-xl transition-all">
+<div class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim px-3 py-1 transition-transform duration-300 ease-out active:scale-90">
+<span class="material-symbols-outlined" data-icon="rss_feed">rss_feed</span>
+<span class="font-label-md text-label-md">Feed</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim px-3 py-1 transition-transform duration-300 ease-out active:scale-90">
+<span class="material-symbols-outlined" data-icon="pets">pets</span>
+<span class="font-label-md text-label-md">Care</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim px-3 py-1 transition-transform duration-300 ease-out active:scale-90">
+<span class="material-symbols-outlined" data-icon="monitor_heart">monitor_heart</span>
+<span class="font-label-md text-label-md">Health</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-secondary-container dark:bg-on-secondary-fixed-variant text-primary dark:text-primary-fixed-dim rounded-xl px-3 py-1 transition-transform duration-300 ease-out active:scale-90">
+<span class="material-symbols-outlined" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</div>
+</nav>
+</body></html>

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:petfolio/core/constants/app_routes.dart';
 import 'package:petfolio/features/services/presentation/controllers/knowledge_base_controller.dart';
 import 'package:petfolio/features/services/data/models/knowledge_base_models.dart';
-import 'package:petfolio/core/widgets/async_value_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:cached_network_image/cached_network_image.dart';

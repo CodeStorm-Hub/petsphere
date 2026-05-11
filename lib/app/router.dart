@@ -19,6 +19,8 @@ import 'package:petfolio/features/marketplace/presentation/screens/product_detai
 import 'package:petfolio/features/social/presentation/screens/post_detail_screen.dart';
 import 'package:petfolio/features/marketplace/presentation/screens/cart_screen.dart';
 import 'package:petfolio/features/marketplace/presentation/screens/order_history_screen.dart';
+import 'package:petfolio/features/marketplace/presentation/screens/checkout_screen.dart';
+import 'package:petfolio/features/marketplace/presentation/screens/order_detail_screen.dart';
 import 'package:petfolio/features/social/presentation/screens/pet_followers_screen.dart';
 import 'package:petfolio/features/pet/presentation/screens/visitor_pet_profile_screen.dart';
 import 'package:petfolio/features/pet/presentation/screens/pet_profile_screen.dart';
@@ -28,7 +30,14 @@ import 'package:petfolio/features/pet/presentation/screens/liked_pets_screen.dar
 import 'package:petfolio/features/auth/presentation/screens/login_screen.dart';
 import 'package:petfolio/features/auth/presentation/screens/registration_screen.dart';
 import 'package:petfolio/features/settings/presentation/screens/settings_screen.dart';
+import 'package:petfolio/features/settings/presentation/screens/edit_owner_profile_screen.dart';
+import 'package:petfolio/features/settings/presentation/screens/password_settings_screen.dart';
+import 'package:petfolio/features/settings/presentation/screens/notification_preferences_screen.dart';
+import 'package:petfolio/features/settings/presentation/screens/privacy_settings_screen.dart';
+import 'package:petfolio/features/settings/presentation/screens/blocked_users_screen.dart';
+import 'package:petfolio/features/settings/presentation/screens/security_settings_screen.dart';
 import 'package:petfolio/features/auth/presentation/screens/splash_screen.dart';
+import 'package:petfolio/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:petfolio/features/care/presentation/screens/pet_care_screen.dart';
 import 'package:petfolio/features/care/presentation/screens/pet_care_onboarding_screen.dart';
 import 'package:petfolio/features/social/presentation/screens/story_viewer_screen.dart';
@@ -58,6 +67,9 @@ import 'package:petfolio/features/social/presentation/screens/pet_social_timelin
 import 'package:petfolio/features/services/presentation/screens/pet_breed_identifier_screen.dart';
 import 'package:petfolio/features/services/presentation/screens/pet_knowledge_base_screen.dart';
 import 'package:petfolio/features/marketplace/presentation/screens/pet_gear_reviews_screen.dart';
+import 'package:petfolio/features/services/presentation/screens/lost_found_detail_screen.dart';
+import 'package:petfolio/features/services/presentation/screens/adoption_detail_screen.dart';
+import 'package:petfolio/features/services/presentation/screens/event_detail_screen.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 
@@ -98,6 +110,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.splash,
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.onboarding,
+        builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(
         path: AppRoutes.login,
@@ -348,6 +364,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const OrderHistoryScreen(),
       ),
       GoRoute(
+        path: AppRoutes.checkout,
+        builder: (context, state) => const CheckoutScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.orderDetail,
+        builder: (context, state) {
+          final orderId = state.pathParameters['orderId'];
+          if (orderId == null) {
+            return const InvalidRouteErrorScreen(missingParam: 'order ID');
+          }
+          return OrderDetailScreen(orderId: orderId);
+        },
+      ),
+      GoRoute(
         path: AppRoutes.product,
         builder: (context, state) {
           final productId = state.pathParameters['id'];
@@ -360,6 +390,30 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.settings,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        builder: (context, state) => const EditOwnerProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.changePassword,
+        builder: (context, state) => const PasswordSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationPreferences,
+        builder: (context, state) => const NotificationPreferencesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.privacySettings,
+        builder: (context, state) => const PrivacySettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.blockedUsers,
+        builder: (context, state) => const BlockedUsersScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.securitySettings,
+        builder: (context, state) => const SecuritySettingsScreen(),
       ),
       GoRoute(
         path: AppRoutes.search,
@@ -400,13 +454,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LostAndFoundScreen(),
       ),
       GoRoute(
-        path: AppRoutes.adoptionCenter,
-        builder: (context, state) => const AdoptionCenterScreen(),
+        path: AppRoutes.lostFoundDetailById(':id'),
+        builder: (context, state) => LostFoundDetailScreen(
+          reportId: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(
         path: AppRoutes.adoptionCenter,
         builder: (context, state) => const AdoptionCenterScreen(),
       ),
+      GoRoute(
+        path: AppRoutes.adoptionDetailById(':id'),
+        builder: (context, state) => AdoptionDetailScreen(
+          listingId: state.pathParameters['id']!,
+        ),
+      ),
+
       GoRoute(
         path: AppRoutes.petFriendlyPlaces,
         builder: (context, state) => const PetFriendlyPlacesScreen(),
@@ -414,6 +477,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.events,
         builder: (context, state) => const PetEventDiscoveryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.eventDetailById(':id'),
+        builder: (context, state) => EventDetailScreen(
+          eventId: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(
         path: AppRoutes.sitters,

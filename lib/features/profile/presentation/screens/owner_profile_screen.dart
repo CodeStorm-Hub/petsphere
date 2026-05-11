@@ -11,7 +11,8 @@ import 'package:petfolio/features/pet/data/models/pet_model.dart';
 import 'package:petfolio/features/social/presentation/controllers/follow_controller.dart';
 import 'package:petfolio/features/social/presentation/controllers/feed_controller.dart';
 import 'package:petfolio/features/profile/presentation/widgets/active_pet_switcher_modal.dart';
-import 'package:petfolio/core/widgets/petfolio_empty_state.dart';
+import 'package:petfolio/core/widgets/petfolio_widgets.dart';
+import 'package:petfolio/core/utils/format_utils.dart';
 
 class OwnerProfileScreen extends ConsumerStatefulWidget {
   const OwnerProfileScreen({super.key});
@@ -260,7 +261,7 @@ class _StatsRow extends ConsumerWidget {
           children: [
             _StatCell(
               value: followers.when(
-                data: (v) => _formatCount(v),
+                data: (v) => FormatUtils.formatCount(v),
                 loading: () => '…',
                 error: (_, _) => '0',
               ),
@@ -270,7 +271,7 @@ class _StatsRow extends ConsumerWidget {
             Container(width: 1, height: 32, color: cs.outlineVariant),
             _StatCell(
               value: following.when(
-                data: (v) => _formatCount(v),
+                data: (v) => FormatUtils.formatCount(v),
                 loading: () => '…',
                 error: (_, _) => '0',
               ),
@@ -280,7 +281,7 @@ class _StatsRow extends ConsumerWidget {
             Container(width: 1, height: 32, color: cs.outlineVariant),
             _StatCell(
               value: posts.when(
-                data: (v) => _formatCount(v.length),
+                data: (v) => FormatUtils.formatCount(v.length),
                 loading: () => '…',
                 error: (_, _) => '0',
               ),
@@ -290,12 +291,6 @@ class _StatsRow extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  static String _formatCount(int count) {
-    if (count >= 1000000) return '${(count / 1000000).toStringAsFixed(1)}M';
-    if (count >= 1000) return '${(count / 1000).toStringAsFixed(1)}k';
-    return count.toString();
   }
 }
 
@@ -389,28 +384,15 @@ class _MyPetsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
     return Padding(
       padding: const EdgeInsets.only(top: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('My Pets',
-                    style:
-                        tt.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                TextButton(
-                  onPressed: () => context.push(AppRoutes.managePets),
-                  child: const Text('Manage'),
-                ),
-              ],
-            ),
+          SectionHeader(
+            title: 'My Pets',
+            actionLabel: 'Manage',
+            onActionTap: () => context.push(AppRoutes.managePets),
           ),
           const SizedBox(height: 8),
           SizedBox(
@@ -423,11 +405,11 @@ class _MyPetsSection extends ConsumerWidget {
                     itemCount: pets.length + 1, // +1 for "Add Pet"
                     itemBuilder: (context, index) {
                       if (index == pets.length) {
-                        return _AddPetCard(cs: cs);
+                        return const AddPetCard();
                       }
                       final pet = pets[index];
                       final isActive = activePet?.id == pet.id;
-                      return _PetMiniCard(
+                      return PetMiniCard(
                         pet: pet,
                         isActive: isActive,
                         onTap: () =>
@@ -442,111 +424,6 @@ class _MyPetsSection extends ConsumerWidget {
   }
 }
 
-class _PetMiniCard extends StatelessWidget {
-  const _PetMiniCard({
-    required this.pet,
-    required this.isActive,
-    required this.onTap,
-  });
-  final PetModel pet;
-  final bool isActive;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 100,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        decoration: BoxDecoration(
-          color: isActive
-              ? cs.primaryContainer.withAlpha(80)
-              : cs.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(16),
-          border: isActive
-              ? Border.all(color: cs.primary, width: 2)
-              : Border.all(color: cs.outlineVariant.withAlpha(80)),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: cs.primaryContainer,
-              backgroundImage: pet.profileImageUrl.isNotEmpty
-                  ? CachedNetworkImageProvider(pet.profileImageUrl)
-                  : null,
-              child: pet.profileImageUrl.isEmpty
-                  ? Icon(Icons.pets, color: cs.onPrimaryContainer)
-                  : null,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              pet.name,
-              style: tt.bodySmall?.copyWith(
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-            if (isActive)
-              Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Text('Active',
-                    style: tt.labelSmall?.copyWith(color: cs.primary)),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AddPetCard extends StatelessWidget {
-  const _AddPetCard({required this.cs});
-  final ColorScheme cs;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.push(AppRoutes.addPet),
-      child: Container(
-        width: 100,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: cs.primary.withAlpha(100),
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: cs.primary.withAlpha(30),
-              ),
-              child: Icon(Icons.add_rounded, color: cs.primary, size: 28),
-            ),
-            const SizedBox(height: 8),
-            Text('Add Pet',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: cs.primary, fontWeight: FontWeight.w600)),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Posts Tab

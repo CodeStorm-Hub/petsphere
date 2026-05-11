@@ -7,97 +7,98 @@ class AppTypography {
 
   static TextTheme getTextTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
-    final inter = GoogleFonts.interTextTheme();
+    
+    // Unified Inter Typography
+    final baseTheme = GoogleFonts.interTextTheme();
 
     final textColor = isDark ? const Color(0xFFF1F5F9) : AppColors.textPrimary;
     final mutedColor = isDark
         ? const Color(0xFF94A3B8)
         : AppColors.textSecondary;
 
-    return inter.copyWith(
-      displayLarge: inter.displayLarge?.copyWith(
+    return baseTheme.copyWith(
+      displayLarge: baseTheme.displayLarge?.copyWith(
         color: textColor,
         fontSize: 56,
-        height: 1,
+        height: 1.1,
         fontWeight: FontWeight.w900,
         letterSpacing: -1.12,
       ),
-      displayMedium: inter.displayMedium?.copyWith(
+      displayMedium: baseTheme.displayMedium?.copyWith(
         color: textColor,
         fontSize: 44,
-        height: 1,
+        height: 1.1,
         fontWeight: FontWeight.w900,
         letterSpacing: -0.88,
       ),
-      displaySmall: inter.displaySmall?.copyWith(
-        color: textColor,
-        fontSize: 40,
-        height: 1,
-        fontWeight: FontWeight.w900,
-        letterSpacing: -0.8,
-      ),
-      headlineLarge: inter.headlineLarge?.copyWith(
+      displaySmall: baseTheme.displaySmall?.copyWith(
         color: textColor,
         fontSize: 36,
-        fontWeight: FontWeight.w700,
+        height: 1.1,
+        fontWeight: FontWeight.w800,
         letterSpacing: -0.36,
       ),
-      headlineMedium: inter.headlineMedium?.copyWith(
+      headlineLarge: baseTheme.headlineLarge?.copyWith(
         color: textColor,
         fontSize: 32,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.32,
       ),
-      headlineSmall: inter.headlineSmall?.copyWith(
+      headlineMedium: baseTheme.headlineMedium?.copyWith(
         color: textColor,
         fontSize: 28,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.28,
       ),
-      titleLarge: inter.titleLarge?.copyWith(
+      headlineSmall: baseTheme.headlineSmall?.copyWith(
+        color: textColor,
+        fontSize: 24,
+        fontWeight: FontWeight.w700,
+      ),
+      titleLarge: baseTheme.titleLarge?.copyWith(
         color: textColor,
         fontSize: 18,
         fontWeight: FontWeight.w700,
       ),
-      titleMedium: inter.titleMedium?.copyWith(
+      titleMedium: baseTheme.titleMedium?.copyWith(
         color: textColor,
         fontSize: 16,
         fontWeight: FontWeight.w600,
       ),
-      titleSmall: inter.titleSmall?.copyWith(
+      titleSmall: baseTheme.titleSmall?.copyWith(
         color: textColor,
         fontSize: 15,
         fontWeight: FontWeight.w500,
       ),
-      bodyLarge: inter.bodyLarge?.copyWith(
-        color: mutedColor,
+      bodyLarge: baseTheme.bodyLarge?.copyWith(
+        color: textColor,
         fontSize: 18,
-        height: 1.7,
+        height: 1.5,
         fontWeight: FontWeight.w400,
       ),
-      bodyMedium: inter.bodyMedium?.copyWith(
+      bodyMedium: baseTheme.bodyMedium?.copyWith(
         color: mutedColor,
         fontSize: 16,
-        height: 1.7,
+        height: 1.5,
         fontWeight: FontWeight.w400,
       ),
-      bodySmall: inter.bodySmall?.copyWith(
+      bodySmall: baseTheme.bodySmall?.copyWith(
         color: mutedColor,
         fontSize: 13,
         fontWeight: FontWeight.w400,
       ),
-      labelLarge: inter.labelLarge?.copyWith(
+      labelLarge: baseTheme.labelLarge?.copyWith(
         color: textColor,
         fontSize: 14,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.56,
       ),
-      labelMedium: inter.labelMedium?.copyWith(
+      labelMedium: baseTheme.labelMedium?.copyWith(
         color: mutedColor,
         fontSize: 12,
         fontWeight: FontWeight.w500,
       ),
-      labelSmall: inter.labelSmall?.copyWith(
+      labelSmall: baseTheme.labelSmall?.copyWith(
         color: mutedColor,
         fontSize: 11,
         fontWeight: FontWeight.w500,

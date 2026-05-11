@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petfolio/features/nutrition/data/nutrition_repository.dart';
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/features/care/presentation/controllers/pet_nutrition_controller.dart';
-import 'package:petfolio/core/widgets/async_value_widget.dart';
 import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 
 class PetNutritionPlannerScreen extends ConsumerStatefulWidget {

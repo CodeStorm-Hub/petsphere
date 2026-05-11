@@ -7,8 +7,10 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:petfolio/features/pet/presentation/controllers/pet_controller.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
+import 'package:petfolio/features/social/presentation/controllers/follow_controller.dart';
 import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 import 'package:petfolio/core/constants/app_routes.dart';
+import 'package:petfolio/core/utils/format_utils.dart';
 
 class PetProfileScreen extends ConsumerStatefulWidget {
   const PetProfileScreen({super.key, required this.petId});
@@ -41,6 +43,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
     final pet = petState.myPets.where((p) => p.id == widget.petId).firstOrNull;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final followerCountAsync = ref.watch(petFollowerCountProvider(widget.petId));
 
     if (pet == null) {
       return _buildEmptyState(context, cs);
@@ -58,7 +61,7 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildProfileHeader(context, pet, cs),
+                    _buildProfileHeader(context, pet, cs, followerCountAsync),
                     _buildActionButtons(context, pet, cs),
                     const SizedBox(height: 24),
                   ],
@@ -164,7 +167,12 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context, PetModel pet, ColorScheme cs) {
+  Widget _buildProfileHeader(
+    BuildContext context,
+    PetModel pet,
+    ColorScheme cs,
+    AsyncValue<int> followerCountAsync,
+  ) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Column(
@@ -204,7 +212,16 @@ class _PetProfileScreenState extends ConsumerState<PetProfileScreen>
                   ],
                 ),
               ),
-              _buildStatItem(context, '2.4k', 'Fans', cs),
+              followerCountAsync.when(
+                data: (count) => _buildStatItem(
+                  context,
+                  FormatUtils.formatCount(count),
+                  'Fans',
+                  cs,
+                ),
+                loading: () => _buildStatItem(context, '…', 'Fans', cs),
+                error: (error, stack) => _buildStatItem(context, '0', 'Fans', cs),
+              ),
             ],
           ),
           const SizedBox(height: 16),

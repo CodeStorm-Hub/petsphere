@@ -4,20 +4,36 @@ class AppColors {
   const AppColors._();
 
   // Brand color: PetFolio Blue (#2563EB)
-  static const primary = Color(0xFF2563EB);
-  static const secondary = Color(0xFF14B8A6); // Teal — care/health accent
-  static const bgLight = Color(0xFFF7FAFF); // Cool off-white
-  static const bgDark = Color(0xFF07111F); // Deep navy-black
-
+  static const seed = Color(0xFF2563EB);
+  
+  // Core palette
+  static const primary = seed;
+  static const primaryContainer = Color(0xFFDCE8FF);
+  static const secondary = Color(0xFF14B8A6); // Teal for health/care
+  static const accent = Color(0xFFFFB020);    // Warmth accent for achievements
+  
+  // Backgrounds
+  static const bgLight = Color(0xFFF7FAFF); // Calm light blue-tinted background
+  static const bgDark = Color(0xFF07111F);  // Deep slate/blue black
+  
+  // Surface
+  static const surface = Colors.white;
+  static const surfaceDark = Color(0xFF0F1B2D);
+  static const surfaceAlt = Color(0xFFEEF4FF);
+  
   // Semantic Colors
-  static const primaryAccent = Color(0xFF2563EB); // Brand Primary
-  static const secondaryAccent = Color(0xFF14B8A6); // Teal for care/health
-  static const petWarmth = Color(0xFFFFB020); // Warm accent for pet moments
-  static const success = Color(0xFF22C55E); // Healthy / completed
-  static const warning = Color(0xFFF59E0B); // Attention / due soon
-  static const alertAccent = Color(0xFFEF4444); // Overdue / urgent / delete
-  static const textPrimary = Color(0xFF0F172A); // Slate 900
+  static const success = Color(0xFF22C55E); // Green
+  static const warning = Color(0xFFF59E0B); // Amber
+  static const error = Color(0xFFEF4444);   // Red
+  static const info = Color(0xFF3B82F6);    // Blue
+  
+  // Text
+  static const textPrimary = Color(0xFF0F172A);   // Slate 900
   static const textSecondary = Color(0xFF64748B); // Slate 500
-
+  static const textMuted = Color(0xFF94A3B8);     // Slate 400
+  
+  // Outlines
+  static const outline = Color(0xFFCBD5E1); // Slate 200
+  
   static const white = Colors.white;
 }

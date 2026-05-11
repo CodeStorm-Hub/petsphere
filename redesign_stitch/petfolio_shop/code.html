@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#ffdbcd",
+                    "tertiary": "#943700",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed": "#360f00",
+                    "on-tertiary-container": "#ffede6",
+                    "on-error-container": "#93000a",
+                    "on-secondary": "#ffffff",
+                    "background": "#faf8ff",
+                    "inverse-primary": "#b4c5ff",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed-variant": "#7d2d00",
+                    "primary": "#004ac6",
+                    "on-primary-container": "#eeefff",
+                    "inverse-surface": "#2e3039",
+                    "surface-container-lowest": "#ffffff",
+                    "on-background": "#191b23",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#d3e4fe",
+                    "inverse-on-surface": "#f0f0fb",
+                    "secondary-container": "#d0e1fb",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "primary-container": "#2563eb",
+                    "on-surface": "#191b23",
+                    "secondary": "#505f76",
+                    "on-surface-variant": "#434655",
+                    "on-secondary-container": "#54647a",
+                    "surface-dim": "#d9d9e5",
+                    "surface": "#faf8ff",
+                    "on-secondary-fixed": "#0b1c30",
+                    "outline-variant": "#c3c6d7",
+                    "surface-container-low": "#f3f3fe",
+                    "error": "#ba1a1a",
+                    "surface-tint": "#0053db",
+                    "tertiary-fixed-dim": "#ffb596",
+                    "tertiary-container": "#bc4800",
+                    "primary-fixed": "#dbe1ff",
+                    "surface-container-highest": "#e1e2ed",
+                    "surface-container-high": "#e7e7f3",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "outline": "#737686",
+                    "surface-container": "#ededf9",
+                    "on-primary-fixed": "#00174b",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "surface-variant": "#e1e2ed",
+                    "surface-bright": "#faf8ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter-desktop": "24px",
+                    "margin-mobile": "20px",
+                    "gutter-mobile": "16px",
+                    "unit": "4px",
+                    "container-max": "1280px",
+                    "margin-desktop": "48px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Inter"],
+                    "body-md": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "caption": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "caption": ["12px", {"lineHeight": "16px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-surface/80 backdrop-blur-md shadow-sm docked full-width top-0 z-50 flex justify-between items-center px-gutter-mobile h-16 w-full sticky">
+<div class="flex items-center gap-2"><div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer" data-icon="menu">menu</span>
+<div class="flex items-center gap-2">
+<img alt="PetFolio Logo" class="h-8 w-8 object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0ujvZD2gG6_7p8u9lN6hiCLhaN-1FUH4rRGPFIZFxpsYLnLUTpkTFvsjyetvh4jiPCxFuSXlqQXVZa6Bs2Rouc2HO-9t9wERV7odsSItp7UO1Dgldeg5YK580eojayypaOecWrZa_zhSpni6L-Kw4ehgDHIHOUPWh1Lr08x1PbEXu8eUQavzWcCN5z8H9M7QXL5oW_pBYNDo-xVz3UUAOjcTzWdzIa6UdETAe7CeRYuXzbHDLHAuNJy5buk"/>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">PetFolio</h1>
+</div>
+</div></div>
+<div class="flex items-center gap-4">
+<button class="relative hover:bg-surface-container-low transition-colors p-2 rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="history">history</span>
+</button>
+<button class="relative hover:bg-surface-container-low transition-colors p-2 rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="shopping_cart">shopping_cart</span>
+<span class="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">3</span>
+</button>
+</div>
+</header>
+<main class="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop mt-4 space-y-6">
+<!-- SearchBar -->
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+</div>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-full py-4 pl-12 pr-4 font-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm" placeholder="Search products..." type="text"/>
+</div>
+<!-- PromoBanner -->
+<section class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary-container to-primary p-6 text-on-primary shadow-lg">
+<div class="relative z-10 space-y-2">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-white">Summer Pet Sale</h2>
+<p class="font-body-lg text-body-lg text-white/90">Up to 40% OFF</p>
+<button class="mt-4 bg-white text-primary px-6 py-2 rounded-full font-label-md text-label-md shadow-md active:scale-95 transition-transform">
+                    Shop Now
+                </button>
+</div>
+<div class="absolute -right-4 -bottom-4 w-40 h-40 opacity-20">
+<span class="material-symbols-outlined text-[160px]" data-icon="pets">pets</span>
+</div>
+<!-- Decorative image -->
+<img class="absolute top-0 right-0 h-full w-1/2 object-cover mix-blend-overlay opacity-50" data-alt="A joyful golden retriever dog running through a sun-drenched green meadow during a bright summer day. The scene is bathed in warm, golden hour lighting that creates a premium and trustworthy lifestyle feel. The background features soft focus greenery and wild flowers, perfectly aligned with a high-end pet boutique aesthetic and the vibrant blue primary brand colors of PetFolio." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_qN9FWmgORS4jjsP6ri0GN0ycAbSLt5VEBLxMuCDzYwv3Bj0Y77HdmlmO9SQKXBAL6MAvvHqlrB9l--Bnxi8kFXDuZ1CMpLcVIPMEJjjXHbpvvMRLo7ZCb_AtFt9sDyeM7Trlcc5u8fdGGEcyir1CdJCdC7UKkbhqY2dS5p7-OLnvgxvbVPKBKJ4AV1gzLRyzeUSpCzah8k4SOD1FWUNrVdY_19Wj5afVYSCFu8Cta70VWdxWB1QdEnkje1wtezhR-DFRmoz8wk4"/>
+</section>
+<!-- CategoryChips -->
+<nav class="flex overflow-x-auto gap-2 hide-scrollbar pb-2">
+<button class="px-5 py-2 bg-primary text-on-primary rounded-full font-label-md text-label-md whitespace-nowrap">All</button>
+<button class="px-5 py-2 bg-surface-container-high text-on-surface-variant rounded-full font-label-md text-label-md whitespace-nowrap hover:bg-surface-container-highest transition-colors">Food</button>
+<button class="px-5 py-2 bg-surface-container-high text-on-surface-variant rounded-full font-label-md text-label-md whitespace-nowrap hover:bg-surface-container-highest transition-colors">Toys</button>
+<button class="px-5 py-2 bg-surface-container-high text-on-surface-variant rounded-full font-label-md text-label-md whitespace-nowrap hover:bg-surface-container-highest transition-colors">Bedding</button>
+<button class="px-5 py-2 bg-surface-container-high text-on-surface-variant rounded-full font-label-md text-label-md whitespace-nowrap hover:bg-surface-container-highest transition-colors">Grooming</button>
+<button class="px-5 py-2 bg-surface-container-high text-on-surface-variant rounded-full font-label-md text-label-md whitespace-nowrap hover:bg-surface-container-highest transition-colors">Treats</button>
+<button class="px-5 py-2 bg-surface-container-high text-on-surface-variant rounded-full font-label-md text-label-md whitespace-nowrap hover:bg-surface-container-highest transition-colors">Accessories</button>
+</nav>
+<!-- ProductGrid -->
+<section class="grid grid-cols-2 gap-gutter-mobile">
+<!-- Product 1 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_2px_12px_rgba(37,99,235,0.05)] overflow-hidden flex flex-col group border border-transparent hover:border-primary-container transition-all">
+<div class="aspect-[4/5] bg-surface relative">
+<img class="w-full h-full object-cover" data-alt="Premium organic kibble dog food in a clean, modern bag design, professionally photographed in a bright studio with soft white lighting. The image emphasizes high-quality ingredients with a few scattered peas and carrots on a neutral surface, evoking a sense of trustworthiness and expert care in light mode style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDALQmgDJZHQqvmvAqRlF6G8dtKgAPPKOCqslFonzN8x3znjrTAbH-tdr76F3j3zTKmX2UIa8KWWZB2DBVgRTP3Mdljb5wocVBqSk6frI85lao3DNgHymeEnmTUWelofS8al9B9BaLgmGZzx_1lZKnzCXNFd7V5pD8OMTPDXY5uziTiaqJteTdHiNjjh1oyJpFVgEDCajft9qk_oN_-nteg9k5rhdLg0IXP7hpI_pUqU78B3lyzArQ1NuzyolvfoR63W_aAbaPzHXA"/>
+<button class="absolute top-2 right-2 bg-white/80 backdrop-blur-md p-2 rounded-full shadow-sm text-on-surface-variant active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[20px]" data-icon="favorite">favorite</span>
+</button>
+</div>
+<div class="p-4 flex flex-col flex-grow">
+<div class="flex items-center gap-1 mb-1">
+<span class="material-symbols-outlined text-[14px] text-yellow-500" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-caption text-caption text-on-surface-variant">4.8</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface mb-2 line-clamp-2">Premium Kibble (Dog Food)</h3>
+<div class="mt-auto flex flex-col gap-3">
+<span class="font-headline-md text-headline-md text-primary">$45.99</span>
+<button class="w-full bg-primary-container text-white py-2 rounded-lg font-label-md text-label-md active:scale-95 transition-all shadow-sm hover:brightness-110">
+                            Add to Cart
+                        </button>
+</div>
+</div>
+</div>
+<!-- Product 2 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_2px_12px_rgba(37,99,235,0.05)] overflow-hidden flex flex-col group border border-transparent hover:border-primary-container transition-all">
+<div class="aspect-[4/5] bg-surface relative">
+<img class="w-full h-full object-cover" data-alt="An interactive laser pointer toy for cats designed with a sleek, ergonomic blue finish. The product is shown on a clean white surface with sharp shadows, emphasizing its modern industrial design. Bright, clean light-mode photography highlights the premium materials and simple interface, matching the PetFolio brand aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuARyivUucijqGfCoSlYDr_xDdx_9XkntRK5gsM5-SPT1OCJwtmK2cRrp9LkxMHQRCTLaZkGQLsRFwSdKd-I0Zl6BLDEmsprl8VvVsC9QhHaMExSXTBciFI9TKZyGLmoCbq9VqBkM6iEhxxEaKUf6bKscCwS_8J7BU3FF_fTB2sDkNZQDkPyEXStcgezHETSZ7Ds7GGq_CCtzGILRRfBJVBFCt931GaTpLC1OL8SDcinp3JzX8IuZpl6P0gwwN74PLZEyIEaXvbivy0"/>
+<button class="absolute top-2 right-2 bg-white/80 backdrop-blur-md p-2 rounded-full shadow-sm text-on-surface-variant active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[20px]" data-icon="favorite">favorite</span>
+</button>
+</div>
+<div class="p-4 flex flex-col flex-grow">
+<div class="flex items-center gap-1 mb-1">
+<span class="material-symbols-outlined text-[14px] text-yellow-500" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-caption text-caption text-on-surface-variant">4.5</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface mb-2 line-clamp-2">Interactive Laser Toy</h3>
+<div class="mt-auto flex flex-col gap-3">
+<span class="font-headline-md text-headline-md text-primary">$12.50</span>
+<button class="w-full bg-primary-container text-white py-2 rounded-lg font-label-md text-label-md active:scale-95 transition-all shadow-sm hover:brightness-110">
+                            Add to Cart
+                        </button>
+</div>
+</div>
+</div>
+<!-- Product 3 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_2px_12px_rgba(37,99,235,0.05)] overflow-hidden flex flex-col group border border-transparent hover:border-primary-container transition-all">
+<div class="aspect-[4/5] bg-surface relative">
+<img class="w-full h-full object-cover" data-alt="A luxurious gray orthopedic pet bed with thick foam layers, displayed in a minimal, bright living room corner. The soft morning light highlights the plush texture and high-end fabric quality. The photography is airy and spacious, creating a feeling of joyful companionship and ultimate comfort for a pet, consistent with modern corporate design rules." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpnDjeFUsvefuGe933ePHbSSk0hpyxTKYxKaTSCq2xwUB_FqJFbJKBtza1tS3Tyx0EquQbr1goBFF-40HjkN7xCTITf98Q2mGxWDeB_MqPVXj_sgyPkysB1Ht-RQAu2RYTf8Pm1uSElxWoFuMDx1MZxcx4p4NlZbYf-oTUtyUhw_VMhxLvuLk5ZeK2eiUFEZSGnqJhCImJSFhWI8G7ahI2K79cHagiOKU0DEhR7GG-AovZ2MMD_3uGe-na4u2_6bLSCNc4GiYjAgI"/>
+<button class="absolute top-2 right-2 bg-white/80 backdrop-blur-md p-2 rounded-full shadow-sm text-on-surface-variant active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[20px]" data-icon="favorite">favorite</span>
+</button>
+</div>
+<div class="p-4 flex flex-col flex-grow">
+<div class="flex items-center gap-1 mb-1">
+<span class="material-symbols-outlined text-[14px] text-yellow-500" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-caption text-caption text-on-surface-variant">4.9</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface mb-2 line-clamp-2">Orthopedic Pet Bed</h3>
+<div class="mt-auto flex flex-col gap-3">
+<span class="font-headline-md text-headline-md text-primary">$89.00</span>
+<button class="w-full bg-primary-container text-white py-2 rounded-lg font-label-md text-label-md active:scale-95 transition-all shadow-sm hover:brightness-110">
+                            Add to Cart
+                        </button>
+</div>
+</div>
+</div>
+<!-- Product 4 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_2px_12px_rgba(37,99,235,0.05)] overflow-hidden flex flex-col group border border-transparent hover:border-primary-container transition-all">
+<div class="aspect-[4/5] bg-surface relative">
+<img class="w-full h-full object-cover" data-alt="A premium bottle of natural pet shampoo with minimalist typography, styled next to fresh aloe vera leaves and lavender sprigs. The lighting is clean and bright, emphasizing organic purity and cleanliness. The image has an editorial boutique feel, highlighting trustworthy expertise in pet grooming products with soft shadows and high-key brightness." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnq7WeOP3SOGG1f-OYgkQ79iHq07LrDbzpeER2kCU4z1QZY8wwmIgmiyyHvg-fngx3j1FnMeA-1D3arjxTSB5rYsys-CM7PabNqPpzc0U7uItkfY2tQpoDXrk2e8LKcTUX_hER3KU5V_BJGLU2pDojxKFLLxSDTbeKMFlFZtWr2ZY_tU5U8k_sqMlS_dWf2dWECg_WxvsfYFn-2hSLv7NwsXZvZgR-oaCO-4WtwvdcNkf7AlmrPaF1ZpDGEdycHmDFRSetFynanMY"/>
+<button class="absolute top-2 right-2 bg-white/80 backdrop-blur-md p-2 rounded-full shadow-sm text-on-surface-variant active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[20px]" data-icon="favorite">favorite</span>
+</button>
+</div>
+<div class="p-4 flex flex-col flex-grow">
+<div class="flex items-center gap-1 mb-1">
+<span class="material-symbols-outlined text-[14px] text-yellow-500" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-caption text-caption text-on-surface-variant">4.7</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface mb-2 line-clamp-2">Natural Shampoo</h3>
+<div class="mt-auto flex flex-col gap-3">
+<span class="font-headline-md text-headline-md text-primary">$18.00</span>
+<button class="w-full bg-primary-container text-white py-2 rounded-lg font-label-md text-label-md active:scale-95 transition-all shadow-sm hover:brightness-110">
+                            Add to Cart
+                        </button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-surface/95 backdrop-blur-lg border-t border-outline-variant/30 shadow-[0_-4px_12px_rgba(37,99,235,0.05)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:text-primary transition-all active:scale-90 duration-150 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="rss_feed">rss_feed</span>
+<span class="font-label-md text-label-md">Feed</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary bg-secondary-container/50 rounded-full px-4 py-1 active:scale-90 duration-150 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span>
+<span class="font-label-md text-label-md">Shop</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:text-primary transition-all active:scale-90 duration-150 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+<span class="font-label-md text-label-md">Care</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:text-primary transition-all active:scale-90 duration-150 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+</body></html>

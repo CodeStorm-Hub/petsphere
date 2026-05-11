@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../controllers/match_controller.dart';
 import 'package:petfolio/core/theme/app_theme.dart';
 import 'package:petfolio/core/utils/layout_utils.dart';
-import 'package:petfolio/core/widgets/brand_logo.dart';
 import 'package:petfolio/core/widgets/petfolio_widgets.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:petfolio/features/pet/data/models/pet_model.dart';
@@ -32,7 +31,7 @@ class DiscoveryScreen extends ConsumerWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Breeding Discovery'),
+          title: const Text('Discover'),
           bottom: TabBar(
             tabs: const [
               Tab(text: 'Discover'),
@@ -190,9 +189,9 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
 
   final CardSwiperController _swiperController = CardSwiperController();
 
-  static const _filterLabels = ['For You', 'Same Breed', 'Nearby'];
+  static const _filterLabels = ['For You', 'Social', 'Playdate', 'Breeding', 'Adoption', 'Nearby'];
   // We use these locally for UI state; 'breed' and 'nearby' are special modes.
-  static const _filterValues = [null, 'breed', 'nearby'];
+  static const _filterValues = [null, 'social', 'playdate', 'breeding', 'adoption', 'nearby'];
 
   @override
   void initState() {
@@ -299,6 +298,120 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
     ref.read(matchProvider.notifier).load(pet.id);
   }
 
+  void _showFilterSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) {
+            final colorScheme = Theme.of(context).colorScheme;
+            return Container(
+              padding: const EdgeInsets.all(24),
+              child: ListView(
+                controller: scrollController,
+                children: [
+                  Text(
+                    'Filters',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Intent
+                  const Text('Intent', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: _filterLabels.map((l) => ChoiceChip(
+                      label: Text(l),
+                      selected: filterType == _filterValues[_filterLabels.indexOf(l)],
+                      onSelected: (val) {
+                        setState(() {
+                          filterType = _filterValues[_filterLabels.indexOf(l)];
+                          currentIndex = 0;
+                        });
+                        Navigator.pop(context);
+                      },
+                    )).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  // Species
+                  const Text('Species', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  const TextField(
+                    decoration: InputDecoration(
+                      hintText: 'e.g., Dog, Cat',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Breed
+                  const Text('Breed', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  const TextField(
+                    decoration: InputDecoration(
+                      hintText: 'e.g., Golden Retriever',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Distance
+                  const Text('Distance', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Slider(
+                    value: 25,
+                    max: 100,
+                    divisions: 20,
+                    label: '25 miles',
+                    onChanged: (double value) {},
+                  ),
+                  const SizedBox(height: 16),
+                  // Age Range
+                  const Text('Age Range (Years)', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  RangeSlider(
+                    values: const RangeValues(1, 10),
+                    max: 20,
+                    divisions: 20,
+                    labels: const RangeLabels('1', '10'),
+                    onChanged: (RangeValues values) {},
+                  ),
+                  const SizedBox(height: 16),
+                  // Gender
+                  const Text('Gender', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: ['Any', 'Male', 'Female'].map((l) => ChoiceChip(
+                      label: Text(l),
+                      selected: l == 'Any',
+                      onSelected: (val) {},
+                    )).toList(),
+                  ),
+                  const SizedBox(height: 32),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Apply Filters'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   // ── Build ────────────────────────────────────────────────────────────────
 
   @override
@@ -402,7 +515,15 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
-                children: List.generate(_filterLabels.length, (i) {
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: IconButton.filledTonal(
+                      icon: const Icon(Icons.tune),
+                      onPressed: () => _showFilterSheet(context),
+                    ),
+                  ),
+                  ...List.generate(_filterLabels.length, (i) {
                   final value = _filterValues[i];
                   // Check selection: 'For You' is null/null, 'Same Breed' is 'breed' mode, 'Nearby' is 'nearby' mode
                   final isSelected = filterType == value;
@@ -472,6 +593,7 @@ class DiscoveryTabState extends ConsumerState<DiscoveryTab> {
                     ),
                   );
                 }),
+                ],
               ),
             ),
 

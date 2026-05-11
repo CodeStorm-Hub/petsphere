@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline-variant": "#c3c6d7",
+                    "on-tertiary-fixed": "#2a1700",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "on-tertiary-container": "#ffeedd",
+                    "error-container": "#ffdad6",
+                    "surface": "#f8f9ff",
+                    "surface-tint": "#0053db",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "surface-container-highest": "#d3e4fe",
+                    "surface-variant": "#d3e4fe",
+                    "secondary-fixed-dim": "#7bd1fa",
+                    "on-secondary-fixed": "#001e2b",
+                    "on-surface": "#0b1c30",
+                    "primary-fixed": "#dbe1ff",
+                    "on-secondary-container": "#005b78",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-background": "#0b1c30",
+                    "primary-container": "#2563eb",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "on-error-container": "#93000a",
+                    "on-primary-fixed": "#00174b",
+                    "surface-container-low": "#eff4ff",
+                    "on-error": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "surface-bright": "#f8f9ff",
+                    "on-secondary-fixed-variant": "#004d66",
+                    "secondary-container": "#7ed4fd",
+                    "surface-container": "#e5eeff",
+                    "on-surface-variant": "#434655",
+                    "surface-dim": "#cbdbf5",
+                    "primary": "#004ac6",
+                    "tertiary": "#784b00",
+                    "background": "#f8f9ff",
+                    "outline": "#737686",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#ffddb8",
+                    "surface-container-high": "#dce9ff",
+                    "tertiary-container": "#996100",
+                    "secondary": "#006686",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#c0e8ff",
+                    "inverse-surface": "#213145",
+                    "on-tertiary": "#ffffff",
+                    "inverse-primary": "#b4c5ff",
+                    "on-primary-container": "#eeefff",
+                    "primary-fixed-dim": "#b4c5ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter-grid": "1rem",
+                    "stack-lg": "1.5rem",
+                    "margin-main": "1.25rem",
+                    "stack-md": "1rem",
+                    "stack-sm": "0.5rem"
+            },
+            "fontFamily": {
+                    "stat-value": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "display-hero": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "stat-value": ["18px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-hero": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-lg overflow-x-hidden pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-main h-16 w-full bg-gradient-to-b from-black/40 to-transparent">
+<div class="flex items-center gap-2">
+<button class="hover:bg-white/10 rounded-full p-2 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-on-primary">arrow_back</span>
+</button>
+<div class="flex items-center gap-2 ml-1">
+<img alt="PetFolio Logo" class="w-8 h-8 object-contain rounded-full bg-white/20 p-1" src="https://lh3.googleusercontent.com/aida/ADBb0ujvZD2gG6_7p8u9lN6hiCLhaN-1FUH4rRGPFIZFxpsYLnLUTpkTFvsjyetvh4jiPCxFuSXlqQXVZa6Bs2Rouc2HO-9t9wERV7odsSItp7UO1Dgldeg5YK580eojayypaOecWrZa_zhSpni6L-Kw4ehgDHIHOUPWh1Lr08x1PbEXu8eUQavzWcCN5z8H9M7QXL5oW_pBYNDo-xVz3UUAOjcTzWdzIa6UdETAe7CeRYuXzbHDLHAuNJy5buk"/>
+<span class="font-headline-md text-on-primary text-lg tracking-tight">PetFolio</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="hover:bg-white/10 rounded-full p-2 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-on-primary">share</span>
+</button>
+<button class="hover:bg-white/10 rounded-full p-2 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-on-primary">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Hero Section -->
+<section class="relative w-full h-[397px] overflow-hidden">
+<img alt="Buddy the Golden Retriever" class="w-full h-full object-cover" data-alt="A cinematic, high-resolution portrait of a happy Golden Retriever named Buddy sitting in a sun-drenched meadow during golden hour. The lighting is soft and warm, highlighting the pet's golden fur against a blurred background of green grass and wildflowers. The image has a professional, high-end photography aesthetic, conveying a mood of joy, loyalty, and premium pet lifestyle." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLW3WYc1PHBmUKut3KIaqiYE7J1evv5loMQh9m5jHk0w40AhFHeYxbN7dqJ1cyVCby1ooVbmIvPrcHf4pG2VuS4bH_I3nS4k8I1O0iE4udwQjn1vgPWFLZUIBdJHnw3prNEII3JZkH9vBklGlFYPLK07Aq5ImlhgY44O0-uBOs9yYEp613IlueOq97x6bQ5OhkMzXvCkFjKlvVYxVgb2eeLY6SEd-NNd5iiwRNbpqNy8xGr1g-YKmQ6PkTM2A4B8QiSZWCy4i1h1I"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+<div class="absolute bottom-6 left-margin-main text-on-primary">
+<div class="flex items-center gap-2 mb-1">
+<h1 class="font-display-hero text-display-hero">Buddy</h1>
+<span class="material-symbols-outlined text-primary-container bg-white rounded-full text-[20px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="material-symbols-outlined text-[#4ADE80] text-[20px]" style="font-variation-settings: 'FILL' 1;">health_and_safety</span>
+</div>
+<p class="font-body-lg opacity-90">Golden Retriever • 2 years</p>
+</div>
+</section>
+<!-- Content Block & Profile Info -->
+<main class="relative z-10 -mt-6 bg-surface-container-lowest rounded-t-3xl px-margin-main pt-stack-lg shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+<!-- Stats Row -->
+<div class="flex justify-between items-center py-4 px-2 mb-stack-lg bg-surface-container-low rounded-xl border border-outline-variant/10">
+<div class="flex flex-col items-center flex-1 border-r border-outline-variant/30">
+<span class="font-stat-value text-stat-value text-primary">1.2k</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Fans</span>
+</div>
+<div class="flex flex-col items-center flex-1 border-r border-outline-variant/30">
+<span class="font-stat-value text-stat-value text-on-surface">124</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Posts</span>
+</div>
+<div class="flex flex-col items-center flex-1">
+<span class="font-stat-value text-stat-value text-on-surface">8</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Awards</span>
+</div>
+</div>
+<!-- Bio -->
+<div class="mb-stack-lg">
+<p class="font-body-lg text-on-surface leading-relaxed">
+                Adventurous Golden Retriever who loves beach runs and tennis balls. Official PetFolio Brand Ambassador 🐾
+            </p>
+</div>
+<!-- Owner Card -->
+<div class="flex items-center justify-between p-stack-md bg-surface border border-outline-variant rounded-xl mb-stack-lg">
+<div class="flex items-center gap-3">
+<img alt="Alex Johnson" class="w-12 h-12 rounded-full object-cover" data-alt="A professional headshot of Alex Johnson, a friendly pet owner in his 30s, smiling warmly. The photo is taken in a brightly lit, modern indoor studio with a soft, neutral grey background. The lighting is clean and flattering, matching the premium corporate lifestyle aesthetic of the PetFolio brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuALsbYa6MBJPR7kLNTURGyimfJvLcewl_vfzmAfkS7zZi42PKYK5_j6QhIb3blSCUU1fJcGta8-l3mSDXVyUBQE54AENorQMrlKYXdq9NfbZQmrKRpUi_CqYjpOSy0eOJ2a6Eg4wS12WRoA5O7tpfrLfaLgGuBNlblb499xSXedlj_DVsmM-wyDGMBbeRL0JDJJiCuYDo_JSu8BbmviPmel11uYJw2W7XgvQA3C5WQMoKSI-pxsQ7cwxVig40paLa88CMqOkj3vq1M"/>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface text-base">Alex Johnson</h3>
+<p class="font-body-sm text-on-surface-variant">Owner</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-high text-primary font-label-caps px-4 py-2 rounded-full hover:bg-surface-variant transition-colors">Message</button>
+<button class="bg-primary text-on-primary font-label-caps px-4 py-2 rounded-full hover:opacity-90 transition-opacity">Follow</button>
+</div>
+</div>
+<!-- Tabs -->
+<div class="sticky top-16 z-40 bg-surface-container-lowest -mx-margin-main px-margin-main flex border-b border-outline-variant/30">
+<button class="flex-1 py-4 text-center border-b-4 border-primary font-bold text-primary">Photos</button>
+<button class="flex-1 py-4 text-center font-label-caps text-on-surface-variant">Health</button>
+<button class="flex-1 py-4 text-center font-label-caps text-on-surface-variant">Awards</button>
+</div>
+<!-- Photo Grid -->
+<div class="grid grid-cols-3 gap-1 mt-gutter-grid pb-12">
+<div class="aspect-square bg-surface-dim rounded-sm overflow-hidden">
+<img alt="Outdoor Play" class="w-full h-full object-cover" data-alt="A high-quality action shot of a Golden Retriever running happily through a lush green field on a bright day. The pet's ears are flopping and its tongue is out, capturing a moment of pure joy and energy. The scene is brightly lit with natural sunlight, emphasizing the vibrant green of the grass." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxxTkoJeO8uiyZREJeKW_L2MBjyH0Jow975Zx2t0rPTe-VkJM2d65oKHOG7p90kt9MpHpAd2MpwwqCsXKx9U_znHTH6epebA75qqiDi3Uwi0BX6J4JBUb1mE7bwnkJ0USpYCR4owK319Dp6zctyf6QN5nYQYwyEYAiVj6Oxe7T_cd01Fn7tlnAQOuIVTLpi-5fGFsKIAiYD6yAo2o7gyQMwOA_d0NBqcebYmYUIzEiejElcSz-aaWzIfrTAPZuQgq556DoUsy1G_s"/>
+</div>
+<div class="aspect-square bg-surface-dim rounded-sm overflow-hidden">
+<img alt="Sleeping Pet" class="w-full h-full object-cover" data-alt="A close-up, serene portrait of a Golden Retriever resting its head on its paws on a clean, white modern rug. The room is filled with soft, diffused morning light coming from a large window. The aesthetic is clean, minimalist, and peaceful, focusing on the calm expression of the dog." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVLrh3xIympcH_rmvQb3mqD7yrt3Bg6PyU7RaGUKOBWwwcBE34KBkgdH--ClwxVmnTotnq80KoK4NpsoTAaGQSU5UoabIHhjdknUXC3-aEzowCxe3TbL0SC8nvHlNd_23rvfACHUgIvSyEZdVdkO3rULGC4Ur-w4d7xc3sNVa5uevGXR0-7KL-VK6dRrbih2bOAlQ8sthP2fgwscw8u5Oz7c5IJ3BZYRxj1Q4PUH7L5e1nZMaYOuhbxSqROMwxprYLwU0E3Ln4wcY"/>
+</div>
+<div class="aspect-square bg-surface-dim rounded-sm overflow-hidden">
+<img alt="Playing with Ball" class="w-full h-full object-cover" data-alt="An adorable image of a Golden Retriever puppy with a tennis ball in its mouth, standing on a paved driveway. The lighting is crisp and clear, creating a bright and cheerful atmosphere. The focus is sharp on the dog's inquisitive eyes and the bright yellow tennis ball." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAT0Z-tnl0D7UmVGHDwrl-pPG3abLcklVi8E89Zysy1NRn9cAF1bBgZsksvkX9wk1aUKmF8G8UpLqJRHFQ3lEQJnWC8jGb_0z8JzMX1zTkpefyYVG-8KeFZtf8zO9hx7o3RYsoEiOpMSuPWU_AIZuzPIuN9bi12WhiohRnskakWByhpqJ9Hj3IVVcO_vSvGRVEBCAP_3SdJ6jK8NVVLwN-BWoaXN3bD0qGNA3RtwwmUfsqLy328f4mc4K1r2ZMjgVZDk7ZzUQQtLsY"/>
+</div>
+<div class="aspect-square bg-surface-dim rounded-sm overflow-hidden">
+<img alt="Beach Trip" class="w-full h-full object-cover" data-alt="A heartwarming photo of a Golden Retriever looking out a car window, with wind blowing through its fur. The scene is set during a scenic coastal drive with blue ocean visible in the background. The mood is adventurous and free, captured with a high-end cinematic lens." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKCPIohJFu9ILhNY_pj__f12nDxgFR3sBT9sj5zU4WlrZXnQ1yWwagXJ-jvmzZVMy6anex_ZFhP7YgStZLdjM43Rde7xRRw28HQCIURuYT5rN8mz62_8fG0pAr3MpdspksImdvC3fA96t2ohtTZueX-I6dRpgriv30z99tqJtzZYEQkhWIDcc2LmlGTEoECOhn7aeXZpm-yAe2xhAQ1oCEDz3jCzX5HkelfJ-0sJ93UwRgh9RRaeBzF4csdgy9kWeHk_fOH300s5s"/>
+</div>
+<div class="aspect-square bg-surface-dim rounded-sm overflow-hidden">
+<img alt="Indoor Home" class="w-full h-full object-cover" data-alt="A lifestyle photo of a Golden Retriever sitting patiently in a modern kitchen with light wood cabinetry. The pet is looking up at the camera with a gentle expression. The environment is clean, bright, and upscale, reflecting a premium household setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFDEJcUxVCc6jDU5uvP_d_tuiyWreR6xop3L8w_tIWiAdv_HTZnrDWKnW8eJBXq_Szvl_6-l6KCFSp2eCG4sNv1Y3sLxqzFBtle6Fkm5HZ1zGXiCen6hmK3PbiJVuigRHHEYt3mK2vpzhYQiKkRdJys3YeQaGZ5U8yaRes7oWV5BsY2rGpNs-6KZ1Wmg6Fe89CBM4Clc5Z8kCcHk8vuXBi8jjMqrsA6Nlbcv7PWkFoRgq-Ml3SskWx-deo1MSaQbfiQWJ4bjejKUg"/>
+</div>
+<div class="aspect-square bg-surface-dim rounded-sm overflow-hidden">
+<img alt="Bath Time" class="w-full h-full object-cover" data-alt="A candid photo of a Golden Retriever getting a bath, covered in white soap suds and looking slightly grumpy but cute. The bathroom setting is modern with white tiles and silver fixtures. The lighting is bright and even, capturing the texture of the bubbles and wet fur." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGrp3XHjuFlwtdkucGAN9KwQyfhGOvg_H7_W6LHXHPnYmL35rtefQkk10h99qkiwLiydxTBgQkK_fUtHSRUwD7ZHppE-Q8rtT1CWJD0Vy6k_FQltfcADaYYcTQS9hut2EVbqyV1UX7cC3rqOlu8ndiHVUovE3y-nBC_kIz8VU1xuDIXOJwcXD2cw91CyhZLFqNCNABwSEGfEjlA-KxK68kLzRMH4woMESllHf-gWMs4Rcte4sqnSDYA-C-1bG3Mhp07JaMAVSI6PU"/>
+</div>
+</div>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-20 right-6 z-[60] bg-primary text-on-primary rounded-full px-6 py-4 flex items-center gap-2 shadow-lg active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person_add</span>
+<span class="font-headline-md text-sm">Follow Buddy</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full flex justify-around items-center px-4 py-3 bg-surface-container-lowest dark:bg-inverse-surface shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-50 rounded-t-xl">
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant p-3 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">dynamic_feed</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-full p-3 active:scale-90 duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pets</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant p-3 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">health_and_safety</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant p-3 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">shopping_bag</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant p-3 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">person</span>
+</div>
+</nav>
+</body></html>
